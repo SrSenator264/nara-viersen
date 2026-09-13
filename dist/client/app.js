@@ -111,7 +111,17 @@ async function askGeminiGuide(fallbackMatch){
  const cart=basket.map(line=>{const item=catalog.find(entry=>entry.id===line.id);return item?{name:item.n,quantity:line.quantity,total:money(unitPrice(item,line.meal,line.extras)*line.quantity)}:null;}).filter(Boolean);
  const queryWords=message.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
  const needs={dips:/dip|sauce|ketchup|mayo|mayonnaise|aioli|صوص|مايونيز|كاتشاب/i.test(message),drinks:/drink|cola|fanta|water|red bull|getränk|شراب|مشروب/i.test(message),desserts:/dessert|donut|muffin|sweet|حلو|دونات/i.test(message)};
- const candidates=catalog.filter(item=>!item.hidden&&!item.unavailable&&!item.optionsPending).map((item,index)=>{const text=(item.n+' '+item.c+' '+item.d).toLocaleLowerCase();let score=item.id===fallbackMatch.id?50:0;queryWords.forEach(word=>{if(text.includes(word.toLocaleLowerCase()))score+=word.length>4?5:2;});if(needs.dips&&item.c==='Dips')score+=30;if(needs.drinks&&item.c==='Alkoholfreie Getränke')score+=30;if(needs.desserts&&item.c==='Desserts')score+=30;return {item,index,score};}).sort((a,b)=>b.score-a.score||a.index-b.index).slice(0,10).map(({item})=>{const record=typeof allergenRecord==='function'?allergenRecord('item',item.id):null;return {id:item.id,name:item.n,category:item.c,description:String(item.d||'').slice(0,180),price:money(item.cents),allergens:record?.status==='confirmed'?'confirmed: '+record.contains.join(', '):'not confirmed'};});
+ const categorySignals={
+  'French Tacos':/\btacos?\b|tortilla|تاكو/i,
+  'Beef Burger':/beef|rind|smash|لحم/i,
+  'Chicken Burger':/chicken|hähnchen|crispy|جاج|دجاج/i,
+  'Fried Chicken':/nugget|fillet|fried|كريسبي|مقلي/i,
+  'Korean & Fusion Wings':/wing|korean|وينغز|جناح/i,
+  'Falafel':/falafel|فلافل/i,
+  'Hot Dogs':/hot\s?dog|هوت\s?دوغ/i,
+  'Sandwiches':/sandwich|shawarma|baguette|شاورما|سندويش/i
+ };
+ const candidates=catalog.filter(item=>!item.hidden&&!item.unavailable&&!item.optionsPending).map((item,index)=>{const text=(item.n+' '+item.c+' '+item.d).toLocaleLowerCase();let score=item.id===fallbackMatch.id?50:0;queryWords.forEach(word=>{if(text.includes(word.toLocaleLowerCase()))score+=word.length>4?5:2;});if(categorySignals[item.c]?.test(message))score+=120;if(needs.dips&&item.c==='Dips')score+=30;if(needs.drinks&&item.c==='Alkoholfreie Getränke')score+=30;if(needs.desserts&&item.c==='Desserts')score+=30;return {item,index,score};}).sort((a,b)=>b.score-a.score||a.index-b.index).slice(0,10).map(({item})=>{const record=typeof allergenRecord==='function'?allergenRecord('item',item.id):null;return {id:item.id,name:item.n,category:item.c,description:String(item.d||'').slice(0,180),price:money(item.cents),allergens:record?.status==='confirmed'?'confirmed: '+record.contains.join(', '):'not confirmed'};});
  appendGuideMessage('user',message);try{const response=await fetch('/api/nara-guide',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,mood:guideState.mood,people:guideState.people,matchId:fallbackMatch.id,history:guideState.history.slice(-6),cart,candidates})});const data=await response.json();if(!response.ok)throw Error(data.error);const match=catalog.find(item=>item.id===data.matchId&&!item.hidden&&!item.unavailable);if(!match)throw Error('Invalid match');guideState.history.push({role:'user',text:message},{role:'assistant',text:data.reply});guideState.history=guideState.history.slice(-6);appendGuideMessage('assistant',data.reply);renderGuideResult(match,data.reply);}catch{const reply='Dein Fire Match aus der NARA Karte. Der Live Guide ist noch nicht verbunden—die Empfehlung bleibt lokal und kostenlos.';appendGuideMessage('assistant',reply);renderGuideResult(fallbackMatch,reply);}
 }
 const heroSlides=[
