@@ -56,10 +56,9 @@ async function guide(request, env) {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${env.GROQ_API_KEY}` },
     body: JSON.stringify({
-      model: env.GROQ_MODEL || "qwen/qwen3.6-27b",
+      model: env.GROQ_MODEL || "groq/compound-mini",
       temperature: 0.2,
       max_completion_tokens: 260,
-      response_format: { type: "json_object" },
       messages: [{ role: "system", content: prompt }, { role: "user", content: message }],
     }),
   });
