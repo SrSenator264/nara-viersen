@@ -4,6 +4,7 @@ const money = cents => new Intl.NumberFormat('de-DE',{style:'currency',currency:
 const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let category='Beef Burger', mode='pickup', basket=[], current=null, returnFocus=null, toastTimer, editingIndex=null, draftExtras={};
 const guideState={mood:'crispy',people:'solo',history:[],draft:[]};
+let guideBusy=false;
 const productPhoto=$('#product-photo');let productPhotoFrame=$('#product-photo-frame');
 if(!productPhotoFrame){productPhotoFrame=document.createElement('div');productPhotoFrame.id='product-photo-frame';productPhotoFrame.className='product-image-wrap';productPhoto.parentElement.insertBefore(productPhotoFrame,productPhoto);productPhotoFrame.append(productPhoto);}
 function extrasPrice(item,extras={}){return Object.entries(extras).reduce((sum,[id,q])=>{const dip=item.dips?.find(d=>d.id===id);if(!dip||dip.deposit===null||dip.unavailable||!Number.isInteger(q)||q<0||q>(dip.required?1:20))throw Error('INVALID_DIP');return sum+(dip.cents+(dip.deposit||0))*q;},0);}
@@ -106,8 +107,14 @@ function confirmGuideDraft(){if(!guideState.draft.length)return;for(const line o
 function renderGuideResult(match,reply,action='Produkt anpassen'){const result=$('#guide-result');result.hidden=false;result.innerHTML='<span>NARA ANTWORT</span><h3>'+escapeHtml(match.n)+'</h3><p>'+escapeHtml(reply)+'<br><b>'+money(match.cents)+'</b></p><button class="button orange" type="button" data-guide-draft="'+match.id+'">Als Entwurf vormerken</button><button class="guide-text-button" type="button" data-recommend="'+match.id+'">'+escapeHtml(action)+' →</button>';}
 async function askGeminiGuide(fallbackMatch){
  if(location.protocol==='file:')return;
+ if(guideBusy)return;
+ guideBusy=true;
  const result=$('#guide-result');result.hidden=false;result.innerHTML='<span>NARA LIVE GUIDE</span><h3>ICH FINDE DEINEN MATCH …</h3><p>Ich prüfe die echte NARA Karte.</p>';
- const message=$('#guide-prompt').value.trim();
+ const prompt=$('#guide-prompt');
+ const message=prompt.value.trim();
+ if(!message){guideBusy=false;return;}
+ prompt.value='';
+ const askButton=$('#find-fire-match');if(askButton)askButton.disabled=true;
  const cart=basket.map(line=>{const item=catalog.find(entry=>entry.id===line.id);return item?{name:item.n,quantity:line.quantity,total:money(unitPrice(item,line.meal,line.extras)*line.quantity)}:null;}).filter(Boolean);
  const queryWords=message.toLocaleLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
  const needs={dips:/dip|sauce|ketchup|mayo|mayonnaise|aioli|صوص|مايونيز|كاتشاب/i.test(message),drinks:/drink|cola|fanta|water|red bull|getränk|شراب|مشروب/i.test(message),desserts:/dessert|donut|muffin|sweet|حلو|دونات/i.test(message)};
@@ -122,7 +129,7 @@ async function askGeminiGuide(fallbackMatch){
   'Sandwiches':/sandwich|shawarma|baguette|شاورما|سندويش/i
  };
  const candidates=catalog.filter(item=>!item.hidden&&!item.unavailable&&!item.optionsPending).map((item,index)=>{const text=(item.n+' '+item.c+' '+item.d).toLocaleLowerCase();let score=item.id===fallbackMatch.id?50:0;queryWords.forEach(word=>{if(text.includes(word.toLocaleLowerCase()))score+=word.length>4?5:2;});if(categorySignals[item.c]?.test(message))score+=120;if(needs.dips&&item.c==='Dips')score+=30;if(needs.drinks&&item.c==='Alkoholfreie Getränke')score+=30;if(needs.desserts&&item.c==='Desserts')score+=30;return {item,index,score};}).sort((a,b)=>b.score-a.score||a.index-b.index).slice(0,10).map(({item})=>{const record=typeof allergenRecord==='function'?allergenRecord('item',item.id):null;return {id:item.id,name:item.n,category:item.c,description:String(item.d||'').slice(0,180),price:money(item.cents),allergens:record?.status==='confirmed'?'confirmed: '+record.contains.join(', '):'not confirmed'};});
- appendGuideMessage('user',message);try{const response=await fetch('/api/nara-guide',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,mood:guideState.mood,people:guideState.people,matchId:fallbackMatch.id,history:guideState.history.slice(-6),cart,candidates})});const data=await response.json();if(!response.ok)throw Error(data.error||'Live Guide nicht erreichbar');const match=catalog.find(item=>item.id===data.matchId&&!item.hidden&&!item.unavailable);if(!match)throw Error('Invalid match');guideState.history.push({role:'user',text:message},{role:'assistant',text:data.reply});guideState.history=guideState.history.slice(-6);appendGuideMessage('assistant',data.reply);renderGuideResult(match,data.reply);}catch(error){const reason=error?.message&&error.message!=='Invalid match'?' '+error.message:'';const reply='Der NARA Live Guide hat gerade keine stabile Verbindung.'+reason+' Ich zeige dir trotzdem den besten Treffer aus der Karte.';appendGuideMessage('assistant',reply);renderGuideResult(fallbackMatch,reply);}
+ appendGuideMessage('user',message);try{const response=await fetch('/api/nara-guide',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,mood:guideState.mood,people:guideState.people,matchId:fallbackMatch.id,history:guideState.history.slice(-6),cart,candidates})});const data=await response.json();if(!response.ok)throw Error(data.error);const match=catalog.find(item=>item.id===data.matchId&&!item.hidden&&!item.unavailable);if(!match)throw Error('Invalid match');guideState.history.push({role:'user',text:message},{role:'assistant',text:data.reply});guideState.history=guideState.history.slice(-6);appendGuideMessage('assistant',data.reply);renderGuideResult(match,data.reply);}catch{const reply='Der Live Guide antwortet gerade nicht. Bitte versuche es gleich noch einmal.';appendGuideMessage('assistant',reply);renderGuideResult(fallbackMatch,reply);}finally{guideBusy=false;if(askButton)askButton.disabled=false;prompt.focus();}
 }
 const heroSlides=[
  {img:'assets/fried-menu.png',alt:'Crispy Chicken Menü',eyebrow:'NARA · CRISPY CHICKEN',title:'CRISPY.<br><em>CHICKEN.</em>',description:'Knusprig. Saftig. Heiß.<br>Dein NARA Moment.',caption:'CRISPY CHICKEN / WINGS / BUCKETS',cta:'Crispy Chicken entdecken',category:'Fried Chicken'},
