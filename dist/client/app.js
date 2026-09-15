@@ -219,7 +219,7 @@ document.addEventListener('click',event=>{
  if(target.id==='reset-search'){$('#menu-search').value='';category='Beef Burger';renderMenu();}
  if(target.dataset.guide){category=target.dataset.guide==='Chicken'?'Korean & Fusion Wings':target.dataset.guide;$('#menu-search').value='';renderMenu();$('#guide-dialog').close();$('#menu').scrollIntoView();}
  if(target.dataset.guideChoice){guideState[target.dataset.guideChoice]=target.dataset.guideValue;document.querySelectorAll('[data-guide-choice="'+target.dataset.guideChoice+'"]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.guideValue===target.dataset.guideValue)));}
- if(target.id==='find-fire-match')fireMatch(true);
+ if(target.id==='find-fire-match')fireMatch(false);
  if(target.dataset.guideDraft)addGuideDraft(Number(target.dataset.guideDraft));
  if(target.dataset.guideConfirm!==undefined)confirmGuideDraft();
  if(target.dataset.guideClear!==undefined){guideState.draft=[];renderGuideDraft();toast('Entwurf verworfen.');}
@@ -233,7 +233,7 @@ document.querySelectorAll('dialog').forEach(dialog=>{
 $('#menu-search').addEventListener('input',renderMenu);
 ['#delivery-street','#delivery-city'].forEach(selector=>$(selector)?.addEventListener('input',updateMapsCheck));
 $('#guide-prompt')?.addEventListener('input',event=>{if(event.target.value.trim().length>=4)fireMatch(false);});
-$('#guide-prompt')?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();fireMatch(true);}});
+$('#guide-prompt')?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();fireMatch(false);}});
 $('#site-language')?.addEventListener('change',event=>applyLanguage(event.target.value));applyLanguage(guideLanguage());
 $('#open-cart').onclick=()=>openDialog('#cart-dialog');
 $('#mobile-cart').onclick=()=>openDialog('#cart-dialog');
