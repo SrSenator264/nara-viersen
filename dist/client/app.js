@@ -100,10 +100,11 @@ function fireMatch(askLive=false){
  else match=pick(item=>item.c==='Fried Chicken')||pick(chicken)||available[0];
  const direct=guideItem(text,available);if(direct)match=direct;
  if(!match)return;
+ appendGuideMessage('user',$('#guide-prompt')?.value.trim()||text);
  const localAnswer=guideLocalAnswer(match,text);
- if(localAnswer){renderGuideResult(localAnswer.match,localAnswer.reply,localAnswer.action);return;}
+ if(localAnswer){appendGuideMessage('assistant',localAnswer.reply);renderGuideResult(localAnswer.match,localAnswer.reply,localAnswer.action);return;}
  const why=wantsSharing?'Gemacht zum Teilen und direkt aus deinen echten Angeboten gewählt.':wantsSpicy?'Dein scharfer Match—mit echtem Fire-Faktor.':wantsChicken?'Knusprig, saftig und passend zu deinem Chicken-Moment.':'Ein echter NARA-Favorit, ausgewählt nach deinem Hunger.';
- renderGuideResult(match,why);
+ appendGuideMessage('assistant',why);renderGuideResult(match,why);
  if(askLive)askGeminiGuide(match);
 }
 function appendGuideMessage(role,text){const chat=$('#guide-chat');if(!chat||!text)return;const bubble=document.createElement('p');bubble.className=role==='user'?'user-bubble':'assistant-bubble';bubble.textContent=text;chat.appendChild(bubble);chat.scrollTop=chat.scrollHeight;}
@@ -232,7 +233,7 @@ document.querySelectorAll('dialog').forEach(dialog=>{
 });
 $('#menu-search').addEventListener('input',renderMenu);
 ['#delivery-street','#delivery-city'].forEach(selector=>$(selector)?.addEventListener('input',updateMapsCheck));
-$('#guide-prompt')?.addEventListener('input',event=>{if(event.target.value.trim().length>=4)fireMatch(false);});
+$('#guide-prompt')?.addEventListener('input',()=>{});
 $('#guide-prompt')?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();fireMatch(false);}});
 $('#site-language')?.addEventListener('change',event=>applyLanguage(event.target.value));applyLanguage(guideLanguage());
 $('#open-cart').onclick=()=>openDialog('#cart-dialog');
