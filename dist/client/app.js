@@ -43,7 +43,7 @@ function selectRequired(id){const option=current?.dips?.find(d=>d.id===id&&d.req
 function openDialog(id){returnFocus=document.activeElement; const dialog=$(id); document.querySelectorAll('dialog[open]').forEach(x=>x.close());dialog.showModal();}
 function toast(text){$('#toast').textContent=text;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2500);}
 function guideAllergenAnswer(item){return typeof allergenAnswerForItem==='function'?allergenAnswerForItem(item):'Für dieses Produkt liegen noch keine vom Lieferanten freigegebenen Allergenangaben vor. Ich kann deshalb keine sichere Zusage geben — bitte direkt im Restaurant nachfragen.';}
-function guideAllergenStatus(item){const status=typeof allergenStatusForItem==='function'?allergenStatusForItem(item):'Allergenangaben noch nicht vom Lieferanten bestätigt.';if(guideLanguage()==='ar')return status.includes('bestätigt')?'معلومات الحساسية مؤكدة من المورد.':'معلومات الحساسية لم يؤكدها المورد بعد.';return status;}
+function guideAllergenStatus(item){if(!item)return guideLanguage()==='ar'?'معلومات الحساسية لم يؤكدها المورد بعد.':'Allergenangaben noch nicht vom Lieferanten bestätigt.';const status=typeof allergenStatusForItem==='function'?allergenStatusForItem(item):'Allergenangaben noch nicht vom Lieferanten bestätigt.';if(guideLanguage()==='ar')return status.includes('bestätigt')?'معلومات الحساسية مؤكدة من المورد.':'معلومات الحساسية لم يؤكدها المورد بعد.';return status;}
 function guideWords(value){return String(value||'').toLocaleLowerCase('de').replace(/[^\p{L}\p{N}]+/gu,' ').trim().split(/\s+/).filter(word=>word.length>2);}
 function guideItem(text,available){
  const words=guideWords(text);let best=null,bestScore=0;
@@ -160,13 +160,11 @@ function setMode(value){mode=value; document.querySelectorAll('[data-mode]').for
 function deliveryAddress(){return {street:$('#delivery-street')?.value.trim()||'',city:$('#delivery-city')?.value.trim()||''};}
 function updateMapsCheck(){const link=$('#delivery-maps-check');if(!link)return;const address=deliveryAddress();const query=[address.street,address.city].filter(Boolean).join(', ')||'Gereonstraße 1, 41747 Viersen';link.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query);}
 function renderCart(){
- $('#cart-count').textContent=basket.reduce((s,x)=>s+x.quantity,0);
- $('#mobile-count').textContent=$('#cart-count').textContent;
- $('#mobile-total').textContent=money(subtotal());
- $('#mobile-cart').hidden=!basket.length;
- $('#cart-total').textContent=money(subtotal());
- $('#deposit-note').textContent='Davon Pfand: '+money(depositTotal());
- $('#checkout').disabled=!basket.length;
+ const count=basket.reduce((s,x)=>s+x.quantity,0),total=money(subtotal());
+ const setText=(selector,value)=>{const el=$(selector);if(el)el.textContent=value};
+ const setHidden=(selector,value)=>{const el=$(selector);if(el)el.hidden=value};
+ const setDisabled=(selector,value)=>{const el=$(selector);if(el)el.disabled=value};
+ setText('#cart-count',count);setText('#mobile-count',count);setText('#mobile-total',total);setHidden('#mobile-cart',!basket.length);setText('#cart-total',total);setText('#deposit-note','Davon Pfand: '+money(depositTotal()));setDisabled('#checkout',!basket.length);
  $('#delivery-panel').hidden=mode!=='delivery';
  updateMapsCheck();
  $('#delivery-note').textContent=mode==='pickup'?'Abholung · Gereonstraße 1, 41747 Viersen.':'Lieferung · bis 10 km rund um IUGENE · Gebühren und Termin werden beim Start bestätigt.';
