@@ -310,4 +310,5 @@ function restoreGermanProductLabels(){if(guideLanguage()==='ar')return;const dia
 document.querySelector('#site-language')?.addEventListener('change',()=>setTimeout(()=>{restoreGermanProductLabels();if(current&&document.querySelector('#product-dialog')?.open){renderDips();updateProductPrice();}},20));restoreGermanProductLabels();
 document.querySelector('#site-language')?.addEventListener('change',()=>setTimeout(localizeArabicCatalog,0));localizeArabicCatalog();
 renderMenu();renderCart();
+setInterval(()=>{if(guideLanguage()!=='ar')return;const fried=catalog.find(item=>item._originalC==='Fried Chicken'&&item._originalN==='Crispy Chicken Filet Menü');if(fried&&fried.n===fried._originalN){fixFriedChickenArabicData();renderMenu();}},400);
 window.__lastNaraLanguage=guideLanguage();setInterval(()=>{const picker=document.querySelector('#site-language');if(!picker)return;ensureLanguagePicker();const language=guideLanguage();if(language!==window.__lastNaraLanguage){window.__lastNaraLanguage=language;localizeArabicCatalog();localizeArabicIngredients();renderMenu();syncVisibleLanguage();syncArabicSurface();syncLanguageSpecificLabels();}},300);
