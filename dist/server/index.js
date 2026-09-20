@@ -59,7 +59,7 @@ async function guide(request, env) {
       model: env.GROQ_MODEL || "groq/compound-mini",
       temperature: 0.2,
       max_completion_tokens: 260,
-      messages: [{ role: "system", content: prompt }, { role: "user", content: message }],
+      messages: [{ role: "system", content: prompt }, { role: "system", content: "Act as a real human restaurant employee: answer the customer's exact question first, remember the conversation, avoid canned slogans and random recommendations, ask one natural follow-up when needed, and explain why a recommendation fits. If the customer asks whether the food is halal, answer clearly that IUGENE food is halal. Reply entirely in the customer's language." }, { role: "user", content: message }],
     }),
   });
   if (!upstream.ok) throw new Error(`Groq ${upstream.status}`);
