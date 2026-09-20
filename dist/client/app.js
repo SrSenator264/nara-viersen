@@ -105,7 +105,7 @@ function fireMatch(askLive=false){
  // Live mode must always use the server AI; local text is only the offline fallback.
  if(askLive){askGeminiGuide(match);return;}
  if(localAnswer){appendGuideMessage('assistant',localAnswer.reply);renderGuideResult(localAnswer.match,localAnswer.reply,localAnswer.action);return;}
- const why=wantsSharing?'Gemacht zum Teilen und direkt aus deinen echten Angeboten gewählt.':wantsSpicy?'Dein scharfer Match—mit echtem Fire-Faktor.':wantsChicken?'Knusprig, saftig und passend zu deinem Chicken-Moment.':'Ein echter NARA-Favorit, ausgewählt nach deinem Hunger.';
+ const why=guideLanguage()==='ar'?(wantsSharing?'مناسب للمشاركة ومختار من عروض نارا المتاحة.':wantsSpicy?'اختيار حار لعشاق النكهة القوية.':wantsChicken?'مقرمش وشهي ومناسب لوجبة الدجاج.':'اختيار مميز من نارا يناسب رغبتك.'):(guideLanguage()==='en'?(wantsSharing?'Made for sharing and selected from NARA’s available offers.':wantsSpicy?'A spicy match for a bold flavor.':wantsChicken?'Crispy, juicy, and perfect for your chicken craving.':'A real NARA favorite, selected for your craving.'):(wantsSharing?'Gemacht zum Teilen und direkt aus deinen echten Angeboten gewählt.':wantsSpicy?'Dein scharfer Match—mit echtem Fire-Faktor.':wantsChicken?'Knusprig, saftig und passend zu deinem Chicken-Moment.':'Ein echter NARA-Favorit, ausgewählt nach deinem Hunger.'));
  appendGuideMessage('assistant',why);renderGuideResult(match,why);
 }
 function appendGuideMessage(role,text){const chat=$('#guide-chat');if(!chat||!text)return;const bubble=document.createElement('p');bubble.className=role==='user'?'user-bubble':'assistant-bubble';bubble.textContent=text;chat.appendChild(bubble);chat.scrollTop=chat.scrollHeight;}
