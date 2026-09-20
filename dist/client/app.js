@@ -102,10 +102,11 @@ function fireMatch(askLive=false){
  if(!match)return;
  appendGuideMessage('user',$('#guide-prompt')?.value.trim()||text);
  const localAnswer=guideLocalAnswer(match,text);
+ // Live mode must always use the server AI; local text is only the offline fallback.
+ if(askLive){askGeminiGuide(match);return;}
  if(localAnswer){appendGuideMessage('assistant',localAnswer.reply);renderGuideResult(localAnswer.match,localAnswer.reply,localAnswer.action);return;}
  const why=wantsSharing?'Gemacht zum Teilen und direkt aus deinen echten Angeboten gewählt.':wantsSpicy?'Dein scharfer Match—mit echtem Fire-Faktor.':wantsChicken?'Knusprig, saftig und passend zu deinem Chicken-Moment.':'Ein echter NARA-Favorit, ausgewählt nach deinem Hunger.';
  appendGuideMessage('assistant',why);renderGuideResult(match,why);
- if(askLive)askGeminiGuide(match);
 }
 function appendGuideMessage(role,text){const chat=$('#guide-chat');if(!chat||!text)return;const bubble=document.createElement('p');bubble.className=role==='user'?'user-bubble':'assistant-bubble';bubble.textContent=text;chat.appendChild(bubble);chat.scrollTop=chat.scrollHeight;}
 function renderGuideDraft(){const box=$('#guide-draft');if(!box)return;if(!guideState.draft.length){box.hidden=true;box.innerHTML='';return;}const lines=guideState.draft.map(line=>{const item=catalog.find(entry=>entry.id===line.id);return item?'<li><span>'+line.quantity+' × '+escapeHtml(item.n)+'</span><b>'+money(unitPrice(item,false,{})*line.quantity)+'</b></li>':'';}).join('');const total=guideState.draft.reduce((sum,line)=>{const item=catalog.find(entry=>entry.id===line.id);return sum+(item?unitPrice(item,false,{})*line.quantity:0);},0);box.hidden=false;box.innerHTML='<span>DEIN BESTELLENTWURF</span><ol>'+lines+'</ol><div><b>Zwischensumme</b><b>'+money(total)+'</b></div><p>Du kannst alles noch anpassen. Erst nach Bestätigung kommt es in deinen Warenkorb.</p><button class="button orange" type="button" data-guide-confirm>Entwurf bestätigen →</button><button class="guide-text-button" type="button" data-guide-clear>Entwurf verwerfen</button>';}
