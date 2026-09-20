@@ -220,7 +220,7 @@ document.addEventListener('click',event=>{
  if(target.id==='reset-search'){$('#menu-search').value='';category='Beef Burger';renderMenu();}
  if(target.dataset.guide){category=target.dataset.guide==='Chicken'?'Korean & Fusion Wings':target.dataset.guide;$('#menu-search').value='';renderMenu();$('#guide-dialog').close();$('#menu').scrollIntoView();}
  if(target.dataset.guideChoice){guideState[target.dataset.guideChoice]=target.dataset.guideValue;document.querySelectorAll('[data-guide-choice="'+target.dataset.guideChoice+'"]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.guideValue===target.dataset.guideValue)));}
- if(target.id==='find-fire-match')fireMatch(false);
+ if(target.id==='find-fire-match')fireMatch(true);
  if(target.dataset.guideDraft)addGuideDraft(Number(target.dataset.guideDraft));
  if(target.dataset.guideConfirm!==undefined)confirmGuideDraft();
  if(target.dataset.guideClear!==undefined){guideState.draft=[];renderGuideDraft();toast('Entwurf verworfen.');}
