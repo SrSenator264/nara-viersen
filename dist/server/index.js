@@ -63,7 +63,11 @@ async function guide(request, env) {
       messages: [{ role: "system", content: prompt }, { role: "system", content: `Act as a real human restaurant employee. The website language is ${requestedLanguage}; reply in that language even if the customer types a category word in another language. Answer the exact question first, remember the conversation, avoid canned slogans and long lists, ask one natural follow-up, and give at most one recommendation plus one alternative. If the customer asks whether the food is halal, answer clearly that IUGENE food is halal. Translate mixed catalog names naturally into the reply language; do not copy Arabic fragments into English or German.` }, { role: "user", content: message }],
     }),
   });
-  if (!upstream.ok) throw new Error(`Groq ${upstream.status}`);
+  if (!upstream.ok) {
+    const failure = await upstream.json().catch(() => ({}));
+    console.error(JSON.stringify({event:'guide_provider_failure',status:upstream.status,code:failure.error?.code,type:failure.error?.type}));
+    throw new Error(`Groq ${upstream.status}`);
+  }
   const body = await upstream.json();
   return json(parseAnswer(body?.choices?.[0]?.message?.content, candidates, fallbackMatchId));
 }
@@ -73,7 +77,7 @@ export default {
     const url = new URL(request.url);
     if (request.method === "POST" && url.pathname === "/api/nara-guide") {
       try { return await guide(request, env); }
-      catch { return json({ error: "Der Live Guide ist vorübergehend nicht erreichbar." }, 503); }
+      catch (error) { console.error(JSON.stringify({event:'guide_failure',reason:String(error.message).slice(0,120)})); return json({ error: "Der Live Guide ist vorübergehend nicht erreichbar." }, 503); }
     }
     if (env.ASSETS && typeof env.ASSETS.fetch === "function") return env.ASSETS.fetch(request);
     return new Response("NARA assets are not configured.", { status: 503 });
