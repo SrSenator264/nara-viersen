@@ -123,6 +123,7 @@ async function askGeminiGuide(fallbackMatch){
  const prompt=$('#guide-prompt');
  const message=prompt.value.trim();
  if(!message){guideBusy=false;return;}
+ const chat=$('#guide-chat');if(chat?.lastElementChild?.textContent===message)chat.lastElementChild.remove();
  prompt.value='';
  const askButton=$('#find-fire-match');if(askButton)askButton.disabled=true;
  const cart=basket.map(line=>{const item=catalog.find(entry=>entry.id===line.id);return item?{name:item.n,quantity:line.quantity,total:money(unitPrice(item,line.meal,line.extras)*line.quantity)}:null;}).filter(Boolean);
@@ -132,11 +133,13 @@ async function askGeminiGuide(fallbackMatch){
   'French Tacos':/\btacos?\b|tortilla|تاكو/i,
   'Beef Burger':/beef|rind|smash|لحم/i,
   'Chicken Burger':/chicken|hähnchen|crispy|جاج|دجاج/i,
-  'Fried Chicken':/nugget|fillet|fried|كريسبي|مقلي/i,
+ 'Fried Chicken':/nugget|fillet|fried|كريسبي|مقلي/i,
+  'Chicken Buckets & Deals':/bucket|eimer|sطل|سطل|عبو|مشاركة|share/i,
   'Korean & Fusion Wings':/wing|korean|وينغز|جناح/i,
   'Falafel':/falafel|فلافل/i,
   'Hot Dogs':/hot\s?dog|هوت\s?دوغ/i,
-  'Sandwiches':/sandwich|shawarma|baguette|شاورما|سندويش/i
+  'Sandwiches':/sandwich|shawarma|baguette|شاورما|سندويش/i,
+  'Dips':/sauce|soße|dip|صوص|اضاف|إضاف/i
  };
  const candidates=catalog.filter(item=>!item.hidden&&!item.unavailable&&!item.optionsPending).map((item,index)=>{const text=(item.n+' '+item.c+' '+item.d).toLocaleLowerCase();let score=item.id===fallbackMatch.id?50:0;queryWords.forEach(word=>{if(text.includes(word.toLocaleLowerCase()))score+=word.length>4?5:2;});if(categorySignals[item.c]?.test(message))score+=120;if(needs.dips&&item.c==='Dips')score+=30;if(needs.drinks&&item.c==='Alkoholfreie Getränke')score+=30;if(needs.desserts&&item.c==='Desserts')score+=30;return {item,index,score};}).sort((a,b)=>b.score-a.score||a.index-b.index).slice(0,10).map(({item})=>{const record=typeof allergenRecord==='function'?allergenRecord('item',item.id):null;return {id:item.id,name:item.n,category:item.c,description:String(item.d||'').slice(0,180),price:money(item.cents),allergens:record?.status==='confirmed'?'confirmed: '+record.contains.join(', '):'not confirmed'};});
 appendGuideMessage('user',message);try{const response=await fetch('/api/nara-guide',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,mood:guideState.mood,people:guideState.people,matchId:fallbackMatch.id,history:guideState.history.slice(-6),cart,candidates})});const data=await response.json();if(!response.ok)throw Error(data.error);const match=catalog.find(item=>item.id===data.matchId&&!item.hidden&&!item.unavailable);if(!match)throw Error('Invalid match');guideState.history.push({role:'user',text:message},{role:'assistant',text:data.reply});guideState.history=guideState.history.slice(-6);appendGuideMessage('assistant',data.reply);renderGuideResult(match,data.reply);}catch{const arabic=guideLanguage()==='ar';const reply=arabic?'أقترح عليك '+fallbackMatch.n+'. '+String(fallbackMatch.d||'يمكنك تعديل الإضافات قبل الإضافة إلى السلة.'):(guideLanguage()==='en'?'I recommend '+fallbackMatch.n+'. '+String(fallbackMatch.d||'You can adjust the options before adding it to your cart.'):'Ich empfehle '+fallbackMatch.n+'. '+String(fallbackMatch.d||'Du kannst die Auswahl vor dem Hinzufügen anpassen.'));guideState.history.push({role:'assistant',text:reply});guideState.history=guideState.history.slice(-6);appendGuideMessage('assistant',reply);renderGuideResult(fallbackMatch,reply);}finally{guideBusy=false;if(askButton)askButton.disabled=false;prompt.focus();}
