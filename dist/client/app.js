@@ -76,6 +76,7 @@ function guideLocalAnswer(match,text){
  return null;
 }
 function fireMatch(askLive=false){
+ askLive=true;
  const text=($('#guide-prompt')?.value||'').toLocaleLowerCase('de');
  const available=catalog.filter(item=>!item.hidden&&!item.unavailable&&!item.optionsPending);
  const includes=(words)=>words.some(word=>text.includes(word));
