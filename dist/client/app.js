@@ -256,7 +256,7 @@ const info={
  allergens:['ALLERGENE','NARA zeigt Allergeninformationen erst, wenn sie aus einer Lieferantenspezifikation oder dem Original-Produktetikett bestätigt wurden. Fehlt die Bestätigung, sagt der Guide klar „nicht bestätigt“ und gibt keine Vermutung ab. Bitte bei einer Allergie immer direkt im Restaurant nachfragen.']
 };
 function showInfo(key){$('#info-title').textContent=info[key][0];$('#info-text').textContent=info[key][1];openDialog('#info-dialog');}
-$('#club-details').onclick=()=>showInfo('club');$('#ask-ai').onclick=()=>openDialog('#guide-dialog');
+$('#club-details').onclick=()=>showInfo('club');$('#ask-ai').onclick=()=>{const chat=$('#guide-chat');const greeting=guideLanguage()==='ar'?'أهلًا! كم شخصًا أنتم وماذا تشتهون: برغر، دجاج مقرمش، تاكو أم وجبة للمشاركة؟':guideLanguage()==='en'?'Hi! How many people are you and what are you craving: burgers, crispy chicken, tacos, or something to share?':'Ahlan! Für wie viele Personen und worauf habt ihr Lust: Burger, Crispy Chicken, Tacos oder etwas zum Teilen?';if(chat)chat.innerHTML='<p class="assistant-bubble">'+greeting+'</p>';openDialog('#guide-dialog');};
 $('.hero').addEventListener('mouseenter',()=>clearInterval(heroTimer));
 $('.hero').addEventListener('mouseleave',startHeroTimer);
 $('.hero').addEventListener('focusin',()=>clearInterval(heroTimer));
