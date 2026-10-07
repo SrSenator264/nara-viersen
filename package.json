@@ -1,8 +1,9 @@
 {
-  "name": "nara-live-guide",
+  "name": "nara-restaurant-operations",
   "private": true,
-  "type": "module",
+  "version": "1.0.0",
+  "description": "Local-first restaurant operations platform for NARA",
   "scripts": {
-    "build": "node scripts/build.mjs"
+    "start": "node server.js"
   }
 }
