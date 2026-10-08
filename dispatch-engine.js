@@ -86,6 +86,57 @@ function availability(d, ctx) {
   return t + travel(at, shop) * MIN;
 }
 
+
+// تحسين بعد التوزيع الأولي: منجرّب ننقل طلب لجولة تانية، أو نبدّل طلبين بين جولتين،
+// ومنقبل التغيير إذا المجموع صار أحسن (أسرع وأقل تأخير). بيصلّح أخطاء "الأول بالدور".
+function improve(drivers, state, ctx) {
+  const { cfg } = ctx;
+  const total = () => drivers.reduce((s, d) => s + state.get(d.id).score, 0);
+  const okTour = t => t.length <= cfg.maxStops && Math.max(...t.map(x => x.ready)) - Math.min(...t.map(x => x.ready)) <= cfg.maxWaitMin * MIN;
+  const tryApply = (changes) => { // changes: [{d, tours}]
+    const before = changes.reduce((s, c) => s + state.get(c.d.id).score, 0);
+    const sims = changes.map(c => ({ c, sim: simulateDriver(c.d, c.tours, ctx) }));
+    const after = sims.reduce((s, x) => s + x.sim.score, 0);
+    return { gain: before - after, apply: () => sims.forEach(({ c, sim }) => { c.d.tours = c.tours; state.set(c.d.id, sim); }) };
+  };
+  const clean = tours => tours.filter(t => t.length);
+  for (let iter = 0; iter < 60; iter++) {
+    let best = null;
+    const slots = [];
+    drivers.forEach(d => d.tours.forEach((t, ti) => t.forEach((o, oi) => slots.push({ d, ti, oi, o }))));
+    // نقل طلب
+    for (const a of slots) {
+      for (const d of drivers) {
+        const targets = [...d.tours.map((_, i) => i), d.tours.length];
+        for (const ti of targets) {
+          if (d === a.d && ti === a.ti) continue;
+          const srcTours = a.d.tours.map((t, i) => (i === a.ti ? t.filter(x => x !== a.o) : t));
+          const base = d === a.d ? srcTours : d.tours;
+          const tgt = base.map((t, i) => (i === ti ? [...t, a.o] : t));
+          if (ti === base.length) tgt.push([a.o]);
+          if (!okTour(tgt[ti] || [a.o])) continue;
+          const changes = d === a.d ? [{ d, tours: clean(tgt) }] : [{ d: a.d, tours: clean(srcTours) }, { d, tours: clean(tgt) }];
+          const r = tryApply(changes);
+          if (r.gain > 0.01 && (!best || r.gain > best.gain)) best = r;
+        }
+      }
+    }
+    // تبديل طلبين بين جولتين
+    for (let i = 0; i < slots.length; i++) for (let j = i + 1; j < slots.length; j++) {
+      const a = slots[i], b = slots[j];
+      if (a.d === b.d && a.ti === b.ti) continue;
+      const swap = (tours, d) => tours.map((t, ti) => t.map(x => (d === a.d && ti === a.ti && x === a.o ? b.o : d === b.d && ti === b.ti && x === b.o ? a.o : x)));
+      const ta = swap(a.d.tours, a.d), tb = a.d === b.d ? null : swap(b.d.tours, b.d);
+      if (!okTour(ta[a.ti]) || !(tb ? okTour(tb[b.ti]) : okTour(ta[b.ti]))) continue;
+      const r = tryApply(tb ? [{ d: a.d, tours: ta }, { d: b.d, tours: tb }] : [{ d: a.d, tours: ta }]);
+      if (r.gain > 0.01 && (!best || r.gain > best.gain)) best = r;
+    }
+    if (!best) break;
+    best.apply();
+  }
+  return total();
+}
+
 function plan(input) {
   const cfg = { ...DEFAULTS, ...(input.config || {}) };
   const now = Number.isFinite(input.now) ? input.now : Date.now();
@@ -99,7 +150,7 @@ function plan(input) {
     if (!validPoint(o)) { unplaced.push({ id: o.id, reason: 'NO_LOCATION' }); continue; }
     const created = Number(new Date(o.createdAt || now));
     orders.push({
-      id: o.id, code: o.code || o.id, lat: o.lat, lng: o.lng,
+      id: o.id, code: o.code || o.id, lat: o.lat, lng: o.lng, zone: o.zone || '',
       ready: Math.max(now, Number(new Date(o.readyAt || now))),
       due: o.dueAt ? Number(new Date(o.dueAt)) : created + cfg.defaultDueMin * MIN,
     });
@@ -134,6 +185,8 @@ function plan(input) {
     best.d.tours = best.tours;
     state.set(best.d.id, best.sim);
   }
+
+  improve(drivers, state, ctx);
 
   const assignments = [];
   const out = drivers.map(d => {

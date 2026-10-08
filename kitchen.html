@@ -114,11 +114,11 @@ button:disabled{opacity:.5}
     ar:{title:'المطبخ',colNew:'جديد',colPrep:'تحضير',colReady:'جاهز',sum:'الملخص',sumTitle:'المطلوب تحضيره الآن',start:'ابدأ',ready:'جاهز ✓',picked:'تم الاستلام',back:'رجوع',print:'طباعة',
       delivery:'توصيل',pickup:'استلام',local:'محلي',table:'طاولة',min:'دقيقة',late:'متأخر',left:'باقي',empty:'لا يوجد',updated:'آخر تحديث',orders:'طلبات',
       offline:'تعذر الاتصال بالسيرفر — تأكد أنه شغّال',login:'سجّل الدخول أولاً',note:'ملاحظة',floor:'طابق',drinks:'مشروبات',other:'أصناف',
-      sumHint:'كل الأصناف من الطلبات الجديدة وقيد التحضير. اضغط على صنف لتشوف طلباته.',sumEmpty:'ما في شي للتحضير'},
+      expect:'متوقع',sumHint:'كل الأصناف من الطلبات الجديدة وقيد التحضير. اضغط على صنف لتشوف طلباته.',sumEmpty:'ما في شي للتحضير'},
     de:{title:'Küche',colNew:'Neu',colPrep:'In Arbeit',colReady:'Fertig',sum:'Summe',sumTitle:'Jetzt zubereiten',start:'Starten',ready:'Fertig ✓',picked:'Abgeholt',back:'Zurück',print:'Drucken',
       delivery:'Lieferung',pickup:'Abholung',local:'Vor Ort',table:'Tisch',min:'Min',late:'zu spät',left:'noch',empty:'Keine',updated:'Aktualisiert',orders:'Bestellungen',
       offline:'Keine Verbindung zum Server',login:'Bitte zuerst anmelden',note:'Hinweis',floor:'Etage',drinks:'Getränke',other:'Artikel',
-      sumHint:'Alle Artikel aus neuen und laufenden Bestellungen. Artikel antippen zeigt die Bestellungen.',sumEmpty:'Nichts zuzubereiten'}
+      expect:'fertig ca.',sumHint:'Alle Artikel aus neuen und laufenden Bestellungen. Artikel antippen zeigt die Bestellungen.',sumEmpty:'Nichts zuzubereiten'}
   };
   const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
   let lang=store.get('nara-kitchen-lang','ar'),sound=store.get('nara-kitchen-sound','1')==='1',autoPrint=store.get('nara-kitchen-autoprint','0')==='1',expandAll=store.get('nara-kitchen-expand','0')==='1';
@@ -157,6 +157,7 @@ button:disabled{opacity:.5}
     const type=o.type==='local'?t('local')+(o.table?' '+esc(o.table):''):t(o.type);
     const timer=o.kitchenStatus==='READY'?'<b>'+tm.age+'</b><small>'+t('min')+'</small>'
       :tm.left<0?'<b>+'+(-tm.left)+'</b><small>'+t('late')+'</small>':'<b>'+tm.left+'</b><small>'+t('left')+'</small>';
+    const exp=o.expectedReadyAt&&o.kitchenStatus!=='READY'?hhmm(new Date(o.expectedReadyAt)):'';
     const hasNote=o.notes||o.items.some(i=>i.note);
     const cust=[o.customerName,o.address].filter(Boolean).join(' · ');
     const agg=new Map();for(const i of o.items){const k=itemKey(i);agg.set(k,{name:i.name,q:(agg.get(k)?.q||0)+i.quantity})}
@@ -170,7 +171,7 @@ button:disabled{opacity:.5}
     const hl=hlItem&&o.items.some(i=>itemKey(i)===hlItem);
     return '<article class="card '+tm.cls+(fresh?' fresh':'')+(open?' open':'')+(hl?' hl':'')+'" data-id="'+esc(o.id)+'">'
       +'<div class="row1"><span class="code">'+esc(o.displayCode)+'</span>'+(o.source!=='NARA'?'<span class="src '+esc(o.source)+'">'+esc(o.source.replace('_',' '))+'</span>':'')
-      +'<span class="type">'+type+'</span>'+(hasNote?'<span class="warn">⚠️</span>':'')+'<span class="timer">'+timer+'</span></div>'
+      +'<span class="type">'+type+(exp?' · '+t('expect')+' '+exp:'')+'</span>'+(hasNote?'<span class="warn">⚠️</span>':'')+'<span class="timer">'+timer+'</span></div>'
       +(cust?'<div class="cust"><bdi>'+esc(cust)+'</bdi></div>':'')
       +'<div class="brief">'+brief+'</div>'
       +'<div class="more">'+(info?'<div class="info">'+info+'</div>':'')+(o.notes?'<div class="note">'+esc(t('note'))+': <bdi>'+esc(o.notes)+'</bdi></div>':'')+'<div class="items">'+items+'</div></div>'

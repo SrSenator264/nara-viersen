@@ -74,7 +74,10 @@ const RULES = [
   ['GET', /^\/api\/cashier\/employee-lookup$/, CASH],
   ['*', /^\/api\/kitchen\/orders$/, KITCH],
   ['GET', /^\/api\/delivery\/auto-plan$/, CASH],
-  ['POST', /^\/api\/driver\/position$/, STAFF],
+  ['POST', /^\/api\/kitchen\/estimate$/, CASH],
+  ['POST', /^\/api\/driver\/(position|start|delivered|finish)$/, STAFF],
+  ['GET', /^\/api\/driver\/routes$/, STAFF],
+  ['POST', /^\/api\/delivery\/(assign|cancel)$/, CASH],
   ['POST', /^\/api\/live-orders\/stage$/, KITCH],
   ['POST', /^\/api\/live-orders\/archive-day$/, CASH],
   ['POST', /^\/api\/tse-demo\/receipt$/, CASH],
@@ -97,7 +100,7 @@ const allowed = (access, role) => Array.isArray(access) && access.includes(role)
 
 // ───────── ملفات ثابتة مسموحة ─────────
 const BLOCKED_DIRS = new Set(['data', 'logs', 'node_modules', 'tests', 'scripts', 'checkpoint', 'local-ocr-output']);
-const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs']);
+const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'dispatch-learning.js', 'prep-learning.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs']);
 const STATIC_EXT = new Set(['.html', '.js', '.mjs', '.css', '.png', '.jpg', '.jpeg', '.webp', '.avif', '.gif', '.svg', '.ico', '.woff', '.woff2', '.webmanifest', '.mp3', '.wav', '.ogg']);
 function staticAllowed(rel) {
   const parts = String(rel || '').split(/[\\/]+/).filter(Boolean);
@@ -119,7 +122,7 @@ function staticAllowed(rel) {
 // الصفحات اللي بتنحقن فيها شاشة الدخول (الاسم → الأدوار)
 const PAGE_ROLES = {
   'kasse.html': CASH, 'live-orders.html': KITCH, 'kitchen.html': KITCH,
-  'driver-app-v2.html': STAFF, 'driver-app.html': STAFF, 'delivery.html': STAFF, 'delivery-print.html': STAFF,
+  'driver-app-v2.html': STAFF, 'driver.html': STAFF, 'dispatch.html': CASH, 'driver-app.html': STAFF, 'delivery.html': STAFF, 'delivery-print.html': STAFF,
   'staff.html': MANAGERS, 'team.html': MANAGERS, 'admin.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'dashboard.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
   'accounting.html': ACCT, 'banking.html': ACCT, 'ledger.html': ACCT, 'reports.html': ACCT, 'sales.html': ACCT, 'kasse-settlement.html': ACCT,
 };

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NARA · التوزيع</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--bg:#f3f5f7;--card:#fff;--ink:#16202a;--muted:#6b7580;--line:#e2e6ea;--late:#dc2626;--ok:#16a34a;--blue:#2563eb}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#101820;color:#fff;flex-wrap:wrap}
+header h1{margin:0;font-size:19px}
+.chip{background:#ffffff1a;border-radius:999px;padding:4px 10px;font-size:13px}
+.sp{flex:1}
+.tog{display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer;background:#ffffff1a;border-radius:10px;padding:6px 10px}
+.tog input{width:18px;height:18px}
+.wrap{display:grid;grid-template-columns:minmax(340px,420px) 1fr;height:calc(100% - 52px)}
+aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
+#map{height:100%;min-height:300px}
+.drv{background:var(--card);border-radius:12px;margin-bottom:10px;overflow:hidden;border-top:5px solid var(--c,#999)}
+.drv h2{margin:0;padding:9px 12px 4px;font-size:17px;display:flex;align-items:center;gap:8px}
+.drv .st{padding:0 12px 8px;font-size:13px;color:var(--muted)}
+.tour{border-top:1px solid var(--line);padding:8px 12px}
+.tour .hd{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
+.tour .hd .t{color:var(--muted);font-weight:600}
+.stop{display:flex;gap:8px;align-items:baseline;padding:4px 0;font-size:14px}
+.stop .n{min-width:20px;height:20px;border-radius:50%;background:var(--c,#999);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center;font-weight:800}
+.stop .c{font-weight:800;direction:ltr}
+.stop .a{flex:1;color:#334;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stop .e{font-variant-numeric:tabular-nums;font-weight:700}
+.stop.late .e{color:var(--late)}
+.stop.done{opacity:.45;text-decoration:line-through}
+.btns{display:flex;gap:6px;margin-top:6px}
+.btn{border:0;border-radius:9px;padding:9px 12px;font-weight:800;font-size:14px;cursor:pointer;background:var(--blue);color:#fff}
+.btn.sec{background:#eef1f4;color:var(--ink)}.btn.red{background:#fee2e2;color:#991b1b}
+.btn:disabled{opacity:.5}
+.late-b{background:#fee2e2;color:#991b1b;border-radius:6px;padding:1px 6px;font-size:12px}
+.box{background:var(--card);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px}
+.box h3{margin:0 0 6px;font-size:14px}
+.warn{background:#fff7d6;border:1px solid #f3d36b}
+.muted{color:var(--muted);font-size:13px}
+#msg{position:fixed;bottom:14px;inset-inline-start:14px;background:#101820;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:999}
+.pin{width:26px;height:26px;border-radius:50%;color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px #0006}
+.car{font-size:24px;filter:drop-shadow(0 1px 2px #0008)}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;height:auto}#map{height:55vh}aside{border:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛵 التوزيع</h1>
+  <span class="chip" id="learn">…</span>
+  <span class="sp"></span>
+  <label class="tog" title="يرسل الجولة الأولى لكل سائق لحاله لما يجي وقتها"><input type="checkbox" id="auto"> إرسال تلقائي</label>
+  <span class="chip" id="upd"></span>
+</header>
+<div class="wrap">
+  <aside id="side"></aside>
+  <div id="map"></div>
+</div>
+<div id="msg"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  const COLORS=['#2563eb','#d97706','#9333ea','#059669','#db2777','#0891b2','#65a30d'];
+  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const hm=v=>{const d=new Date(v);return isNaN(d)?'—':String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+  const $=s=>document.querySelector(s);
+  const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  let plan=null,busy=false,colorOf={},map=null,layer=null,fitted=false;
+  $('#auto').checked=store.get('nara-dispatch-auto','0')==='1';
+  $('#auto').onchange=()=>store.set('nara-dispatch-auto',$('#auto').checked?'1':'0');
+
+  function toast(t){const m=$('#msg');m.textContent=t;m.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>m.style.display='none',3500)}
+  function color(id){if(!colorOf[id])colorOf[id]=COLORS[Object.keys(colorOf).length%COLORS.length];return colorOf[id]}
+
+  function initMap(){
+    if(!window.L){$('#map').innerHTML='<div class="box warn" style="margin:12px">الخريطة ما حمّلت (ما في إنترنت؟). الخطة شغّالة بدونها.</div>';return}
+    map=L.map('map',{zoomControl:true}).setView([51.2556,6.3936],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+    layer=L.layerGroup().addTo(map);
+  }
+  const pin=(n,c)=>L.divIcon({className:'',html:'<div class="pin" style="background:'+c+'">'+esc(n)+'</div>',iconSize:[26,26],iconAnchor:[13,13]});
+
+  function drawMap(){
+    if(!map||!plan)return;layer.clearLayers();
+    const shop=[plan.shop.lat,plan.shop.lng],pts=[shop];
+    L.marker(shop,{icon:L.divIcon({className:'',html:'<div class="pin" style="background:#101820">🏠</div>',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(layer).bindTooltip('المحل');
+    for(const r of plan.active||[]){
+      const c=color(r.driverId),line=[shop];
+      r.stops.filter(s=>Number.isFinite(s.lat)).forEach((s,i)=>{line.push([s.lat,s.lng]);pts.push([s.lat,s.lng]);L.marker([s.lat,s.lng],{icon:pin(s.delivered?'✓':i+1,c),opacity:s.delivered?.5:1}).addTo(layer).bindTooltip(esc(s.code)+' · '+esc(s.address))});
+      L.polyline(line,{color:c,weight:4}).addTo(layer);
+    }
+    for(const d of plan.drivers||[])for(const t of d.tours){
+      const c=color(d.driverId),line=[shop];
+      t.stops.forEach((s,i)=>{line.push([s.lat,s.lng]);pts.push([s.lat,s.lng]);L.marker([s.lat,s.lng],{icon:pin(i+1,c),opacity:.85}).addTo(layer).bindTooltip(esc(s.code)+' · '+esc(d.name)+' · '+hm(s.etaAt))});
+      line.push(shop);L.polyline(line,{color:c,weight:3,dashArray:'6 8',opacity:.8}).addTo(layer);
+    }
+    for(const p of plan.positions||[])if(Number.isFinite(p.lat)){L.marker([p.lat,p.lng],{icon:L.divIcon({className:'',html:'<div class="car">🛵</div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(layer).bindTooltip(esc(p.name||'')+' · '+hm(p.at),{permanent:true,direction:'top'});pts.push([p.lat,p.lng])}
+    if(!fitted&&pts.length>1){map.fitBounds(pts,{padding:[30,30]});fitted=true}
+  }
+
+  function render(){
+    const side=$('#side');if(!plan){side.innerHTML='<div class="box">…</div>';return}
+    const L_=plan.learning||{};$('#learn').textContent=L_.samples?('🧠 تعلّم من '+L_.samples+' مشوار · معامل '+(L_.global||1).toFixed(2)+'×'):'🧠 لسا عم يتعلّم (ما في توصيلات مسجّلة)';
+    let h='';
+    if(plan.assumedDrivers)h+='<div class="box warn">ولا سائق مسجّل دوامه هلق، فالخطة معتبرة كل السواقين شغّالين.</div>';
+    if(!plan.ok&&plan.reason==='NO_DRIVERS')h+='<div class="box warn">ما في سواقين بالنظام. ضيفهم من صفحة الفريق (team.html) بدور "سائق".</div>';
+    const byDriver={};for(const r of plan.active||[])(byDriver[r.driverId]??=[]).push(r);
+    for(const d of plan.drivers||[]){
+      const c=color(d.driverId),act=byDriver[d.driverId]||[],out=act.some(r=>r.startedAt);
+      const st=out?'🛵 طالع · بيرجع تقريباً '+hm(d.freeAt):act.length?'📦 عنده جولة مرسلة لسا ما طلع':(Date.parse(d.freeAt)<=Date.now()+60000?'✅ فاضي هلق':'بيصير فاضي '+hm(d.freeAt));
+      h+='<section class="drv" style="--c:'+c+'"><h2>'+esc(d.name||d.driverId)+'</h2><div class="st">'+st+'</div>';
+      for(const r of act){
+        const left=r.stops.filter(s=>!s.delivered).length;
+        h+='<div class="tour"><div class="hd">'+(r.startedAt?'بالطريق':'مرسلة')+' <span class="t">'+left+' باقي من '+r.stops.length+'</span></div>'
+          +r.stops.map((s,i)=>'<div class="stop'+(s.delivered?' done':'')+'"><span class="n">'+(i+1)+'</span><span class="c">'+esc(s.code)+'</span><span class="a">'+esc(s.address)+'</span></div>').join('')
+          +(r.startedAt?'':'<div class="btns"><button class="btn red" data-cancel="'+esc(r.routeId)+'">إلغاء الإرسال</button></div>')+'</div>';
+      }
+      d.tours.forEach((t,i)=>{
+        const late=t.stops.map(s=>plan.assignments.find(a=>a.orderId===s.orderId)).filter(a=>a&&a.lateMin);
+        h+='<div class="tour"><div class="hd">'+(i===0&&!act.length?'الجولة الجاية':'بعدها')+' <span class="t">طلوع '+hm(t.departAt)+' · رجعة '+hm(t.backAt)+'</span>'+(late.length?'<span class="late-b">'+late.length+' متأخر</span>':'')+'</div>'
+          +t.stops.map((s,k)=>{const a=plan.assignments.find(x=>x.orderId===s.orderId)||{};return '<div class="stop'+(a.lateMin?' late':'')+'"><span class="n">'+(k+1)+'</span><span class="c">'+esc(s.code)+'</span><span class="a">'+esc(s.address||s.name||'')+'</span><span class="e">'+hm(s.etaAt)+(a.lateMin?' (+'+a.lateMin+')':'')+'</span></div>'}).join('')
+          +(i===0?'<div class="btns"><button class="btn" data-send="'+esc(d.driverId)+'" data-tour="0">📤 أرسل لـ'+esc(d.name||'')+'</button>'+(t.googleMapsUrl?'<a class="btn sec" target="_blank" rel="noopener" href="'+esc(t.googleMapsUrl)+'">🗺️ المسار</a>':'')+'</div>':'')+'</div>';
+      });
+      if(!d.tours.length&&!act.length)h+='<div class="tour muted">ما في طلبات إله هلق</div>';
+      h+='</section>';
+    }
+    if((plan.unplaced||[]).length)h+='<div class="box warn"><h3>طلبات بدون موقع على الخريطة</h3><div class="muted">العنوان ناقص أو غلط، أو لسا عم يندوّر عليه (بياخد لحد دقيقة). صلّح العنوان بالكاشير.</div>'+plan.unplaced.map(u=>'<div>• '+esc(u.id)+'</div>').join('')+'</div>';
+    if(!(plan.drivers||[]).some(d=>d.tours.length)&&!(plan.active||[]).length&&!(plan.unplaced||[]).length)h+='<div class="box muted">ما في طلبات توصيل مفتوحة.</div>';
+    side.innerHTML=h;
+  }
+
+  async function api(method,url,body){const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||r.status);return j}
+  async function send(driverId){
+    const d=plan.drivers.find(x=>x.driverId===driverId);if(!d||!d.tours[0])return;
+    const t=d.tours[0],etas={};t.stops.forEach(s=>etas[s.orderId]=s.etaAt);
+    await api('POST','/api/delivery/assign',{driverId,orderIds:t.stops.map(s=>s.orderId),etas});
+    toast('📤 انبعتت لـ '+(d.name||''));
+  }
+  async function load(){
+    if(busy)return;busy=true;
+    try{
+      plan=await api('GET','/api/delivery/auto-plan');
+      if($('#auto').checked){
+        // إرسال تلقائي: الجولة الأولى لسائق ما عنده جولة مرسلة ووقت طلوعها إجا
+        const sent=new Set((plan.active||[]).map(r=>r.driverId));let any=false;
+        for(const d of plan.drivers||[])if(d.tours[0]&&!sent.has(d.driverId)&&Date.parse(d.tours[0].departAt)<=Date.now()+60000){try{await send(d.driverId);any=true}catch(e){toast(e.message)}}
+        if(any)plan=await api('GET','/api/delivery/auto-plan');
+      }
+      render();drawMap();$('#upd').textContent='تحديث '+hm(Date.now());
+    }catch(e){$('#side').innerHTML='<div class="box warn">'+esc(e.message==='401'?'سجّل الدخول أولاً':'تعذر تحميل الخطة: '+e.message)+'</div>'}
+    finally{busy=false}
+  }
+  $('#side').addEventListener('click',async e=>{
+    const s=e.target.closest('[data-send]'),c=e.target.closest('[data-cancel]');if(!s&&!c)return;
+    const b=s||c;b.disabled=true;
+    try{if(s)await send(s.dataset.send);else{await api('POST','/api/delivery/cancel',{routeId:c.dataset.cancel});toast('انلغى الإرسال')}}catch(err){toast(err.message)}
+    await load();
+  });
+  initMap();load();setInterval(load,10000);
+})();
+</script>
+</body>
+</html>
