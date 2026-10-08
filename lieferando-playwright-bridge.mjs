@@ -440,11 +440,11 @@ page.on('response', async r => {
   } catch (e) { console.error(`[NARA] response parse failed: ${e.message}`); }
 });
 
-let reloading = false, wsTimer = null;
+let reloading = false, wsTimer = null, loadedAt = Date.now();
 async function refresh() {
   if (reloading) return;
   reloading = true;
-  try { await page.reload({ waitUntil: 'domcontentloaded' }); }
+  try { await page.reload({ waitUntil: 'domcontentloaded' }); loadedAt = Date.now(); }
   catch (e) { console.error('[NARA] refresh failed: ' + e.message); }
   finally { reloading = false; }
 }
@@ -454,7 +454,9 @@ page.on('websocket', ws => {
   ws.on('framereceived', f => {
     const len = f.payload?.length ?? 0;
     if (CFG.debugWs) log(`WS frame ${len}B`);
-    if (len > 40) { clearTimeout(wsTimer); wsTimer = setTimeout(refresh, 1500); } // رسالة حقيقية (مو heartbeat) → اجلب فوراً
+    // رسالة حقيقية (مو heartbeat) → اجلب. بس مش بأول 10 ثواني بعد التحميل (رسائل الاتصال نفسها كانت تعمل حلقة إعادة تحميل)،
+    // وما في أكتر من إعادة تحميل وحدة كل 15 ثانية.
+    if (len > 40 && Date.now() - loadedAt > 10000 && !wsTimer) wsTimer = setTimeout(() => { wsTimer = null; refresh(); }, Math.max(1500, 15000 - (Date.now() - loadedAt)));
   });
 });
 
