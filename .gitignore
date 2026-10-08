@@ -26,3 +26,9 @@ work/
 .env
 .env.*
 .backup-*/
+*backup*
+*benchmark*
+*diagnostic*
+*poc*
+publish-staging-*/
+nara-worker-deploy-archive-backup-*/
