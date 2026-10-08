@@ -53,3 +53,13 @@ test('Loco delivery goes to our dispatch (same drivers) with Sides ready time', 
   assert.equal(inp.orders.length, 1);
   assert.equal(inp.orders[0].readyAt, '2026-10-08T16:48:00.000Z');
 });
+
+test('Lieferando delivery QR (Zum Liefern scannen) goes on our receipt', async () => {
+  const core = await import('../nara-receipt-core.mjs');
+  const url = 'https://mca.scoober.com/qr/?ref=DF4FPH&id=c7c4e5af9ee416e78bd5fedd7516a1ae';
+  const lines = core.renderLines({ displayCode: 'DF4FPH', platform: 'LIEFERANDO', orderType: 'DELIVERY', deliveryQrUrl: url, cart: [{ quantity: 1, name: 'Fries', totalCents: 899 }], totalCents: 899, payment: { method: 'CASH' } }, { lang: 'de' });
+  assert.ok(lines.some(l => l.qr === url));
+  assert.match(core.toText(lines), /Zum Liefern scannen/);
+  const plain = core.renderLines({ displayCode: 'X1', platform: 'NARA', orderType: 'PICKUP', cart: [], totalCents: 0 }, { lang: 'de' });
+  assert.ok(plain.some(l => l.qr === 'NARA|NARA|X1'));
+});

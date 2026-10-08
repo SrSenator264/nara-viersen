@@ -20,7 +20,7 @@ const TXT = {
     dineIn: 'Dine-in', table: 'Table', paidCard: 'PAID · CARD', paidCash: 'PAID · CASH', open: 'PAYMENT OPEN',
     verify: '!! CHECK ORDER IN PLATFORM APP !!',
     driver: 'Driver', round: 'Round', pickupAt: 'Pickup', etaAt: 'ETA',
-    notBill: 'This is not a bill', scan: "Scan the QR code to open the order",
+    notBill: 'This is not a bill', scan: "Scan the QR code to open the order", scanDeliver: 'Scan to deliver',
     kitchen: 'KITCHEN', readyBy: 'Ready by', since: 'Ordered',
   },
   de: {
@@ -33,7 +33,7 @@ const TXT = {
     dineIn: 'Vor Ort', table: 'Tisch', paidCard: 'BEZAHLT · KARTE', paidCash: 'BEZAHLT · BAR', open: 'ZAHLUNG OFFEN',
     verify: '!! BESTELLUNG IN PLATTFORM PRÜFEN !!',
     driver: 'Fahrer', round: 'Tour', pickupAt: 'Abholung', etaAt: 'Ankunft',
-    notBill: 'Das ist keine Rechnung', scan: 'QR-Code scannen, um die Bestellung zu öffnen',
+    notBill: 'Das ist keine Rechnung', scan: 'QR-Code scannen, um die Bestellung zu öffnen', scanDeliver: 'Zum Liefern scannen',
     kitchen: 'KÜCHE', readyBy: 'Fertig bis', since: 'Bestellt',
   },
 };
@@ -203,8 +203,8 @@ export function renderLines(o, opt = {}) {
   // ── التذييل
   sep();
   add(t.notBill, { align: 'center' });
-  L.push({ text: '', qr: `NARA|${o.platform || ''}|${o.displayCode || o.externalOrderCode}`, align: 'center' });
-  for (const s of wrap(t.scan, W)) add(s, { align: 'center' });
+  L.push({ text: '', qr: o.deliveryQrUrl || `NARA|${o.platform || ''}|${o.displayCode || o.externalOrderCode}`, align: 'center' });
+  for (const s of wrap(o.deliveryQrUrl ? t.scanDeliver : t.scan, W)) add(s, { align: 'center' });
   sep();
   return L;
 }

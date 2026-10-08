@@ -271,7 +271,7 @@ const P = f => path.join(CFG.dataDir, f);
 function initStorage() {
   fs.mkdirSync(P('raw'), { recursive: true });
   try { state = JSON.parse(fs.readFileSync(P('state.json'), 'utf8')); } catch { /* أول تشغيل */ }
-  state.sent ??= {}; state.printed ??= {};
+  state.sent ??= {}; state.printed ??= {}; state.qr ??= {};
   const cutoff = Date.now() - CFG.rawKeepDays * 86400000;
   for (const f of fs.readdirSync(P('raw'))) {
     try { const fp = P('raw/' + f); if (fs.statSync(fp).mtimeMs < cutoff) fs.unlinkSync(fp); } catch { /* تجاهل */ }
@@ -370,10 +370,12 @@ async function handleList(list) {
     if (!shapeDumped && st.stage === 'PREPARE') dumpShape(x);
 
     const o = normalize(x, st);
+    const qr = state.qr[S(x.public_reference).toUpperCase()];
+    if (qr) o.deliveryQrUrl = qr;
     const rec = buildReceipt(o);
     o.receiptText = rec.text;
 
-    const sig = sha(JSON.stringify([o.liveStage, o.totalCents, o.cart, o.delivery, o.payment, o.requestedAt, o.readyForKitchen, o.remarks, o.customerPhone]));
+    const sig = sha(JSON.stringify([o.liveStage, o.totalCents, o.cart, o.delivery, o.payment, o.requestedAt, o.readyForKitchen, o.remarks, o.customerPhone, o.deliveryQrUrl]));
     if (state.sent[id] !== sig) {
       fs.writeFileSync(P(`raw/${id}.json`), JSON.stringify(x));
       const body = { source: 'LIEFERANDO', order: o };
@@ -440,6 +442,29 @@ page.on('response', async r => {
     const list = Array.isArray(p) ? p : (p?.orders || p?.data || []);
     await processList(Array.isArray(list) ? list : []);
   } catch (e) { console.error(`[NARA] response parse failed: ${e.message}`); }
+});
+
+// ───────────── QR "Zum Liefern scannen" ─────────────
+// Lieferando بتحط على ورقتها QR (mca.scoober.com/qr/?ref=CODE&id=…). الرابط مش بقائمة الطلبات،
+// فمنلقطه من أي رد بيحتويه (مثلاً لما حدا يكبس Print order) ومنحفظه حسب كود الطلب.
+const QR_RE = /https?:\/\/mca\.scoober\.com\/qr\/?\?ref=([A-Za-z0-9]+)(?:&|&amp;|\\u0026)id=([a-f0-9]{16,64})/g;
+let qrSaved = 0;
+ctx.on('response', async r => {
+  try {
+    const u = r.url();
+    if (!/takeaway|justeat|just-eat|lieferando|scoober/i.test(u)) return;
+    const ct = (r.headers()['content-type'] || '').toLowerCase();
+    if (!/json|text|javascript|html/.test(ct)) return;
+    const body = await r.text().catch(() => '');
+    if (!body || !/scoober|qr/i.test(body)) return;
+    let found = 0;
+    for (const m of body.matchAll(QR_RE)) {
+      const ref = m[1].toUpperCase(), url = `https://mca.scoober.com/qr/?ref=${m[1]}&id=${m[2]}`;
+      if (state.qr[ref] !== url) { state.qr[ref] = url; found++; }
+    }
+    if (found) { saveState(); log(`QR captured for ${found} order(s) from ${new URL(u).pathname}`); setTimeout(refresh, 1000); }
+    else if (qrSaved < 15 && /scoober/i.test(body)) { qrSaved++; fs.appendFileSync(P('qr-capture.jsonl'), JSON.stringify({ at: new Date().toISOString(), url: u.replace(/\?.*$/, ''), body: body.slice(0, 20000) }) + '\n'); }
+  } catch { /* تجاهل */ }
 });
 
 let reloading = false, wsTimer = null, loadedAt = Date.now();

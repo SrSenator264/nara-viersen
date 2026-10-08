@@ -23,7 +23,7 @@
     else if(type==='DELIVERY')method='CASH';                              // طلب توصيل مباشر: بيتحصّل عند الزبون
     const noteParts=[d.bell&&('Klingel: '+d.bell),d.extra,d.notes].filter(Boolean);
     return {
-      displayCode:code,externalOrderCode:code,placedAt:o.createdAt||o.placedAt||new Date().toISOString(),platform:plat,
+      deliveryQrUrl:o.deliveryQrUrl||'',displayCode:code,externalOrderCode:code,placedAt:o.createdAt||o.placedAt||new Date().toISOString(),platform:plat,
       orderType:type,table:o.table||'',customerName:d.name||'',customerPhone:d.phone||'',
       delivery:{address:[d.street,d.house].filter(Boolean).join(' '),floor:d.floor||'',postalCode:d.postal||'',city:d.city||'',notes:noteParts.join(' · ')},
       cart:items.map(i=>({quantity:Number(i.quantity)||1,name:i.name,totalCents:(Number(i.unitCents)||0)*(Number(i.quantity)||0),
@@ -37,10 +37,10 @@
   const TX={
     de:{delivery:'LIEFERUNG',pickup:'ABHOLUNG',dine:'VOR ORT',table:'TISCH',asap:'So bald wie möglich',tel:'Tel.',floor:'Etage',note:'Hinweis',
       sub:'Zwischensumme',deliv:'Lieferkosten',disc:'Rabatt',total:'GESAMT',cash:'BARZAHLUNG',collect:'Beim Kunden kassieren',open:'ZAHLUNG OFFEN',
-      paidCard:'BEZAHLT · KARTE',paidCash:'BEZAHLT · BAR',paidOnline:'BEZAHLT · ONLINE',driver:'Fahrer',round:'Tour',eta:'Ankunft',notBill:'Das ist keine Rechnung',scan:'QR-Code scannen, um die Bestellung zu öffnen',thanks:'Guten Appetit!'},
+      paidCard:'BEZAHLT · KARTE',paidCash:'BEZAHLT · BAR',paidOnline:'BEZAHLT · ONLINE',driver:'Fahrer',round:'Tour',eta:'Ankunft',notBill:'Das ist keine Rechnung',scan:'QR-Code scannen, um die Bestellung zu öffnen',scanDeliver:'Zum Liefern scannen',thanks:'Guten Appetit!'},
     en:{delivery:'DELIVERY',pickup:'PICKUP',dine:'DINE-IN',table:'TABLE',asap:'As soon as possible',tel:'Tel.',floor:'Floor',note:'Note',
       sub:'Subtotal',deliv:'Delivery',disc:'Discount',total:'TOTAL',cash:'CASH',collect:'Collect from customer',open:'PAYMENT OPEN',
-      paidCard:'PAID · CARD',paidCash:'PAID · CASH',paidOnline:'PAID · ONLINE',driver:'Driver',round:'Round',eta:'ETA',notBill:'This is not a bill',scan:'Scan the QR code to open the order',thanks:'Enjoy your meal!'}
+      paidCard:'PAID · CARD',paidCash:'PAID · CASH',paidOnline:'PAID · ONLINE',driver:'Driver',round:'Round',eta:'ETA',notBill:'This is not a bill',scan:'Scan the QR code to open the order',scanDeliver:'Scan to deliver',thanks:'Enjoy your meal!'}
   };
   const eur=c=>(Math.round(Number(c)||0)/100).toFixed(2).replace('.',',')+' €';
   const pad=n=>String(n).padStart(2,'0');
@@ -97,9 +97,10 @@
     const a=r.assignment;
     if(a&&(a.driverName||a.roundId))rows.push('<div class="rc-driver">'+(a.driverName?'<div><b>'+esc(t.driver)+':</b> '+esc(a.driverName)+'</div>':'')+(a.roundId?'<div><b>'+esc(t.round)+':</b> '+esc(a.roundId)+'</div>':'')+(a.etaAt?'<div><b>'+esc(t.eta)+':</b> '+esc(hhmm(a.etaAt))+'</div>':'')+'</div>');
     // QR محلي (بدون إنترنت)
-    const payload='NARA|'+(r.platform||'')+'|'+r.displayCode;
+    // Lieferando: نفس QR تبعهم ("Zum Liefern scannen")؛ غير هيك QR داخلي
+    const payload=r.deliveryQrUrl||('NARA|'+(r.platform||'')+'|'+r.displayCode);
     let qr='';try{if(window.NARA_QR)qr='<div class="rc-qr">'+window.NARA_QR.svg(payload,{level:'M',quiet:1})+'</div>'}catch(e){console.warn('[NARA][RECEIPT_QR_FAILED]',e.message)}
-    rows.push(qr+'<div class="rc-small rc-c">'+esc(t.scan)+'</div><div class="rc-small rc-c rc-nb">'+esc(t.notBill)+'</div><div class="rc-thanks">'+esc(t.thanks)+'</div>');
+    rows.push(qr+'<div class="rc-small rc-c">'+esc(r.deliveryQrUrl?t.scanDeliver:t.scan)+'</div><div class="rc-small rc-c rc-nb">'+esc(t.notBill)+'</div><div class="rc-thanks">'+esc(t.thanks)+'</div>');
     return '<div class="nara-rc">'+rows.join('')+'</div>';
   }
 
