@@ -1,0 +1,21 @@
+/* kasse-quick-extras.css — زر المنيو على كل سطر + زر "أكتر" ونافذته */
+body .cart-controls button.qx-menu{font-size:.95rem;font-weight:800;background:#ffffff14;color:#ffe7b0;border:2px dashed #ffffff40;min-height:52px;padding:0 12px}
+body .cart-controls button.qx-menu.on{background:#f59e0b;color:#1a1300;border:2px solid #f59e0b}
+#qx-extra{order:4;flex:none;display:block;width:calc(100% - 32px);margin-inline:16px !important;min-height:54px;margin:10px 0 4px;border:2px dashed #ffffff55;border-radius:14px;background:transparent;color:#fff;font-size:1.15rem;font-weight:800;cursor:pointer}
+#qx-extra:hover{background:#ffffff12}
+#qx-modal{position:fixed;inset:0;z-index:60;background:#0009;display:flex;align-items:center;justify-content:center;padding:16px}
+#qx-modal[hidden]{display:none}
+.qx-card{width:min(520px,100%);background:#fff;color:#16202a;border-radius:18px;padding:18px;box-shadow:0 20px 60px #0006;max-height:92vh;overflow:auto}
+.qx-card h2{margin:0 0 12px;font-size:1.3rem}
+.qx-l{display:block;margin:10px 0;font-weight:700;font-size:.95rem}
+.qx-l input,.qx-l select{display:block;width:100%;margin-top:6px;min-height:50px;padding:0 12px;border:1px solid #cfd6dd;border-radius:12px;font-size:1.05rem;box-sizing:border-box}
+.qx-l small{display:block;color:#b45309;margin-top:4px}
+.qx-l small[hidden]{display:none}
+.qx-prices{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.qx-prices button{min-height:52px;border:1px solid #cfd6dd;border-radius:12px;background:#f4f6f8;font-size:1.05rem;font-weight:800;cursor:pointer}
+.qx-prices button.on{background:#16202a;color:#fff;border-color:#16202a}
+.qx-prices input{grid-column:1/-1;margin-top:0}
+.qx-err{color:#b91c1c;font-weight:700;min-height:1.2em;margin:4px 0}
+.qx-acts{display:flex;gap:10px}
+.qx-acts button{flex:1;min-height:56px;border:0;border-radius:14px;font-size:1.1rem;font-weight:800;cursor:pointer;background:#eef1f4}
+.qx-acts button.go{background:#e34824;color:#fff}

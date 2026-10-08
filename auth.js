@@ -75,6 +75,7 @@ const RULES = [
   ['*', /^\/api\/kitchen\/orders$/, KITCH],
   ['GET', /^\/api\/delivery\/auto-plan$/, CASH],
   ['POST', /^\/api\/kitchen\/estimate$/, CASH],
+  ['*', /^\/api\/kasse\/settings$/, CASH],
   ['POST', /^\/api\/driver\/(position|start|delivered|finish|proof)$/, STAFF],
   ['GET', /^\/api\/delivery\/proof$/, CASH],
   ['GET', /^\/api\/driver\/routes$/, STAFF],

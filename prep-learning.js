@@ -11,7 +11,7 @@ const DEFAULT_PREP = 12;     // قبل ما يتعلّم شي
 const PER_EXTRA = 0.6;       // دقيقة لكل قطعة زيادة
 const MIN_SAMPLES = 3;
 const MAX_SAMPLES = 600;
-const FEE = new Set(['DELIVERY_FEE', 'FEE', 'SERVICE_FEE', 'TIP']);
+const FEE = new Set(['DELIVERY_FEE', 'FEE', 'SERVICE_FEE', 'TIP', 'EXTRA']); // EXTRA (كاسة، صحن…) ما بينطبخ
 const DRINK = /getr[äa]nk|drink|cola|fanta|sprite|wasser|water|saft|juice|limo|ayran|iced tea|eistee/i;
 
 const str = v => (v == null ? '' : String(v)).trim();
