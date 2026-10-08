@@ -1,0 +1,6 @@
+'use strict';
+(function(){
+const external=new Set(['LIEFERANDO','WOLT','UBER_EATS']);
+function run(){const state=window.NARA_LEGACY_KASSE_STATE;if(!state)return;const o=state.getCurrent?.();const blocked=external.has(o?.source||'');document.querySelectorAll('#cash,#card').forEach(b=>{b.disabled=blocked;b.title=blocked?'Zahlung bereits über die externe Plattform erfolgt.':''});let n=document.querySelector('#external-payment-note');if(blocked&&!n){n=document.createElement('p');n.id='external-payment-note';n.className='external-payment-note';document.querySelector('.pay-actions')?.before(n)}if(n){n.hidden=!blocked;if(blocked)n.textContent='Externe Plattform: Zahlung bereits dort erfolgt. NARA zeigt den Auftrag nur an und sendet ihn zur Ausführung.'}}
+document.addEventListener('DOMContentLoaded',()=>{const t=setInterval(()=>{if(window.NARA_LEGACY_KASSE_STATE){clearInterval(t);run();document.querySelector('#order-source')?.addEventListener('change',()=>setTimeout(run,0));document.querySelector('#open-order')?.addEventListener('change',()=>setTimeout(run,0));document.querySelector('#new-order')?.addEventListener('click',()=>setTimeout(run,0))}},50);setTimeout(()=>clearInterval(t),5000)});
+})();

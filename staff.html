@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NARA · الموظفون والورديات</title>
+  <link rel="stylesheet" href="nara-shell.css">
+  <link rel="stylesheet" href="staff.css">
+</head>
+<body>
+  <main class="staff-page">
+    <header class="staff-header">
+      <div><p class="eyebrow">إدارة التشغيل والحسابات</p><h1>الموظفون والورديات</h1><p>الحضور والانصراف، الورديات، وأجور العمال من مكان واحد.</p></div>
+      <a class="back-link" href="ai-control.html">العودة إلى مدير NARA</a>
+    </header>
+    <section class="summary-grid">
+      <article><span>الموظفون</span><strong id="summary-employees">—</strong><small>المسجلون حالياً</small></article>
+      <article><span>الورديات المفتوحة</span><strong id="summary-shifts">—</strong><small>تعمل الآن</small></article>
+      <article><span>الحضور اليوم</span><strong id="summary-attendance">—</strong><small>آخر تسجيلات الحضور</small></article>
+    </section>
+    <section class="workspace-grid">
+      <article class="panel form-panel">
+        <div class="panel-title"><div><p class="eyebrow">بيانات الفريق</p><h2>إضافة موظف</h2></div></div>
+        <form id="employee-form"><input id="employee-id" type="hidden">
+          <label>اسم الموظف<input id="name" required placeholder="مثال: أحمد محمد"></label>
+          <label>الدور<select id="role"><option value="CASHIER">كاشير</option><option value="KITCHEN">مطبخ</option><option value="MANAGER">مدير</option><option value="ACCOUNTANT">محاسب</option></select></label>
+          <label>أجر الساعة (€)<input id="hourly-rate" type="number" min="0" step="0.01" required placeholder="مثال: 12.50"></label>
+          <label>نوع العقد<select id="contract-type"><option value="HOURLY">بالساعة</option><option value="MONTHLY">راتب شهري</option></select></label>
+          <fieldset class="profile-switches"><legend>ملفات الموظف</legend><label><input id="profile-internal" type="checkbox" checked> الملف الداخلي — التشغيل والتدريب</label><label><input id="profile-official" type="checkbox"> الملف الرسمي — المحاسبة والتصدير</label></fieldset>
+          <label>الاستراحة بالدقائق<input id="break-minutes" type="number" min="0" step="1" value="0"></label>
+          <label>خصم يومي (€)<input id="daily-deduction" type="number" min="0" step="0.01" value="0"></label>
+          <div class="form-buttons"><button id="employee-submit" class="primary" type="submit">حفظ الموظف</button><button id="cancel-edit" class="ghost" type="button" hidden onclick="cancelEdit()">إلغاء التعديل</button></div><p id="form-status" class="form-status" role="status"></p>
+        </form>
+      </article>
+      <article class="panel"><div class="panel-title"><div><p class="eyebrow">الفريق</p><h2>الموظفون</h2></div><button class="ghost" type="button" onclick="load()">تحديث</button></div><div id="employees" class="employee-list">جاري التحميل...</div></article>
+    </section>
+    <section class="panel attendance-panel"><div class="panel-title"><div><p class="eyebrow">التشغيل اليومي</p><h2>الورديات والحضور</h2></div><span id="status" class="live-status">جاري التحميل...</span></div><div id="shift-summary" class="empty-state">لا توجد ورديات مفتوحة حالياً.</div></section>
+    <section class="panel payroll-panel">
+      <div class="panel-title"><div><p class="eyebrow">الحسابات اليومية</p><h2>أجور العمال والتسويات</h2></div><div class="report-actions"><input id="payroll-date" type="date"><button class="ghost" type="button" onclick="loadPayroll()">تحديث</button><button class="ghost" type="button" onclick="exportPayrollCsv()">تصدير Excel</button><button class="ghost" type="button" onclick="window.print()">طباعة / PDF</button></div></div>
+      <p class="report-note">المستحق = ساعات العمل × أجر الساعة. أي مبلغ غير مدفوع ينتقل تلقائياً كرصيد مستحق لليوم التالي. السجلات مصنفة إلى رسمي وتجريبي/داخلي.</p>
+      <div id="payroll-table" class="payroll-table">جاري تحميل تقرير الأجور...</div>
+    </section>
+  </main>
+  <script src="nara-shell.js"></script><script src="staff.js"></script>
+</body>
+</html>

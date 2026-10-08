@@ -1,0 +1,152 @@
+:root{--fire:#ef491d;--ink:#20231f;--paper:#f8f5ea;--muted:#62675f;--line:#dce0d7}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 Tahoma,Arial,sans-serif}button{font:inherit;cursor:pointer;border:0}button:focus-visible{outline:3px solid #286bc1}.warning{background:#74220d;color:#fff;text-align:center;padding:12px;font-weight:700}header{display:flex;align-items:center;gap:28px;padding:16px 4%;background:#fff;border-bottom:1px solid var(--line)}header a:last-child{margin-right:auto}.brand{font:bold 28px Arial;text-decoration:none;color:var(--fire)}main{max-width:1500px;margin:auto;padding:24px}.toolbar,.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.eyebrow{color:var(--fire);font-weight:bold;font-size:12px}h1{font-size:32px;margin:2px 0}h2{margin:0}.status{background:#fff0e4;padding:10px;border-radius:8px}.cashier-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(340px,.85fr);gap:20px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}.categories{display:flex;gap:10px;overflow:auto;padding:15px 0}.category,.ghost{background:#eef0e9;border:1px solid var(--line);border-radius:9px;padding:13px 18px;min-height:52px;white-space:nowrap;font-weight:bold}.category.selected{background:var(--ink);color:#fff}.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}.product{min-height:145px;text-align:right;background:#fffaf1;border:1px solid #eadfce;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:6px}.product-name{font-weight:800;font-size:18px}.product-desc{color:var(--muted);font-size:13px;flex:1}.product b{font-size:19px;direction:ltr}.cart-panel{position:sticky;top:12px}.cart-empty{text-align:center;color:var(--muted);padding:45px 10px}.cart-item{border-bottom:1px solid var(--line);padding:12px 0;display:flex;justify-content:space-between;gap:10px}.cart-item strong,.cart-item small,.cart-item span{display:block}.cart-item small{color:var(--muted);font-size:12px}.cart-controls{display:flex;align-items:center;gap:6px}.cart-controls button{background:#eef0e9;border-radius:7px;min-width:42px;min-height:42px;font-size:22px}.cart-controls .remove{font-size:13px;color:#952800}.cart-total{border-top:2px solid var(--ink);margin-top:14px;padding-top:14px;display:flex;justify-content:space-between;font-size:22px}.pay-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.pay-actions button{min-height:58px;border-radius:9px;font-weight:800}.secondary{background:#eef0e9}.cash{background:#2f7d4a;color:#fff}.card{background:#286bc1;color:#fff}.message{color:#952800;font-weight:bold}.modal{position:fixed;inset:0;background:#0008;display:grid;place-items:center;padding:16px}.modal[hidden]{display:none}.modal-card{background:#fff;border-radius:14px;padding:22px;width:min(620px,100%);max-height:90vh;overflow:auto}.option{display:block;padding:12px;border-bottom:1px solid #eee}.add-configured{width:100%;background:var(--fire);color:#fff;border-radius:9px;padding:15px;font-weight:bold}footer{text-align:center;color:var(--muted);padding:24px}@media(max-width:900px){.cashier-layout{grid-template-columns:1fr}.cart-panel{position:static}.toolbar{align-items:start;flex-direction:column}}@media(max-width:600px){main{padding:14px}.products{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.product{min-height:150px;padding:11px}header{gap:12px;flex-wrap:wrap}}
+.menu-search{display:block;width:100%;box-sizing:border-box;margin:0 0 14px;padding:14px 18px;border:1px solid #d8d5ca;border-radius:14px;background:#fff;color:#1f2933;font:inherit;font-size:1.05rem;outline:none;direction:rtl}.menu-search:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.14)}.menu-search::placeholder{color:#7b8490}
+.header-actions{display:flex;align-items:center;gap:14px;margin-inline-start:auto}.language-switcher{display:flex;gap:5px;padding:4px;background:#eef0e9;border:1px solid var(--line);border-radius:12px}.language-switcher button{min-height:44px;padding:8px 13px;border-radius:8px;background:transparent;font-weight:800}.language-switcher button:hover,.language-switcher button:focus-visible{background:#fff}.order-strip{display:grid;grid-template-columns:minmax(360px,1.4fr) minmax(150px,.55fr) minmax(280px,1fr);gap:14px;align-items:stretch;margin:0 0 20px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:14px}.order-types{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.order-types button{min-height:68px;padding:12px 10px;border:2px solid #d8d5ca;border-radius:12px;background:#f6f7f3;font-weight:800;font-size:1.05rem}.order-types button:hover,.order-types button:focus-visible,.order-types button.selected{background:var(--ink);border-color:var(--ink);color:#fff}.table-picker,.open-orders{display:flex;flex-direction:column;justify-content:center;gap:6px}.table-picker label,.open-orders label{font-weight:800;color:var(--muted);font-size:.9rem}.table-picker select,.open-orders select{width:100%;min-height:48px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit}.open-orders{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8px}.open-orders label{grid-column:1/-1}.open-orders select{min-width:0}.open-orders .secondary{min-height:48px;padding:8px 13px;border-radius:9px;font-weight:800}.delivery-card{margin:0 0 20px}.delivery-card[hidden],.table-picker[hidden]{display:none}.delivery-card .section-head{margin-bottom:16px}.maps{min-height:48px;padding:10px 16px;border-radius:9px;background:#286bc1;color:#fff;font-weight:800}.delivery-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(130px,1fr) minmax(0,1.3fr);gap:14px 12px}.delivery-grid label{display:flex;flex-direction:column;gap:5px;font-weight:800}.delivery-grid input,.delivery-grid textarea{width:100%;min-height:46px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;font:inherit;font-weight:400}.delivery-grid textarea{resize:vertical}.delivery-grid .wide{grid-column:span 3}.address-preview{margin:14px 0 0;padding:11px 13px;background:#f6f7f3;border-radius:8px;color:var(--muted);font-weight:700;min-height:42px}@media(max-width:1000px){.order-strip{grid-template-columns:1fr 1fr}.order-types{grid-column:1/-1}.open-orders{grid-column:1/-1}.delivery-grid{grid-template-columns:minmax(0,1.7fr) minmax(120px,1fr)}.delivery-grid .wide{grid-column:span 2}}@media(max-width:600px){.header-actions{width:100%;justify-content:space-between}.language-switcher button{min-height:40px;padding:7px 9px}.order-strip{grid-template-columns:1fr;padding:10px}.order-types{grid-template-columns:1fr}.open-orders{grid-template-columns:1fr}.open-orders label{grid-column:auto}.delivery-grid{grid-template-columns:1fr}.delivery-grid .wide{grid-column:auto}.maps{width:100%}}
+/* Keep the payment panel inside the viewport on ordinary desktop widths. */
+main{width:100%;max-width:1500px;min-width:0}.cashier-layout,.order-strip,.menu-panel,.cart-panel,.pay-actions{min-width:0}.pay-actions button{min-width:0;white-space:normal}@media(max-width:1100px){.cashier-layout{grid-template-columns:minmax(0,1fr) minmax(260px,32vw)}.order-strip{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.order-types{grid-column:1/-1}}@media(max-width:760px){.cashier-layout,.order-strip{grid-template-columns:1fr}.order-types{grid-column:auto}}
+/* Additive cashier safety monitor; legacy cashier controls remain unchanged. */
+.nara-kasse-monitor{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:12px 0;padding:10px 14px;border:1px solid #d8dfd8;border-radius:10px;background:#f5faf5;color:#26352a;font-size:13px}
+.nara-kasse-monitor strong{margin-inline-end:auto}.nara-kasse-monitor span{white-space:nowrap}
+.nara-kasse-monitor .external-accounting{flex-basis:100%;padding-top:6px;color:#7a4b00;font-style:normal;border-top:1px solid #ead9b0}
+.nara-kasse-monitor .settlement-link{margin-inline-start:auto;color:#8f2e1b;font-weight:700;text-decoration:none;white-space:nowrap}
+
+/* Additive button feedback: visual only, existing cashier behavior stays unchanged. */
+button{
+  transition:transform .12s ease,filter .12s ease,box-shadow .12s ease,background-color .12s ease;
+}
+button:hover:not(:disabled){
+  filter:brightness(.96);
+  box-shadow:0 3px 10px #17202a1c;
+}
+button:active:not(:disabled){
+  transform:translateY(2px) scale(.98);
+  filter:brightness(.88);
+  box-shadow:inset 0 2px 5px #17202a33;
+}
+button:focus-visible{
+  outline:3px solid #275fbc;
+  outline-offset:3px;
+}
+.product:active:not(:disabled),
+.category:active:not(:disabled),
+[data-order-type]:active:not(:disabled),
+.pay-actions button:active:not(:disabled){
+  transform:scale(.97);
+}
+.nara-kasse-monitor .settlement-link:active{
+  transform:translateY(1px);
+}
+.external-payment-note{margin:0 0 10px;padding:11px 13px;border:1px solid #ead9b0;border-radius:9px;background:#fff8e8;color:#7a4b00;font-weight:700}
+button:disabled{cursor:not-allowed;opacity:.55;filter:grayscale(.25)}
+
+/* Major cashier layout layer: preserves legacy handlers and reorganizes only the visual hierarchy. */
+body{background:linear-gradient(135deg,#f7f5ee 0%,#eef3f0 100%)}
+header{position:sticky;top:0;z-index:10;box-shadow:0 2px 14px #17202a12}
+main{padding-top:28px}
+.toolbar{margin-bottom:18px}
+.toolbar .status{border:1px solid #f1d7c6;box-shadow:0 2px 8px #17202a0b}
+.order-strip{grid-template-columns:minmax(0,1.25fr) minmax(190px,.7fr) minmax(250px,1fr);padding:18px;box-shadow:0 5px 18px #17202a10}
+.order-types button{min-height:76px;box-shadow:0 2px 4px #17202a0a}
+.order-types button.selected{box-shadow:0 5px 12px #20231f35}
+#order-hub-fields{background:#f7faf7;border:1px solid #e0e7df;border-radius:12px;padding:12px}
+.cashier-layout{grid-template-columns:minmax(0,1.55fr) minmax(360px,.85fr);gap:22px}
+.menu-panel,.cart-panel{box-shadow:0 5px 18px #17202a10}
+.menu-panel{padding:20px}
+.cart-panel{top:88px;border-top:4px solid var(--fire)}
+.section-head{margin-bottom:12px}
+.section-head h2{font-size:1.5rem}
+.categories{scrollbar-width:thin}
+.category{min-height:48px;padding:11px 16px}
+.products{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.product{min-height:188px;overflow:hidden;box-shadow:0 2px 7px #17202a0a}
+.product:hover{border-color:#c6a98d;transform:translateY(-2px)}
+.product-image{width:100%;height:108px;object-fit:cover;border-radius:9px;background:#eee}
+.cart-empty{min-height:230px;display:grid;place-items:center}
+.cart-item{padding:15px 0}
+.cart-controls{flex-wrap:wrap;justify-content:flex-end}
+.pay-actions{position:sticky;bottom:0;padding-top:12px;background:#fff}
+.pay-actions button{min-height:62px;font-size:1.05rem}
+@media(max-width:900px){.cashier-layout{grid-template-columns:1fr}.cart-panel{position:static}.pay-actions{position:static}}
+
+/* Payment dialog polish: keeps the existing payment logic, replaces only the native look. */
+#payment-dialog{
+  width:min(560px,calc(100vw - 32px));
+  max-width:none;
+  margin:auto;
+  padding:0;
+  border:0;
+  border-radius:18px;
+  color:var(--ink);
+  background:#fff;
+  box-shadow:0 24px 80px #17202a45;
+  overflow:hidden;
+}
+#payment-dialog::backdrop{background:#17202a99;backdrop-filter:blur(3px)}
+#payment-dialog form{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:26px}
+#payment-dialog h2{grid-column:1/-1;margin:0;padding-bottom:14px;border-bottom:1px solid var(--line);font-size:1.55rem}
+#payment-dialog p{grid-column:1/-1;margin:0}
+#payment-dialog #payment-total{font-size:1.25rem;font-weight:800}
+#payment-dialog label{grid-column:1/-1;display:grid;grid-template-columns:minmax(130px,1fr) minmax(130px,1fr);align-items:center;gap:12px;font-weight:800}
+#payment-dialog input{width:100%;min-height:44px;padding:9px 11px;border:1px solid #ccd2c8;border-radius:9px;background:#fbfcfa;font:inherit}
+#payment-dialog input:focus{outline:3px solid #286bc144;border-color:#286bc1}
+#payment-dialog #payment-change{padding:10px 12px;border-radius:9px;background:#f6f7f3;color:var(--muted)}
+#payment-dialog #payment-difference{padding:12px;border-radius:9px;background:#fff5ec;font-weight:800}
+#payment-dialog #payment-difference[data-valid="true"]{background:#eaf7ee;color:#21643a}
+#payment-dialog #payment-cancel,#payment-dialog #payment-confirm{min-height:48px;padding:11px 18px;border-radius:10px;font-weight:800}
+#payment-dialog #payment-cancel{grid-column:1;background:#eef0e9;color:var(--ink)}
+#payment-dialog #payment-confirm{grid-column:2;background:var(--fire);color:#fff}
+#payment-dialog #payment-confirm:disabled{opacity:.55;cursor:wait}
+@media(max-width:560px){#payment-dialog form{padding:20px}#payment-dialog label{grid-template-columns:1fr;gap:5px}#payment-dialog #payment-cancel,#payment-dialog #payment-confirm{grid-column:1/-1}}
+
+/* Cashier order strip layout refinement; additive styling only. */
+#order-hub-fields{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:minmax(210px,.8fr) minmax(210px,.8fr) minmax(0,2.4fr);
+  gap:12px;
+  align-items:end;
+  padding-top:2px;
+}
+#order-hub-fields label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  color:var(--muted);
+  font-weight:700;
+  white-space:nowrap;
+}
+#order-hub-fields select,
+#order-hub-fields input{
+  min-width:0;
+  width:100%;
+  min-height:40px;
+  padding:8px 10px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  color:var(--ink);
+  font:inherit;
+}
+.order-hub-summary{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:5px 12px;
+  min-width:0;
+  color:var(--muted);
+  font-size:.9rem;
+  line-height:1.4;
+}
+.order-hub-summary strong{color:var(--ink);margin-inline-end:4px}
+.order-hub-summary span{white-space:nowrap}
+@media(max-width:900px){
+  #order-hub-fields{grid-template-columns:1fr 1fr}
+  .order-hub-summary{grid-column:1/-1}
+}
+@media(max-width:600px){
+  #order-hub-fields{grid-template-columns:1fr}
+  #order-hub-fields label{align-items:stretch;flex-direction:column;gap:4px;white-space:normal}
+  .order-hub-summary{grid-column:auto}
+}
+/* Lanch import is an additive workflow layer. */
+#nara-lanch-button{margin-inline-start:8px;border:0;border-radius:10px;background:#eef1ea;padding:10px 12px;font-weight:700;cursor:pointer}#nara-lanch-modal{position:fixed;inset:0;z-index:40;background:#0006;display:grid;place-items:center;padding:20px}#nara-lanch-modal[hidden]{display:none}.nara-lanch-card{width:min(560px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 20px 60px #0005}.nara-lanch-card h2{margin-top:0}.nara-lanch-card label{display:block;margin:12px 0;font-weight:700}.nara-lanch-card input,.nara-lanch-card textarea{display:block;width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #ccd5ce;border-radius:9px;font:inherit}.nara-lanch-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}.nara-lanch-actions button{border:0;border-radius:9px;background:#202622;color:#fff;padding:10px 16px;font-weight:700;cursor:pointer}

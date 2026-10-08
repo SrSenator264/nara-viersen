@@ -1,8 +1,28 @@
-# Generated artifacts
-*.tar.gz
-publish-staging-*/
-dist/
-.openai/
 .env
 node_modules/
+.nara-ocr-venv/
+.nara-ocr-venv-fixed/
+.nara-ocr-venv-broken-backup-*/
+data/*.json
+data/**/*.json
+logs/
+local-ocr-output/
+checkpoint*/
+checkpoints/
+nara-deploy/
+nara-deploy-clean/
+nara-worker-deploy/
+*.bak
+*.tmp
 
+pw-profile/
+node_modules/
+pw-profile/
+data/
+outputs/
+work/
+*.tar.gz
+*.zip
+.env
+.env.*
+.backup-*/

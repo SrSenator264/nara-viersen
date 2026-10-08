@@ -1,0 +1,2 @@
+'use strict';
+(function(){function mount(){const h=document.querySelector('header .header-actions');if(!h||document.getElementById('nara-live-orders-link'))return;const a=document.createElement('a');a.id='nara-live-orders-link';a.href='live-orders.html';a.textContent='📋 Live Orders';a.style.cssText='font-weight:800;color:#e85f12;text-decoration:none;margin-inline:8px';h.appendChild(a)}setInterval(mount,500);mount()})();

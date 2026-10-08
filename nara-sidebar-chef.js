@@ -1,0 +1,2 @@
+'use strict';
+(function(){function add(){const side=document.querySelector('.side');if(!side||side.querySelector('[data-nav-key="customer-chef"]'))return;const a=document.createElement('a');a.dataset.navKey='customer-chef';a.href='index.html#guide-dialog';a.textContent='👨‍🍳 Chef NARA · موقع الزبون';a.title='فتح واجهة الزبون ومساعد الطلبات';side.prepend(a)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add()})();

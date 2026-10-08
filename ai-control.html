@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NARA · AI Manager</title>
+<link rel="stylesheet" href="nara.css">
+<link rel="stylesheet" href="nara-shell.css">
+<link rel="stylesheet" href="ai-control.css">
+</head>
+<body>
+<header class="topbar"><h1>NARA · AI Manager</h1></header>
+<main id="ai-manager" class="page">
+<section class="card"><h2>مدير مشروع NARA 🤖</h2><p>المركز الخاص بك لإدارة الوكلاء والاقتراحات والموافقات.</p>
+<nav class="agent-nav"><a href="inventory-foundation.html#invoices">الفواتير</a><a href="kasse.html">الكاشير وTSE</a><a href="inventory-foundation.html#items">المخزون</a><a href="ai-control.html" aria-current="page">الوكلاء</a></nav></section>
+<section class="card" id="manager-project-state"><h2>حالة المشروع الفعلية</h2><p id="manager-project-state-text">جاري قراءة الكود والبيانات…</p></section>
+<section class="card"><h2>الوكلاء</h2><div class="agent-grid">
+<article><b>📄 وكيل الفواتير</b><span>قراءة واستخراج ومراجعة</span></article>
+<article><b>🔗 وكيل ربط الأصناف</b><span>مطابقة الموردين والأصناف</span></article>
+<article><b>✨ وكيل الأسماء</b><span>اقتراح أسماء مختصرة</span></article>
+<article><b>📦 وكيل المخزون</b><span>مراقبة النقص والحركة</span></article>
+<article><b>🧾 وكيل الكاشير وTSE</b><span>التدقيق قبل الترحيل</span></article>
+</div></section>
+<section class="card" id="manager-chat"><h2>محادثة المدير</h2><div id="manager-messages" class="manager-messages"></div><div class="manager-compose"><textarea id="manager-input" rows="2" placeholder="احكِ لي ماذا تريد…"></textarea><div class="manager-tools"><button type="button" id="manager-voice" title="تحدث صوتياً">🎙️</button><button type="button" id="manager-call" title="بدء اتصال صوتي">📞</button></div><button id="manager-send">إرسال</button></div></section>
+</main>
+<script src="nara-i18n.js"></script>
+<script src="nara-shell.js"></script>
+<script src="ai-manager.js?v=20261002-hallucination-guard1"></script>
+<script src="ai-manager-i18n-fix.js"></script>
+</body>
+</html>
+<script src="ai-manager-cashier-agents.js?v=20261002"></script>
+<script src="ai-manager-command-center.js?v=20261002-execution-ui1"></script>
+<script src="manager-pending-actions.js"></script>
+
