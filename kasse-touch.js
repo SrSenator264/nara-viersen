@@ -37,7 +37,12 @@
   labels();
   document.dispatchEvent(new Event('nara-chip-ready'));
 
-  // 3) نبضة صغيرة للمجموع لما يتغير (ردّ على ضغطة المستخدم)
+  // 3) سطر رسم التوصيل بالسلة: بدون + - تعديل؛ زر الحذف صار "إعفاء"
+  const waiveLabel={de:'Erlassen',ar:'إعفاء',en:'Waive'};
+  function decorateFee(){const L=window.NARA_LEGACY_KASSE_STATE,o=L&&L.getCurrent&&L.getCurrent();if(!o)return;const rows=[...document.querySelectorAll('#cart .cart-item')];(o.cart||[]).forEach((it,i)=>{const row=rows[i];if(!row||it.kind!=='DELIVERY_FEE')return;row.classList.add('fee-line');const rm=row.querySelector('[data-act=remove]');if(rm)rm.textContent=waiveLabel[lang()]||waiveLabel.de})}
+  const cartEl=$('#cart');if(cartEl){new MutationObserver(decorateFee).observe(cartEl,{childList:true});decorateFee()}
+
+  // 4) نبضة صغيرة للمجموع لما يتغير (ردّ على ضغطة المستخدم)
   const total=$('#total');
   if(total){let last=total.textContent,tm=0;new MutationObserver(()=>{if(total.textContent===last)return;last=total.textContent;total.classList.remove('bump');void total.offsetWidth;total.classList.add('bump');clearTimeout(tm);tm=setTimeout(()=>total.classList.remove('bump'),400)}).observe(total,{childList:true,characterData:true,subtree:true})}
 })();

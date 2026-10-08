@@ -92,7 +92,7 @@
     return {
       ok: shortfall === 0, type: 'delivery', reason: shortfall ? 'BELOW_MINIMUM' : null, postalCode: plz,
       zone: { id: zone.id, name: zone.name }, customerFeeCents: zone.customerFeeCents, minOrderCents: zone.minOrderCents,
-      shortfallCents: shortfall, subtotalCents: subtotal, totalCents: subtotal + zone.customerFeeCents,
+      shortfallCents: shortfall, subtotalCents: subtotal, totalCents: subtotal + zone.customerFeeCents, ruleVersion: cfg.version,
     };
   }
 

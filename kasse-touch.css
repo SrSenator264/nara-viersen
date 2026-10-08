@@ -142,6 +142,11 @@ body .delivery-grid input,body .delivery-grid textarea{min-height:54px;padding:1
 body .delivery-grid input:focus,body .delivery-grid textarea:focus{outline:none;border-color:var(--t-flame);box-shadow:0 0 0 4px #ef491d22}
 body .address-preview{margin:12px 0 0;padding:12px 14px;border-radius:12px;background:#f2f4ef;font-weight:600}
 
+/* سطر رسم التوصيل بالسلة */
+body .cart-item.fee-line{grid-template-columns:1fr auto;align-items:center;padding:8px 0}
+body .cart-item.fee-line small,body .cart-item.fee-line [data-act=minus],body .cart-item.fee-line [data-act=plus],body .cart-item.fee-line [data-act=edit],body .cart-item.fee-line .cart-controls b{display:none}
+body .cart-item.fee-line .cart-controls button.remove{min-height:40px;min-width:0;margin:0;font-size:.8rem}
+
 /* شريحة العنوان داخل السلة */
 body #dl-chip{flex:none;display:grid;gap:2px;margin:0 16px 8px;padding:10px 14px;text-align:start;border-radius:14px;background:#ffffff14;color:#fff;border:2px dashed #ffffff3d;font-weight:700}
 body #dl-chip[hidden]{display:none}
