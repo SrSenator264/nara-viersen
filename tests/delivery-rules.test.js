@@ -33,9 +33,11 @@ test('quote: postal code with spaces, invalid and out of area', () => {
   assert.equal(R.quote(cfg(), { postalCode: '41061', subtotalCents: 5000 }).reason, 'OUT_OF_AREA');
 });
 
-test('quote: Mönchengladbach 41063 stays closed until the customer fee is set', () => {
+test('quote: Mönchengladbach 41063 = 4 EUR fee, 30 EUR minimum', () => {
   const c = cfg();
-  assert.equal(R.quote(c, { postalCode: '41063', subtotalCents: 5000 }).reason, 'ZONE_NOT_CONFIGURED');
+  const m = R.quote(c, { postalCode: '41063', subtotalCents: 3000 });
+  assert.equal(m.ok, true); assert.equal(m.customerFeeCents, 400); assert.equal(m.totalCents, 3400);
+  assert.equal(R.quote(c, { postalCode: '41063', subtotalCents: 2999 }).reason, 'BELOW_MINIMUM');
   assert.equal(R.quote(c, { postalCode: '41061', subtotalCents: 5000 }).reason, 'OUT_OF_AREA');
   const next = R.updateConfig(c, { zones: c.zones.map(z => z.id === 'moenchengladbach-start' ? { ...z, postalCodes: ['41061'], customerFeeCents: 400, needsSetup: false } : z) });
   const q = R.quote(next, { postalCode: '41061', subtotalCents: 2999 });
@@ -53,7 +55,7 @@ test('quote: pickup has no fee and no minimum', () => {
 
 test('public zones never expose driver pay and hide unconfigured zones', () => {
   const zones = R.publicZones(cfg());
-  assert.equal(zones.length, 3);
+  assert.equal(zones.length, 4);
   for (const z of zones) assert.equal('driverPayCents' in z, false);
   assert.equal(JSON.stringify(zones).includes('driverPay'), false);
 });
