@@ -1,0 +1,178 @@
+/* kasse-touch.css — واجهة الكاشير للتابلت (لمس). طبقة شكل فقط: ما بتغيّر أي id ولا أي منطق دفع/طلب.
+   الطباعة مستثناة (كل شي داخل @media screen). */
+@media screen{
+:root{
+  --t-ink:#1c1e1a;--t-flame:#ef491d;--t-surface:#e9ece6;--t-tile:#fff;--t-line:#d6dbd0;
+  --t-cart:#1e201c;--t-cart2:#2a2d26;--t-text:#f1efe6;--t-dim:#a9aea1;--t-dir:1;
+  --t-ease:cubic-bezier(.2,.8,.2,1);
+}
+html[dir=rtl]{--t-dir:-1}
+html,body{height:100%}
+body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;background:var(--t-surface);
+  font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,Tahoma,Arial,sans-serif;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.warning{flex:none;padding:3px 12px;font-size:12px;font-weight:600}
+body header{flex:none;position:static;min-height:0;padding:6px 16px;gap:16px;box-shadow:0 1px 0 var(--t-line)}
+body header .brand{font-size:1.35rem}
+body header strong[data-i18n=cashier]{font-size:1rem;color:#6a6f66}
+body header button,body header a{min-height:44px;display:inline-flex;align-items:center}
+body footer{display:none}
+body main{flex:1 1 auto;min-height:0;max-width:none;width:100%;display:grid;grid-template-columns:minmax(0,1fr) clamp(340px,33vw,440px);grid-template-rows:auto auto minmax(0,1fr);gap:10px 12px;padding:10px 14px 14px}
+body .toolbar{display:none}
+
+/* شريط نوع الطلب */
+body .order-strip{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0;padding:10px 12px;border-radius:18px;box-shadow:0 1px 0 var(--t-line);background:#fff}
+body .order-types{display:flex;gap:8px;grid-column:auto}
+body .order-types button{min-width:112px;min-height:56px;padding:0 14px;border-radius:16px;font-size:1.05rem;font-weight:800;color:var(--t-ink);background:#eef0ea;border:2px solid transparent;box-shadow:none;transition:background-color .15s,color .15s,transform .1s var(--t-ease)}
+body .order-types button.selected{background:var(--t-ink);color:#fff;box-shadow:none}
+body .order-types button[data-order-type=delivery].selected{background:var(--t-flame)}
+body .table-picker,body .open-orders{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;gap:8px;grid-column:auto}
+body .table-picker label,body .open-orders label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+body .open-orders select{max-width:230px}
+body .table-picker[hidden]{display:none}
+body .order-strip select{min-height:52px;padding:0 12px;border:2px solid var(--t-line);border-radius:14px;background:#fff;font:inherit;font-size:1rem;color:var(--t-ink)}
+body #new-order{min-height:52px;padding:0 14px;white-space:nowrap;border-radius:14px;font-weight:800}
+body #order-hub-fields{flex:1 1 340px;display:flex;align-items:center;gap:10px;margin:0;padding:0;border:0;background:none;grid-template-columns:none}
+body #order-hub-fields label{flex:1 1 0;min-width:0}
+body #order-hub-fields select,body #order-hub-fields input{min-height:52px;border:2px solid var(--t-line);border-radius:14px;font-size:1rem}
+body .order-hub-summary{display:none}
+body .nara-kasse-monitor{flex:none;margin:0;padding:3px 12px;font-size:12px;border-radius:10px;gap:4px 14px}
+
+/* التخطيط الرئيسي: مفروش على كل ارتفاع الشاشة بدون سكرول للصفحة */
+body .cashier-layout{display:contents}
+body .order-strip{grid-column:1;grid-row:1}
+body .nara-kasse-monitor{grid-column:1;grid-row:2}
+body .menu-panel{grid-column:1;grid-row:3;height:100%;max-height:100%}
+body .cart-panel{grid-column:2;grid-row:1/-1;height:100%;max-height:100%}
+body .menu-panel{display:grid;grid-template-columns:150px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:10px 14px;min-height:0;padding:12px;border:0;border-radius:20px;overflow:hidden;box-shadow:0 1px 0 var(--t-line)}
+body .menu-panel>.section-head{display:none}
+body #menu-search{grid-column:2;grid-row:1;margin:0;min-height:54px;border:2px solid var(--t-line);border-radius:16px;font-size:1.05rem;direction:inherit;padding:0 18px}
+body #menu-search:focus{border-color:var(--t-flame);box-shadow:0 0 0 4px #ef491d22}
+
+/* ألوان الأقسام */
+[data-hue="0"]{--c:#d9411a}[data-hue="1"]{--c:#a85f00}[data-hue="2"]{--c:#2b8a4a}[data-hue="3"]{--c:#12807f}
+[data-hue="4"]{--c:#2b5fc4}[data-hue="5"]{--c:#8238ad}[data-hue="6"]{--c:#c0345f}[data-hue="7"]{--c:#6f5236}
+body #categories{grid-column:1;grid-row:1/3;display:flex;flex-direction:column;gap:8px;margin:0;padding:0 4px 0 0;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin}
+html[dir=rtl] body #categories{padding:0 0 0 4px}
+body .category{flex:none;min-height:64px;padding:10px 12px;text-align:start;white-space:normal;line-height:1.2;border-radius:16px;background:#f2f4ef;color:var(--t-ink);font-weight:800;font-size:.98rem;border-inline-start:7px solid var(--c,#999);transition:background-color .15s,color .15s,transform .1s var(--t-ease)}
+body .category.selected{background:var(--c,var(--t-ink));color:#fff;border-color:transparent}
+@media (hover:hover){body .category:not(.selected):hover{background:color-mix(in srgb,var(--c) 16%,#fff)}}
+
+/* بطاقات الأصناف */
+body #products{grid-auto-rows:max-content;grid-column:2;grid-row:2;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:12px;align-content:start;padding:2px 4px 16px 2px;scrollbar-width:thin;overscroll-behavior:contain}
+body .product{min-height:136px;padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;gap:8px;text-align:start;overflow:hidden;
+  background:var(--t-tile);color:var(--t-ink);border:2px solid #e2e6dc;border-inline-start:8px solid var(--c,#999);border-radius:18px;box-shadow:0 1px 0 #0000000d;
+  transition:background-color .16s,color .16s,border-color .16s,transform .16s var(--t-ease),box-shadow .16s}
+body .product .product-name{font-size:1.2rem;font-weight:800;line-height:1.2}
+body .product .product-name,body .product .product-desc{flex:none}
+body .product .product-desc{font-size:.82rem;line-height:1.35;color:#686d63;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+body .product b{align-self:flex-start;padding:5px 13px;border-radius:999px;font-size:1.1rem;font-variant-numeric:tabular-nums;background:color-mix(in srgb,var(--c,#888) 14%,#fff);color:var(--c,var(--t-ink));transition:background-color .16s,color .16s}
+@media (hover:hover){
+  body .product:hover{background:var(--c);border-color:var(--c);color:#fff;transform:translateY(-3px);box-shadow:0 12px 24px color-mix(in srgb,var(--c) 38%,transparent)}
+  body .product:hover .product-desc{color:#ffffffd9}
+  body .product:hover b{background:#fff;color:var(--c)}
+}
+body .product:active{background:var(--c);border-color:var(--c);color:#fff;transform:scale(.965);box-shadow:none}
+body .product:active .product-desc{color:#ffffffd9}
+body .product:active b{background:#fff;color:var(--c)}
+
+/* السلة: لوحة داكنة، المجموع كبير، أزرار الدفع بالأسفل ثابتة */
+body .cart-panel{position:static;top:auto;display:flex;flex-direction:column;min-height:0;padding:0;overflow:hidden;border:0;border-radius:22px;background:var(--t-cart);color:var(--t-text);box-shadow:0 8px 30px #14160f33}
+body .cart-panel .section-head{flex:none;margin:0;padding:14px 16px 8px}
+body .cart-panel .section-head h2{margin:0;font-size:1.15rem;color:#fff}
+body .cart-panel .ghost{min-height:46px;padding:0 16px;border-radius:12px;background:#ffffff1a;color:#fff;font-weight:700}
+body #cart{flex:1 1 auto;min-height:150px;overflow-y:auto;padding:0 16px;overscroll-behavior:contain;scrollbar-width:thin}
+body #cart.cart-empty{display:grid;place-items:center;min-height:0;color:var(--t-dim);text-align:center;font-size:1rem}
+body .cart-item{display:grid;gap:10px;padding:12px 0;border-bottom:1px solid #ffffff1f}
+body .cart-item strong{color:#fff;font-size:1.05rem}
+body .cart-item small{display:block;color:var(--t-dim);line-height:1.35}
+body .cart-item span{color:#cfd3c8;font-variant-numeric:tabular-nums}
+body .cart-controls{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px}
+body .cart-controls b{min-width:30px;text-align:center;font-size:1.2rem;color:#fff}
+body .cart-controls button{min-width:52px;min-height:52px;padding:0 14px;border-radius:14px;background:#ffffff1a;color:#fff;font-weight:800;font-size:1.3rem;box-shadow:none}
+body .cart-controls button[data-act=plus]{background:var(--t-flame)}
+body .cart-controls button[data-act=edit],body .cart-controls button[data-act=remove]{font-size:.9rem;font-weight:700}
+body .cart-controls button.remove{background:#5b2a21;color:#ffb8a8;margin-inline-start:auto}
+body .cart-total{flex:none;display:flex;justify-content:space-between;align-items:baseline;margin:0;padding:8px 16px 4px;border-top:1px solid #ffffff1f;color:#c7cbbf}
+body #total{font-size:2.3rem;line-height:1;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;display:inline-block;transform-origin:100% 60%}
+body #total.bump{animation:t-bump .32s var(--t-ease)}
+@keyframes t-bump{0%{transform:scale(1)}40%{transform:scale(1.14);color:#ffb59f}100%{transform:scale(1)}}
+body .nara-quote-total{padding:0 16px 8px;border-top:0;font-size:1rem;color:#c7cbbf}
+body .nara-quote-total strong{color:#fff;font-size:1.3rem}
+body .pay-actions{flex:none;position:static;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;padding:10px 16px 14px;background:var(--t-cart2)}
+body .pay-actions button{min-width:0;white-space:normal;border-radius:14px;font-weight:800}
+body .pay-actions #cash,body .pay-actions #card{grid-column:span 3;order:1;min-height:80px;font-size:1.4rem;border-radius:18px}
+body .pay-actions button:not(#cash):not(#card){grid-column:span 2;order:2;min-height:42px;font-size:.85rem;background:#ffffff14;color:#d5d9cc}
+body .pay-actions #cash{background:#2d9150;color:#fff}body .pay-actions #card{background:#2b62cf;color:#fff}
+@media (hover:hover){body .pay-actions #cash:hover{background:#34a559}body .pay-actions #card:hover{background:#3772e6}body .pay-actions button:not(#cash):not(#card):hover{background:#ffffff26}}
+body #message{position:fixed;inset-inline-start:50%;bottom:18px;transform:translateX(-50%);z-index:70;margin:0;padding:12px 20px;border-radius:14px;background:#1c1e1a;color:#fff;font-size:.95rem;font-weight:600;box-shadow:0 10px 30px #0005;max-width:min(90vw,520px);pointer-events:none}
+body #message:empty{display:none}
+body .external-payment-note{margin:0 16px 8px}
+/* ترتيب عناصر السلة + أدوات الطباعة (Küche/Kunde/Lieferung) بشكل مدمج */
+body .cart-panel>.section-head{order:1}body #dl-chip{order:2}body #cart{order:3}body #nara-print-tools{order:4}
+body .cart-panel>.cart-total{order:5}body .nara-quote-total{order:6}body .external-payment-note{order:6}body .pay-actions{order:7}body #message{order:8}
+body #nara-print-tools{flex:none;margin:0;padding:6px 16px 8px;border-top:1px solid #ffffff1f}
+body .nara-order-identity{margin:0 0 4px;color:var(--t-dim);font-size:.8rem}
+body .nara-order-identity strong{color:#ffb59f;font-size:1rem}
+body .nara-print-actions{gap:6px}
+body .nara-print-actions button{min-height:40px;padding:4px 6px;border-radius:12px;background:#ffffff14;color:#e4e7dc;font-size:.82rem;font-weight:700;line-height:1.1}
+@media (hover:hover){body .nara-print-actions button:hover{background:#ffffff26;box-shadow:none}}
+
+/* لوحة بيانات التوصيل (درج جانبي) */
+body #dl-scrim{position:fixed;inset:0;z-index:55;background:#10130f80;opacity:0;pointer-events:none;transition:opacity .2s}
+body.dl-open #dl-scrim{opacity:1;pointer-events:auto}
+body .delivery-card{position:fixed;inset-block:0;inset-inline-start:0;z-index:60;width:min(580px,94vw);max-width:none;margin:0;padding:16px 18px 24px;overflow-y:auto;background:#fff;
+  border-radius:0 22px 22px 0;box-shadow:0 0 60px #0007;transform:translateX(calc(-104% * var(--t-dir)));visibility:hidden;pointer-events:none;
+  transition:transform .24s var(--t-ease),visibility 0s .24s}
+html[dir=rtl] body .delivery-card{border-radius:22px 0 0 22px}
+body .delivery-card[hidden]{display:none}
+body .delivery-card.is-open{transform:none;visibility:visible;pointer-events:auto;transition:transform .24s var(--t-ease)}
+body .delivery-card .section-head{position:sticky;top:-16px;z-index:2;margin:-16px -18px 12px;padding:14px 18px;background:#fff;border-bottom:1px solid var(--t-line);display:flex;gap:10px;align-items:center}
+body .delivery-card .section-head h2{margin:0;margin-inline-end:auto;font-size:1.25rem}
+body .delivery-card .maps{min-height:48px;padding:0 14px;border-radius:12px;background:#eef0ea;color:var(--t-ink);font-weight:700}
+body #dl-done{min-height:52px;padding:0 22px;border-radius:14px;background:var(--t-flame);color:#fff;font-weight:800;font-size:1rem}
+body .delivery-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+body .delivery-grid label{display:grid;gap:4px;font-size:.82rem;font-weight:700;color:#5f645a}
+body .delivery-grid label.wide{grid-column:1/-1}
+body .delivery-grid input,body .delivery-grid textarea{min-height:54px;padding:10px 14px;border:2px solid var(--t-line);border-radius:14px;font:inherit;font-size:1.05rem;color:var(--t-ink);background:#fbfcfa}
+body .delivery-grid input:focus,body .delivery-grid textarea:focus{outline:none;border-color:var(--t-flame);box-shadow:0 0 0 4px #ef491d22}
+body .address-preview{margin:12px 0 0;padding:12px 14px;border-radius:12px;background:#f2f4ef;font-weight:600}
+
+/* شريحة العنوان داخل السلة */
+body #dl-chip{flex:none;display:grid;gap:2px;margin:0 16px 8px;padding:10px 14px;text-align:start;border-radius:14px;background:#ffffff14;color:#fff;border:2px dashed #ffffff3d;font-weight:700}
+body #dl-chip[hidden]{display:none}
+body #dl-chip .dl-addr{font-size:.98rem;line-height:1.3}
+body #dl-chip .dl-fee{font-size:.85rem;font-weight:600;color:#d3d7ca}
+body #dl-chip .dl-fee[data-state=warn]{color:#ffd08a}body #dl-chip .dl-fee[data-state=ok]{color:#9fe0b4}body #dl-chip .dl-fee[data-state=bad]{color:#ffb0a4}
+@media (hover:hover){body #dl-chip:hover{background:#ffffff22}}
+
+/* ضيّق: تابلت عمودي / شاشات صغيرة */
+@media (max-width:1100px){
+  body header{gap:10px;padding:4px 12px}
+  body header a:not(.brand):not(.settlement-link){white-space:nowrap}
+  body header>a[href="index.html"],body .header-actions>a[href="index.html"]{display:none}
+  body header button,body header a{font-size:.9rem;white-space:nowrap}
+  body .order-types button{min-width:96px;padding:0 10px;font-size:.95rem}
+  body #order-hub-fields{flex-basis:100%}
+  body .nara-order-identity{display:none}
+  body .cart-controls button{min-height:46px;min-width:46px}
+  body #cart{min-height:170px}
+  body .cart-controls{gap:6px}
+  body .cart-controls button{min-height:44px;min-width:44px;padding:0 10px}
+  body .pay-actions #cash,body .pay-actions #card{min-height:68px;font-size:1.25rem}
+  body .pay-actions button:not(#cash):not(#card){min-height:38px}
+  body .order-types button{min-height:50px}
+  body #dl-chip{padding:8px 12px}
+  body #order-hub-fields select,body #order-hub-fields input,body .order-strip select{min-height:48px}
+}
+@media (max-width:900px){
+  body main{grid-template-columns:minmax(0,1fr) 330px}
+  body .menu-panel{grid-template-columns:116px minmax(0,1fr)}
+  body #products{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  body .product,body .category,body .order-types button,body .delivery-card,body #dl-scrim{transition:none}
+  body #total.bump{animation:none}
+}
+}

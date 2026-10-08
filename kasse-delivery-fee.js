@@ -15,19 +15,21 @@
   const line=document.createElement('div');line.id='nara-quote-total';line.className='cart-total nara-quote-total';line.hidden=true;
   total.closest('.cart-total').after(line);
   let seq=0;
+  function chipFee(text,state){const el=document.querySelector('#dl-chip .dl-fee');if(el){el.textContent=text||'';el.dataset.state=state||''}}
   function isDelivery(){return !card.hidden}
   async function refresh(){
     if(!isDelivery()){line.hidden=true;return}
     const plz=($('#postal-code')||{}).value||'',sub=cents(total.textContent),mine=++seq;
-    if(!plz.trim()){box.dataset.state='hint';box.textContent=tr('hint');line.hidden=true;return}
+    if(!plz.trim()){box.dataset.state='hint';box.textContent=tr('hint');line.hidden=true;chipFee('','');return}
     let q;try{const r=await fetch('/api/delivery/quote',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({postalCode:plz,subtotalCents:sub,type:'delivery'})});q=await r.json()}catch(e){q=null}
     if(mine!==seq)return;
-    if(!q){box.dataset.state='bad';box.textContent=tr('err');line.hidden=true;return}
+    if(!q){box.dataset.state='bad';box.textContent=tr('err');line.hidden=true;chipFee(tr('err'),'bad');return}
     if(q.reason==='POSTAL_CODE_INVALID'||q.reason==='OUT_OF_AREA'||q.reason==='ZONE_NOT_CONFIGURED'){
-      box.dataset.state='bad';box.textContent=tr(q.reason==='POSTAL_CODE_INVALID'?'bad':q.reason==='OUT_OF_AREA'?'out':'nocfg');line.hidden=true;return}
+      box.dataset.state='bad';box.textContent=tr(q.reason==='POSTAL_CODE_INVALID'?'bad':q.reason==='OUT_OF_AREA'?'out':'nocfg');line.hidden=true;chipFee(box.textContent,'bad');return}
     const okMin=q.ok;
     box.dataset.state=okMin?'ok':'warn';
     box.innerHTML=`<div><span>${tr('fee')}</span><strong>${eur(q.customerFeeCents)}</strong></div><div><span>${tr('min')}</span><strong>${eur(q.minOrderCents)}</strong></div><div class="nq-status">${okMin?'✓ '+tr('ok'):'⚠ '+tr('short')+' '+eur(q.shortfallCents)}</div>`;
+    chipFee(tr('fee')+' '+eur(q.customerFeeCents)+' · '+(okMin?'✓ '+tr('ok'):'⚠ '+tr('short')+' '+eur(q.shortfallCents)),okMin?'ok':'warn');
     line.hidden=false;line.innerHTML=`<span>${tr('total')}</span><strong>${eur(q.totalCents)}</strong>`;
   }
   const again=()=>setTimeout(refresh,0);
@@ -36,5 +38,6 @@
   document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',again));
   new MutationObserver(refresh).observe(total,{childList:true,characterData:true,subtree:true});
   new MutationObserver(refresh).observe(card,{attributes:true,attributeFilter:['hidden']});
+  document.addEventListener('nara-chip-ready',refresh);
   refresh();
 })();
