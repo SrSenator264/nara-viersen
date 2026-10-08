@@ -135,7 +135,8 @@ body .delivery-card .section-head{position:sticky;top:-16px;z-index:2;margin:-16
 body .delivery-card .section-head h2{margin:0;margin-inline-end:auto;font-size:1.25rem}
 body .delivery-card .maps{min-height:48px;padding:0 14px;border-radius:12px;background:#eef0ea;color:var(--t-ink);font-weight:700}
 body #dl-done{min-height:52px;padding:0 22px;border-radius:14px;background:var(--t-flame);color:#fff;font-weight:800;font-size:1rem}
-body .delivery-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+body .delivery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px}
+body .delivery-grid>*{min-width:0}
 body .delivery-grid label{display:grid;gap:4px;font-size:.82rem;font-weight:700;color:#5f645a}
 body .delivery-grid label.wide{grid-column:1/-1}
 body .delivery-grid input,body .delivery-grid textarea{min-height:54px;padding:10px 14px;border:2px solid var(--t-line);border-radius:14px;font:inherit;font-size:1.05rem;color:var(--t-ink);background:#fbfcfa}
@@ -183,4 +184,16 @@ body #dl-chip .dl-fee[data-state=warn]{color:#ffd08a}body #dl-chip .dl-fee[data-
   body .product,body .category,body .order-types button,body .delivery-card,body #dl-scrim{transition:none}
   body #total.bump{animation:none}
 }
+}
+
+/* اقتراحات الزبون من رقم الهاتف */
+@media screen{
+body .phone-suggest{grid-column:1/-1;display:grid;gap:8px}
+body .phone-suggest[hidden]{display:none}
+body .ps-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;min-height:56px;padding:8px 14px;text-align:start;border-radius:14px;background:#fff4ee;border:2px solid #f3c9b6;color:var(--t-ink);transition:background-color .15s,border-color .15s}
+body .ps-phone{font-weight:800;font-variant-numeric:tabular-nums}
+body .ps-line{font-size:.92rem;color:#4a4f46}
+body .ps-use{padding:8px 14px;border-radius:999px;background:var(--t-flame);color:#fff;font-weight:800;font-size:.9rem}
+body .ps-item:active{background:#ffe3d5;border-color:var(--t-flame)}
+@media (hover:hover){body .ps-item:hover{background:#ffe9dd;border-color:var(--t-flame)}}
 }

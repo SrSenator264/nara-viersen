@@ -24,7 +24,7 @@
   function syncFee(feeCents,quote){
     const L=legacy(),o=curOrder();if(!L||!o)return false;
     const cart=o.cart||(o.cart=[]),idx=cart.findIndex(i=>i.kind===FEE);let changed=false;
-    const want=o.type==='delivery'&&Number.isInteger(feeCents)&&feeCents>0;
+    const want=o.type==='delivery'&&Number.isInteger(feeCents)&&feeCents>0&&cart.some(i=>i.kind!==FEE);
     if(!want){if(idx>=0){cart.splice(idx,1);changed=true}if(o.deliveryFee){delete o.deliveryFee;changed=true}}
     else if(idx<0){
       if(o.deliveryFee&&o.deliveryFee.applied){o.deliveryFee={waived:true,zoneId:quote&&quote.zone?quote.zone.id:null,ruleVersion:quote&&quote.ruleVersion||null};changed=true}
