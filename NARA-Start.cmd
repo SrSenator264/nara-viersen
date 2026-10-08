@@ -9,7 +9,8 @@ if errorlevel 1 (
   start "NARA Server (nicht schliessen)" /min cmd /c "node server.js >> logs\server.log 2>&1"
   timeout /t 3 /nobreak >nul
 )
-tasklist /v /fi "WINDOWTITLE eq NARA Lieferando*" 2>nul | find /i "cmd.exe" >nul
-if errorlevel 1 start "NARA Lieferando (nicht schliessen)" /min cmd /c "%~dp0NARA-Lieferando.cmd"
 start "" "http://localhost:%PORT%/kasse.html"
+rem Lieferando-Bridge nur starten, wenn sie noch nicht laeuft (schnelle Pruefung, blockiert die Kasse nicht)
+powershell -NoProfile -Command "if(Get-CimInstance Win32_Process -Filter \"Name='cmd.exe'\" | Where-Object { $_.CommandLine -like '*NARA-Lieferando.cmd*' }){exit 0}else{exit 1}" >nul 2>&1
+if errorlevel 1 start "NARA Lieferando (nicht schliessen)" /min cmd /c ""%~dp0NARA-Lieferando.cmd""
 exit /b 0
