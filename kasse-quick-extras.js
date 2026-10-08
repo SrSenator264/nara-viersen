@@ -1,6 +1,6 @@
 // kasse-quick-extras.js — زرّين سريعين بالكاشير:
 // 1) "🍟 Menü +4 €" على كل صنف بالسلة: أي صنف بيصير منيو بكبسة (حتى لو ما إله منيو بالقائمة). كبسة تانية بتلغيه.
-// 2) "➕ Extra" تحت السلة: شي مش موجود بالمنيو (بندورة زيادة، كاسة بلاستيك…): اسم + سعر بكبسة + ملاحظة،
+// 2) "➕ Extra" تحت السلة: شي مش موجود بالمنيو (بندورة زيادة، كاسة بلاستيك…): سعر بكبسة، والاسم والملاحظة والصنف كلهم اختياري،
 //    إما سطر لحاله أو ملزوق على صنف معيّن (بيطلع تحته بالمطبخ والفاتورة).
 // سعر المنيو بيجي من إعدادات السيرفر (/api/kasse/settings)، الافتراضي 4 €.
 (function(){
@@ -11,9 +11,9 @@
   const cur=()=>{const l=L();return l&&l.getCurrent?l.getCurrent():null};
   const lang=()=>{try{return localStorage.getItem('nara-kasse-language')||document.documentElement.lang||'de'}catch(e){return 'de'}};
   const T={
-    de:{menu:'Menü',extra:'➕ Extra',title:'Extra hinzufügen',what:'Was genau?',ph:'z. B. extra Tomate, Plastikbecher',price:'Preis',note:'Notiz (optional)',for:'Für welchen Artikel?',alone:'Eigene Zeile',add:'Hinzufügen',cancel:'Abbrechen',per:'Preis pro Stück',need:'Bitte eingeben, was der Kunde möchte',other:'Anderer Preis'},
-    ar:{menu:'منيو',extra:'➕ أكتر',title:'إضافة شي مش بالمنيو',what:'شو بالضبط؟',ph:'مثلاً بندورة زيادة، كاسة بلاستيك',price:'السعر',note:'ملاحظة (اختياري)',for:'لأي صنف؟',alone:'سطر لحاله',add:'أضف',cancel:'إلغاء',per:'السعر لكل قطعة',need:'اكتب شو طلب الزبون',other:'سعر تاني'},
-    en:{menu:'Menu',extra:'➕ Extra',title:'Add extra',what:'What exactly?',ph:'e.g. extra tomato, plastic cup',price:'Price',note:'Note (optional)',for:'For which item?',alone:'Separate line',add:'Add',cancel:'Cancel',per:'Price per piece',need:'Type what the customer wants',other:'Other price'}};
+    de:{menu:'Menü',extra:'➕ Extra',title:'Extra hinzufügen',what:'Was genau? (optional)',ph:'z. B. extra Tomate, Plastikbecher',price:'Preis',note:'Notiz (optional)',for:'Für welchen Artikel? (optional)',alone:'Eigene Zeile',add:'Hinzufügen',cancel:'Abbrechen',per:'Preis pro Stück',need:'Bitte eingeben, was der Kunde möchte',other:'Anderer Preis'},
+    ar:{menu:'منيو',extra:'➕ أكتر',title:'إضافة شي مش بالمنيو',what:'شو بالضبط؟ (اختياري)',ph:'مثلاً بندورة زيادة، كاسة بلاستيك',price:'السعر',note:'ملاحظة (اختياري)',for:'لأي صنف؟ (اختياري)',alone:'سطر لحاله',add:'أضف',cancel:'إلغاء',per:'السعر لكل قطعة',need:'اكتب شو طلب الزبون',other:'سعر تاني'},
+    en:{menu:'Menu',extra:'➕ Extra',title:'Add extra',what:'What exactly? (optional)',ph:'e.g. extra tomato, plastic cup',price:'Price',note:'Note (optional)',for:'For which item? (optional)',alone:'Separate line',add:'Add',cancel:'Cancel',per:'Price per piece',need:'Type what the customer wants',other:'Other price'}};
   const tr=k=>(T[lang()]||T.de)[k];
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const eur=c=>(c/100).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
@@ -77,12 +77,11 @@
     const pb=e.target.closest('.qx-prices button');if(pb){price=Number(pb.dataset.c);modal.querySelectorAll('.qx-prices button').forEach(b=>b.classList.toggle('on',b===pb));const c=$('#qx-custom');if(c)c.value='';return}
     if(e.target.id==='qx-add'){
       const what=($('#qx-what').value||'').trim(),note=($('#qx-note').value||'').trim(),cc=customCents(),cents=cc==null?price:cc;
-      if(!what){$('#qx-err').textContent=tr('need');return}
       if(!Number.isInteger(cents)){$('#qx-err').textContent=tr('other')+' ?';return}
       const o=cur();if(!o)return closeExtra();o.cart=o.cart||[];
       const sel=$('#qx-for'),idx=sel&&sel.value!==''?Number(sel.value):-1,target=idx>=0?o.cart[idx]:null;
-      if(target){target.options=target.options||[];target.options.push({id:'__extra-'+Date.now(),name:what+(note?' ('+note+')':''),cents,group:'__extra',quantity:1});target.unitCents+=cents}
-      else{const fee=o.cart.findIndex(i=>i.kind==='DELIVERY_FEE'),line={id:'extra-'+Date.now(),name:'Extra: '+what,unitCents:cents,quantity:1,options:[],note,kind:'EXTRA'};if(fee>=0)o.cart.splice(fee,0,line);else o.cart.push(line)}
+      if(target){target.options=target.options||[];target.options.push({id:'__extra-'+Date.now(),name:(what||'Extra')+(note?' ('+note+')':''),cents,group:'__extra',quantity:1});target.unitCents+=cents}
+      else{const fee=o.cart.findIndex(i=>i.kind==='DELIVERY_FEE'),line={id:'extra-'+Date.now(),name:what?'Extra: '+what:'Extra',unitCents:cents,quantity:1,options:[],note,kind:'EXTRA'};if(fee>=0)o.cart.splice(fee,0,line);else o.cart.push(line)}
       closeExtra();commit();
     }
   });
