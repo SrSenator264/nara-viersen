@@ -48,7 +48,7 @@ function kitchenItems(cart, catalog) {
 // طلب → شكل المطبخ. ما في أي حقل فيه مبلغ.
 function kitchenView(o, now = Date.now(), catalog = null) {
   const d = o.delivery || {};
-  const created = ms(o.acceptedAt || o.createdAt || o.placedAt) ?? now;
+  const created = orderTime(o) ?? now;
   const prep = Math.max(1, Number(o.preparationMinutes || d.preparationMinutes || o.prepMinutes) || 20);
   // وقت لازم يكون جاهز: من المنصة (dueAt - وقت التوصيل) أو من وقت الطلب + التحضير
   const platformStart = ms(o.kitchenStartAt);
@@ -83,8 +83,19 @@ function isOtherStation(o) {
 }
 
 const MAX_AGE_H = 12; // طلب مفتوح أقدم من 12 ساعة = منسي من يوم قبل، مش شغل المطبخ هلق
+// وقت الطلب: أول تاريخ صالح (acceptedAt أحياناً نص مكسور من الجسر القديم متل "22:27 - 4 Oct")،
+// وإذا ما في، طلبات الكاشير رقمها هو وقت إنشائها بالميلي ثانية
+function orderTime(o) {
+  for (const k of ['acceptedAt', 'createdAt', 'placedAt']) {
+    const v = o && o[k];
+    if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(v)) { const t = Date.parse(v); if (Number.isFinite(t)) return t; }
+  }
+  const id = String(o && o.id || '');
+  if (/^1\d{12}$/.test(id)) return Number(id);
+  return null;
+}
 function isStale(o, now = Date.now()) {
-  const t = ms(o.acceptedAt || o.createdAt || o.placedAt);
+  const t = orderTime(o);
   return t != null && now - t > MAX_AGE_H * 3600000;
 }
 
@@ -135,4 +146,4 @@ function applyKitchenStatus(order, next, user, now = new Date().toISOString()) {
   return { from, to };
 }
 
-module.exports = { STATES, MAX_AGE_H, isStale, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };
+module.exports = { STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };

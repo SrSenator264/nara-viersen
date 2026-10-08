@@ -70,7 +70,7 @@ function forecast(data, now = Date.now(), extraCart = null) {
   const m = model(data);
   const slots = Math.max(1, Number(data.settings && data.settings.kitchen && data.settings.kitchen.parallelOrders) || 3);
   const CLOSED = new Set(['COMPLETED', 'CANCELLED', 'STORNIERT', 'DONE']);
-  const stale = o => { const t = Date.parse(o.acceptedAt || o.createdAt || o.placedAt); return Number.isFinite(t) && now - t > 12 * 3600000; };
+  const stale = o => require('./kitchen.js').isStale(o, now);
   const open = (data.orders || []).filter(o => !CLOSED.has(str(o.status).toUpperCase()) && !stale(o) && cookItems(o.cart).length
     && !['READY', 'PICKED_UP'].includes(str(o.kitchenStatus).toUpperCase())
     && !/loco/i.test(str(o.brand || o.brandName)) && !/^SIDES/i.test(str(o.source)));

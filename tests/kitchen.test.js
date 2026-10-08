@@ -114,3 +114,10 @@ test('forgotten open orders from yesterday do not show in kitchen or dispatch', 
   assert.deepEqual(S.missingAddresses(data), []);
   assert.equal(S.buildInput(data, NOW).orders.length, 0);
 });
+
+test('broken acceptedAt text and cashier orders without date: age taken from a real date or the order number', () => {
+  assert.equal(K.orderTime({ acceptedAt: '22:27 - 4 Oct', createdAt: '2026-10-04T20:05:56.728Z' }), Date.parse('2026-10-04T20:05:56.728Z'));
+  assert.equal(K.orderTime({ id: '1790160934868' }), 1790160934868);
+  assert.equal(K.isStale({ acceptedAt: '22:27 - 4 Oct', createdAt: '2026-10-04T20:05:56.728Z' }, NOW), true);
+  assert.equal(K.isStale({ id: '1790160934868' }, NOW), true);
+});
