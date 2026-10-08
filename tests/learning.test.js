@@ -107,3 +107,23 @@ test('full flow: plan, send to driver, start, deliver, learn, come back', () => 
   assert.equal(data.orders.find(o => o.id === 's1').assignment, undefined);
   assert.ok(S.planFor(data, NOW).assignments.some(a => a.orderId === 's1'));
 });
+
+test('photo proof: only for orders paid online, and it marks the order delivered', () => {
+  const data = { settings: {}, attendanceEvents: [], shifts: [], deliveryRoutes: [],
+    employees: [{ id: 'd1', name: 'Ali', role: 'DRIVER', active: true }],
+    orders: [
+      { id: 'on', type: 'delivery', status: 'OPEN', delivery: { lat: 51.28, lng: 6.38 }, cart: [{ name: 'A', quantity: 1 }], platform: 'LIEFERANDO', paymentStatus: 'PAID_ON_PLATFORM' },
+      { id: 'cash', type: 'delivery', status: 'OPEN', delivery: { lat: 51.27, lng: 6.38 }, cart: [{ name: 'B', quantity: 1 }], payment: { method: 'CASH' } },
+    ] };
+  const me = { id: 'd1', role: 'DRIVER', name: 'Ali' };
+  S.assignRoute(data, { driverId: 'd1', orderIds: ['on', 'cash'] }, null, iso(0));
+  const view = S.driverRoutes(data, 'd1')[0].stops;
+  assert.equal(view.find(s => s.orderId === 'on').canProof, true);
+  assert.equal(view.find(s => s.orderId === 'cash').canProof, false);
+  assert.throws(() => S.proofDelivery(data, 'cash', me, { file: 'x.jpg' }, iso(5)), /أونلاين/);
+  const r = S.proofDelivery(data, 'on', me, { file: 'on-1.jpg', pos: { lat: 51.28, lng: 6.38 } }, iso(12));
+  assert.equal(r.order.deliveredAt, iso(12));
+  assert.equal(r.order.deliveryProof.reason, 'NOT_HANDED_OVER');
+  assert.equal(r.order.deliveryProof.by, 'Ali');
+  assert.equal(S.driverRoutes(data, 'd1')[0].stops.find(s => s.orderId === 'on').proof, true);
+});

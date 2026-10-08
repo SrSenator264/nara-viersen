@@ -203,15 +203,31 @@ function finishRoute(data, routeId, user, now = new Date().toISOString()) {
   return r;
 }
 
+// مدفوع أونلاين؟ (بس هالطلبات بيصير فيها إثبات بالصورة إذا ما حدا فتح)
+function paidOnline(o) {
+  const method = str((o.payment && o.payment.method) || o.paymentMethod).toUpperCase();
+  if (method === 'CASH') return false;
+  return method === 'ONLINE' || str(o.paymentStatus).toUpperCase() === 'PAID_ON_PLATFORM' || !!(o.payment && o.payment.paid === true);
+}
+
+// إثبات تسليم بالصورة: الطلب مدفوع أونلاين وما حدا فتح الباب
+function proofDelivery(data, orderId, user, { file, pos }, now = new Date().toISOString()) {
+  const o = (data.orders || []).find(x => String(x.id) === String(orderId));
+  if (!o || !o.deliveryRouteId) throw err(404, 'الطلب مش بجولة');
+  routeFor(data, o.deliveryRouteId, user);
+  if (!paidOnline(o)) throw err(409, 'الصورة بس للطلبات المدفوعة أونلاين. طلب الكاش لازم ينسلّم باليد.');
+  o.deliveryProof = { file, at: now, by: user ? user.name : null, reason: 'NOT_HANDED_OVER', ...(pos && Number.isFinite(pos.lat) ? { lat: pos.lat, lng: pos.lng } : {}) };
+  return deliverStop(data, orderId, user, pos, now);
+}
+
 // جولات السائق نفسه (بدون أي مبلغ)
 function driverRoutes(data, driverId) {
   const cache = data.geocodeCache || {};
   return openRoutes(data).filter(r => r.employeeId === driverId).map(r => {
     const stops = (r.orderIds || []).map(id => (data.orders || []).find(o => String(o.id) === String(id))).filter(Boolean).map(o => {
       const d = o.delivery || {}, kv = kitchen.kitchenView(o);
-      const method = str((o.payment && o.payment.method) || o.paymentMethod || '').toUpperCase();
-      const cash = method === 'CASH' || (!method && kv.source === 'NARA' && o.status !== 'COMPLETED');
-      return { orderId: o.id, code: kv.displayCode, source: kv.source, name: kv.customerName, phone: kv.phone, address: kv.address, city: kv.city, floor: kv.floor,
+      const cash = !paidOnline(o);
+      return { orderId: o.id, code: kv.displayCode, source: kv.source, name: kv.customerName, phone: kv.phone, address: kv.address, city: kv.city, floor: kv.floor, canProof: paidOnline(o), proof: !!o.deliveryProof,
         notes: kv.notes, itemsCount: kv.items.reduce((s, i) => s + i.quantity, 0), cash, delivered: !!o.deliveredAt, etaAt: o.assignment && o.assignment.etaAt || null, ...(pointOf(o, cache) || {}) };
     });
     return { routeId: r.id, roundId: r.id.slice(-4).toUpperCase(), status: r.status, startedAt: r.startedAt, allDelivered: stops.every(s => s.delivered), stops,
@@ -239,4 +255,4 @@ async function geocode(address, fetchImpl = fetch) {
   return { lat: Number(j[0].lat), lng: Number(j[0].lon) };
 }
 
-module.exports = { DEFAULT_SHOP, addressOf, addressKey, pointOf, buildInput, planFor, missingAddresses, geocode, activeDrivers, assignRoute, cancelRoute, startRoute, deliverStop, finishRoute, driverRoutes, travelModel };
+module.exports = { DEFAULT_SHOP, addressOf, addressKey, pointOf, buildInput, planFor, missingAddresses, geocode, activeDrivers, assignRoute, cancelRoute, startRoute, deliverStop, finishRoute, driverRoutes, travelModel, paidOnline, proofDelivery };

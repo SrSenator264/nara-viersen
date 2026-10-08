@@ -38,6 +38,8 @@ main{padding:12px 12px 90px}
 .acts{display:flex;gap:8px;margin-top:10px}
 .acts button,.acts a{flex:1;min-height:52px;border:0;border-radius:11px;font-size:17px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none}
 .deliver{background:var(--ok);color:#fff}.nav{background:#e9edf1;color:var(--ink)}
+.photo{display:block;width:100%;margin-top:8px;min-height:50px;border:2px dashed #94a3b8;border-radius:11px;background:#fff;font-size:16px;font-weight:800;color:var(--ink);cursor:pointer}
+.proofok{margin-top:6px;color:var(--ok);font-weight:800}
 #msg{position:fixed;bottom:16px;left:16px;right:16px;background:#101820;color:#fff;padding:12px 14px;border-radius:12px;display:none;text-align:center;z-index:9}
 </style>
 </head>
@@ -45,6 +47,7 @@ main{padding:12px 12px 90px}
 <header><h1>🛵 طلباتي</h1><span class="gps" id="gps">📍 …</span></header>
 <main id="main"><div class="empty">…</div></main>
 <div id="msg"></div>
+<input type="file" id="cam" accept="image/*" capture="environment" hidden>
 <script>
 (function(){
   const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -85,7 +88,9 @@ main{padding:12px 12px 90px}
           +(s.phone?'<div><a class="tel" href="tel:'+esc(String(s.phone).replace(/\s/g,''))+'">☎ <bdi dir="ltr">'+esc(s.phone)+'</bdi></a></div>':'')
           +(s.notes?'<div class="note"><bdi>'+esc(s.notes)+'</bdi></div>':'')
           +'<div class="pay '+(s.cash?'cash':'paid')+'">'+(s.cash?'💶 كاش · المبلغ مكتوب على الفاتورة':'✓ مدفوع، لا تاخد مصاري')+'</div>'
-          +(!s.delivered&&r.startedAt?'<div class="acts"><a class="nav" href="'+esc(nav)+'" target="_blank" rel="noopener">🧭 ملاحة</a><button class="deliver" data-deliver="'+esc(s.orderId)+'">✅ تم التسليم</button></div>':'')+'</div>';
+          +(!s.delivered&&r.startedAt?'<div class="acts"><a class="nav" href="'+esc(nav)+'" target="_blank" rel="noopener">🧭 ملاحة</a><button class="deliver" data-deliver="'+esc(s.orderId)+'">✅ تم التسليم</button></div>'
+            +(s.canProof?'<button class="photo" data-proof="'+esc(s.orderId)+'">📷 ما حدا فتح؟ صوّر الطلب عند الباب</button>':''):'')
+          +(s.proof?'<div class="proofok">📷 انحفظت صورة الإثبات</div>':'')+'</div>';
       }).join('');
       return '<section class="route">'+head+action+stops+'</section>';
     }).join('');
@@ -96,7 +101,18 @@ main{padding:12px 12px 90px}
     catch(e){$('#main').innerHTML='<div class="empty">'+esc(e.message==='401'?'سجّل الدخول':'ما في اتصال بالسيرفر')+'</div>'}
     finally{busy=false}
   }
+  // صورة الإثبات: بتتصغّر على الجوال (أقصى 1280px) قبل ما تنبعت
+  let proofFor=null;
+  function shrink(file){return new Promise((ok,bad)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const k=Math.min(1,1280/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);ok(c.toDataURL('image/jpeg',0.72))};img.onerror=()=>bad(Error('الصورة ما انفتحت'));img.src=url})}
+  $('#cam').addEventListener('change',async()=>{
+    const f=$('#cam').files&&$('#cam').files[0];$('#cam').value='';if(!f||!proofFor)return;
+    toast('📤 عم تنبعت الصورة…');
+    try{const image=await shrink(f);await api('POST','/api/driver/proof',{orderId:proofFor,image,...(last||{})});toast('📷 انحفظ الإثبات وانسلّم الطلب ✅');if(navigator.vibrate)navigator.vibrate(80)}
+    catch(err){toast(err.message)}
+    proofFor=null;await load();
+  });
   $('#main').addEventListener('click',async e=>{
+    const pf=e.target.closest('[data-proof]');if(pf){proofFor=pf.dataset.proof;$('#cam').click();return}
     const st=e.target.closest('[data-start]'),dl=e.target.closest('[data-deliver]'),fn=e.target.closest('[data-finish]');
     if(!st&&!dl&&!fn)return;const b=st||dl||fn;b.disabled=true;
     try{
