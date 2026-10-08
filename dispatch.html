@@ -126,7 +126,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       if(!d.tours.length&&!act.length)h+='<div class="tour muted">ما في طلبات إله هلق</div>';
       h+='</section>';
     }
-    if((plan.unplaced||[]).length)h+='<div class="box warn"><h3>طلبات بدون موقع على الخريطة</h3><div class="muted">العنوان ناقص أو غلط، أو لسا عم يندوّر عليه (بياخد لحد دقيقة). صلّح العنوان بالكاشير.</div>'+plan.unplaced.map(u=>'<div>• '+esc(u.id)+'</div>').join('')+'</div>';
+    if((plan.unplaced||[]).length)h+='<div class="box warn"><h3>طلبات بدون موقع على الخريطة</h3><div class="muted">العنوان ناقص أو غلط، أو لسا عم يندوّر عليه (بياخد لحد دقيقة). صلّح العنوان بالكاشير.</div>'+plan.unplaced.map(u=>'<div>• <b>'+esc(u.code||u.id)+'</b> '+esc(u.address||(u.reason==='NO_DRIVERS'?'':'بدون عنوان'))+'</div>').join('')+'</div>';
     if(!(plan.drivers||[]).some(d=>d.tours.length)&&!(plan.active||[]).length&&!(plan.unplaced||[]).length)h+='<div class="box muted">ما في طلبات توصيل مفتوحة.</div>';
     side.innerHTML=h;
   }

@@ -86,7 +86,7 @@ function buildInput(data, now = Date.now()) {
 
   const fc = prep.forecast(data, now); // متى كل طلب رح يجهز فعلياً (متعلّم من المطبخ + الطابور)
   const orders = (data.orders || [])
-    .filter(o => isDelivery(o) && !delivered(o) && !busy.has(String(o.id)))
+    .filter(o => isDelivery(o) && !delivered(o) && !kitchen.isStale(o, now) && !busy.has(String(o.id)))
     .map(o => {
       const p = pointOf(o, cache);
       const kv = kitchen.kitchenView(o, now);
@@ -113,6 +113,8 @@ function planFor(data, now = Date.now()) {
     stops: (r.orderIds || []).map(id => byId.get(String(id))).filter(Boolean).map(o => ({ orderId: o.id, code: kitchen.kitchenView(o, now).displayCode, delivered: delivered(o), address: addressOf(o).replace(/, Deutschland$/, ''), ...(pointOf(o, cache) || {}) })),
   }));
   const positions = Object.entries(data.driverPositions || {}).map(([id, p]) => ({ driverId: id, ...p }));
+  // الطلبات بدون موقع: منعرض رقم الطلب والعنوان، مش الـ id الداخلي
+  result.unplaced = result.unplaced.map(u => { const o = byId.get(String(u.id)); return o ? { ...u, code: kitchen.kitchenView(o, now).displayCode, address: addressOf(o).replace(/, Deutschland$/, '') } : u; });
   return { ...result, shop: input.shop, assumedDrivers: input.assumedDrivers, learning: input.learning, active, positions };
 }
 
@@ -239,7 +241,7 @@ function driverRoutes(data, driverId) {
 function missingAddresses(data) {
   const cache = data.geocodeCache || {}, out = new Set();
   for (const o of data.orders || []) {
-    if (!isDelivery(o) || delivered(o) || pointOf(o, cache)) continue;
+    if (!isDelivery(o) || delivered(o) || kitchen.isStale(o) || pointOf(o, cache)) continue;
     const a = addressOf(o); if (a && !(cache[addressKey(a)] && cache[addressKey(a)].failedAt)) out.add(a);
   }
   return [...out];

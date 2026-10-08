@@ -105,3 +105,12 @@ test('kitchen ticket (receipt core) has no prices or payment', async () => {
   assert.match(text, /KÜCHE/); assert.match(text, /1x Crispy Chicken/); assert.match(text, /\+ Pommes/); assert.match(text, /Extra scharf/);
   assert.ok(!/EUR|€|11\.99|25\.90|BAR|Gesamt/i.test(text), text);
 });
+
+test('forgotten open orders from yesterday do not show in kitchen or dispatch', () => {
+  const old = { ...kasseOrder, id: 'old', createdAt: '2026-10-07T20:00:00Z' };
+  assert.deepEqual(K.listKitchenOrders([old, kasseOrder], NOW).map(o => o.id), ['o1']);
+  const S = require('../dispatch-service.js');
+  const data = { settings: {}, employees: [], orders: [{ ...old, type: 'delivery', delivery: { street: 'X', house: '1', postal: '41747' } }] };
+  assert.deepEqual(S.missingAddresses(data), []);
+  assert.equal(S.buildInput(data, NOW).orders.length, 0);
+});

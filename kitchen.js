@@ -82,8 +82,15 @@ function isOtherStation(o) {
   return /loco/i.test(str(o.brand || o.brandName || o.restaurantName || o.restaurant)) || /^SIDES/i.test(str(o.source || o.platform));
 }
 
+const MAX_AGE_H = 12; // طلب مفتوح أقدم من 12 ساعة = منسي من يوم قبل، مش شغل المطبخ هلق
+function isStale(o, now = Date.now()) {
+  const t = ms(o.acceptedAt || o.createdAt || o.placedAt);
+  return t != null && now - t > MAX_AGE_H * 3600000;
+}
+
 function isKitchenOrder(o, now = Date.now()) {
   if (!o || CLOSED.has(str(o.status).toUpperCase())) return false;
+  if (isStale(o, now)) return false;
   if (isOtherStation(o)) return false;
   if (!Array.isArray(o.cart) || !kitchenItems(o.cart).length) return false;
   if (str(o.kitchenStatus).toUpperCase() === 'PICKED_UP') {
@@ -128,4 +135,4 @@ function applyKitchenStatus(order, next, user, now = new Date().toISOString()) {
   return { from, to };
 }
 
-module.exports = { STATES, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };
+module.exports = { STATES, MAX_AGE_H, isStale, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };
