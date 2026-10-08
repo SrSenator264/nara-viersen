@@ -16,5 +16,5 @@ if not exist "logs" mkdir "logs"
 echo [%date% %time%] Sides-Bridge startet (Server %NARA_BASE_URL%) >> logs\sides.log
 node sides-bridge.mjs >> logs\sides.log 2>&1
 echo [%date% %time%] Bridge beendet - Neustart in 15 Sekunden >> logs\sides.log
-timeout /t 15 /nobreak >nul
+ping -n 16 127.0.0.1 >nul
 goto loop
