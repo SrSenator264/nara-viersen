@@ -33,8 +33,9 @@ test('quote: postal code with spaces, invalid and out of area', () => {
   assert.equal(R.quote(cfg(), { postalCode: '41061', subtotalCents: 5000 }).reason, 'OUT_OF_AREA');
 });
 
-test('quote: Mönchengladbach zone stays closed until configured', () => {
+test('quote: Mönchengladbach 41063 stays closed until the customer fee is set', () => {
   const c = cfg();
+  assert.equal(R.quote(c, { postalCode: '41063', subtotalCents: 5000 }).reason, 'ZONE_NOT_CONFIGURED');
   assert.equal(R.quote(c, { postalCode: '41061', subtotalCents: 5000 }).reason, 'OUT_OF_AREA');
   const next = R.updateConfig(c, { zones: c.zones.map(z => z.id === 'moenchengladbach-start' ? { ...z, postalCodes: ['41061'], customerFeeCents: 400, needsSetup: false } : z) });
   const q = R.quote(next, { postalCode: '41061', subtotalCents: 2999 });
@@ -94,7 +95,7 @@ test('km pay rule: tier boundaries', () => {
   const c = R.updateConfig(cfg(), { payRule: 'km' });
   const at = km => R.standardPay(c, { km }).cents;
   assert.equal(at(0.4), 100); assert.equal(at(5), 100); assert.equal(at(5.01), 150);
-  assert.equal(at(7), 150); assert.equal(at(7.5), 200); assert.equal(at(8), 200);
+  assert.equal(at(7), 150); assert.equal(at(7.5), 300); assert.equal(at(8), 300);
   assert.equal(at(9.9), 300); assert.equal(at(10), 300);
   assert.equal(R.standardPay(c, { km: 10.01 }).reason, 'OVER_MAX_KM');
   assert.equal(R.standardPay(c, {}).reason, 'KM_MISSING');

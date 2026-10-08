@@ -24,7 +24,6 @@
       kmTiers: [
         { upToKm: 5, cents: 100 },
         { upToKm: 7, cents: 150 },
-        { upToKm: 8, cents: 200, unconfirmed: true }, // الشريحة غير مؤكدة بعد
         { upToKm: 10, cents: 300 },
       ],
       zones: [
@@ -32,8 +31,8 @@
         { id: 'viersen-core', name: 'Viersen 41747 / 41748', postalCodes: ['41747', '41748'], customerFeeCents: 100, minOrderCents: 1500, driverPayCents: 100 },
         { id: 'viersen-41749', name: 'Viersen 41749', postalCodes: ['41749'], customerFeeCents: 200, minOrderCents: 2000, driverPayCents: 200 },
         { id: 'viersen-41751', name: 'Viersen 41751', postalCodes: ['41751'], customerFeeCents: 300, minOrderCents: 2500, driverPayCents: 300 },
-        // منطقة واحدة من بداية مونشنغلادباخ. الـPLZ ورسم الزبون لسا ما انكتبوا، فما بتشتغل لحد ما تنضبط.
-        { id: 'moenchengladbach-start', name: 'Mönchengladbach (Anfang)', postalCodes: [], customerFeeCents: null, minOrderCents: 3000, driverPayCents: 400, needsSetup: true },
+        // منطقة واحدة من بداية مونشنغلادباخ. الـPLZ = 41063؛ رسم الزبون لسا ما انكتب، فما بتشتغل لحد ما تنضبط.
+        { id: 'moenchengladbach-start', name: 'Mönchengladbach (Anfang)', postalCodes: ['41063'], customerFeeCents: null, minOrderCents: 3000, driverPayCents: 400, needsSetup: true },
       ],
     };
   }
