@@ -9,5 +9,7 @@ if errorlevel 1 (
   start "NARA Server (nicht schliessen)" /min cmd /c "node server.js >> logs\server.log 2>&1"
   timeout /t 3 /nobreak >nul
 )
+tasklist /v /fi "WINDOWTITLE eq NARA Lieferando*" 2>nul | find /i "cmd.exe" >nul
+if errorlevel 1 start "NARA Lieferando (nicht schliessen)" /min cmd /c "%~dp0NARA-Lieferando.cmd"
 start "" "http://localhost:%PORT%/kasse.html"
 exit /b 0

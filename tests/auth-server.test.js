@@ -135,3 +135,18 @@ test('two devices: an older version of an order cannot overwrite a newer one, se
   const again = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', order: { ...base, rev: 2, kitchenStatus: 'NEW', cart: [{ ...base.cart[0], quantity: 3 }] } }, S.cashier);
   assert.equal(again.status, 200); assert.equal(again.json.order.kitchenStatus, 'READY');
 });
+
+test('Lieferando bridge: heartbeat/alert from this PC, status for cashier, old Chrome extension rejected', async () => {
+  assert.equal((await call('GET', '/api/platform-orders/status')).status, 401);
+  let r = await call('GET', '/api/platform-orders/status', null, S.cashier);
+  assert.equal(r.status, 200); assert.equal(r.json.platforms[0].state, 'down');
+  assert.equal((await call('POST', '/api/platform-orders/heartbeat', { source: 'LIEFERANDO', bridge: 'playwright', lastOkAt: new Date().toISOString(), loggedOut: false })).status, 200);
+  r = await call('GET', '/api/platform-orders/status', null, S.kitchen);
+  assert.equal(r.json.platforms[0].state, 'ok');
+  assert.equal((await call('POST', '/api/platform-orders/alert', { source: 'LIEFERANDO', type: 'SESSION_EXPIRED' })).status, 200);
+  r = await call('GET', '/api/platform-orders/status', null, S.cashier);
+  assert.equal(r.json.platforms[0].state, 'login');
+  assert.ok([401, 403].includes((await call('GET', '/api/platform-orders/status', null, S.driver)).status));
+  r = await call('POST', '/api/platform-orders/import', { source: 'LIEFERANDO', order: { externalOrderCode: 'ABC', rawText: 'x', cart: [{ name: 'Lieferando order', quantity: 1, unitCents: 1000 }] } });
+  assert.equal(r.status, 422); assert.equal(r.json.code, 'LEGACY_BRIDGE');
+});

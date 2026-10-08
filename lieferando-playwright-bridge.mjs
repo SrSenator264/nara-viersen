@@ -6,7 +6,7 @@
 // اختبار:    node lieferando-playwright-bridge.mjs --selftest   (بدون متصفح)
 //
 // متغيرات البيئة (كلها اختيارية):
-//   NARA_BASE_URL, NARA_TOKEN, NARA_PLAYWRIGHT_PROFILE, NARA_DATA_DIR, NARA_REFRESH_MS
+//   PORT (افتراضي 4185), NARA_BASE_URL, NARA_SERVICE_KEY, NARA_TOKEN, NARA_PLAYWRIGHT_PROFILE, NARA_DATA_DIR, NARA_REFRESH_MS
 //   NARA_MONEY_UNIT=auto|euro|cents      NARA_DURATION_UNIT=auto|min|sec
 //   NARA_RECEIPT_LANG=en|de  NARA_RECEIPT_WIDTH=42  NARA_RECEIPT_HEADER="..."
 //   NARA_PRINTER_HOST=192.168.x.x  NARA_PRINTER_PORT=9100  NARA_PRINTER_CODEPAGE=19
@@ -19,7 +19,9 @@ import { renderLines, toText, toEscPos, printTcp } from './nara-receipt.mjs';
 
 const env = (k, d) => process.env[k] ?? d;
 const CFG = {
-  base: env('NARA_BASE_URL', 'http://localhost:4174').replace(/\/$/, ''),
+  // 127.0.0.1 مش localhost: السيرفر بيسمع على IPv4 بس، وlocalhost ممكن يروح على ::1
+  base: env('NARA_BASE_URL', 'http://127.0.0.1:' + env('PORT', '4185')).replace(/\/$/, ''),
+  serviceKey: env('NARA_SERVICE_KEY', ''),
   token: env('NARA_TOKEN', ''),
   profile: env('NARA_PLAYWRIGHT_PROFILE', 'D:/NARA-Playwright/pw-profile'),
   dataDir: env('NARA_DATA_DIR', 'D:/NARA-Playwright/data'),
@@ -287,7 +289,7 @@ async function tryPost(pathname, body, { quiet = false } = {}) {
   try {
     const r = await fetch(CFG.base + pathname, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', ...(CFG.token ? { authorization: `Bearer ${CFG.token}` } : {}) },
+      headers: { 'content-type': 'application/json', ...(CFG.token ? { authorization: `Bearer ${CFG.token}` } : {}), ...(CFG.serviceKey ? { 'x-nara-service-key': CFG.serviceKey } : {}) },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(8000),
     });
@@ -459,14 +461,16 @@ page.on('websocket', ws => {
 await page.goto('https://live-orders.takeaway.com/orders', { waitUntil: 'domcontentloaded' });
 setInterval(refresh, CFG.refreshMs);
 setInterval(() => flushOutbox().catch(e => console.error('[NARA] outbox:', e.message)), 30000);
-setInterval(async () => {
+async function beat() {
   const url = page.url();
   const loggedOut = /login|signin|sign-in|auth|account\./i.test(new URL(url).hostname + new URL(url).pathname);
   if (loggedOut) await alertServer('SESSION_EXPIRED', { url });
   const silentMs = Date.now() - (lastOkAt || Date.now());
   if (lastOkAt && silentMs > Math.max(CFG.refreshMs * 4, 120000)) await alertServer('NO_DATA', { silentSeconds: Math.round(silentMs / 1000) });
   await tryPost('/api/platform-orders/heartbeat', { source: 'LIEFERANDO', bridge: 'playwright', lastOkAt: lastOkAt ? new Date(lastOkAt).toISOString() : null, loggedOut }, { quiet: true });
-}, 60000);
+}
+setInterval(() => beat().catch(e => console.error('[NARA] heartbeat:', e.message)), 60000);
+beat().catch(() => {});
 
 log(`Playwright bridge ready. Profile: ${CFG.profile}`);
 log(`Server: ${CFG.base} | printer: ${CFG.printerHost || 'off'} | receipt: ${CFG.lang}/${CFG.width}`);
