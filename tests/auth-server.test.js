@@ -76,10 +76,11 @@ test('role matrix', async () => {
 });
 
 test('pay data never reaches non-managers', async () => {
+  const pay = await call('POST', '/api/delivery/driver-pay', { employeeId: S.driverId, zoneCents: { 'viersen-core': 777 }, factor: 1.3 }, S.owner); assert.equal(pay.status, 200);
   const cfg = await call('GET', '/api/delivery/config', null, S.owner); assert.equal(cfg.status, 200);
   for (const k of ['cashier', 'kitchen', 'driver']) for (const u of ['/api/kasse-state', '/api/kasse/open-orders', '/api/delivery/zones']) {
     const r = await call('GET', u, null, S[k]);
-    assert.ok(!/driverPay|hourlyRate|payRecord|monthlySalary/i.test(r.text), `${k} ${u} leaks pay data`);
+    assert.ok(!/driverPay|hourlyRate|payRecord|monthlySalary|"zoneCents"|777/i.test(r.text), `${k} ${u} leaks pay data`);
   }
 });
 

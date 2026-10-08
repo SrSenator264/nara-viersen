@@ -72,6 +72,7 @@ const RULES = [
   ['GET', /^\/api\/kasse\/open-orders$/, KITCH],
   ['*', /^\/api\/customers(\/sync)?$/, CASH],
   ['GET', /^\/api\/cashier\/employee-lookup$/, CASH],
+  ['*', /^\/api\/kitchen\/orders$/, KITCH],
   ['POST', /^\/api\/live-orders\/stage$/, KITCH],
   ['POST', /^\/api\/live-orders\/archive-day$/, CASH],
   ['POST', /^\/api\/tse-demo\/receipt$/, CASH],
@@ -117,7 +118,7 @@ function staticAllowed(rel) {
 const PAGE_ROLES = {
   'kasse.html': CASH, 'live-orders.html': KITCH, 'kitchen.html': KITCH,
   'driver-app-v2.html': STAFF, 'driver-app.html': STAFF, 'delivery.html': STAFF, 'delivery-print.html': STAFF,
-  'staff.html': MANAGERS, 'admin.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'dashboard.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
+  'staff.html': MANAGERS, 'team.html': MANAGERS, 'admin.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'dashboard.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
   'accounting.html': ACCT, 'banking.html': ACCT, 'ledger.html': ACCT, 'reports.html': ACCT, 'sales.html': ACCT, 'kasse-settlement.html': ACCT,
 };
 
