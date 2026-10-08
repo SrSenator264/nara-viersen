@@ -34,3 +34,6 @@
 .nara-rc .rc-driver{margin:6px 0;padding:6px 9px;border:2px solid #000;border-radius:7px;font-size:14px}
 .nara-rc .rc-qr{display:flex;justify-content:center;margin:10px 0 4px}.nara-rc .rc-qr svg{width:34mm;height:34mm}
 .nara-rc .rc-nb{margin-top:2px;font-weight:700}.nara-rc .rc-thanks{margin-top:6px;text-align:center;font-size:14px;font-weight:800}
+
+/* تذكرة المطبخ: الأصناف أكبر، بدون أسعار */
+.nara-rc-kitchen .rc-kitem{font-size:19px;grid-template-columns:auto 1fr}.nara-rc-kitchen .rc-kopt{font-size:15px;font-weight:700}.nara-rc-kitchen .rc-inote{font-size:15px}.nara-rc-kitchen .rc-name{font-size:15px}

@@ -1,5 +1,5 @@
 // kasse-receipt.js — فاتورة موحّدة للكاشير: نفس قالب nara-receipt-core (شكل ورقة Lieferando) لكل المصادر.
-// بيحوّل طلب الكاشير للشكل الموحّد ثم بيبني HTML للطباعة 80mm. المطبخ لسا بقالبه القديم.
+// بيحوّل طلب الكاشير للشكل الموحّد ثم بيبني HTML للطباعة 80mm. تذكرة المطبخ بنفس الشكل بدون أي مبلغ (kitchenHtml).
 (function(){
   const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const FEE='DELIVERY_FEE';
@@ -102,6 +102,37 @@
     rows.push(qr+'<div class="rc-small rc-c">'+esc(t.scan)+'</div><div class="rc-small rc-c rc-nb">'+esc(t.notBill)+'</div><div class="rc-thanks">'+esc(t.thanks)+'</div>');
     return '<div class="nara-rc">'+rows.join('')+'</div>';
   }
+
+  // ───────── تذكرة المطبخ: نفس الشكل، بدون أسعار ولا دفع ولا عنوان ─────────
+  const KT={de:{kitchen:'KÜCHE',delivery:'LIEFERUNG',pickup:'ABHOLUNG',dine:'VOR ORT',table:'TISCH',since:'Bestellt',ready:'Fertig bis',note:'Hinweis'},
+    en:{kitchen:'KITCHEN',delivery:'DELIVERY',pickup:'PICKUP',dine:'DINE-IN',table:'TABLE',since:'Ordered',ready:'Ready by',note:'Note'}};
+  // يقبل طلب كاشير/منصة أو شكل شاشة المطبخ ({items,...}) ويرجّع شكل المطبخ
+  function toKitchen(o){
+    if(Array.isArray(o.items))return o;
+    const d=o.delivery||{},r=toReceiptOrder(o,'kitchen'),created=o.acceptedAt||o.createdAt||o.placedAt||new Date().toISOString();
+    const prep=Number(o.preparationMinutes||d.preparationMinutes||o.prepMinutes)||20,start=Date.parse(o.kitchenStartAt||created);
+    return {displayCode:r.displayCode,source:r.platform,type:o.type==='pickup'?'pickup':o.type==='local'?'local':'delivery',table:o.table||'',customerName:d.name||o.customerName||'',
+      notes:[d.notes,d.extra,o.remarks].filter(Boolean).join(' · '),createdAt:created,readyBy:isNaN(start)?'':new Date(start+prep*60000).toISOString(),
+      items:r.cart.map(i=>({name:i.name,quantity:i.quantity,options:i.options,note:i.notes}))};
+  }
+  function kitchenHtml(o){
+    const k=toKitchen(o),t=KT[lang()]||KT.de;
+    const type=k.type==='pickup'?t.pickup:k.type==='local'?(t.dine+(k.table?' · '+t.table+' '+esc(k.table):'')):t.delivery;
+    const rows=['<div class="rc-brand">'+t.kitchen+'</div>','<div class="rc-code">'+esc(k.displayCode)+'</div>'];
+    if(k.source&&k.source!=='NARA')rows.push('<div class="rc-small rc-c"><b>'+esc(String(k.source).replace('_',' '))+'</b></div>');
+    rows.push('<div class="rc-type">'+esc(type)+'</div>');
+    rows.push('<div class="rc-c rc-small">'+esc(t.since)+' '+esc(hhmm(k.createdAt))+'</div>');
+    if(hhmm(k.readyBy))rows.push('<div class="rc-c rc-when">'+esc(t.ready)+' '+esc(hhmm(k.readyBy))+'</div>');
+    if(k.customerName)rows.push('<div class="rc-c rc-name">'+esc(k.customerName)+'</div>');
+    if(k.notes)rows.push('<div class="rc-note"><b>'+esc(t.note)+':</b> '+esc(k.notes)+'</div>');
+    rows.push('<div class="rc-items">'+k.items.map(i=>{
+      let h='<div class="rc-item rc-kitem"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span></div>';
+      (i.options||[]).forEach(op=>{h+='<div class="rc-opt rc-kopt">+ '+(op.quantity>1?esc(op.quantity)+'× ':'')+esc(op.name)+'</div>'});
+      if(i.note)h+='<div class="rc-inote">! '+esc(i.note)+'</div>';
+      return h}).join('')+'</div>');
+    return '<div class="nara-rc nara-rc-kitchen">'+rows.join('')+'</div>';
+  }
+  api.toKitchen=toKitchen;api.kitchenHtml=kitchenHtml;
   api.toReceiptOrder=toReceiptOrder;api.html=html;
   window.NARA_RECEIPT=api;
   import('/nara-receipt-core.mjs').then(m=>{api.core=m;api.ready=true}).catch(e=>console.warn('[NARA][RECEIPT_CORE_LOAD_FAILED]',e.message));

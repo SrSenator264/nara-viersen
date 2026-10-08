@@ -1,1 +1,182 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NARA · شاشة المطبخ</title><style>body{margin:0;background:#eef2f6;font-family:Arial;color:#14213d}.bar{padding:18px;background:#14213d;color:#fff;display:flex;justify-content:space-between;align-items:center}.bar h1{margin:0;font-size:24px}.muted{color:#697586}.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px;padding:16px}.order{background:#fff;border-radius:16px;padding:16px;box-shadow:0 3px 14px #0001;border-top:6px solid #95a4b8}.order.start{border-top-color:#ef4444}.order.soon{border-top-color:#f59e0b}.order.ready{border-top-color:#16a34a}.order h2{margin:0 0 8px}.items{border-top:1px solid #e5e7eb;padding-top:8px}.item{padding:5px 0}.meta{font-size:14px;line-height:1.7}.actions{display:flex;gap:8px;margin-top:12px}.actions button{flex:1;padding:11px;border:0;border-radius:9px;background:#c9361e;color:#fff;font-weight:bold}.actions button.secondary{background:#e5e7eb;color:#14213d}.empty{padding:40px;text-align:center}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2f6;font-size:13px}</style></head><body><header class="bar"><h1>NARA · شاشة المطبخ</h1><span id="clock"></span></header><main><p id="status" class="muted" style="padding:0 16px"></p><section id="board" class="board"></section></main><script>(async()=>{const board=document.querySelector('#board'),status=document.querySelector('#status'),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const money=c=>`${(Number(c||0)/100).toFixed(2)} €`;const priority=o=>{const age=Math.max(0,(Date.now()-Date.parse(o.createdAt||Date.now()))/60000),left=Math.max(0,Number(o.preparationMinutes||20)-age),eta=Number(o.delivery?.driverEtaMinutes||10);return left<=eta?'start':left<=eta+10?'soon':''};async function setStatus(id,kitchenStatus){const r=await fetch('/api/kitchen/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:id,kitchenStatus})});if(!r.ok){const j=await r.json();throw Error(j.error||'تعذر التحديث')}await load()}async function load(){try{const r=await fetch('/api/kitchen/orders',{cache:'no-store'}),j=await r.json();if(!r.ok)throw Error();const orders=j.orders||[];orders.sort((a,b)=>({start:0,soon:1,'':2}[priority(a)]-({start:0,soon:1,'':2}[priority(b)])));board.innerHTML=orders.length?orders.map(o=>{const p=priority(o),d=o.delivery||{};return `<article class="order ${p} ${o.kitchenStatus==='READY'?'ready':''}"><h2>${esc(o.displayCode)} <span class="badge">${esc(o.kitchenStatus)}</span></h2><div class="meta">${esc(o.type||'طلب')} · ${esc(d.name||'بدون اسم')}<br>${esc(d.address||d.city||'بدون عنوان')}<br>التحضير: ${esc(o.preparationMinutes||20)} دقيقة · ${money((o.cart||[]).reduce((s,x)=>s+Number(x.unitCents||0)*Number(x.quantity||0),0))}</div><div class="items">${(o.cart||[]).map(x=>`<div class="item">${esc(x.name||'صنف')} × ${Number(x.quantity||1)}</div>`).join('')}</div><div class="actions">${o.kitchenStatus==='NEW'?`<button data-id="${esc(o.id)}" data-state="PREPARING">ابدأ التحضير</button>`:''}${o.kitchenStatus==='PREPARING'?`<button data-id="${esc(o.id)}" data-state="READY">جاهز</button>`:''}${o.kitchenStatus==='READY'?`<button class="secondary" data-id="${esc(o.id)}" data-state="PICKED_UP">تم الاستلام</button>`:''}</div></article>`}).join(''):'<div class="empty">لا توجد طلبات حالياً</div>';status.textContent=`آخر تحديث: ${new Date().toLocaleTimeString('ar-DE')} · الطلبات: ${orders.length}`}catch(e){status.textContent='تعذر الاتصال بالسيرفر؛ تأكد أنه يعمل.'}}board.onclick=async e=>{const b=e.target.closest('button[data-id]');if(!b)return;try{await setStatus(b.dataset.id,b.dataset.state)}catch(err){status.textContent=err.message}};setInterval(()=>document.querySelector('#clock').textContent=new Date().toLocaleTimeString('ar-DE'),1000);await load();setInterval(load,10000)})()</script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NARA · المطبخ</title>
+<link rel="stylesheet" href="/kasse-print-lifecycle.css">
+<style>
+:root{--bg:#101418;--panel:#181e24;--card:#fff;--ink:#14181c;--muted:#6b7580;--line:#e3e7eb;--new:#2563eb;--prep:#f59e0b;--ready:#16a34a;--late:#dc2626;--soon:#f59e0b}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:#e8edf2;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#0b0e11;border-bottom:1px solid #222a31;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:20px;font-weight:800;letter-spacing:.02em}
+header .sp{flex:1}
+#clock{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.hbtn{border:1px solid #2b343c;background:#161c22;color:#e8edf2;border-radius:10px;padding:9px 12px;font-size:15px;font-weight:700;cursor:pointer}
+.hbtn[aria-pressed="true"]{background:#e8edf2;color:#101418}
+#status{padding:6px 16px;font-size:13px;color:#93a0ad;min-height:24px}
+#status.err{color:#fca5a5}
+main{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0 12px 72px;align-items:start}
+.col{background:var(--panel);border-radius:14px;min-height:60vh;display:flex;flex-direction:column}
+.col h2{margin:0;padding:12px 14px;font-size:17px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid}
+.col[data-s="NEW"] h2{border-color:var(--new)}.col[data-s="PREPARING"] h2{border-color:var(--prep)}.col[data-s="READY"] h2{border-color:var(--ready)}
+.count{background:#0b0e11;border-radius:999px;padding:2px 10px;font-size:15px}
+.list{display:flex;flex-direction:column;gap:10px;padding:10px}
+.empty{color:#5d6873;text-align:center;padding:30px 0;font-size:15px}
+.card{background:var(--card);color:var(--ink);border-radius:12px;overflow:hidden;border-inline-start:8px solid var(--line)}
+.card.soon{border-inline-start-color:var(--soon)}.card.late{border-inline-start-color:var(--late)}
+.card.fresh{animation:flash 1s ease-in-out 3}
+@keyframes flash{50%{box-shadow:0 0 0 6px #60a5fa}}
+.top{display:flex;align-items:center;gap:8px;padding:10px 12px 6px}
+.code{font-size:24px;font-weight:900;letter-spacing:.02em;direction:ltr}
+.src{font-size:12px;font-weight:800;padding:3px 8px;border-radius:6px;background:#eef1f4;color:#334}
+.src.LIEFERANDO{background:#ff8000;color:#fff}.src.UBER_EATS{background:#06c167;color:#fff}.src.WOLT{background:#00c2e8;color:#fff}.src.LANCH{background:#222;color:#fff}
+.type{font-size:13px;font-weight:700;color:var(--muted)}
+.timer{margin-inline-start:auto;text-align:center;line-height:1.05}
+.timer b{display:block;font-size:22px;font-variant-numeric:tabular-nums;direction:ltr}
+.timer small{font-size:11px;color:var(--muted)}
+.card.late .timer b{color:var(--late)}.card.soon .timer b{color:#b45309}
+.who{padding:0 12px;font-size:13px;color:var(--muted)}
+.note{margin:6px 12px 0;padding:6px 9px;background:#fff7d6;border:1px solid #f3d36b;border-radius:8px;font-size:15px;font-weight:700}
+.items{padding:6px 12px 8px}
+.it{padding:6px 0;border-top:1px dashed var(--line)}
+.it:first-child{border-top:0}
+.it .n{font-size:19px;font-weight:800;direction:ltr;text-align:left}
+.it .q{display:inline-block;min-width:2.1em;color:var(--new)}
+.it .o{font-size:15px;color:#334;direction:ltr;text-align:left;padding-left:2.1em}
+.it .x{font-size:15px;font-weight:800;color:var(--late);direction:ltr;text-align:left;padding-left:2.1em}
+.acts{display:flex;gap:8px;padding:10px 12px 12px;border-top:1px solid var(--line)}
+.go{flex:1;min-height:56px;border:0;border-radius:10px;font-size:19px;font-weight:900;color:#fff;cursor:pointer;touch-action:manipulation}
+.go:active{transform:scale(.98)}
+.go.NEW{background:var(--new)}.go.PREPARING{background:#d97706}.go.READY{background:var(--ready)}
+.sm{min-width:56px;min-height:56px;border:1px solid var(--line);background:#f4f6f8;border-radius:10px;font-size:20px;cursor:pointer}
+button:disabled{opacity:.5}
+@media (max-width:900px){main{grid-template-columns:1fr}.col{min-height:auto}}
+@media print{header,#status,main{display:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">المطبخ</h1>
+  <span class="sp"></span>
+  <button class="hbtn" id="sound" aria-pressed="true">🔔</button>
+  <button class="hbtn" id="autoprint" aria-pressed="false">🖨️ تلقائي</button>
+  <button class="hbtn" id="lang">DE</button>
+  <span id="clock"></span>
+</header>
+<div id="status"></div>
+<main>
+  <section class="col" data-s="NEW"><h2><span data-t="colNew"></span><span class="count">0</span></h2><div class="list"></div></section>
+  <section class="col" data-s="PREPARING"><h2><span data-t="colPrep"></span><span class="count">0</span></h2><div class="list"></div></section>
+  <section class="col" data-s="READY"><h2><span data-t="colReady"></span><span class="count">0</span></h2><div class="list"></div></section>
+</main>
+<script src="/kasse-receipt.js"></script>
+<script>
+(function(){
+  const T={
+    ar:{title:'المطبخ',colNew:'جديد',colPrep:'قيد التحضير',colReady:'جاهز',start:'ابدأ',ready:'جاهز ✓',picked:'تم الاستلام',back:'رجوع',print:'طباعة',
+      delivery:'توصيل',pickup:'استلام',local:'محلي',table:'طاولة',min:'دقيقة',late:'متأخر',left:'باقي',empty:'لا يوجد',updated:'آخر تحديث',orders:'طلبات',
+      offline:'تعذر الاتصال بالسيرفر — تأكد أنه شغّال',login:'سجّل الدخول أولاً',auto:'تلقائي',note:'ملاحظة'},
+    de:{title:'Küche',colNew:'Neu',colPrep:'In Zubereitung',colReady:'Fertig',start:'Starten',ready:'Fertig ✓',picked:'Abgeholt',back:'Zurück',print:'Drucken',
+      delivery:'Lieferung',pickup:'Abholung',local:'Vor Ort',table:'Tisch',min:'Min',late:'zu spät',left:'noch',empty:'Keine',updated:'Aktualisiert',orders:'Bestellungen',
+      offline:'Keine Verbindung zum Server',login:'Bitte zuerst anmelden',auto:'Auto',note:'Hinweis'}
+  };
+  const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  let lang=store.get('nara-kitchen-lang','ar'),sound=store.get('nara-kitchen-sound','1')==='1',autoPrint=store.get('nara-kitchen-autoprint','0')==='1';
+  const t=k=>(T[lang]||T.ar)[k]||k;
+  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const $=s=>document.querySelector(s);
+  const NEXT={NEW:'PREPARING',PREPARING:'READY',READY:'PICKED_UP'},PREV={PREPARING:'NEW',READY:'PREPARING'};
+  const BTN={NEW:'start',PREPARING:'ready',READY:'picked'};
+  let orders=[],known=null,skew=0,busy=false;
+
+  function applyLang(){
+    document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+    $('#title').textContent=t('title');$('#lang').textContent=lang==='ar'?'DE':'ع';
+    $('#autoprint').textContent='🖨️ '+t('auto');
+    document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
+  }
+  function beep(){
+    if(!sound)return;
+    try{const a=new (window.AudioContext||window.webkitAudioContext)();[0,0.25,0.5].forEach(d=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;o.connect(g);g.connect(a.destination);g.gain.setValueAtTime(0.25,a.currentTime+d);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d+0.2);o.start(a.currentTime+d);o.stop(a.currentTime+d+0.22)})}catch(e){}
+  }
+  function printTicket(o){
+    if(!window.NARA_RECEIPT||!window.NARA_RECEIPT.kitchenHtml)return;
+    let sheet=document.getElementById('nara-print-sheet');
+    if(!sheet){sheet=document.createElement('section');sheet.id='nara-print-sheet';document.body.appendChild(sheet)}
+    sheet.innerHTML=window.NARA_RECEIPT.kitchenHtml(o);window.print();setTimeout(()=>sheet.remove(),500);
+  }
+  function clockText(){const d=new Date(Date.now()+skew);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+  function timing(o){
+    const now=Date.now()+skew,age=Math.max(0,Math.floor((now-Date.parse(o.createdAt))/60000)),left=Math.round((Date.parse(o.readyBy)-now)/60000);
+    let cls='';if(o.kitchenStatus!=='READY'){if(left<0)cls='late';else if(left<=5)cls='soon'}
+    return {age,left,cls};
+  }
+  function card(o,fresh){
+    const tm=timing(o);
+    const type=o.type==='local'?t('local')+(o.table?' · '+t('table')+' '+esc(o.table):''):t(o.type);
+    const timer=o.kitchenStatus==='READY'?'<b>'+tm.age+'</b><small>'+t('min')+'</small>'
+      :tm.left<0?'<b>+'+(-tm.left)+'</b><small>'+t('late')+'</small>':'<b>'+tm.left+'</b><small>'+t('left')+' '+t('min')+'</small>';
+    const items=o.items.map(i=>'<div class="it"><div class="n"><span class="q">'+esc(i.quantity)+'×</span>'+esc(i.name)+'</div>'
+      +(i.options||[]).map(x=>'<div class="o">+ '+(x.quantity>1?esc(x.quantity)+'× ':'')+esc(x.name)+'</div>').join('')
+      +(i.note?'<div class="x">! '+esc(i.note)+'</div>':'')+'</div>').join('');
+    const next=NEXT[o.kitchenStatus],prev=PREV[o.kitchenStatus];
+    return '<article class="card '+tm.cls+(fresh?' fresh':'')+'" data-id="'+esc(o.id)+'">'
+      +'<div class="top"><span class="code">'+esc(o.displayCode)+'</span>'+(o.source!=='NARA'?'<span class="src '+esc(o.source)+'">'+esc(o.source.replace('_',' '))+'</span>':'')
+      +'<span class="type">'+type+'</span><span class="timer">'+timer+'</span></div>'
+      +(o.customerName?'<div class="who"><bdi>'+esc(o.customerName)+'</bdi></div>':'')
+      +(o.notes?'<div class="note">'+esc(t('note'))+': <bdi>'+esc(o.notes)+'</bdi></div>':'')
+      +'<div class="items">'+items+'</div>'
+      +'<div class="acts">'+(prev?'<button class="sm" data-act="set" data-to="'+prev+'" title="'+t('back')+'">↩</button>':'')
+      +'<button class="sm" data-act="print" title="'+t('print')+'">🖨️</button>'
+      +(next?'<button class="go '+o.kitchenStatus+'" data-act="set" data-to="'+next+'">'+t(BTN[o.kitchenStatus])+'</button>':'')+'</div></article>';
+  }
+  function render(freshIds){
+    for(const s of ['NEW','PREPARING','READY']){
+      const col=document.querySelector('.col[data-s="'+s+'"]'),list=orders.filter(o=>o.kitchenStatus===s);
+      col.querySelector('.count').textContent=list.length;
+      col.querySelector('.list').innerHTML=list.length?list.map(o=>card(o,freshIds.has(o.id))).join(''):'<div class="empty">'+t('empty')+'</div>';
+    }
+  }
+  function setStatus(msg,err){const s=$('#status');s.textContent=msg;s.className=err?'err':''}
+  async function load(){
+    try{
+      const r=await fetch('/api/kitchen/orders',{cache:'no-store'});
+      if(r.status===401||r.status===403){setStatus(t('login'),true);return}
+      const j=await r.json();if(!r.ok)throw Error(j.error||r.status);
+      if(j.serverTime)skew=Date.parse(j.serverTime)-Date.now();
+      orders=(j.orders||[]).filter(o=>o.kitchenStatus!=='PICKED_UP');
+      const fresh=new Set();
+      if(known){for(const o of orders)if(!known.has(o.id)&&o.kitchenStatus==='NEW')fresh.add(o.id)}
+      known=new Set(orders.map(o=>o.id));
+      if(fresh.size){beep();if(autoPrint)orders.filter(o=>fresh.has(o.id)).forEach(printTicket)}
+      render(fresh);
+      setStatus(t('updated')+' '+clockText()+' · '+orders.length+' '+t('orders'));
+    }catch(e){setStatus(t('offline'),true)}
+  }
+  async function setState(id,to,btn){
+    if(busy)return;busy=true;btn&&(btn.disabled=true);
+    try{
+      const r=await fetch('/api/kitchen/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:id,kitchenStatus:to})});
+      const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||r.status);
+    }catch(e){setStatus(e.message,true)}
+    finally{busy=false;await load()}
+  }
+  document.querySelector('main').addEventListener('click',e=>{
+    const b=e.target.closest('button[data-act]');if(!b)return;
+    const id=b.closest('.card').dataset.id,o=orders.find(x=>String(x.id)===id);if(!o)return;
+    if(b.dataset.act==='print')printTicket(o);else setState(o.id,b.dataset.to,b);
+  });
+  $('#sound').onclick=()=>{sound=!sound;store.set('nara-kitchen-sound',sound?'1':'0');$('#sound').setAttribute('aria-pressed',sound);$('#sound').textContent=sound?'🔔':'🔕';if(sound)beep()};
+  $('#autoprint').onclick=()=>{autoPrint=!autoPrint;store.set('nara-kitchen-autoprint',autoPrint?'1':'0');$('#autoprint').setAttribute('aria-pressed',autoPrint)};
+  $('#lang').onclick=()=>{lang=lang==='ar'?'de':'ar';store.set('nara-kitchen-lang',lang);applyLang();render(new Set())};
+  $('#sound').setAttribute('aria-pressed',sound);$('#sound').textContent=sound?'🔔':'🔕';$('#autoprint').setAttribute('aria-pressed',autoPrint);
+  applyLang();
+  setInterval(()=>{$('#clock').textContent=clockText()},1000);$('#clock').textContent=clockText();
+  setInterval(()=>{if(orders.length)render(new Set())},30000);
+  load();setInterval(load,5000);
+})();
+</script>
+</body>
+</html>

@@ -21,6 +21,7 @@ const TXT = {
     verify: '!! CHECK ORDER IN PLATFORM APP !!',
     driver: 'Driver', round: 'Round', pickupAt: 'Pickup', etaAt: 'ETA',
     notBill: 'This is not a bill', scan: "Scan the QR code to open the order",
+    kitchen: 'KITCHEN', readyBy: 'Ready by', since: 'Ordered',
   },
   de: {
     delivery: 'Lieferung', pickup: 'Abholung', confirmed: 'Bestätigte Zeit', scheduled: 'Geplante Zeit', asap: 'So bald wie möglich',
@@ -33,6 +34,7 @@ const TXT = {
     verify: '!! BESTELLUNG IN PLATTFORM PRÜFEN !!',
     driver: 'Fahrer', round: 'Tour', pickupAt: 'Abholung', etaAt: 'Ankunft',
     notBill: 'Das ist keine Rechnung', scan: 'QR-Code scannen, um die Bestellung zu öffnen',
+    kitchen: 'KÜCHE', readyBy: 'Fertig bis', since: 'Bestellt',
   },
 };
 
@@ -203,6 +205,40 @@ export function renderLines(o, opt = {}) {
   add(t.notBill, { align: 'center' });
   L.push({ text: '', qr: `NARA|${o.platform || ''}|${o.displayCode || o.externalOrderCode}`, align: 'center' });
   for (const s of wrap(t.scan, W)) add(s, { align: 'center' });
+  sep();
+  return L;
+}
+
+// تذكرة المطبخ: نفس ترتيب الفاتورة الموحّدة لكن بدون أي مبلغ أو دفع أو عنوان.
+// الأصناف بخط كبير، والخيارات والملاحظات واضحة.
+export function renderKitchenLines(o, opt = {}) {
+  const W = opt.width || 42;
+  const t = TXT[opt.lang] || TXT.de;
+  const L = [];
+  const add = (text, st = {}) => L.push({ text: String(text), ...st });
+  const big = (text, st = {}) => { for (const s of wrap(text, Math.floor(W / 2))) add(s, { size: 2, ...st }); };
+  const sep = () => add('-'.repeat(W));
+
+  big(t.kitchen, { align: 'center', bold: true });
+  big(o.displayCode || o.externalOrderCode || '', { align: 'center', bold: true });
+  if (o.platform && o.platform !== 'NARA') add(o.platform, { align: 'center', bold: true });
+  sep();
+  big(o.orderType === 'PICKUP' ? t.pickup : o.orderType === 'DINE_IN' ? `${t.dineIn}${o.table ? ' ' + o.table : ''}` : t.delivery, { align: 'center', bold: true });
+  const placed = fmtTime(o.placedAt);
+  if (placed) add(`${t.since}: ${placed}`, { align: 'center' });
+  const ready = fmtTime(o.readyBy || o.requestedAt || o.dueAt);
+  if (ready) big(`${t.readyBy} ${ready}`, { align: 'center', bold: true });
+  else add(t.asap, { align: 'center' });
+  if (o.customerName) add(o.customerName, { align: 'center' });
+  const notes = [o.delivery && o.delivery.notes, o.remarks].filter(Boolean).join(' · ');
+  if (notes) { sep(); for (const s of wrap(`${t.notes}: ${notes}`, W)) add(s, { bold: true }); }
+  sep();
+  for (const it of o.cart || []) {
+    for (const s of wrap(`${it.quantity}x ${it.name}`, Math.floor(W / 2))) add(s, { size: 2, bold: true });
+    for (const op of it.options || []) for (const s of wrap(`+ ${op.quantity > 1 ? op.quantity + 'x ' : ''}${op.name}`, W - 2)) add('  ' + s);
+    if (it.notes) for (const s of wrap(`! ${it.notes}`, W - 2)) add('  ' + s, { bold: true });
+    add('');
+  }
   sep();
   return L;
 }
