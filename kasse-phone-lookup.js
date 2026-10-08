@@ -32,7 +32,7 @@
     if(!c){c={id:'customer-'+Date.now(),orderCount:0};a.push(c)}
     Object.keys(FIELDS).forEach(k=>{if(d[k])c[k]=d[k]});
     if(c.lastOrderId!==o.id){c.orderCount=(c.orderCount||0)+1;c.lastOrderId=o.id}
-    c.lastOrderAt=now;save(a);
+    c.lastOrderAt=now;c.updatedAt=now;save(a);
   }
   ['#kitchen','#cash','#card'].forEach(sel=>{const b=$(sel);if(b)b.addEventListener('click',remember,true)});
 })();

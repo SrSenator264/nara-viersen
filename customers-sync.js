@@ -14,7 +14,7 @@ function clean(c, nowIso) {
   o.id = str(c.id);
   o.orderCount = Number.isInteger(c.orderCount) && c.orderCount > 0 ? Math.min(c.orderCount, 1e6) : 0;
   const t = Date.parse(c.updatedAt);
-  o.updatedAt = Number.isFinite(t) ? new Date(t).toISOString() : nowIso;
+  o.updatedAt = Number.isFinite(t) ? new Date(t).toISOString() : '1970-01-01T00:00:00.000Z'; // بدون ختم وقت = قديم (ما بيغلب سجل السيرفر)
   if (!o.name && !o.phone) return null;
   return o;
 }

@@ -31,3 +31,8 @@ test('fields are whitelisted and capped', () => {
   const r = mergeCustomers([], {}, [{ id: 'a', name: 'x'.repeat(500), phone: '1', evil: '<script>', __proto__: { z: 1 } }]);
   assert.equal(r.customers[0].name.length, 200); assert.equal('evil' in r.customers[0], false);
 });
+
+test('records without a timestamp never override the server copy', () => {
+  const r = mergeCustomers([{ id: 'a', name: 'Ali', phone: '02162 123456', street: 'Server', updatedAt: T(1) }], {}, [{ id: 'z', name: 'Ali', phone: '02162 123456', street: 'Legacy' }]);
+  assert.equal(r.customers.length, 1); assert.equal(r.customers[0].street, 'Server');
+});

@@ -197,3 +197,11 @@ body .ps-use{padding:8px 14px;border-radius:999px;background:var(--t-flame);colo
 body .ps-item:active{background:#ffe3d5;border-color:var(--t-flame)}
 @media (hover:hover){body .ps-item:hover{background:#ffe9dd;border-color:var(--t-flame)}}
 }
+
+/* مؤشر الاتصال بالسيرفر */
+@media screen{
+body .nara-sync{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px;border-radius:999px;background:#eef0ea;font-size:.8rem;font-weight:700;color:#4a4f46;white-space:nowrap}
+body .nara-sync i{width:10px;height:10px;border-radius:50%;background:#c9772b}
+body .nara-sync[data-state=on] i{background:#2d9150}
+@media (max-width:1100px){body .nara-sync span{display:none}}
+}
