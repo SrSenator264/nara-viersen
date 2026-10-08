@@ -5,3 +5,32 @@
 .nara-printer-network-fields{display:grid;grid-template-columns:1fr 100px;gap:8px;margin:10px 0}.nara-printer-network-fields select{grid-column:1/-1}.nara-printer-network-fields input,.nara-printer-network-fields select{padding:9px;border:1px solid #ccd5ce;border-radius:8px}
 
 @media print{@page{size:80mm auto;margin:0}html,body{width:80mm!important;margin:0!important;padding:0!important;background:#fff!important}#nara-print-sheet{width:80mm!important;min-height:20mm;padding:4mm 5mm;box-sizing:border-box;font:11px Arial,sans-serif;line-height:1.35}.print-platform-logo{font-size:24px!important;padding:5px 0 8px!important;margin-bottom:8px!important;border-bottom:2px solid #000!important}.print-brand{font-size:16px!important;margin:7px 0 9px!important}.print-platform-status{font-size:9px!important;margin:7px 0!important;padding:5px!important}.print-code{font-size:12px!important}.print-meta{font-size:10px!important;margin-bottom:7px!important}.print-contact{font-size:10px!important;line-height:1.4!important;margin:7px 0!important;padding:6px!important}.print-line{margin:4px 0!important;font-size:11px!important}.print-line span{max-width:53mm}.print-total{font-size:16px!important;margin-top:7px!important}.print-details{border-top:1px dashed #000;margin-top:8px;padding-top:6px;font-size:9px;line-height:1.35}.print-footnote{font-size:9px!important;margin-top:8px!important}}
+
+/* الفاتورة الموحّدة: ورق 80mm، أسود/أبيض فقط، خطوط واضحة */
+.nara-rc{font:13px/1.3 "Segoe UI",Arial,Helvetica,sans-serif;color:#000;width:100%;font-variant-numeric:tabular-nums}
+.nara-rc .rc-c{text-align:center}.nara-rc .rc-small{font-size:11px;line-height:1.35}
+.nara-rc .rc-brand{font-size:26px;font-weight:900;letter-spacing:.06em;text-align:center;line-height:1.1}
+.nara-rc .rc-code{margin:8px 0 2px;font-size:25px;font-weight:900;text-align:center;letter-spacing:.02em;line-height:1.1}
+.nara-rc .rc-type{margin:8px 0 3px;padding:6px 4px;background:#000;color:#fff;text-align:center;font-size:21px;font-weight:900;letter-spacing:.08em;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.nara-rc .rc-when{font-size:15px;font-weight:700;margin-bottom:6px}
+.nara-rc .rc-box{margin:6px 0;padding:7px 9px;border:2px solid #000;border-radius:7px}
+.nara-rc .rc-name{font-size:17px;font-weight:900;line-height:1.2}
+.nara-rc .rc-addr{font-size:15px;font-weight:600;line-height:1.3}
+.nara-rc .rc-phone{margin-top:3px;font-size:15px;font-weight:800}
+.nara-rc .rc-note{margin:6px 0;padding:6px 9px;border:2px dashed #000;border-radius:7px;font-size:14px}
+.nara-rc .rc-items{margin:8px 0 4px;border-top:2px solid #000}
+.nara-rc .rc-item{display:grid;grid-template-columns:auto 1fr auto;gap:6px;align-items:baseline;padding:6px 0 2px;font-size:15px;font-weight:800}
+.nara-rc .rc-qty{min-width:2.2em}.nara-rc .rc-price{white-space:nowrap}
+.nara-rc .rc-opt{padding:0 0 0 2.2em;font-size:12.5px;font-weight:500}
+.nara-rc .rc-inote{padding:1px 0 0 2.2em;font-size:12.5px;font-weight:800}
+.nara-rc .rc-item+.rc-item,.nara-rc .rc-opt+.rc-item,.nara-rc .rc-inote+.rc-item{border-top:1px dotted #000}
+.nara-rc .rc-totals{margin-top:6px;padding-top:6px;border-top:2px solid #000}
+.nara-rc .rc-line2{display:flex;justify-content:space-between;font-size:13px}
+.nara-rc .rc-total{display:flex;justify-content:space-between;margin-top:3px;padding-top:4px;border-top:1px solid #000;font-size:22px;font-weight:900}
+.nara-rc .rc-pay{margin:10px 0 6px;padding:7px 6px;border:3px solid #000;border-radius:9px;text-align:center}
+.nara-rc .rc-pay-l{font-size:18px;font-weight:900;letter-spacing:.06em}
+.nara-rc .rc-pay-amt{font-size:30px;font-weight:900;line-height:1.15}
+.nara-rc .rc-paid{border-style:solid}
+.nara-rc .rc-driver{margin:6px 0;padding:6px 9px;border:2px solid #000;border-radius:7px;font-size:14px}
+.nara-rc .rc-qr{display:flex;justify-content:center;margin:10px 0 4px}.nara-rc .rc-qr svg{width:34mm;height:34mm}
+.nara-rc .rc-nb{margin-top:2px;font-weight:700}.nara-rc .rc-thanks{margin-top:6px;text-align:center;font-size:14px;font-weight:800}

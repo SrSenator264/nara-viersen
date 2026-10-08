@@ -3,6 +3,7 @@
     "playwright": "^1.63.0"
   },
   "scripts": {
-    "lieferando:bridge": "node lieferando-playwright-bridge.mjs"
+    "lieferando:bridge": "node lieferando-playwright-bridge.mjs",
+    "test": "node --test"
   }
 }
