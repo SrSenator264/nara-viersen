@@ -94,7 +94,7 @@ test('fairness uses the standard pay, not the personal pay', () => {
 });
 
 test('km pay rule: tier boundaries', () => {
-  const c = R.updateConfig(cfg(), { payRule: 'km' });
+  const c = R.updateConfig(cfg(), { payRule: 'km', kmTiers: [{ upToKm: 5, cents: 100 }, { upToKm: 7, cents: 150 }, { upToKm: 10, cents: 300 }] });
   const at = km => R.standardPay(c, { km }).cents;
   assert.equal(at(0.4), 100); assert.equal(at(5), 100); assert.equal(at(5.01), 150);
   assert.equal(at(7), 150); assert.equal(at(7.5), 300); assert.equal(at(8), 300);
@@ -107,25 +107,26 @@ test('km pay rule: tier boundaries', () => {
 test('update: version increments, old object untouched, invalid rejected', () => {
   const c = cfg();
   const before = JSON.stringify(c);
-  const next = R.updateConfig(c, { payRule: 'km' }, new Date('2026-10-08T10:00:00Z'));
+  const next = R.updateConfig(c, { payRule: 'km', kmTiers: [{ upToKm: 5, cents: 100 }] }, new Date('2026-10-08T10:00:00Z'));
   assert.equal(next.version, 2); assert.equal(next.payRule, 'km'); assert.equal(next.updatedAt, '2026-10-08T10:00:00.000Z');
   assert.equal(JSON.stringify(c), before);
   assert.throws(() => R.updateConfig(c, { payRule: 'banana' }), /Invalid delivery config/);
   assert.throws(() => R.updateConfig(c, { zones: [] }), /Invalid delivery config/);
+  assert.throws(() => R.updateConfig(c, { payRule: 'km' }), /kmTier/); // km pricing is off: no tiers defined
 });
 
 test('order pay record keeps the rule version, later changes do not alter it', () => {
   const c = cfg();
   const rec = R.orderPayRecord(c, {}, { postalCode: '41749', km: 4.2 });
   assert.deepEqual({ z: rec.zoneId, v: rec.ruleVersion, p: rec.driverPayCents, r: rec.payRule }, { z: 'viersen-41749', v: 1, p: 200, r: 'zone' });
-  const c2 = R.updateConfig(c, { payRule: 'km' });
+  const c2 = R.updateConfig(c, { payRule: 'km', kmTiers: [{ upToKm: 5, cents: 100 }] });
   const rec2 = R.orderPayRecord(c2, {}, { postalCode: '41749', km: 4.2 });
   assert.equal(rec2.ruleVersion, 2); assert.equal(rec2.driverPayCents, 100);
   assert.equal(rec.driverPayCents, 200); // stored record is unchanged
 });
 
 test('order pay record without km under km rule reports the reason instead of inventing a value', () => {
-  const c = R.updateConfig(cfg(), { payRule: 'km' });
+  const c = R.updateConfig(cfg(), { payRule: 'km', kmTiers: [{ upToKm: 5, cents: 100 }] });
   const rec = R.orderPayRecord(c, {}, { postalCode: '41747' });
   assert.equal(rec.driverPayCents, null); assert.equal(rec.payReason, 'KM_MISSING');
 });

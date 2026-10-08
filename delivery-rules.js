@@ -21,11 +21,7 @@
       version: 1,
       updatedAt: null,
       payRule: 'zone', // 'zone' = أجر حسب المنطقة (الحالي) | 'km' = حسب شرائح الكيلومتر (لاحقاً)
-      kmTiers: [
-        { upToKm: 5, cents: 100 },
-        { upToKm: 7, cents: 150 },
-        { upToKm: 10, cents: 300 },
-      ],
+      kmTiers: [], // التسعير بالكيلومتر ملغي حالياً؛ ما في شرائح. بتنضاف لاحقاً من الإعدادات
       zones: [
         // أجر السائق القياسي مفترض = رسم الزبون (يحتاج تأكيد). ممكن يتعدّل بشكل منفصل.
         { id: 'viersen-core', name: 'Viersen 41747 / 41748', postalCodes: ['41747', '41748'], customerFeeCents: 100, minOrderCents: 1500, driverPayCents: 100 },
@@ -72,6 +68,7 @@
         if (!isCents(t?.cents)) errors.push(`kmTiers: cents must be a non-negative integer (tier ${t?.upToKm})`);
       }
     }
+    if (cfg.payRule === 'km' && !(Array.isArray(cfg.kmTiers) && cfg.kmTiers.length)) errors.push('payRule km requires at least one kmTier');
     return { ok: errors.length === 0, errors };
   }
 
