@@ -44,7 +44,7 @@ test('quote: Mönchengladbach 41063 = 4 EUR fee, 30 EUR minimum', () => {
   assert.equal(q.reason, 'BELOW_MINIMUM'); assert.equal(q.minOrderCents, 3000);
   assert.equal(R.quote(next, { postalCode: '41061', subtotalCents: 3000 }).ok, true);
   // zone with postal code but no fee yet
-  const half = R.updateConfig(c, { zones: c.zones.map(z => z.id === 'moenchengladbach-start' ? { ...z, postalCodes: ['41061'] } : z) });
+  const half = R.updateConfig(c, { zones: c.zones.map(z => z.id === 'moenchengladbach-start' ? { ...z, postalCodes: ['41061'], customerFeeCents: null } : z) });
   assert.equal(R.quote(half, { postalCode: '41061', subtotalCents: 5000 }).reason, 'ZONE_NOT_CONFIGURED');
 });
 
