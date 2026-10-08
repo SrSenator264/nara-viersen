@@ -69,7 +69,7 @@
   const empTimer=setInterval(()=>{employeeField()},1000);employeeField();
 
   // 5) حالة جسور المنصات
-  const NAMES={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch'};
+  const NAMES={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',SIDES:'Loco (Sides)'};
   const COLORS={ok:'#16a34a',login:'#f59e0b',nodata:'#f59e0b',down:'#dc2626'};
   let platforms=[];
   async function pollPlatforms(){

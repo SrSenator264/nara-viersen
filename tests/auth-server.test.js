@@ -150,3 +150,10 @@ test('Lieferando bridge: heartbeat/alert from this PC, status for cashier, old C
   r = await call('POST', '/api/platform-orders/import', { source: 'LIEFERANDO', order: { externalOrderCode: 'ABC', rawText: 'x', cart: [{ name: 'Lieferando order', quantity: 1, unitCents: 1000 }] } });
   assert.equal(r.status, 422); assert.equal(r.json.code, 'LEGACY_BRIDGE');
 });
+
+test('Sides (Loco) import accepted from this PC and shows in status', async () => {
+  const r = await call('POST', '/api/platform-orders/import', { source: 'SIDES', order: { externalOrderCode: 'SIDES-1', displayCode: 'VMB9JY', brand: 'Loco Chicken', cart: [{ name: 'Combo', quantity: 1, totalCents: 1897 }], totalCents: 1897 } });
+  assert.equal(r.status, 201, JSON.stringify(r.json));
+  const st = await call('GET', '/api/platform-orders/status', null, S.cashier);
+  assert.ok(st.json.platforms.some(p => p.source === 'SIDES'));
+});

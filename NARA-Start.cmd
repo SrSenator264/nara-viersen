@@ -13,4 +13,6 @@ start "" "http://localhost:%PORT%/kasse.html"
 rem Lieferando-Bridge nur starten, wenn sie noch nicht laeuft (schnelle Pruefung, blockiert die Kasse nicht)
 powershell -NoProfile -Command "if(Get-CimInstance Win32_Process -Filter \"Name='cmd.exe'\" | Where-Object { $_.CommandLine -like '*NARA-Lieferando.cmd*' }){exit 0}else{exit 1}" >nul 2>&1
 if errorlevel 1 start "NARA Lieferando (nicht schliessen)" /min cmd /c ""%~dp0NARA-Lieferando.cmd""
+powershell -NoProfile -Command "if(Get-CimInstance Win32_Process -Filter \"Name='cmd.exe'\" | Where-Object { $_.CommandLine -like '*NARA-Sides.cmd*' }){exit 0}else{exit 1}" >nul 2>&1
+if errorlevel 1 start "NARA Sides Loco (nicht schliessen)" /min cmd /c ""%~dp0NARA-Sides.cmd""
 exit /b 0

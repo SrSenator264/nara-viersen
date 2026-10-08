@@ -4,7 +4,7 @@
 // الكاشير بيسأل /api/platform-orders/status وبيعرض: شغّال / لازم تسجيل دخول / مسكّر.
 
 const STALE_MS = 3 * 60000;     // ما في heartbeat من 3 دقايق = الجسر مسكّر
-const SOURCES = ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'LANCH'];
+const SOURCES = ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'LANCH', 'SIDES'];
 const state = new Map();
 
 const src = v => String(v || '').toUpperCase();
@@ -44,7 +44,7 @@ function view(s, now = Date.now()) {
 
 // بس المنصات اللي إلها جسر شغّال أو كان شغّال (Lieferando دايماً بتبين)
 function list(now = Date.now()) {
-  const keys = new Set(['LIEFERANDO', ...state.keys()]);
+  const keys = new Set(['LIEFERANDO', 'SIDES', ...state.keys()]);
   return [...keys].map(s => view(s, now));
 }
 
