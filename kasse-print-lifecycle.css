@@ -5,3 +5,10 @@
 .nara-printer-network-fields{display:grid;grid-template-columns:1fr 100px;gap:8px;margin:10px 0}.nara-printer-network-fields select{grid-column:1/-1}.nara-printer-network-fields input,.nara-printer-network-fields select{padding:9px;border:1px solid #ccd5ce;border-radius:8px}
 
 @media print{@page{size:80mm auto;margin:0}html,body{width:80mm!important;margin:0!important;padding:0!important;background:#fff!important}#nara-print-sheet{width:80mm!important;min-height:20mm;padding:4mm 5mm;box-sizing:border-box;font:11px Arial,sans-serif;line-height:1.35}.print-platform-logo{font-size:24px!important;padding:5px 0 8px!important;margin-bottom:8px!important;border-bottom:2px solid #000!important}.print-brand{font-size:16px!important;margin:7px 0 9px!important}.print-platform-status{font-size:9px!important;margin:7px 0!important;padding:5px!important}.print-code{font-size:12px!important}.print-meta{font-size:10px!important;margin-bottom:7px!important}.print-contact{font-size:10px!important;line-height:1.4!important;margin:7px 0!important;padding:6px!important}.print-line{margin:4px 0!important;font-size:11px!important}.print-line span{max-width:53mm}.print-total{font-size:16px!important;margin-top:7px!important}.print-details{border-top:1px dashed #000;margin-top:8px;padding-top:6px;font-size:9px;line-height:1.35}.print-footnote{font-size:9px!important;margin-top:8px!important}}
+
+/* الفاتورة الموحّدة (nara-receipt-core): خط ثابت العرض، 42 حرف بالسطر على 80mm */
+.nara-rc{font:10px/1.28 "Courier New",Courier,monospace;color:#000;width:100%}
+.nara-rc .rc-line{white-space:pre-wrap;word-break:break-word;min-height:1.28em}
+.nara-rc .rc-c{text-align:center}.nara-rc .rc-r{text-align:right}.nara-rc .rc-b{font-weight:700}
+.nara-rc .rc-big{font-size:20px;line-height:1.15;font-weight:700}
+.nara-rc .rc-qr{display:flex;justify-content:center;padding:6px 0}.nara-rc .rc-qr img{width:34mm;height:34mm}
