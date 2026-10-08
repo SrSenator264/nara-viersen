@@ -120,3 +120,18 @@ test('cross-origin writes blocked; protected pages carry the login script', asyn
   const page = await call('GET', '/kasse.html'); assert.equal(page.status, 200); assert.match(page.text, /nara-auth\.js/);
   assert.doesNotMatch((await call('GET', '/index.html')).text, /nara-auth\.js/);
 });
+
+test('two devices: an older version of an order cannot overwrite a newer one, server-owned fields are kept', async () => {
+  const id = 'sync-' + Date.now();
+  const base = { id, type: 'pickup', cart: [{ name: 'Burger', unitCents: 899, quantity: 1, options: [] }] };
+  const a = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', order: base }, S.cashier);
+  assert.equal(a.status, 200); assert.equal(a.json.rev, 1);
+  const b = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', order: { ...base, rev: 1, cart: [{ ...base.cart[0], quantity: 3 }] } }, S.cashier);
+  assert.equal(b.status, 200); assert.equal(b.json.rev, 2);
+  const stale = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', order: { ...base, rev: 1, cart: [{ ...base.cart[0], quantity: 5 }] } }, S.cashier);
+  assert.equal(stale.status, 409); assert.equal(stale.json.code, 'ORDER_CONFLICT'); assert.equal(stale.json.order.cart[0].quantity, 3);
+  // المطبخ غيّر الحالة؛ الكاشير بنسخة فيها حالة قديمة ما بيكتب فوقها
+  assert.equal((await call('POST', '/api/kitchen/orders', { orderId: id, kitchenStatus: 'READY' }, S.kitchen)).status, 200);
+  const again = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', order: { ...base, rev: 2, kitchenStatus: 'NEW', cart: [{ ...base.cart[0], quantity: 3 }] } }, S.cashier);
+  assert.equal(again.status, 200); assert.equal(again.json.order.kitchenStatus, 'READY');
+});

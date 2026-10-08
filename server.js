@@ -221,9 +221,14 @@ http.createServer((req,res)=>{
     if(action==='ORDER_SYNC'){
       if(stored&&['COMPLETED','CANCELLED','STORNIERT'].includes(String(stored.status||'')))return reply(res,409,{error:'Order-ID ist bereits historisch geschlossen.',code:'ORDER_ID_COLLISION',orderId:stored.id,status:stored.status,requiresNewOrderId:true});
       const displayCode=String(order.displayCode||stored?.displayCode||('NARA-'+String(order.id).replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase())).slice(0,32);
-      const next={...order,id:String(order.id),displayCode,status:stored?.status||'OPEN',updatedAt:new Date().toISOString()};
+      // قفل بين الأجهزة: كل حفظ بيرفع رقم النسخة (rev). جهاز بيبعت نسخة أقدم من اللي عالسيرفر = تعارض، ما منكتب فوق تعديل جهاز تاني.
+      const storedRev=Number.isInteger(stored?.rev)?stored.rev:0;
+      if(stored&&Number.isInteger(order.rev)&&order.rev<storedRev)return reply(res,409,{error:'الطلب انعدّل من جهاز تاني.',code:'ORDER_CONFLICT',orderId:stored.id,order:stored});
+      const next={...order,id:String(order.id),displayCode,status:stored?.status||'OPEN',rev:storedRev+1,updatedAt:new Date().toISOString()};
+      // حقول بيملكها السيرفر (المطبخ، التوزيع، التسليم): الكاشير ما بيكتب فوقها بنسخة قديمة
+      if(stored)for(const k of ['kitchenStatus','kitchenStatusAt','kitchenStatusBy','preparingAt','readyAt','pickedUpAt','liveStage','liveStageSource','liveStageUpdatedAt','deliveryRouteId','driverId','assignment','assignmentStatus','outAt','deliveredAt','deliveryProof','paymentId','completedAt'])if(stored[k]!==undefined)next[k]=stored[k];else delete next[k];
       if(stored){current.orders=current.orders.map(x=>x.id===next.id?{...stored,...next}:x)}else current.orders.push(next);
-      writeAdminData(current);return reply(res,200,{ok:true,action:'ORDER_SYNC',orderId:next.id,status:next.status,order:next,collision:false});
+      writeAdminData(current);return reply(res,200,{ok:true,action:'ORDER_SYNC',orderId:next.id,status:next.status,rev:next.rev,order:next,collision:false});
     }
     if(!stored)return reply(res,404,{error:'Bestellung nicht gefunden.'});
     if(action==='KITCHEN_PRINT'){

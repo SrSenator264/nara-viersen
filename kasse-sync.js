@@ -1,13 +1,17 @@
 // kasse-sync.js — السيرفر هو المرجع: دفتر الزبائن والطلبات المفتوحة بتنحفظ عالسيرفر وبتظهر على كل الأجهزة.
 // المتصفح (localStorage) بيضل نسخة محلية؛ لو السيرفر مقطوع الشغل مستمر وبيتزامن لما يرجع.
-// حدود: تعديل نفس الطلب من جهازين بنفس الوقت = آخر حفظ بيفوز (قفل الطلبات خطوة لاحقة).
+// قفل بين الأجهزة: كل طلب إله رقم نسخة (rev). إذا جهاز تاني عدّل قبلك، السيرفر بيرفض نسختك القديمة
+// والكاشير بيحمّل آخر نسخة وبينبّهك. والطلبات اللي انعدّلت على جهاز تاني بتتحدث هون لحالها.
 (function(){
   const CK='nara-customers',OK='nara-kasse-orders',HK='nara-customers-hashes',NK='nara-customers-known',BK='nara-customers-baseline';
   const ls=window.localStorage,rawSet=Storage.prototype.setItem;
   const closed=s=>['COMPLETED','CANCELLED','STORNIERT'].includes(String(s||''));
   const jget=(k,d)=>{try{const v=JSON.parse(ls.getItem(k));return v==null?d:v}catch(e){return d}};
   const jset=(k,v)=>{try{rawSet.call(ls,k,JSON.stringify(v))}catch(e){}};
-  const hash=o=>{const x=Object.assign({},o);delete x.updatedAt;return JSON.stringify(x)};
+  const hash=o=>{const x=Object.assign({},o);delete x.updatedAt;delete x.rev;return JSON.stringify(x)};
+  const T2={de:'Bestellung wurde auf einem anderen Gerät geändert – neueste Version geladen.',ar:'الطلب انعدّل من جهاز تاني — حمّلت آخر نسخة.',en:'Order was changed on another device – latest version loaded.'};
+  function note(){const m=document.querySelector('#message');if(m)m.textContent=T2[lang()]||T2.de}
+  function replaceLocal(L,id,server){const list=L.getOrders(),i=list.findIndex(x=>String(x.id)===String(id));if(i<0)return false;const keep=list[i];Object.keys(keep).forEach(k=>delete keep[k]);Object.assign(keep,server);pushed[id]=hash(keep);return true}
   const T={de:{on:'Server verbunden',off:'Offline – lokal gespeichert'},ar:{on:'متصل بالسيرفر',off:'بدون اتصال — محفوظ محلياً'},en:{on:'Server connected',off:'Offline – saved locally'}};
   const lang=()=>{try{return ls.getItem('nara-kasse-language')||'de'}catch(e){return 'de'}};
 
@@ -43,7 +47,10 @@
       if(!o||!o.id||closed(o.status)||!hasContent(o))continue;
       const h=hash(o);if(pushed[o.id]===h)continue;
       try{const r=await fetch('/api/kasse/events',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'ORDER_SYNC',employeeId:emp,order:Object.assign({},o,{employeeId:emp}),items:o.cart||[]})});
-        if(r.ok||r.status===409||r.status===422){pushed[o.id]=h;status(true)}else if(r.status>=500)throw new Error('HTTP '+r.status)}
+        const d=await r.json().catch(()=>({}));const L=window.NARA_LEGACY_KASSE_STATE;
+        if(r.ok){pushed[o.id]=h;status(true);const lo=L&&L.getOrders().find(x=>String(x.id)===String(o.id));if(lo&&Number.isInteger(d.rev)&&lo.rev!==d.rev){lo.rev=d.rev;L.save()}}
+        else if(r.status===409&&d.code==='ORDER_CONFLICT'&&d.order&&L){replaceLocal(L,o.id,d.order);L.save();L.render();note();status(true)}
+        else if(r.status===409||r.status===422){pushed[o.id]=h;status(true)}else if(r.status>=500)throw new Error('HTTP '+r.status)}
       catch(e){status(false);return}
     }
   }
@@ -54,7 +61,12 @@
       const d=await r.json();status(true);
       const list=L.getOrders();let changed=false;
       for(const s of d.orders||[]){
-        if(list.some(x=>String(x.id)===String(s.id)))continue;
+        const local=list.find(x=>String(x.id)===String(s.id));
+        if(local){
+          // انعدّل على جهاز تاني ونحنا ما عدّلنا شي هون من آخر مزامنة: منحدّث نسختنا
+          if(Number.isInteger(s.rev)&&s.rev>(Number(local.rev)||0)&&pushed[s.id]===hash(local)&&!closed(local.status)){replaceLocal(L,s.id,s);changed=true}
+          continue;
+        }
         const plat=String(s.platform||s.source||'NARA').toUpperCase();
         if(!['local','pickup','delivery'].includes(s.type)||/LIEFERANDO|UBER|WOLT|LANCH/.test(plat))continue;
         list.push(s);pushed[s.id]=hash(s);changed=true;

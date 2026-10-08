@@ -19,3 +19,8 @@ body .cart-controls button.qx-menu.on{background:#f59e0b;color:#1a1300;border:2p
 .qx-acts{display:flex;gap:10px}
 .qx-acts button{flex:1;min-height:56px;border:0;border-radius:14px;font-size:1.1rem;font-weight:800;cursor:pointer;background:#eef1f4}
 .qx-acts button.go{background:#e34824;color:#fff}
+/* وقت الجهوزية المتوقع تحت المجموع */
+.nara-eta{order:5;flex:none;margin:0 16px 8px;padding:8px 12px;border-radius:12px;background:#ffffff14;color:#e9f1e7;font-size:.95rem}
+.nara-eta b{color:#fff}
+.nara-eta small{display:block;opacity:.7;font-size:.8rem}
+.nara-eta[hidden]{display:none}
