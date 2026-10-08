@@ -1,5 +1,7 @@
 'use strict';
 // kitchen.js — منطق شاشة المطبخ: شكل الطلب للمطبخ (بدون أي مبلغ) وتغيير حالته.
+// معلومات الزبون (اسم، عنوان، هاتف) ظاهرة: المطبخ بيرد على التلفون وبيعرف الطلب منها.
+// طلبات Loco Chicken (برنامج Sides منفصل) ما بتظهر هون.
 // بيستعمله السيرفر (/api/kitchen/orders) والاختبارات.
 
 const STATES = ['NEW', 'PREPARING', 'READY', 'PICKED_UP'];
@@ -29,7 +31,7 @@ function typeOf(o) {
 // اسم الخيار بدون الترجمة العربية الملحقة ("Einzel / بدون منيو" → "Einzel")
 function optionName(x) { return str(x && x.name).split(' / ')[0].trim(); }
 
-function kitchenItems(cart) {
+function kitchenItems(cart, catalog) {
   return (Array.isArray(cart) ? cart : [])
     .filter(i => i && !FEE_KINDS.has(str(i.kind).toUpperCase()))
     .map(i => ({
@@ -39,12 +41,12 @@ function kitchenItems(cart) {
         .map(x => ({ name: optionName(x), quantity: Math.max(1, Number(x && x.quantity) || 1) }))
         .filter(x => x.name && !/^einzel$/i.test(x.name) && !/^__/.test(x.name)),
       note: str(i.note || i.notes),
-      category: str(i.category),
+      category: str(i.category) || (catalog ? catalog(str(i.name)) : ''),
     }));
 }
 
 // طلب → شكل المطبخ. ما في أي حقل فيه مبلغ.
-function kitchenView(o, now = Date.now()) {
+function kitchenView(o, now = Date.now(), catalog = null) {
   const d = o.delivery || {};
   const created = ms(o.acceptedAt || o.createdAt || o.placedAt) ?? now;
   const prep = Math.max(1, Number(o.preparationMinutes || d.preparationMinutes || o.prepMinutes) || 20);
@@ -59,8 +61,12 @@ function kitchenView(o, now = Date.now()) {
     type: typeOf(o),
     table: str(o.table),
     customerName: str(d.name || o.customerName),
+    phone: str(d.phone || o.customerPhone),
+    address: str(d.address) || [str(d.street), str(d.house || d.houseNumber)].filter(Boolean).join(' '),
+    city: [str(d.postal || d.postalCode), str(d.city)].filter(Boolean).join(' '),
+    floor: str(d.floor),
     notes: notes.join(' · '),
-    items: kitchenItems(o.cart),
+    items: kitchenItems(o.cart, catalog),
     createdAt: new Date(created).toISOString(),
     readyBy: new Date(readyBy).toISOString(),
     scheduled: !!o.requestedAt,
@@ -71,8 +77,14 @@ function kitchenView(o, now = Date.now()) {
   };
 }
 
+// Loco Chicken شغّالة ببرنامج Sides لحالها وبتطبع عندها، فطلباتها ما بتظهر على تابلت مطبخنا
+function isOtherStation(o) {
+  return /loco/i.test(str(o.brand || o.brandName || o.restaurantName || o.restaurant)) || /^SIDES/i.test(str(o.source || o.platform));
+}
+
 function isKitchenOrder(o, now = Date.now()) {
   if (!o || CLOSED.has(str(o.status).toUpperCase())) return false;
+  if (isOtherStation(o)) return false;
   if (!Array.isArray(o.cart) || !kitchenItems(o.cart).length) return false;
   if (str(o.kitchenStatus).toUpperCase() === 'PICKED_UP') {
     const at = ms(o.kitchenStatusAt);
@@ -81,11 +93,19 @@ function isKitchenOrder(o, now = Date.now()) {
   return true;
 }
 
-function listKitchenOrders(orders, now = Date.now()) {
+// اسم الصنف → اسم الفئة من المنيو (لطلبات الكاشير اللي ما فيها فئة)
+function catalogFrom(data) {
+  const cats = new Map((data && data.categories || []).map(c => [c.id, str(c.name)]));
+  const byName = new Map();
+  for (const p of (data && data.products) || []) if (p && p.name) byName.set(str(p.name).toLowerCase(), cats.get(p.categoryId) || '');
+  return name => byName.get(str(name).toLowerCase()) || '';
+}
+
+function listKitchenOrders(orders, now = Date.now(), catalog = null) {
   const rank = { NEW: 0, PREPARING: 1, READY: 2, PICKED_UP: 3 };
   return (Array.isArray(orders) ? orders : [])
     .filter(o => isKitchenOrder(o, now))
-    .map(o => kitchenView(o, now))
+    .map(o => kitchenView(o, now, catalog))
     .sort((a, b) => (rank[a.kitchenStatus] - rank[b.kitchenStatus]) || (Date.parse(a.readyBy) - Date.parse(b.readyBy)));
 }
 
@@ -108,4 +128,4 @@ function applyKitchenStatus(order, next, user, now = new Date().toISOString()) {
   return { from, to };
 }
 
-module.exports = { STATES, kitchenItems, kitchenView, isKitchenOrder, listKitchenOrders, applyKitchenStatus };
+module.exports = { STATES, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };

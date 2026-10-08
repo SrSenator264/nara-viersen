@@ -19,7 +19,7 @@ const platformOrder = {
   fees: { delivery: 150 }, payment: { method: 'CASH' },
 };
 
-const MONEY_KEYS = /cents|price|total|amount|payment|discount|fee|phone|street|postal|address/i;
+const MONEY_KEYS = /cents|price|total|amount|payment|discount|fee/i;
 function assertNoMoney(v, path = '') {
   if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) {
     assert.ok(!MONEY_KEYS.test(k), 'forbidden key in kitchen view: ' + path + k);
@@ -27,13 +27,27 @@ function assertNoMoney(v, path = '') {
   }
 }
 
-test('kitchen view has no amounts, no payment, no address or phone', () => {
+test('kitchen view has no amounts or payment, but shows customer info', () => {
   for (const o of [kasseOrder, platformOrder]) {
     const v = K.kitchenView(o, NOW);
     assertNoMoney(v);
     const s = JSON.stringify(v);
-    assert.ok(!/999|2590|1199|0151|Gereonstr/.test(s), s);
+    assert.ok(!/999|2590|1199|CASH/.test(s), s);
   }
+  const v = K.kitchenView(kasseOrder, NOW);
+  assert.equal(v.customerName, 'Ali'); assert.equal(v.phone, '0151 000');
+  assert.equal(v.address, 'Gereonstr. 1'); assert.equal(v.city, '41747');
+});
+
+test('Loco Chicken orders (own Sides system) never show on our kitchen screen', () => {
+  const orders = [{ ...kasseOrder, id: 'l1', brand: 'Loco Chicken' }, { ...kasseOrder, id: 'l2', source: 'SIDES' }, { ...kasseOrder, id: 'n1', brand: 'Just Smashed' }];
+  assert.deepEqual(K.listKitchenOrders(orders, NOW).map(o => o.id), ['n1']);
+});
+
+test('category is looked up from the menu when the order has none', () => {
+  const cat = K.catalogFrom({ categories: [{ id: 'c1', name: 'Beef Burger' }], products: [{ name: 'Smash Burger', categoryId: 'c1' }] });
+  assert.equal(K.kitchenView(kasseOrder, NOW, cat).items[0].category, 'Beef Burger');
+  assert.equal(K.kitchenView(platformOrder, NOW, cat).items[0].category, '');
 });
 
 test('delivery fee line is dropped, single-menu marker removed, notes kept', () => {
