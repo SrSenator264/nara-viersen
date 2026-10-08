@@ -71,7 +71,7 @@ function readAdminData(){fs.mkdirSync(adminDataDir,{recursive:true});if(!fs.exis
 function validateAdminData(data){if(!data||typeof data!=='object')throw Error('Invalid data');for(const key of ['categories','products','optionGroups','inventoryItems','suppliers','supplierArticles','purchaseReceipts','purchasePriceHistory','invoices','invoiceLines','recipes','stockMovements','documents','orders','payments','receipts','fiscalTransactions','auditEvents','employees','shifts','workSessions','attendanceEvents','payrollPayments','dailySettlements','chartOfAccounts','journalEntries','accountingPeriods','fixedAssets','cashbooks'])if(!Array.isArray(data[key]))throw Error('Invalid '+key);for(const item of data.inventoryItems)if(!item.id||typeof item.name!=='string'||typeof item.unit!=='string')throw Error('Invalid inventory item');for(const invoice of data.invoices)if(!invoice.id||!invoice.status||!invoice.createdAt)throw Error('Invalid invoice');return data;}
 function writeAdminData(next){next=normalizeAdminData(next);validateAdminData(next);fs.mkdirSync(adminDataDir,{recursive:true});if(fs.existsSync(adminDataFile))fs.copyFileSync(adminDataFile,adminDataFile+'.bak');const tmp=adminDataFile+'.tmp-'+process.pid;fs.writeFileSync(tmp,JSON.stringify({...next,updatedAt:new Date().toISOString()},null,2),'utf8');fs.renameSync(tmp,adminDataFile);return readAdminData();}
 function adminId(prefix){return prefix+'_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);}
-const naraManagerOnly=(req,res)=>{const key=process.env.NARA_MANAGER_KEY||'';if(key){if(String(req.headers['x-nara-manager-key']||'')===key)return true}else if(['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress||''))return true;reply(res,403,{error:'Manager access required.'});return false};
+const naraManagerOnly=(req,res)=>{if(req.naraUser&&['OWNER','MANAGER'].includes(req.naraUser.role))return true;const key=process.env.NARA_MANAGER_KEY||'';if(key){if(String(req.headers['x-nara-manager-key']||'')===key)return true}else if(['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress||''))return true;reply(res,403,{error:'Manager access required.'});return false};
 const naraDeliveryConfig=data=>{const R=require('./delivery-rules.js');return data.deliveryConfig&&R.validateConfig(data.deliveryConfig).ok?data.deliveryConfig:R.defaultConfig()};
 const naraJsonBody=(req,res,limit,handler)=>{let body='';req.on('data',chunk=>{body+=chunk;if(body.length>limit)req.destroy()});req.on('end',()=>{try{handler(JSON.parse(body||'{}'))}catch(error){reply(res,400,{error:error.message||'Bad request.'})}})};
 function orderDay(value){const s=String(value||'');const d=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);return d?`${d[3]}-${d[2]}-${d[1]}`:s.slice(0,10);}
@@ -104,7 +104,7 @@ async function naraGuide(message,preferences){
  if(!parsed||!allowedIds.has(Number(parsed.matchId))||typeof parsed.reply!=='string')throw Error('AI provider returned an invalid menu answer.');
  return {reply:parsed.reply.slice(0,420),matchId:parsed.matchId};
 }
-function serveFile(req,res){let relative=decodeURIComponent(new URL(req.url,'http://local').pathname);if(relative==='/')relative='/index.html';let file=path.resolve(root,'.'+relative),rel=path.relative(root,file);if(rel&&rel.startsWith('assets'+path.sep)&&!fs.existsSync(file)){const alt=path.resolve(root,'dist','client',rel);if(alt.startsWith(path.resolve(root,'dist','client','assets')+path.sep)&&fs.existsSync(alt)){file=alt;rel=path.relative(root,file)}}if(!rel||rel.startsWith('..'+path.sep)||path.isAbsolute(rel)||!fs.existsSync(file)||fs.statSync(file).isDirectory())return reply(res,404,{error:'Not found'});const type={'.html':'text/html; charset=utf-8','.js':'application/javascript; charset=utf-8','.mjs':'application/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml'}[path.extname(file).toLowerCase()]||'application/octet-stream';res.writeHead(200,{'Content-Type':type,'Cache-Control':'no-store'});fs.createReadStream(file).pipe(res);}
+function serveFile(req,res){let relative=decodeURIComponent(new URL(req.url,'http://local').pathname);if(relative==='/')relative='/index.html';let file=path.resolve(root,'.'+relative),rel=path.relative(root,file);if(rel&&rel.startsWith('assets'+path.sep)&&!fs.existsSync(file)){const alt=path.resolve(root,'dist','client',rel);if(alt.startsWith(path.resolve(root,'dist','client','assets')+path.sep)&&fs.existsSync(alt)){file=alt;rel=path.relative(root,file)}}if(!rel||rel.startsWith('..'+path.sep)||path.isAbsolute(rel)||!naraAuthLib.staticAllowed(rel)||!fs.existsSync(file)||fs.statSync(file).isDirectory())return reply(res,404,{error:'Not found'});const type={'.html':'text/html; charset=utf-8','.js':'application/javascript; charset=utf-8','.mjs':'application/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml'}[path.extname(file).toLowerCase()]||'application/octet-stream';res.writeHead(200,{'Content-Type':type,'Cache-Control':'no-store'});fs.createReadStream(file).pipe(res);}
 async function mapRouteEstimate(stops){
  const clean=Array.isArray(stops)?stops.filter(x=>String(x?.address||'').trim()):[];
  if(clean.length<2)return {provider:'NONE',status:'NEEDS_ADDRESS',stops:clean};
@@ -120,8 +120,11 @@ function googleMapsDirectionsUrl(origin, stops){
  if(points.length>1)params.set('waypoints',points.slice(0,-1).join('|'));
  return 'https://www.google.com/maps/dir/?'+params.toString();
 }
+const naraAuth=require('./server-auth.js').create({readAdminData,writeAdminData,reply,adminId,dir:adminDataDir});
+const naraAuthLib=require('./auth.js');
 http.createServer((req,res)=>{
  const url=new URL(req.url,'http://local');
+ if(naraAuth.gate(req,res,url))return;
  if(url.pathname==='/api/accounting/accounts'&&req.method==='GET'){const data=readAdminData(),now=new Date().toISOString(),required=[['1000','Kasse / الصندوق / Cash','ASSET'],['1200','Bank / البنك / Bank','ASSET'],['1300','Warenbestand / مخزون المواد / Inventory','ASSET'],['1400','Vorsteuer / ضريبة المشتريات / Input VAT','ASSET'],['1570','Umsatzsteuer / ضريبة المبيعات / Output VAT','LIABILITY'],['4000','Umsatz 7% / مبيعات 7% / Sales 7%','REVENUE'],['4010','Umsatz 19% / مبيعات 19% / Sales 19%','REVENUE'],['5000','Wareneinsatz / تكلفة المواد / COGS','EXPENSE'],['5100','Löhne / أجور العمال / Labor','EXPENSE'],['5200','Miete / الإيجار / Rent','EXPENSE'],['5210','Energie / الطاقة / Energy','EXPENSE'],['5220','Plattformgebühren / عمولات المنصات','EXPENSE'],['5230','Abschreibungen / الإهلاك / Depreciation','EXPENSE'],['9000','Eigenkapital / رأس المال / Equity','EQUITY']];const existing=new Set(data.chartOfAccounts.map(x=>String(x.number)));const added=required.filter(([number])=>!existing.has(number)).map(([number,name,type])=>({id:adminId('account'),number,name,type,active:true,system:true,createdAt:now}));if(added.length){data.chartOfAccounts.push(...added);data.auditEvents.push({id:adminId('audit'),type:'CHART_OF_ACCOUNTS_MIGRATED',createdAt:now,details:{added:added.map(x=>x.number)}});writeAdminData(data)}return reply(res,200,{ok:true,accounts:readAdminData().chartOfAccounts});}
  if(req.method==='OPTIONS')return reply(res,204,{});
  if(url.pathname==='/api/accounting/auto-post-platform-commissions'&&req.method==='POST'){const data=readAdminData(),accounts=new Map(data.chartOfAccounts.map(x=>[x.number,x.id])),fees=accounts.get('5220'),orders=new Map(data.orders.map(x=>[String(x.id),x])),dims=data.settings.salesDimensions||{},rates=new Map((dims.platforms||[]).map(x=>[x.id,Number(x.commissionRate||0)]));if(!fees)return reply(res,422,{error:'حساب عمولات المنصات غير موجود'});let clearing=accounts.get('1360');if(!clearing){clearing=adminId('account');data.chartOfAccounts.push({id:clearing,number:'1360',name:'Plattformen / حسابات وسيطة للمنصات',type:'ASSET',active:true,system:true,createdAt:new Date().toISOString()})}const existing=new Set(data.journalEntries.map(x=>x.sourceRef).filter(Boolean)),now=new Date().toISOString(),created=[];for(const p of data.payments.filter(x=>x.status==='COMPLETED')){const o=orders.get(String(p.orderId))||{},platform=o.platformId||o.platform||o.source||'',rate=Number(rates.get(platform)||0);if(!platform||!rate)continue;const ref='PLATFORM_FEE:'+p.id;if(existing.has(ref))continue;const amount=Math.round(Number(p.amountCents||0)*rate/100);if(!amount)continue;data.journalEntries.push({id:adminId('journal'),number:'AUTO-FEE-'+Date.now(),date:String(p.createdAt||now).slice(0,10),description:'ترحيل عمولة منصة '+platform,sourceRef:ref,status:'POSTED',lines:[{accountId:fees,debitCents:amount,creditCents:0,memo:'Plattformgebühr '+platform},{accountId:clearing,debitCents:0,creditCents:amount,memo:'حساب وسيط المنصة',dimensions:{platform,brandId:o.brandId||null}}],createdAt:now});created.push(ref)}if(created.length){data.auditEvents.push({id:adminId('audit'),type:'AUTOMATIC_PLATFORM_COMMISSION_POSTING',createdAt:now,details:{count:created.length}});writeAdminData(data)}return reply(res,200,{ok:true,createdCount:created.length,sourceRefs:created});}
@@ -207,6 +210,7 @@ http.createServer((req,res)=>{
     const payload=JSON.parse(body||'{}'),action=String(payload.action||''),order=payload.order||{},current=readAdminData();
     for(const key of ['orders','payments','receipts','fiscalTransactions','auditEvents'])current[key]??=[];
     if(!order.id)return reply(res,400,{error:'Order-ID fehlt.'});
+    if(req.naraUser){if(req.naraUser.role==='KITCHEN'&&!['KITCHEN_PRINT','CLOCK_IN','CLOCK_OUT'].includes(action))return reply(res,403,{error:'Keine Berechtigung.',code:'FORBIDDEN'});if(req.naraUser.id!=='manager-key'){payload.employeeId=req.naraUser.id;if(!order.employeeId)order.employeeId=req.naraUser.id}}
     if(['ORDER_SYNC','FINALIZE_PAYMENT'].includes(action)&&current.settings?.requireEmployeeShiftForCashier===true){const employeeId=String(payload.employeeId||order.employeeId||'');const employee=current.employees.find(x=>x.id===employeeId);const shift=current.shifts.find(x=>x.employeeId===employeeId&&x.status==='OPEN');if(!employee||!shift)return reply(res,409,{error:'لا يمكن تنفيذ عملية الكاشير بدون موظف ووردية مفتوحة.',code:'CASHIER_SHIFT_REQUIRED'});}
     let stored=current.orders.find(x=>x.id===String(order.id));
     if(action==='ORDER_SYNC'){
@@ -391,14 +395,14 @@ serveFile=function(req,res){
     const rel=path.relative(root,file);if(!rel||rel.startsWith('..'+path.sep)||path.isAbsolute(rel)||!fs.existsSync(file))return reply(res,404,{error:'Not found'});
     const html=fs.readFileSync(file,'utf8').replace('inventory-foundation.js','inventory-foundation.js?v=20261002-manager-demo');
     res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, no-cache, must-revalidate'});
-    return res.end(html);
+    return res.end(naraAuth.inject(pathname,html));
   }
   if(pathname==='/admin-foundation.html'){
     const file=path.resolve(root,'.'+pathname);
     const rel=path.relative(root,file);if(!rel||rel.startsWith('..'+path.sep)||path.isAbsolute(rel)||!fs.existsSync(file))return reply(res,404,{error:'Not found'});
     const html=fs.readFileSync(file,'utf8').replace('</body>','<script src="admin-menu-enhancements.js?v=20260930-menu-editor"></script></body>');
     res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, no-cache, must-revalidate'});
-    return res.end(html);
+    return res.end(naraAuth.inject(pathname,html));
   }
   if(pathname==='/kasse.html'){
     const file=path.resolve(root,'.'+pathname);
@@ -406,7 +410,12 @@ serveFile=function(req,res){
     // kasse.html owns its additive scripts; do not inject them again here.
     const html=fs.readFileSync(file,'utf8');
     res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, no-cache, must-revalidate'});
-    return res.end(html);
+    return res.end(naraAuth.inject(pathname,html));
+  }
+  if(/\.html$/.test(pathname)&&naraAuthLib.PAGE_ROLES[pathname.slice(1)]){
+    const file=path.resolve(root,'.'+pathname),rel=path.relative(root,file);if(!rel||rel.startsWith('..'+path.sep)||path.isAbsolute(rel)||!fs.existsSync(file))return reply(res,404,{error:'Not found'});
+    res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, no-cache, must-revalidate'});
+    return res.end(naraAuth.inject(pathname,fs.readFileSync(file,'utf8')));
   }
   return serveFileBase(req,res);
 };

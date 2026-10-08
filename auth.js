@@ -94,7 +94,8 @@ const allowed = (access, role) => Array.isArray(access) && access.includes(role)
 
 // ───────── ملفات ثابتة مسموحة ─────────
 const BLOCKED_DIRS = new Set(['data', 'logs', 'node_modules', 'tests', 'scripts', 'checkpoint', 'local-ocr-output']);
-const STATIC_EXT = new Set(['.html', '.js', '.mjs', '.css', '.png', '.jpg', '.jpeg', '.webp', '.avif', '.gif', '.svg', '.ico', '.woff', '.woff2', '.json', '.webmanifest', '.mp3', '.wav', '.ogg']);
+const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs']);
+const STATIC_EXT = new Set(['.html', '.js', '.mjs', '.css', '.png', '.jpg', '.jpeg', '.webp', '.avif', '.gif', '.svg', '.ico', '.woff', '.woff2', '.webmanifest', '.mp3', '.wav', '.ogg']);
 function staticAllowed(rel) {
   const parts = String(rel || '').split(/[\\/]+/).filter(Boolean);
   if (!parts.length) return false;
@@ -107,7 +108,8 @@ function staticAllowed(rel) {
   if (/\.(bak|tmp|log|env|pem|key)$/i.test(last) || last.includes('.bak')) return false;
   const ext = last.includes('.') ? last.slice(last.lastIndexOf('.')) : '';
   if (!STATIC_EXT.has(ext)) return false;
-  if (last === 'package.json' || last === 'package-lock.json') return false;
+  if (SERVER_FILES.has(last)) return false;
+  if (parts[0].toLowerCase() === 'dist' && parts[1] && parts[1].toLowerCase() === 'server') return false;
   return true;
 }
 
