@@ -1,1 +1,229 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Live Orders</title><link rel="stylesheet" href="live-orders.css"></head><body><header><a class="brand" href="kasse.html">🍴 <span>Live Orders</span></a><div class="header-spacer"></div><button class="header-menu">▦ More from NARA</button><button class="header-icon">🔔</button><a href="kasse.html">Zur Kasse</a></header><aside class="side-nav"><button class="side-active">⌂</button><button>▣</button><button>▣</button><button>◫</button><button>Ⅱ</button><button class="side-bottom">⚙</button></aside><main><section class="toolbar"><h1>Your orders</h1><span id="sync-status">Synchronisierung…</span></section><nav class="tabs"><button data-stage="PREPARE" class="active">▤ &nbsp; Prepare <b id="count-prepare">0</b></button><button data-stage="HANDOVER">▱ &nbsp; Handover <b id="count-handover">0</b></button><button data-stage="DONE">✓ &nbsp; Done <b id="count-done">0</b></button></nav><div class="orders-layout"><section id="order-list" class="order-list"></section><article id="order-detail" class="order-detail"><p>Wähle einen Auftrag aus.</p></article></div></main><script src="live-orders.js?v=20261004"></script><script src="live-orders-archive-ui.js?v=20261004"></script></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Live Orders · NARA</title>
+<link rel="stylesheet" href="kasse-print-lifecycle.css?v=20261008">
+<style>
+:root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--warn:#e0a100;--late:#d1342f;--chip:#e9f4fb}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 "Segoe UI",system-ui,Arial,sans-serif}
+button{font:inherit;cursor:pointer}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;height:64px;padding:0 24px;background:#fff;box-shadow:0 1px 0 var(--line)}
+.brand{display:flex;align-items:center;gap:8px;color:var(--brand);font-weight:800;font-size:1.35rem;text-decoration:none}
+.brand i{font-style:normal;font-size:1.5rem}
+header .sp{flex:1}
+.sync{color:var(--mute);font-size:.85rem}
+.sync b{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-inline-end:6px}
+.sync.off b{background:var(--late)}
+header a.back{color:var(--brand);font-weight:800;text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:999px}
+main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template-columns:minmax(330px,430px) 1fr;gap:22px;align-items:start}
+.panel{background:var(--card);border-radius:18px;box-shadow:0 1px 3px #0000000d}
+.list{padding:18px}
+.list h1{margin:0 0 12px;font-size:1.6rem}
+.tools{display:flex;gap:8px;margin-bottom:12px}
+.tools select,.tools input{min-width:0;flex:1;height:38px;border:1px solid var(--line);border-radius:10px;padding:0 10px;font:inherit;background:#fff}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs button{position:relative;flex:1;height:42px;border:1px solid var(--line);border-radius:999px;background:#fff;font-weight:700;color:var(--ink)}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tabs button small{position:absolute;top:-8px;inset-inline-end:8px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#fff;color:var(--ink);border:1px solid var(--line);font-size:.78rem;line-height:20px}
+.cards{display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 290px);overflow:auto;padding:2px}
+.card{display:grid;grid-template-columns:62px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:start;width:100%}
+.card:hover{border-color:#cfc8c0}
+.card.sel{border:2px solid var(--brand);padding:11px}
+.card h3{margin:0;font-size:1rem;line-height:1.25}
+.card p{margin:2px 0 0;color:var(--mute);font-size:.88rem}
+.card .code{color:var(--ink);font-weight:600}
+.empty{color:var(--mute);text-align:center;padding:40px 10px}
+.ring{position:relative;width:58px;height:58px}
+.ring svg{transform:rotate(-90deg)}
+.ring span{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:1.05rem;line-height:1}
+.ring span small{font-weight:600;font-size:.68rem;color:var(--mute);margin-top:2px}
+.ring.big{width:74px;height:74px}.ring.big span{font-size:1.3rem}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.b-LIEFERANDO{background:#fff1e6;color:#d65a00}.b-UBER_EATS{background:#e6f6ec;color:#0b7a3b}.b-WOLT{background:#e6f4fb;color:#0a7cb2}.b-LANCH{background:#f1eafd;color:#6b3fc4}.b-LOCO{background:#fde8e8;color:#c21f1f}.b-NARA{background:#eceff1;color:#37474f}
+.b-x{background:#fde8e8;color:#c21f1f}
+.detail{padding:24px 26px;min-height:420px;display:flex;flex-direction:column}
+.dh{display:flex;gap:16px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.dh h2{margin:0;font-size:1.35rem}
+.dh .meta{color:var(--mute);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.dh .sp{flex:1}
+.cust{padding:16px 0;border-bottom:1px solid var(--line)}
+.cust b{font-size:1.05rem}
+.cust .row{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;color:var(--ink)}
+.cust a{color:var(--ink);text-decoration:none;font-weight:600}
+.cust .muted{color:var(--mute)}
+.note{margin-top:10px;padding:8px 12px;border-radius:10px;background:#fff6e0;color:#7a5200;font-weight:600}
+.items{padding:16px 0;flex:1}
+.ih{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ih h3{margin:0;font-size:1.25rem}
+.pay{font-size:.85rem;font-weight:700;padding:4px 10px;border-radius:999px;background:#eef6ef;color:var(--ok)}
+.pay.cash{background:#fff1e6;color:#c24f00}
+.cat{margin:16px 0 6px;font-weight:800;font-size:1.05rem}
+.it{display:grid;grid-template-columns:28px 1fr auto;gap:6px;padding:4px 0}
+.it .q{font-weight:700}
+.it .n{font-weight:600}
+.it .p{font-variant-numeric:tabular-nums}
+.opt{grid-column:2/4;color:var(--mute);font-size:.9rem}
+.chip{grid-column:2/4;justify-self:start;margin-top:4px;padding:6px 12px;border-radius:10px;background:var(--chip);color:#164a63;font-size:.92rem}
+.sum{border-top:1px solid var(--line);padding-top:12px}
+.sum div{display:flex;justify-content:space-between;padding:3px 0;color:var(--mute)}
+.sum .tot{color:var(--ink);font-weight:800;font-size:1.15rem}
+.acts{display:flex;justify-content:flex-end;gap:12px;padding-top:16px}
+.acts button{height:52px;padding:0 26px;border-radius:999px;font-weight:800;font-size:1.05rem}
+.acts .sec{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.acts .pri{background:var(--brand);border:0;color:#fff}
+.acts .pri:disabled{opacity:.5}
+.placeholder{margin:auto;color:var(--mute)}
+#nara-print-sheet{display:none}
+@media (max-width:900px){main{grid-template-columns:1fr;padding:14px}.cards{max-height:none}header{padding:0 14px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="kasse.html"><i>🍴</i> Live Orders</a>
+  <span class="sp"></span>
+  <span class="sync" id="sync"><b></b><span>…</span></span>
+  <a class="back" href="kasse.html">Zur Kasse</a>
+</header>
+<main>
+  <section class="panel list">
+    <h1>Your orders</h1>
+    <div class="tools">
+      <select id="plat"><option value="ALL">Alle Plattformen</option><option value="LIEFERANDO">Lieferando</option><option value="UBER_EATS">Uber Eats</option><option value="WOLT">Wolt</option><option value="LOCO">Loco Chicken</option></select>
+      <input id="q" placeholder="Suchen: Code, Name, Straße">
+    </div>
+    <div class="tabs">
+      <button data-st="PREPARE" class="on">Prepare <small id="n-PREPARE">0</small></button>
+      <button data-st="HANDOVER">Handover <small id="n-HANDOVER">0</small></button>
+      <button data-st="DONE">Done <small id="n-DONE">0</small></button>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+  <section class="panel detail" id="detail"><p class="placeholder">Wähle einen Auftrag aus.</p></section>
+</main>
+<div id="nara-print-sheet"></div>
+<script src="kasse-receipt.js?v=20261008"></script>
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=c=>(Number(c||0)/100).toFixed(2).replace('.',',')+' €';
+const S=v=>String(v??'').trim();
+let orders=[],stage='PREPARE',selId=null,lastOk=0;
+
+const isLoco=o=>/loco/i.test(S(o.brand||o.brandName))||/^SIDES/i.test(S(o.source));
+function plat(o){if(isLoco(o))return 'LOCO';const p=S(o.platform||o.source).toUpperCase();if(/LIEFERANDO/.test(p))return 'LIEFERANDO';if(/UBER/.test(p))return 'UBER_EATS';if(/WOLT/.test(p))return 'WOLT';if(/LANCH/.test(p))return 'LANCH';return 'NARA'}
+const PL={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',LOCO:'Loco',NARA:'NARA'};
+function badge(o){const p=plat(o);let t=PL[p];if(p==='LOCO'&&o.channel&&o.channel!=='SIDES')t+=' · '+(PL[o.channel]||o.portalName||'');return '<span class="badge b-'+p+'">'+esc(t)+'</span>'}
+function stageOf(o){const st=S(o.status).toUpperCase();if(st==='CANCELLED')return 'DONE';const s=S(o.liveStage).toUpperCase();if(s==='DONE'||st==='COMPLETED')return 'DONE';if(s==='HANDOVER')return 'HANDOVER';return 'PREPARE'}
+const cancelled=o=>S(o.status).toUpperCase()==='CANCELLED';
+const code=o=>S(o.displayCode)||S(o.externalOrderCode)||S(o.id).slice(-6);
+const D=o=>o.delivery||{};
+const isDel=o=>S(o.type||o.orderType).toLowerCase().startsWith('deliv');
+function street(o){const d=D(o),st=S(d.street),h=S(d.house||d.houseNumber);return (st&&h&&!new RegExp('\\s'+h.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$').test(st)?st+' '+h:st)||S(d.address)}
+function place(o){const d=D(o);return [S(d.postal||d.postalCode),S(d.city)].filter(Boolean).join(' ')}
+function title(o){if(!isDel(o))return 'Abholung';return [place(o),street(o)].filter(Boolean).join(', ')||'Lieferung'}
+function custName(o){return S(D(o).name)||S(o.customerName)||'Kunde'}
+function phone(o){return S(o.customerPhone)||S(D(o).phone)}
+const localDay=t=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+function when(o){return Date.parse(o.placedAt||o.createdAt||o.acceptedAt||0)||0}
+function due(o){return Date.parse(o.dueAt||o.etaAt||o.requestedAt||0)||0}
+
+function ring(o,big){
+  const now=Date.now(),d=due(o),p=when(o);
+  const size=big?74:58,r=big?32:25,c=2*Math.PI*r;
+  if(!d||stageOf(o)==='DONE'){return '<div class="ring'+(big?' big':'')+'"><svg width="'+size+'" height="'+size+'"><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="#e7e3de" stroke-width="5"/></svg><span>'+(stageOf(o)==='DONE'?(cancelled(o)?'✕':'✓'):'ASAP')+'</span></div>'}
+  const left=Math.round((d-now)/60000),total=Math.max(1,(d-(p||d-45*60000))/60000),frac=Math.max(0,Math.min(1,left/total));
+  const col=left<0?'var(--late)':left<10?'var(--warn)':'var(--ok)';
+  return '<div class="ring'+(big?' big':'')+'"><svg width="'+size+'" height="'+size+'"><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="#e7e3de" stroke-width="5"/><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+(c*frac)+' '+c+'"/></svg><span style="color:'+(left<0?'var(--late)':'inherit')+'">'+Math.abs(left)+'<small>'+(left<0?'min zu spät':'min')+'</small></span></div>'
+}
+
+async function load(){
+  try{
+    const r=await fetch('/api/kasse-state',{cache:'no-store'});
+    if(!r.ok)throw Error(r.status);
+    const j=await r.json(),today=localDay(Date.now());
+    orders=(j.orders||[]).filter(o=>(o.source||o.platform)&&!o.liveArchivedAt&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<12*3600000));
+    lastOk=Date.now();
+  }catch(e){}
+  render();
+}
+
+function visible(){
+  const p=$('#plat').value,q=S($('#q').value).toLowerCase();
+  return orders.filter(o=>(p==='ALL'||plat(o)===p)&&(!q||[code(o),custName(o),street(o),place(o),phone(o)].some(v=>v.toLowerCase().includes(q))));
+}
+
+function render(){
+  const vis=visible();
+  for(const s of ['PREPARE','HANDOVER','DONE'])$('#n-'+s).textContent=vis.filter(o=>stageOf(o)===s).length;
+  const list=vis.filter(o=>stageOf(o)===stage).sort((a,b)=>stage==='DONE'?when(b)-when(a):(due(a)||when(a))-(due(b)||when(b)));
+  if(selId&&!orders.some(o=>String(o.id)===selId))selId=null;
+  if(!selId&&list[0])selId=String(list[0].id);
+  $('#cards').innerHTML=list.map(o=>'<button class="card'+(String(o.id)===selId?' sel':'')+'" data-id="'+esc(o.id)+'">'+ring(o)+'<div><h3>'+esc(title(o))+'</h3><p>'+esc(custName(o))+'</p><p>'+(o.asap===false||o.requestedAt?'🕒 '+new Date(due(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'ASAP')+' · <span class="code">#'+esc(code(o))+'</span></p></div><div>'+(cancelled(o)?'<span class="badge b-x">Storniert</span>':badge(o))+'</div></button>').join('')||'<p class="empty">Keine Aufträge hier.</p>';
+  document.querySelectorAll('.card').forEach(b=>b.onclick=()=>{selId=b.dataset.id;render()});
+  const sy=$('#sync');sy.classList.toggle('off',Date.now()-lastOk>20000);sy.querySelector('span').textContent=(Date.now()-lastOk>20000?'Keine Verbindung':'Live')+' · '+new Date(lastOk||Date.now()).toLocaleTimeString('de-DE');
+  renderDetail(orders.find(o=>String(o.id)===selId));
+}
+
+function itemsHtml(o){
+  const cart=(o.cart||[]).filter(i=>!/FEE|TIP/.test(S(i.kind).toUpperCase()));
+  const groups=[];
+  for(const i of cart){const c=S(i.category);let g=groups.find(x=>x.c===c);if(!g)groups.push(g={c,items:[]});g.items.push(i)}
+  return groups.map(g=>(g.c?'<div class="cat">'+esc(g.c)+'</div>':'')+g.items.map(i=>{
+    const q=Number(i.quantity)||1,tot=i.totalCents!=null?Number(i.totalCents):(Number(i.unitCents)||0)*q;
+    const opts=(i.options||[]).map(x=>S(x.name).split(' / ')[0]).filter(n=>n&&!/^einzel$/i.test(n)&&!/^__/.test(n));
+    const note=S(i.note||i.notes);
+    return '<div class="it"><span class="q">'+q+'</span><span class="n">'+esc(i.name)+'</span><span class="p">'+eur(tot)+'</span>'+(opts.length?'<span class="opt">+ '+opts.map(esc).join(', ')+'</span>':'')+(note?'<span class="chip">'+esc(note)+'</span>':'')+'</div>'}).join('')).join('');
+}
+function sumHtml(o){
+  const cart=o.cart||[];
+  const sub=cart.filter(i=>!/FEE|TIP/.test(S(i.kind).toUpperCase())).reduce((s,i)=>s+(i.totalCents!=null?Number(i.totalCents):(Number(i.unitCents)||0)*(Number(i.quantity)||1)),0);
+  const rows=[['Subtotal',sub]];
+  const f=o.fees||{};
+  const fee=(Number(o.deliveryFeeCents)||0)||(typeof f.delivery==='number'?f.delivery:0)||cart.filter(i=>S(i.kind).toUpperCase()==='DELIVERY_FEE').reduce((s,i)=>s+(Number(i.unitCents)||0)*(Number(i.quantity)||1),0);
+  if(fee)rows.push(['Liefergebühr',fee]);
+  for(const [k,l] of [['service','Servicegebühr'],['smallOrder','Mindermengenzuschlag']])if(typeof f[k]==='number'&&f[k])rows.push([l,f[k]]);
+  const disc=(Number(o.discountsCents)||0)+(Number(o.discountCents)||0)+(Number(o.stampCents)||0)+(Number(o.discount&&o.discount.amountCents)||0);
+  if(disc)rows.push(['Rabatt',-disc]);
+  if(Number(o.tipCents))rows.push(['Trinkgeld',Number(o.tipCents)]);
+  const total=Number(o.totalCents)||Number(o.externalTotalCents)||rows.reduce((s,r)=>s+r[1],0);
+  return '<div class="sum">'+rows.map(r=>'<div><span>'+r[0]+'</span><span>'+eur(r[1])+'</span></div>').join('')+'<div class="tot"><span>Total</span><span>'+eur(total)+'</span></div></div>';
+}
+
+function renderDetail(o){
+  const el=$('#detail');
+  if(!o){el.innerHTML='<p class="placeholder">Wähle einen Auftrag aus.</p>';return}
+  const st=stageOf(o),cash=S(o.payment&&o.payment.method).toUpperCase()==='CASH';
+  const n=(o.cart||[]).filter(i=>!/FEE|TIP/.test(S(i.kind).toUpperCase())).reduce((s,i)=>s+(Number(i.quantity)||1),0);
+  const acc=Date.parse(o.acceptedAt||o.confirmedAt||o.placedAt||o.createdAt||0);
+  const notes=[S(D(o).notes),S(o.remarks)].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
+  const tel=phone(o);
+  el.innerHTML=
+    '<div class="dh">'+ring(o,true)+'<div><h2>'+esc(title(o))+'</h2><div class="meta">#'+esc(code(o))+' · '+(isDel(o)?'🛵 Delivery':'🛍 Pickup')+' '+badge(o)+(cancelled(o)?' <span class="badge b-x">Storniert</span>':'')+'</div></div><span class="sp"></span></div>'+
+    '<div class="cust"><b>'+esc(custName(o))+'</b><div class="row">'+(tel?'<a href="tel:'+esc(tel.replace(/\s/g,''))+'">📞 '+esc(tel)+'</a>':'')+(o.verificationCode?'<span><b>Verification code:</b> '+esc(o.verificationCode)+'</span>':'')+'</div>'+
+      (acc?'<div class="row muted">Bestellt um '+new Date(acc).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+(due(o)?' · Lieferung bis '+new Date(due(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'')+'</div>':'')+
+      notes.map(x=>'<div class="note">📝 '+esc(x)+'</div>').join('')+'</div>'+
+    '<div class="items"><div class="ih"><h3>'+n+' Items</h3><span class="pay'+(cash?' cash':'')+'">'+(cash?'💶 Bar · '+eur(o.cashDueCents||o.totalCents):'💳 Online bezahlt')+'</span></div>'+itemsHtml(o)+'</div>'+
+    sumHtml(o)+
+    '<div class="acts"><button class="sec" id="print">🖨 Print order</button>'+(cancelled(o)?'':st==='PREPARE'?'<button class="pri" id="adv" data-to="HANDOVER">Handover</button>':st==='HANDOVER'?'<button class="pri" id="adv" data-to="DONE">✓ Done</button>':'<button class="sec" id="adv" data-to="HANDOVER">↩ Zurück</button>')+'</div>';
+  $('#print').onclick=()=>printOrder(o);
+  const a=$('#adv');if(a)a.onclick=async()=>{a.disabled=true;try{const r=await fetch('/api/live-orders/stage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:o.id,stage:a.dataset.to})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||r.status);Object.assign(o,j.order||{liveStage:a.dataset.to})}catch(e){a.disabled=false;a.textContent='Fehler: '+e.message;return}render()};
+}
+
+function printOrder(o){
+  const R=window.NARA_RECEIPT,sheet=$('#nara-print-sheet');
+  if(R&&R.ready){sheet.innerHTML=R.html(o,'customer')}
+  else sheet.innerHTML='<div style="font:14px Arial"><b>#'+esc(code(o))+'</b><br>'+esc(title(o))+'<br>'+esc(custName(o))+'</div>';
+  setTimeout(()=>window.print(),50);
+}
+
+document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{stage=b.dataset.st;selId=null;document.querySelectorAll('[data-st]').forEach(x=>x.classList.toggle('on',x===b));render()});
+$('#plat').onchange=()=>{selId=null;render()};$('#q').oninput=()=>{selId=null;render()};
+load();setInterval(load,5000);setInterval(render,30000);
+})();
+</script>
+</body>
+</html>

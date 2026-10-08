@@ -149,6 +149,7 @@ function mapProduct(p, c) {
     unitCents: Math.round(total / qty),
     totalCents: total,
     notes: S(p.remarks),
+    note: S(p.remarks),
     options: flattenSpecs(p.specifications, c),
   };
 }
@@ -185,19 +186,20 @@ function normalize(x, st) {
   const nameFull = df(/^(full_?name|customer_?name|name)$/i);
   const nameJoined = [df(/^first_?name$/i), df(/^last_?name$/i)].filter(Boolean).join(' ');
   const customerName = S(first(nameFull, nameJoined));
-  const customerPhone = S(first(df(/phone|mobile|tel/i)));
+  // Lieferando بتعرض رقم الوساطة (display_phone_number) + كود التحقق؛ هاد اللي لازم ينطلب
+  const customerPhone = S(first(x.customer && x.customer.display_phone_number, df(/phone|mobile|tel/i)));
   let street = S(df(/^(street|street_?name|address_?line_?1|line_?1)$/i));
   const houseNumber = S(df(/house_?(number|no|nr)|^number$|street_?number/i));
   const formatted = S(df(/formatted|full_?address|address_?line|^address$/i));
   if (!street && formatted) street = formatted;
-  if (street && houseNumber && !street.includes(houseNumber)) street = `${street} ${houseNumber}`;
+  const fullStreet = street && houseNumber && !street.includes(houseNumber) ? `${street} ${houseNumber}` : street;
   const postalCode = S(df(/postal|zip|postcode/i));
   const city = S(df(/^city$|town|locality/i));
   const floor = S(df(/floor|apartment|flat|suite/i));
   const dnotes = S(df(/note|instruction|comment|remark|delivery_?info/i));
   const lat = Number(df(/^lat(itude)?$/i)) || null;
   const lng = Number(df(/^(lng|lon|long|longitude)$/i)) || null;
-  const verificationCode = S(deepFind(x, /verif/i, { skip: ['products'] }));
+  const verificationCode = S(first(x.customer && x.customer.phone_masking_code, deepFind(x, /verif|masking_?code/i, { skip: ['products'] })));
   if (!street) warnings.push('no street found');
   if (!customerPhone) warnings.push('no phone found');
 
@@ -235,7 +237,7 @@ function normalize(x, st) {
     platformStatus: st.raw,
     orderType: /pick|collect|abhol/i.test(S(x.delivery_type)) ? 'PICKUP' : 'DELIVERY',
     customerName, customerPhone, verificationCode,
-    delivery: { address: street, street, houseNumber, house: houseNumber, postalCode, postal: postalCode, city, floor, notes: dnotes, lat, lng, name: customerName, phone: customerPhone },
+    delivery: { address: fullStreet, street, houseNumber, house: houseNumber, postalCode, postal: postalCode, city, floor, notes: dnotes, lat, lng, name: customerName, phone: customerPhone },
     payment: { method, paid: method === 'ONLINE', raw: payRaw },
     paymentMethod: method,
     externalPaymentStatus: method === 'ONLINE' ? 'PAID_ON_PLATFORM' : 'UNKNOWN',
