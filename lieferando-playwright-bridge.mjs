@@ -233,8 +233,13 @@ function normalize(x, st) {
     platformStatus: st.raw,
     orderType: /pick|collect|abhol/i.test(S(x.delivery_type)) ? 'PICKUP' : 'DELIVERY',
     customerName, customerPhone, verificationCode,
-    delivery: { address: street, street, houseNumber, postalCode, city, floor, notes: dnotes, lat, lng },
+    delivery: { address: street, street, houseNumber, house: houseNumber, postalCode, postal: postalCode, city, floor, notes: dnotes, lat, lng, name: customerName, phone: customerPhone },
     payment: { method, paid: method === 'ONLINE', raw: payRaw },
+    paymentMethod: method,
+    externalPaymentStatus: method === 'ONLINE' ? 'PAID_ON_PLATFORM' : 'UNKNOWN',
+    externalTotalCents: totalCents,
+    type: /pick|collect|abhol/i.test(S(x.delivery_type)) ? 'pickup' : 'delivery',
+    acceptedAt: confirmedAt || placedAt,
     cashDueCents: method === 'CASH' ? totalCents : 0,
     cart, subtotalCents, fees, discountsCents, stampCents, totalCents,
     asap: !requestedAt,
@@ -367,7 +372,7 @@ async function handleList(list) {
     const sig = sha(JSON.stringify([o.liveStage, o.totalCents, o.cart, o.delivery, o.payment, o.requestedAt, o.readyForKitchen, o.remarks, o.customerPhone]));
     if (state.sent[id] !== sig) {
       fs.writeFileSync(P(`raw/${id}.json`), JSON.stringify(x));
-      const body = { source: 'LIEFERANDO', order: { ...o, raw: x } };
+      const body = { source: 'LIEFERANDO', order: o };
       const r = await tryPost('/api/platform-orders/import', body);
       if (r === 'retry') fs.appendFileSync(P('outbox.jsonl'), JSON.stringify(body) + '\n');
       state.sent[id] = sig; saveState();
