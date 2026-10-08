@@ -73,7 +73,7 @@ async function poll() {
     loggedOut = false; lastOkAt = Date.now();
     for (const o of orders) {
       const id = String(o.id);
-      const sig = sha(JSON.stringify([o.orderstatetypeId, o.amount, o.billingNumber, o.expectedDeliveryTimeMinutes, o.paymentIds]));
+      const sig = sha(JSON.stringify([o.orderstatetypeId, o.amount, o.billingNumber, o.expectedDeliveryTimeMinutes, o.paymentIds, o.routing && o.routing.expectedTourStart]));
       if (state.sent[id] === sig) continue;
       const D = await sidesCall('/ordercentral/showSingleOrderdata', 'order_id=' + encodeURIComponent(id) + '&showDeliveryPortal=1&showOrderstateHistory=1');
       if (!D.json || D.json.status !== 1 || !D.json.response || !D.json.response.orderDataset) { log(`detail ${id} failed`, D.status, JSON.stringify(D.json && D.json.response && D.json.response.error_code || D.text || '')); continue; }

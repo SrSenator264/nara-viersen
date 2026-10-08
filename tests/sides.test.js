@@ -43,3 +43,13 @@ test('Loco/Sides orders are recorded but never on our kitchen tablet', async () 
   const o = { ...normalizeSides(detail), id: 'x', source: 'SIDES', status: 'OPEN' };
   assert.equal(K.listKitchenOrders([o], Date.parse('2026-10-08T16:40:00Z')).length, 0);
 });
+
+test('Loco delivery goes to our dispatch (same drivers) with Sides ready time', async () => {
+  const { normalizeSides } = await import('../sides-normalize.mjs');
+  const S = require('../dispatch-service.js');
+  const o = { ...normalizeSides(detail, { id: 1, routing: { expectedTourStart: '2026-10-08 18:48:00' } }), id: 'loco1', source: 'SIDES', status: 'OPEN' };
+  assert.equal(o.readyAt, '2026-10-08T16:48:00.000Z');
+  const inp = S.buildInput({ settings: {}, employees: [], orders: [o] }, Date.parse('2026-10-08T16:40:00Z'));
+  assert.equal(inp.orders.length, 1);
+  assert.equal(inp.orders[0].readyAt, '2026-10-08T16:48:00.000Z');
+});

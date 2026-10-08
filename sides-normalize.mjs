@@ -72,6 +72,7 @@ export function normalizeSides(detail, listOrder = {}) {
   const reference = S((R.deliveryPortalInfo && R.deliveryPortalInfo.referenceId) || listOrder.referenceId);
   const type = /deliver/i.test(S(D.ordertype_constantname || listOrder.ordertypeConstantName)) ? 'delivery' : 'pickup';
   const createdAt = berlinToIso(D.billingdate || D.createdate || listOrder.billingDate);
+  const readyAt = berlinToIso(listOrder.routing && listOrder.routing.expectedTourStart);
   const dueAt = berlinToIso(D.expectedDeliveryDate || (listOrder.routing && listOrder.routing.expectedDeliveryTime));
   const name = [S(C.user_name), S(C.user_surname)].filter(Boolean).join(' ') || S(listOrder.customer && listOrder.customer.name);
   const street = S(C.customer_street), house = S(C.customer_streetnumber), postal = S(C.customer_zip), city = S(C.customer_city);
@@ -92,7 +93,7 @@ export function normalizeSides(detail, listOrder = {}) {
     station: 'LOCO',
     type, orderType: type.toUpperCase(),
     liveStage,
-    createdAt, placedAt: createdAt, dueAt,
+    createdAt, placedAt: createdAt, dueAt, readyAt,
     customerName: name, customerPhone: S(C.customer_telephone),
     delivery: type === 'delivery' ? { name, phone: S(C.customer_telephone), street, house, houseNumber: house, postal, postalCode: postal, city, lat, lng, address: [street, house].filter(Boolean).join(' '), notes } : { name, phone: S(C.customer_telephone) },
     remarks: S(D.comment),
