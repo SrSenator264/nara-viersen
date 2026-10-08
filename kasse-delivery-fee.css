@@ -1,0 +1,5 @@
+.nara-quote{grid-column:1/-1;margin-top:12px;padding:12px 14px;border-radius:12px;border:1px solid #d6d6d6;background:#f6f6f4;display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:15px}
+.nara-quote>div{display:flex;flex-direction:column;gap:2px}.nara-quote span{font-size:12px;opacity:.7}.nara-quote strong{font-size:18px}
+.nara-quote[data-state=ok]{background:#eaf6ee;border-color:#9fd1ae}.nara-quote[data-state=warn]{background:#fff4e0;border-color:#f0c070}.nara-quote[data-state=bad]{background:#fdeceb;border-color:#e5a09b}
+.nara-quote .nq-status{margin-inline-start:auto;font-weight:600;flex-direction:row}
+.nara-quote-total{margin-top:6px}
