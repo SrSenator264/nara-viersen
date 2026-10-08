@@ -77,6 +77,25 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 .acts .pri:disabled{opacity:.5}
 .placeholder{margin:auto;color:var(--mute)}
 #nara-print-sheet{display:none}
+.stats{max-width:1320px;margin:18px auto 0;padding:0 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:stretch}
+.stat{display:flex;flex-direction:column;gap:2px;min-width:132px;padding:10px 14px;border-radius:14px;background:#fff;border:2px solid transparent;border-top:5px solid var(--pc,#999);text-align:start;box-shadow:0 1px 3px #0000000d}
+.stat.on{border-color:var(--pc)}
+.stat b{font-size:.85rem;color:var(--pc)}
+.stat strong{font-size:1.5rem;line-height:1.1}
+.stat span{color:var(--mute);font-size:.82rem}
+.stat.total{--pc:#1d2327;background:#1d2327;color:#fff}.stat.total b,.stat.total span{color:#ffffffb0}
+.stat.rep{--pc:#1d2327;justify-content:center;align-items:center;font-weight:800;cursor:pointer}
+.card{border-inline-start:6px solid var(--pc,#999)!important}
+.badge{font-size:.8rem;padding:4px 11px}
+#rep{position:fixed;inset:0;z-index:20;background:#0008;display:flex;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto}
+#rep[hidden]{display:none}
+.rcard{width:min(760px,100%);background:#fff;border-radius:18px;padding:22px 24px}
+.rcard h2{margin:0 0 4px}.rhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.rhead .sp{flex:1}.rhead button,.rhead input{height:40px;border-radius:10px;border:1px solid var(--line);padding:0 14px;font:inherit;background:#fff}
+.rhead .go{background:var(--ink);color:#fff;border:0;font-weight:700}
+.rg{margin:16px 0 4px;padding:8px 12px;border-radius:10px;background:#f6f4f1;border-inline-start:6px solid var(--pc);display:flex;justify-content:space-between;font-weight:800}
+.rt{width:100%;border-collapse:collapse;font-size:.9rem}.rt td{padding:5px 6px;border-bottom:1px solid #f0ece7}.rt td.n{text-align:end;font-variant-numeric:tabular-nums}.rt tr.x td{color:#b00;text-decoration:line-through}
+.rsum{margin-top:18px;border-top:2px solid var(--ink);padding-top:10px}.rsum div{display:flex;justify-content:space-between;padding:3px 0}.rsum .big{font-size:1.25rem;font-weight:800}
 @media (max-width:900px){main{grid-template-columns:1fr;padding:14px}.cards{max-height:none}header{padding:0 14px}}
 </style>
 </head>
@@ -87,11 +106,12 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
   <span class="sync" id="sync"><b></b><span>…</span></span>
   <a class="back" href="kasse.html">Zur Kasse</a>
 </header>
+<div class="stats" id="stats"></div>
 <main>
   <section class="panel list">
     <h1>Your orders</h1>
     <div class="tools">
-      <select id="plat"><option value="ALL">Alle Plattformen</option><option value="LIEFERANDO">Lieferando</option><option value="UBER_EATS">Uber Eats</option><option value="WOLT">Wolt</option><option value="LOCO">Loco Chicken</option></select>
+      <select id="plat"><option value="ALL">Alle Plattformen</option><option value="LIEFERANDO">Lieferando</option><option value="UBER_EATS">Uber Eats</option><option value="WOLT">Wolt</option><option value="LANCH">Lanch</option><option value="LOCO">Loco Chicken</option></select>
       <input id="q" placeholder="Suchen: Code, Name, Straße">
     </div>
     <div class="tabs">
@@ -103,6 +123,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
   </section>
   <section class="panel detail" id="detail"><p class="placeholder">Wähle einen Auftrag aus.</p></section>
 </main>
+<div id="rep" hidden><div class="rcard"><div class="rhead"><h2>📊 Tagesbericht</h2><span class="sp"></span><input type="date" id="rday"><button class="go" id="rprint">🖨 Drucken</button><button id="rclose">✕</button></div><div id="rbody"></div></div></div>
 <div id="nara-print-sheet"></div>
 <script src="kasse-receipt.js?v=20261008"></script>
 <script>
@@ -115,6 +136,8 @@ let orders=[],stage='PREPARE',selId=null,lastOk=0;
 
 const isLoco=o=>/loco/i.test(S(o.brand||o.brandName))||/^SIDES/i.test(S(o.source));
 function plat(o){if(isLoco(o))return 'LOCO';const p=S(o.platform||o.source).toUpperCase();if(/LIEFERANDO/.test(p))return 'LIEFERANDO';if(/UBER/.test(p))return 'UBER_EATS';if(/WOLT/.test(p))return 'WOLT';if(/LANCH/.test(p))return 'LANCH';return 'NARA'}
+const PC={LIEFERANDO:'#ff8000',UBER_EATS:'#06c167',WOLT:'#009de0',LANCH:'#7b4ddb',LOCO:'#d62828',NARA:'#37474f'};
+let all=[],pays={};
 const PL={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',LOCO:'Loco',NARA:'NARA'};
 function badge(o){const p=plat(o);let t=PL[p];if(p==='LOCO'&&o.channel&&o.channel!=='SIDES')t+=' · '+(PL[o.channel]||o.portalName||'');return '<span class="badge b-'+p+'">'+esc(t)+'</span>'}
 function stageOf(o){const st=S(o.status).toUpperCase();if(st==='CANCELLED')return 'DONE';const s=S(o.liveStage).toUpperCase();if(s==='DONE'||st==='COMPLETED')return 'DONE';if(s==='HANDOVER')return 'HANDOVER';return 'PREPARE'}
@@ -128,7 +151,7 @@ function title(o){if(!isDel(o))return 'Abholung';return [place(o),street(o)].fil
 function custName(o){return S(D(o).name)||S(o.customerName)||'Kunde'}
 function phone(o){return S(o.customerPhone)||S(D(o).phone)}
 const localDay=t=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
-function when(o){return Date.parse(o.placedAt||o.createdAt||o.acceptedAt||0)||0}
+function when(o){const v=o.placedAt||o.createdAt||o.acceptedAt;const t=v?Date.parse(v):0;if(t)return t;const id=S(o.id).match(/1\d{12}/);return id?Number(id[0]):(Date.parse(o.completedAt||o.updatedAt||0)||0)}
 function due(o){return Date.parse(o.dueAt||o.etaAt||o.requestedAt||0)||0}
 
 function ring(o,big){
@@ -145,7 +168,8 @@ async function load(){
     const r=await fetch('/api/kasse-state',{cache:'no-store'});
     if(!r.ok)throw Error(r.status);
     const j=await r.json(),today=localDay(Date.now());
-    orders=(j.orders||[]).filter(o=>(o.source||o.platform)&&!o.liveArchivedAt&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<12*3600000));
+    all=j.orders||[];pays={};for(const p of j.payments||[])pays[p.id]=p;
+    orders=all.filter(o=>plat(o)!=='NARA'&&!o.liveArchivedAt&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<12*3600000));
     lastOk=Date.now();
   }catch(e){}
   render();
@@ -157,12 +181,13 @@ function visible(){
 }
 
 function render(){
+  renderStats();
   const vis=visible();
   for(const s of ['PREPARE','HANDOVER','DONE'])$('#n-'+s).textContent=vis.filter(o=>stageOf(o)===s).length;
   const list=vis.filter(o=>stageOf(o)===stage).sort((a,b)=>stage==='DONE'?when(b)-when(a):(due(a)||when(a))-(due(b)||when(b)));
   if(selId&&!orders.some(o=>String(o.id)===selId))selId=null;
   if(!selId&&list[0])selId=String(list[0].id);
-  $('#cards').innerHTML=list.map(o=>'<button class="card'+(String(o.id)===selId?' sel':'')+'" data-id="'+esc(o.id)+'">'+ring(o)+'<div><h3>'+esc(title(o))+'</h3><p>'+esc(custName(o))+'</p><p>'+(o.asap===false||o.requestedAt?'🕒 '+new Date(due(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'ASAP')+' · <span class="code">#'+esc(code(o))+'</span></p></div><div>'+(cancelled(o)?'<span class="badge b-x">Storniert</span>':badge(o))+'</div></button>').join('')||'<p class="empty">Keine Aufträge hier.</p>';
+  $('#cards').innerHTML=list.map(o=>'<button class="card'+(String(o.id)===selId?' sel':'')+'" style="--pc:'+PC[plat(o)]+'" data-id="'+esc(o.id)+'">'+ring(o)+'<div><h3>'+esc(title(o))+'</h3><p>'+esc(custName(o))+'</p><p>'+(o.asap===false||o.requestedAt?'🕒 '+new Date(due(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'ASAP')+' · <span class="code">#'+esc(code(o))+'</span></p></div><div>'+(cancelled(o)?'<span class="badge b-x">Storniert</span>':badge(o))+'</div></button>').join('')||'<p class="empty">Keine Aufträge hier.</p>';
   document.querySelectorAll('.card').forEach(b=>b.onclick=()=>{selId=b.dataset.id;render()});
   const sy=$('#sync');sy.classList.toggle('off',Date.now()-lastOk>20000);sy.querySelector('span').textContent=(Date.now()-lastOk>20000?'Keine Verbindung':'Live')+' · '+new Date(lastOk||Date.now()).toLocaleTimeString('de-DE');
   renderDetail(orders.find(o=>String(o.id)===selId));
@@ -222,6 +247,45 @@ function printOrder(o){
 
 document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{stage=b.dataset.st;selId=null;document.querySelectorAll('[data-st]').forEach(x=>x.classList.toggle('on',x===b));render()});
 $('#plat').onchange=()=>{selId=null;render()};$('#q').oninput=()=>{selId=null;render()};
+
+// ── Zähler je Plattform + Tagesbericht ──
+function totalOf(o){const p=o.paymentId&&pays[o.paymentId];if(p&&Number.isFinite(Number(p.amountCents)))return Number(p.amountCents);
+  const t=Number(o.totalCents)||Number(o.externalTotalCents);if(t)return t;
+  return (o.cart||[]).reduce((s,i)=>s+(i.totalCents!=null?Number(i.totalCents):(Number(i.unitCents)||0)*(Number(i.quantity)||1)),0)-(Number(o.discount&&o.discount.amountCents)||0)}
+function payOf(o){const p=o.paymentId&&pays[o.paymentId];const m=S((p&&p.method)||(o.payment&&o.payment.method)||o.paymentMethod).toUpperCase();
+  if(/CASH|BAR/.test(m))return 'Bar';if(/CARD|KARTE|EC/.test(m))return 'Karte';if(/ONLINE|PAID/.test(m))return 'Online';return plat(o)==='NARA'?(S(o.status).toUpperCase()==='COMPLETED'?'?':'offen'):'Online'}
+function dayOrders(day){return all.filter(o=>localDay(when(o))===day&&!o.isTest&&!/^TEST/i.test(S(o.id)))}
+const ORDER=['LIEFERANDO','UBER_EATS','WOLT','LANCH','LOCO','NARA'];
+function groups(list){const g={};for(const o of list){(g[plat(o)]??=[]).push(o)}return ORDER.filter(k=>g[k]).map(k=>({k,list:g[k]}))}
+function renderStats(){
+  const list=dayOrders(localDay(Date.now())).filter(o=>!cancelled(o));
+  const cur=$('#plat').value;
+  const chips=groups(list).map(({k,list})=>{let sub=eur(list.reduce((s,o)=>s+totalOf(o),0));
+    if(k==='LOCO'){const c={};for(const o of list){const ch=PL[o.channel]||o.portalName||'Sides';c[ch]=(c[ch]||0)+1}sub+=' · '+Object.entries(c).map(([a,b])=>a+' '+b).join(' · ')}
+    return '<button class="stat'+(cur===k?' on':'')+'" style="--pc:'+PC[k]+'" data-p="'+k+'"><b>'+(k==='NARA'?'NARA Kasse':PL[k])+'</b><strong>'+list.length+'</strong><span>'+esc(sub)+'</span></button>'});
+  const tot=list.reduce((s,o)=>s+totalOf(o),0);
+  $('#stats').innerHTML=chips.join('')+'<div class="stat total"><b>Heute gesamt</b><strong>'+list.length+'</strong><span>'+eur(tot)+'</span></div><button class="stat rep" id="openrep">📊 Tagesbericht</button>';
+  document.querySelectorAll('.stat[data-p]').forEach(b=>b.onclick=()=>{const k=b.dataset.p;if(k==='NARA'){openRep();return}$('#plat').value=$('#plat').value===k?'ALL':k;selId=null;render()});
+  $('#openrep').onclick=openRep;
+}
+function reportHtml(day){
+  const list=dayOrders(day).sort((a,b)=>when(a)-when(b));
+  const ok=list.filter(o=>!cancelled(o));
+  const by={Bar:0,Karte:0,Online:0};let rows='';
+  for(const {k,list:L} of groups(list)){
+    const good=L.filter(o=>!cancelled(o)),sum=good.reduce((s,o)=>s+totalOf(o),0);
+    rows+='<div class="rg" style="--pc:'+PC[k]+'"><span>'+(k==='NARA'?'NARA Kasse':PL[k])+' · '+good.length+' Bestellungen</span><span>'+eur(sum)+'</span></div><table class="rt">'+
+      L.map(o=>{const t=totalOf(o),pm=payOf(o);if(!cancelled(o)&&by[pm]!=null)by[pm]+=t;
+        return '<tr'+(cancelled(o)?' class="x"':'')+'><td>'+new Date(when(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+'</td><td>#'+esc(code(o))+'</td><td>'+(k==='LOCO'?esc(PL[o.channel]||o.portalName||''):'')+' '+(isDel(o)?'Lieferung':S(o.type)==='pickup'?'Abholung':'Vor Ort')+'</td><td>'+pm+'</td><td class="n">'+eur(t)+'</td></tr>'}).join('')+'</table>';
+  }
+  const total=ok.reduce((s,o)=>s+totalOf(o),0),canc=list.length-ok.length;
+  return rows+'<div class="rsum"><div><span>Bestellungen</span><span>'+ok.length+(canc?' (+'+canc+' storniert)':'')+'</span></div><div><span>Bar</span><span>'+eur(by.Bar)+'</span></div><div><span>Karte</span><span>'+eur(by.Karte)+'</span></div><div><span>Online (Plattformen)</span><span>'+eur(by.Online)+'</span></div><div class="big"><span>Umsatz gesamt</span><span>'+eur(total)+'</span></div></div>'||'<p>Keine Bestellungen.</p>';
+}
+function isoDay(t){const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function openRep(){const r=$('#rday');if(!r.value)r.value=isoDay(Date.now());drawRep();$('#rep').hidden=false}
+function drawRep(){const [y,m,d]=$('#rday').value.split('-').map(Number);$('#rbody').innerHTML=reportHtml(y+'-'+m+'-'+d)}
+$('#rday').onchange=drawRep;$('#rclose').onclick=()=>{$('#rep').hidden=true};
+$('#rprint').onclick=()=>{const sh=$('#nara-print-sheet');sh.innerHTML='<div style="font:12px Arial"><b style="font-size:16px">Tagesbericht '+esc($('#rday').value)+'</b>'+$('#rbody').innerHTML+'</div>';setTimeout(()=>window.print(),50)};
 load();setInterval(load,5000);setInterval(render,30000);
 })();
 </script>
