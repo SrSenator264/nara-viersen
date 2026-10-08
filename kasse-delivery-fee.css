@@ -3,3 +3,6 @@
 .nara-quote[data-state=ok]{background:#eaf6ee;border-color:#9fd1ae}.nara-quote[data-state=warn]{background:#fff4e0;border-color:#f0c070}.nara-quote[data-state=bad]{background:#fdeceb;border-color:#e5a09b}
 .nara-quote .nq-status{margin-inline-start:auto;font-weight:600;flex-direction:row}
 .nara-quote-total{margin-top:6px}
+
+/* أزرار Lieferando و Lanch القديمة (استيراد يدوي) مخفية؛ الجسر الجديد بيجيب الطلبات تلقائياً. بتنرجع بحذف هالسطر. */
+#nara-lieferando-button,#nara-lanch-button{display:none!important}
