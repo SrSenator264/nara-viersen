@@ -99,10 +99,19 @@ export function normalizeUber(o, store = {}) {
   const fee = find(/delivery|liefer/i) || 0;
   const discount = lines.filter(l => /offer|discount|promo|rabatt|angebot|aktion/i.test(l.label)).reduce((s, l) => s + Math.abs(l.cents || 0), 0);
   const tip = Math.abs(find(/tip|trinkgeld/i) || 0);
-  let total = find(/^total|^gesamt|^summe/i);
+  // Servicegebühr von Uber ("Marketplace fee (Uber's fees)"): zahlt der Kunde, geht an Uber – nicht an uns
+  const service = Math.abs(find(/marketplace|service|uber.?s fee/i) || 0);
+  // Barzahlung: Uber schreibt dann "Cash due" statt "Total"
+  const cash = lines.some(l => /cash|bar(zahlung)?\b|zu zahlen/i.test(l.label));
+  const thirdParty = /THIRD_PARTY/i.test(S(o.fulfillmentType));
   const itemsSum = cart.reduce((s, i) => s + i.totalCents, 0);
-  if (subtotal != null && Math.abs(subtotal - itemsSum) > 1) warnings.push(`items ${itemsSum} ≠ subtotal ${subtotal}`);
-  if (total == null) total = itemsSum + fee - discount + tip;
+  // Manche Angebote (z. B. 1+1 gratis) zieht Uber schon vor der Zwischensumme ab → als Rabatt zählen
+  const preSub = subtotal != null && itemsSum - subtotal > 1 ? itemsSum - subtotal : 0;
+  if (subtotal != null && subtotal - itemsSum > 1) warnings.push(`items ${itemsSum} < subtotal ${subtotal}`);
+  // Endbetrag: zuerst Ubers eigener orderTotal, dann die Zeile "Total"/"Cash due", sonst selbst rechnen
+  let total = e5ToCents(o.payment && o.payment.orderTotal);
+  if (total == null) total = find(/^total|^gesamt|^summe|cash due|bar/i);
+  if (total == null) total = (subtotal != null ? subtotal : itemsSum) + fee + service - discount + tip;
   if (fee) cart.push({ name: 'Liefergebühr', kind: 'DELIVERY_FEE', quantity: 1, unitCents: fee, totalCents: fee, options: [] });
 
   const iso = v => { const t = Date.parse(v); return Number.isFinite(t) ? new Date(t).toISOString() : null; };
@@ -142,14 +151,16 @@ export function normalizeUber(o, store = {}) {
     } : { name, phone: S(phone.phoneNumber) },
     deliveryQrUrl: S(o.orderTrackingMetadata && o.orderTrackingMetadata.url) || null,
     cart,
-    subtotalCents: subtotal != null ? subtotal : itemsSum,
-    deliveryFeeCents: fee, discountsCents: discount, tipCents: tip,
+    subtotalCents: itemsSum,
+    deliveryFeeCents: fee, discountsCents: discount + preSub, tipCents: tip,
+    fees: { delivery: fee, service, small: 0 },
     totalCents: total,
     externalTotalCents: total,
-    payment: { method: 'ONLINE', paid: true, raw: 'uber' },
-    paymentMethod: 'ONLINE',
-    externalPaymentStatus: 'PAID_ON_PLATFORM',
-    cashDueCents: 0,
+    // Bar + Uber-Kurier: der Kurier kassiert, nicht wir. Bar + eigener Fahrer: unser Fahrer kassiert.
+    payment: cash ? { method: 'CASH', paid: false, raw: 'uber', collectedBy: thirdParty ? 'UBER_COURIER' : 'DRIVER' } : { method: 'ONLINE', paid: true, raw: 'uber' },
+    paymentMethod: cash ? 'CASH' : 'ONLINE',
+    externalPaymentStatus: cash ? (thirdParty ? 'CASH_UBER_COURIER' : 'CASH_ON_DELIVERY') : 'PAID_ON_PLATFORM',
+    cashDueCents: cash && !thirdParty ? total : 0,
     asap: !requestedAt,
     requestedAt, platformReadyAt: readyAt, dueAt, etaAt: dueAt, prepMinutes,
     taxRate: Array.isArray(o.taxRateOptions) ? o.taxRateOptions.join(',') : '',

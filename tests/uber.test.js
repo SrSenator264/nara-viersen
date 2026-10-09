@@ -47,3 +47,22 @@ test('Uber states map to NARA stages', async () => {
   assert.equal(stageOf('COMPLETED').stage, 'DONE');
   assert.equal(stageOf('SOMETHING_NEW').known, false);
 });
+
+test('Uber cash order with Uber courier: total from orderTotal, service fee separate, cash collected by courier', async () => {
+  const { normalizeUber } = await import('../uber-normalize.mjs');
+  const o = { ...order, id: 'cash-1', payment: {
+    orderTotal: e5(21.98).currencyAmount,
+    lineItems: [
+      { label: rt('Subtotal'), value: rt('€32.46') }, { label: rt('Delivery Fee'), value: rt('€1.00') },
+      { label: rt("Marketplace fee (Uber's fees)"), value: rt('€1.30') }, { label: rt('Special offer'), value: rt('(€12.14)') },
+      { label: rt('Cash due'), value: rt('€21.98') },
+    ] },
+    cartInfo: { cartItems: [{ itemID: 'n', name: 'Nuggets', quantity: { amount: 2 }, price: e5(11.98) }, { itemID: 't', name: 'Taco', quantity: { amount: 1 }, price: e5(8.99) }, { itemID: 'b', name: 'Burger', quantity: { amount: 1 }, price: e5(11.49) }] } };
+  const n = normalizeUber(o, {});
+  assert.equal(n.totalCents, 2198);
+  assert.equal(n.fees.service, 130); assert.equal(n.deliveryFeeCents, 100);
+  assert.equal(n.discountsCents, 1214 + 1198);
+  assert.equal(n.payment.method, 'CASH'); assert.equal(n.payment.collectedBy, 'UBER_COURIER'); assert.equal(n.cashDueCents, 0);
+  const own = normalizeUber({ ...o, fulfillmentType: 'DELIVERY_BYOC' }, {});
+  assert.equal(own.payment.collectedBy, 'DRIVER'); assert.equal(own.cashDueCents, 2198);
+});
