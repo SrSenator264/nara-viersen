@@ -33,3 +33,11 @@ test('fresh quotes: only new platform orders not yet started in the kitchen', ()
   const data = { orders: [lf('5'), lf('6', { kitchenStatus: 'PREPARING' }), lf('7', { placedAt: at(-60) }), { id: 'k', source: 'NARA', cart: cart(1), placedAt: at(-1) }] };
   assert.deepEqual(Q.freshQuotes(data, NOW).map(q => q.orderId), ['5']);
 });
+
+test('no platform time: compares with our standard 60 minutes', () => {
+  const o = lf('8');
+  const q = Q.quote({ orders: [] }, o, NOW);
+  assert.equal(q.platformMin, 60); assert.equal(q.addMin, 0); assert.equal(q.setMin, 60);
+  const huge = Q.quote({ orders: [], settings: { kitchen: { parallelOrders: 1 } } }, lf('9', { cart: cart(120) }), NOW);
+  assert.ok(huge.addMin > 0 && huge.setMin > 60);
+});

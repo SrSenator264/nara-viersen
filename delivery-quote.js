@@ -22,6 +22,7 @@ function settings(data) {
     bufferMin: Number.isFinite(Number(q.bufferMin)) ? Number(q.bufferMin) : 5,       // هامش أمان
     unknownDriveMin: Number.isFinite(Number(q.unknownDriveMin)) ? Number(q.unknownDriveMin) : 15, // إذا ما عرفنا العنوان
     freshMin: Number.isFinite(Number(q.freshMin)) ? Number(q.freshMin) : 20,        // قديش بيضل الاقتراح ظاهر
+    standardMin: Number.isFinite(Number(q.standardMin)) ? Number(q.standardMin) : 60, // الوقت اللي دايماً منحطّه عالمنصة
   };
 }
 
@@ -78,13 +79,16 @@ function quote(data, o, now = Date.now()) {
     // وقت المنصة: من القبول للتسليم المتوقع
     const base = ms(o.confirmedAt || o.acceptedAt || o.placedAt) || now;
     const due = ms(o.dueAt || o.etaAt);
-    const platformMin = due ? Math.round((due - base) / MIN) : null;
+    // إذا المنصة عطت وقت منستعملو، وإلا الوقت الثابت تبعنا (60 د)
+    const platformMin = due ? Math.round((due - base) / MIN) : S.standardMin;
     Object.assign(out, {
       scheduled: false,
       recommendMin: minutes,
       deliverAt: new Date(now + minutes * MIN).toISOString(),
-      platformMin,
-      addMin: platformMin != null ? Math.max(0, minutes - platformMin) : null,
+      platformMin, standardMin: S.standardMin,
+      // الوقت اللي لازم ينكتب: الثابت إذا بيكفي، وإلا اقتراحنا
+      setMin: Math.max(minutes, S.standardMin),
+      addMin: Math.max(0, minutes - platformMin),
     });
   }
   return out;
