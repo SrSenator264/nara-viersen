@@ -45,6 +45,13 @@ function kitchenItems(cart, catalog) {
     }));
 }
 
+// حالة المطبخ: إذا المنصة قالت إنو الطلب طلع (جاهز / مع السواق) والمطبخ لسا ما كبس شي → جاهز
+function kitchenStatusOf(o) {
+  const k = STATES.includes(str(o.kitchenStatus).toUpperCase()) ? str(o.kitchenStatus).toUpperCase() : 'NEW';
+  if ((k === 'NEW' || k === 'PREPARING') && sourceOf(o) !== 'NARA' && str(o.liveStage).toUpperCase() === 'HANDOVER' && str(o.liveStageSource).toUpperCase() !== 'NARA') return 'READY';
+  return k;
+}
+
 // طلب → شكل المطبخ. ما في أي حقل فيه مبلغ.
 function kitchenView(o, now = Date.now(), catalog = null) {
   const d = o.delivery || {};
@@ -78,7 +85,7 @@ function kitchenView(o, now = Date.now(), catalog = null) {
     priority: typeOf(o) === 'local',
     scheduled: !!o.requestedAt,
     preparationMinutes: prep,
-    kitchenStatus: STATES.includes(str(o.kitchenStatus).toUpperCase()) ? str(o.kitchenStatus).toUpperCase() : 'NEW',
+    kitchenStatus: kitchenStatusOf(o),
     kitchenStatusAt: o.kitchenStatusAt || null,
     employeeName: str(o.employeeName || o.createdByName),
   };
@@ -172,4 +179,4 @@ function applyKitchenStatus(order, next, user, now = new Date().toISOString()) {
   return { from, to };
 }
 
-module.exports = { isClosedForOps, STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };
+module.exports = { kitchenStatusOf, isClosedForOps, STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };

@@ -148,3 +148,15 @@ test('dine-in table orders come first; startAt tells the kitchen when to begin',
   assert.equal(list[0].priority, true);
   assert.equal(list[2].startAt, at(90));
 });
+
+test('platform says out for delivery → kitchen shows it as ready and the queue skips it', () => {
+  const NOW = Date.parse('2026-10-09T12:00:00Z');
+  const at = m => new Date(NOW + m * 60000).toISOString();
+  const cart = [{ name: 'Cheese Burger', quantity: 1, unitCents: 799 }];
+  const out = { id: 'u1', source: 'UBER_EATS', status: 'OPEN', liveStage: 'HANDOVER', cart, createdAt: at(-20) };
+  const cooking = { id: 'l1', source: 'LIEFERANDO', status: 'OPEN', liveStage: 'PREPARE', cart, createdAt: at(-5) };
+  assert.equal(K.kitchenStatusOf(out), 'READY');
+  assert.equal(K.kitchenStatusOf({ ...out, liveStageSource: 'NARA' }), 'NEW');
+  const P = require('../prep-learning.js');
+  assert.deepEqual(Object.keys(P.forecast({ orders: [out, cooking] }, NOW).orders), ['l1']);
+});

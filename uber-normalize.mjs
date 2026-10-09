@@ -37,7 +37,7 @@ const richText = x => {
 const STAGES = [
   ['CANCELLED', /cancel|reject|denied|fail|refund|unfulfilled/i],
   ['DONE', /complete|delivered|finished|done|fulfilled|picked_?up_by_customer|dined/i],
-  ['HANDOVER', /ready|pick|handoff|handover|courier|en_?route|on_?the_?way|delivering|dispatch/i],
+  ['HANDOVER', /ready|pick|handoff|handover|courier|en_?route|on_?the_?way|delivering|out_?for|dispatch|in_?transit/i],
   ['PREPARE', /prepar|accept|confirm|creat|^new$|offer|placed|pending|schedul/i],
 ];
 export function stageOf(state) {

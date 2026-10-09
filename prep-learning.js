@@ -72,12 +72,12 @@ function forecast(data, now = Date.now(), extraCart = null) {
   const CLOSED = new Set(['COMPLETED', 'CANCELLED', 'STORNIERT', 'DONE']);
   const stale = o => require('./kitchen.js').isStale(o, now);
   const open = (data.orders || []).filter(o => !require('./kitchen.js').isClosedForOps(o, now) && !stale(o) && cookItems(o.cart).length
-    && !['READY', 'PICKED_UP'].includes(str(o.kitchenStatus).toUpperCase())
+    && !['READY', 'PICKED_UP'].includes(require('./kitchen.js').kitchenStatusOf(o))
     && !/loco/i.test(str(o.brand || o.brandName)) && !/^SIDES/i.test(str(o.source)));
   const free = Array(slots).fill(now);
   const out = {};
   // اللي عم ينطبخ هلق بياخد مكان لحتى يخلص
-  const cooking = open.filter(o => str(o.kitchenStatus).toUpperCase() === 'PREPARING').sort((a, b) => Date.parse(a.preparingAt || 0) - Date.parse(b.preparingAt || 0));
+  const cooking = open.filter(o => require('./kitchen.js').kitchenStatusOf(o) === 'PREPARING').sort((a, b) => Date.parse(a.preparingAt || 0) - Date.parse(b.preparingAt || 0));
   for (const o of cooking) {
     const start = Date.parse(o.preparingAt) || now, prep = prepMinutes(m, o.cart);
     const end = Math.max(now + MIN, start + prep * MIN);
@@ -85,7 +85,7 @@ function forecast(data, now = Date.now(), extraCart = null) {
     out[o.id] = { startAt: new Date(start).toISOString(), readyAt: new Date(end).toISOString(), prepMin: prep };
   }
   // الجديدة بالدور (الأقدم أول)
-  const waiting = open.filter(o => str(o.kitchenStatus || 'NEW').toUpperCase() === 'NEW')
+  const waiting = open.filter(o => require('./kitchen.js').kitchenStatusOf(o) === 'NEW')
     .sort((a, b) => Date.parse(a.kitchenStartAt || a.createdAt || a.placedAt || 0) - Date.parse(b.kitchenStartAt || b.createdAt || b.placedAt || 0));
   const place = (cart, notBefore) => {
     free.sort((a, b) => a - b);
