@@ -100,6 +100,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 .rhead .go{background:var(--ink);color:#fff;border:0;font-weight:700}
 .rg{margin:16px 0 4px;padding:8px 12px;border-radius:10px;background:#f6f4f1;border-inline-start:6px solid var(--pc);display:flex;justify-content:space-between;font-weight:800}
 .rt{width:100%;border-collapse:collapse;font-size:.9rem}.rt td{padding:5px 6px;border-bottom:1px solid #f0ece7}.rt td.n{text-align:end;font-variant-numeric:tabular-nums}.rt .tst{border:0;background:#f4f1ec;border-radius:6px;cursor:pointer;padding:0 4px}.rt tr.x td{color:#b00;text-decoration:line-through}
+.asum{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:10px 12px;margin-bottom:8px;border-radius:10px;background:#f6f4f1;font-size:.9rem}
 .rsvc{display:flex;justify-content:space-between;gap:12px;padding:2px 12px 6px;font-size:.85rem;color:#7a736c}
 .rsum{margin-top:18px;border-top:2px solid var(--ink);padding-top:10px}.rsum div{display:flex;justify-content:space-between;padding:3px 0}.rsum .big{font-size:1.25rem;font-weight:800}
 @media (max-width:900px){main{grid-template-columns:1fr;padding:14px}.cards{max-height:none}header{padding:0 14px}}
@@ -207,7 +208,8 @@ async function load(){
     const j=await r.json(),today=localDay(Date.now());
     all=j.orders||[];pays={};for(const p of j.payments||[])pays[p.id]=p;
     // طلبات التجربة اللي انلغت (NARA-Demo-Loeschen) ما بتطلع أبداً
-    orders=all.filter(o=>plat(o)!=='NARA'&&!o.liveArchivedAt&&!(o.isTest&&cancelled(o))&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<12*3600000));
+    orders=all.filter(o=>plat(o)!=='NARA'&&!o.liveArchivedAt&&!(o.isTest&&cancelled(o))&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<3*3600000));
+    // بعد تسكيرة اليوم (5 الصبح) كل طلبات امبارح بتروح عالأرشيف، حتى لو المنصة ما سكّرتها. بس طلب عمرو أقل من 3 ساعات بيضل.
     lastOk=Date.now();
   }catch(e){}
   render();
@@ -344,7 +346,9 @@ function openArc(){const a=$('#aday');if(!a.value)a.value=isoDay(Date.now()-DAY_
 function drawArc(){
   const [y,m,d]=$('#aday').value.split('-').map(Number),day=y+'-'+m+'-'+d;
   const list=all.filter(o=>plat(o)!=='NARA'&&!o.isTest&&localDay(when(o))===day).sort((a,b)=>when(a)-when(b));
-  $('#abody').innerHTML=list.map(o=>'<button class="arow'+(cancelled(o)?' x':'')+'" style="--pc:'+PC[plat(o)]+'" data-aid="'+esc(o.id)+'"><span>'+new Date(when(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+'</span><span><b><bdi>'+esc(title(o))+'</bdi></b><small><bdi>'+esc(custName(o))+'</bdi> · #'+esc(code(o))+'</small></span>'+badge(o)+'<span>'+eur(totalOf(o))+'</span></button>').join('')||'<p>'+t('noOrders')+'</p>';
+  const ok=list.filter(o=>!cancelled(o)),paid=ok.reduce((s,o)=>s+totalOf(o),0),svc=ok.reduce((s,o)=>s+svcOf(o),0),cnt={};for(const o of ok)cnt[plat(o)]=(cnt[plat(o)]||0)+1;
+  const head=list.length?'<div class="asum"><span>'+ok.length+' '+t('orders')+(list.length>ok.length?' (+'+(list.length-ok.length)+' '+t('plusCanc')+')':'')+' · '+Object.entries(cnt).map(([k,n])=>PL[k]+' '+n).join(' · ')+'</span><b>'+(svc?t('forYou')+' ':'')+eur(paid-svc)+'</b></div>':'';
+  $('#abody').innerHTML=head+list.map(o=>'<button class="arow'+(cancelled(o)?' x':'')+'" style="--pc:'+PC[plat(o)]+'" data-aid="'+esc(o.id)+'"><span>'+new Date(when(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+'</span><span><b><bdi>'+esc(title(o))+'</bdi></b><small><bdi>'+esc(custName(o))+'</bdi> · #'+esc(code(o))+'</small></span>'+badge(o)+'<span>'+eur(totalOf(o))+'</span></button>').join('')||'<p>'+t('noOrders')+'</p>';
   document.querySelectorAll('[data-aid]').forEach(b=>b.onclick=()=>{arcSel=all.find(o=>String(o.id)===b.dataset.aid)||null;$('#arc').hidden=true;render()});
 }
 $('#aday').onchange=drawArc;$('#aclose').onclick=()=>{$('#arc').hidden=true};
