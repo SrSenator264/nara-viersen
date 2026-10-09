@@ -9,11 +9,11 @@
   'use strict';
   const T={
     de:{single:'Einzeln',menu:'Als Menü',add:'Hinzufügen',save:'Änderung speichern',required:'Pflicht',pick:'Bitte wählen: {x}',more:'anzeigen',less:'ausblenden',note:'Notiz',notePh:'Notiz für die Küche …',qty:'Menge',incl:'inkl.',close:'Schließen',
-      groups:{__drink:'Getränk',__sauce:'Sauce',Dips:'Dips','Ihre Extras':'Extras'}},
+      groups:{__drink:'Getränk',__sauce:'Sauce (im Menü inklusive)',Dips:'Dip extra (separat im Becher)','Ihre Extras':'Extras im Burger'}},
     ar:{single:'لحالو',menu:'منيو',add:'زيد عالطلب',save:'احفظ التعديل',required:'لازم',pick:'لازم تنقّي: {x}',more:'فرجيني',less:'خبّي',note:'ملاحظة',notePh:'ملاحظة للمطبخ …',qty:'الكمية',incl:'ضمن السعر',close:'سكّر',
-      groups:{__drink:'المشروب',__sauce:'الصوص',Dips:'الديبس','Ihre Extras':'إضافات'}},
+      groups:{__drink:'المشروب',__sauce:'الصوص (ضمن المنيو)',Dips:'ديب زيادة (بعلبة لحال)','Ihre Extras':'إضافات جوّا البرغر'}},
     en:{single:'Single',menu:'As menu',add:'Add to order',save:'Save changes',required:'Required',pick:'Please choose: {x}',more:'show',less:'hide',note:'Note',notePh:'Note for the kitchen …',qty:'Qty',incl:'incl.',close:'Close',
-      groups:{__drink:'Drink',__sauce:'Sauce',Dips:'Dips','Ihre Extras':'Extras'}}};
+      groups:{__drink:'Drink',__sauce:'Sauce (included in menu)',Dips:'Extra dip (separate cup)','Ihre Extras':'Extras inside the burger'}}};
   // ملاحظات سريعة للمطبخ (ألماني لأنو بتنطبع)
   const QUICK=['ohne Zwiebeln','ohne Tomaten','ohne Gurke','ohne Salat','ohne Soße','extra scharf','gut durch'];
   const L=()=>{try{const l=window.NARA_LANG?NARA_LANG.get():localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
@@ -40,7 +40,10 @@
   function chosenOptions(){
     const out=[];
     for(const g of S.gs){if(!visible(g))continue;const m=S.sel[g.group]||{};
-      for(const [id,v] of Object.entries(m))out.push({id,name:v.opt.name,cents:+v.opt.cents||0,group:g.group,quantity:v.qty||1})}
+      for(const [id,v] of Object.entries(m)){
+        // ديب بعلبة لحال: منكتب "Dip:" قدّامو كي المطبخ ما يحطو جوّا البرغر
+        const dip=g.group==='Dips'&&!/^(ohne|no)\b/i.test(v.opt.name)&&id!=='no-dip';
+        out.push({id,name:(dip?'Dip: ':'')+v.opt.name,cents:+v.opt.cents||0,group:g.group,quantity:v.qty||1})}}
     return out;
   }
   const unitCents=()=>(S.p.cents||0)+chosenOptions().reduce((s,x)=>s+(x.cents||0)*(x.quantity||1),0);
