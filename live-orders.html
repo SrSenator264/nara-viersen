@@ -71,6 +71,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 .sum{border-top:1px solid var(--line);padding-top:12px}
 .sum div{display:flex;justify-content:space-between;padding:3px 0;color:var(--mute)}
 .sum .tot{color:var(--ink);font-weight:800;font-size:1.15rem}
+.sum .net{color:#16a34a;font-weight:700;font-size:.92rem}
 .acts{display:flex;justify-content:flex-end;gap:12px;padding-top:16px}
 .acts button{height:52px;padding:0 26px;border-radius:999px;font-weight:800;font-size:1.05rem}
 .acts .sec{background:#fff;border:1px solid var(--line);color:var(--ink)}
@@ -99,6 +100,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 .rhead .go{background:var(--ink);color:#fff;border:0;font-weight:700}
 .rg{margin:16px 0 4px;padding:8px 12px;border-radius:10px;background:#f6f4f1;border-inline-start:6px solid var(--pc);display:flex;justify-content:space-between;font-weight:800}
 .rt{width:100%;border-collapse:collapse;font-size:.9rem}.rt td{padding:5px 6px;border-bottom:1px solid #f0ece7}.rt td.n{text-align:end;font-variant-numeric:tabular-nums}.rt .tst{border:0;background:#f4f1ec;border-radius:6px;cursor:pointer;padding:0 4px}.rt tr.x td{color:#b00;text-decoration:line-through}
+.rsvc{display:flex;justify-content:space-between;gap:12px;padding:2px 12px 6px;font-size:.85rem;color:#7a736c}
 .rsum{margin-top:18px;border-top:2px solid var(--ink);padding-top:10px}.rsum div{display:flex;justify-content:space-between;padding:3px 0}.rsum .big{font-size:1.25rem;font-weight:800}
 @media (max-width:900px){main{grid-template-columns:1fr;padding:14px}.cards{max-height:none}header{padding:0 14px}}
 </style>
@@ -145,19 +147,19 @@ const T={
     cancelled:'Storniert',none:'Keine Bestellungen hier.',offline:'Keine Verbindung',live:'Live',subtotal:'Zwischensumme',fee:'Liefergebühr',service:'Servicegebühr',small:'Mindermengenzuschlag',
     disc:'Rabatt',tip:'Trinkgeld',total:'Gesamt',delTag:'🛵 Lieferung',pickTag:'🛍 Abholung',verify:'Bestätigungscode:',ordered:'Bestellt um',dueBy:'Lieferung bis',items:'Artikel',
     cash:'💶 Bar',online:'💳 Online bezahlt',printOrder:'🖨 Bestellung drucken',toHandover:'Übergabe',done:'✓ Erledigt',back:'↩ Zurück',err:'Fehler: ',
-    naraKasse:'NARA Kasse',today:'Heute gesamt',orders:'Bestellungen',plusCanc:'storniert',Bar:'Bar',Karte:'Karte',Mix:'Bar + Karte',Online:'Online',offen:'offen',onlinePlat:'Online (Plattformen)',revenue:'Umsatz gesamt',noOrders:'Keine Bestellungen.',archive:'Archiv',arcHint:'Erledigte Bestellungen verschwinden nach Geschäftsschluss (05:00 Uhr) aus der Liste und bleiben hier im Archiv.',arcView:'Archiv',markTest:'Als Test markieren (zählt nicht)',markTestQ:'Diese Bestellung als Test markieren? Sie zählt dann nicht mehr im Tagesbericht.',testHint:'Test-Bestellungen mit 🧪 markieren – sie zählen dann nicht mehr. Offene Kassen-Aufträge zählen erst nach Bezahlung.'},
+    naraKasse:'NARA Kasse',today:'Heute gesamt',orders:'Bestellungen',plusCanc:'storniert',Bar:'Bar',Karte:'Karte',Mix:'Bar + Karte',Online:'Online',offen:'offen',onlinePlat:'Online (Plattformen)',revenue:'Umsatz gesamt',noOrders:'Keine Bestellungen.',archive:'Archiv',arcHint:'Erledigte Bestellungen verschwinden nach Geschäftsschluss (05:00 Uhr) aus der Liste und bleiben hier im Archiv.',arcView:'Archiv',markTest:'Als Test markieren (zählt nicht)',markTestQ:'Diese Bestellung als Test markieren? Sie zählt dann nicht mehr im Tagesbericht.',testHint:'Test-Bestellungen mit 🧪 markieren – sie zählen dann nicht mehr. Offene Kassen-Aufträge zählen erst nach Bezahlung.',custPaid:'Kunde bezahlt',platFee:'Servicegebühr (geht an die Plattform)',forYou:'Für dich'},
   ar:{toKasse:'رجوع للكاشير',yourOrders:'طلباتك',allPlat:'كل المنصات',search:'دوّر: الكود، الاسم، الشارع',PREPARE:'تحضير',HANDOVER:'تسليم',DONE:'خلصت',
     pick:'اختار طلب.',report:'تقرير اليوم',print:'اطبع',pickup:'استلام',delivery:'توصيل',local:'بالمحل',customer:'الزبون',minLate:'د متأخر',min:'د',
     cancelled:'ملغى',none:'ما في طلبات هون.',offline:'ما في اتصال',live:'Live',subtotal:'المجموع الفرعي',fee:'أجرة التوصيل',service:'رسوم الخدمة',small:'رسوم الطلب الصغير',
     disc:'خصم',tip:'بخشيش',total:'المجموع',delTag:'🛵 توصيل',pickTag:'🛍 استلام',verify:'كود التأكيد:',ordered:'انطلب الساعة',dueBy:'التوصيل لحد',items:'أصناف',
     cash:'💶 دفع كاش',online:'💳 مدفوع أونلاين',printOrder:'🖨 اطبع الطلب',toHandover:'تسليم',done:'✓ خلصت',back:'↩ رجوع',err:'غلط: ',
-    naraKasse:'NARA كاشير',today:'مجموع اليوم',orders:'طلبات',plusCanc:'ملغى',Bar:'كاش',Karte:'كرت',Mix:'كاش + كرت',Online:'أونلاين',offen:'مفتوح',onlinePlat:'أونلاين (المنصات)',revenue:'مجموع المبيعات',noOrders:'ما في طلبات.',archive:'الأرشيف',arcHint:'الطلبات اللي خلصت بتختفي من القائمة بعد تسكير المحل (الساعة 5 الصبح) وبتضل هون بالأرشيف.',arcView:'من الأرشيف',markTest:'علّمو تجربة (ما بينحسب)',markTestQ:'بدك تعلّم هالطلب تجربة؟ بعدها ما بينحسب بتقرير اليوم.',testHint:'علّم طلبات التجربة بـ 🧪 وما بتنحسب. طلبات الكاشير المفتوحة ما بتنحسب إلا بعد الدفع.'},
+    naraKasse:'NARA كاشير',today:'مجموع اليوم',orders:'طلبات',plusCanc:'ملغى',Bar:'كاش',Karte:'كرت',Mix:'كاش + كرت',Online:'أونلاين',offen:'مفتوح',onlinePlat:'أونلاين (المنصات)',revenue:'مجموع المبيعات',noOrders:'ما في طلبات.',archive:'الأرشيف',arcHint:'الطلبات اللي خلصت بتختفي من القائمة بعد تسكير المحل (الساعة 5 الصبح) وبتضل هون بالأرشيف.',arcView:'من الأرشيف',markTest:'علّمو تجربة (ما بينحسب)',markTestQ:'بدك تعلّم هالطلب تجربة؟ بعدها ما بينحسب بتقرير اليوم.',testHint:'علّم طلبات التجربة بـ 🧪 وما بتنحسب. طلبات الكاشير المفتوحة ما بتنحسب إلا بعد الدفع.',custPaid:'دفع الزبون',platFee:'رسوم الخدمة (للمنصة)',forYou:'إلك'},
   en:{toKasse:'Back to till',yourOrders:'Your orders',allPlat:'All platforms',search:'Search: code, name, street',PREPARE:'Prepare',HANDOVER:'Handover',DONE:'Done',
     pick:'Select an order.',report:'Daily report',print:'Print',pickup:'Pickup',delivery:'Delivery',local:'Dine-in',customer:'Customer',minLate:'min late',min:'min',
     cancelled:'Cancelled',none:'No orders here.',offline:'No connection',live:'Live',subtotal:'Subtotal',fee:'Delivery fee',service:'Service fee',small:'Small order fee',
     disc:'Discount',tip:'Tip',total:'Total',delTag:'🛵 Delivery',pickTag:'🛍 Pickup',verify:'Verification code:',ordered:'Ordered at',dueBy:'Deliver by',items:'items',
     cash:'💶 Cash',online:'💳 Paid online',printOrder:'🖨 Print order',toHandover:'Handover',done:'✓ Done',back:'↩ Back',err:'Error: ',
-    naraKasse:'NARA till',today:'Today total',orders:'orders',plusCanc:'cancelled',Bar:'Cash',Karte:'Card',Mix:'Cash + card',Online:'Online',offen:'open',onlinePlat:'Online (platforms)',revenue:'Total revenue',noOrders:'No orders.',archive:'Archive',arcHint:'Finished orders leave the list after closing (5:00 am) and stay here in the archive.',arcView:'Archive',markTest:'Mark as test (not counted)',markTestQ:'Mark this order as a test? It will no longer count in the daily report.',testHint:'Mark test orders with 🧪 so they no longer count. Open till orders only count once paid.'}
+    naraKasse:'NARA till',today:'Today total',orders:'orders',plusCanc:'cancelled',Bar:'Cash',Karte:'Card',Mix:'Cash + card',Online:'Online',offen:'open',onlinePlat:'Online (platforms)',revenue:'Total revenue',noOrders:'No orders.',archive:'Archive',arcHint:'Finished orders leave the list after closing (5:00 am) and stay here in the archive.',arcView:'Archive',markTest:'Mark as test (not counted)',markTestQ:'Mark this order as a test? It will no longer count in the daily report.',testHint:'Mark test orders with 🧪 so they no longer count. Open till orders only count once paid.',custPaid:'Customer paid',platFee:'Service fee (goes to the platform)',forYou:'For you'}
 };
 const lang=window.NARA_LANG?NARA_LANG.get():'de';
 const t=k=>(T[lang]||T.de)[k]??T.de[k]??k;
@@ -254,7 +256,8 @@ function sumHtml(o){
   if(disc)rows.push([t('disc'),-disc]);
   if(Number(o.tipCents))rows.push([t('tip'),Number(o.tipCents)]);
   const total=Number(o.totalCents)||Number(o.externalTotalCents)||rows.reduce((s,r)=>s+r[1],0);
-  return '<div class="sum">'+rows.map(r=>'<div><span>'+r[0]+'</span><span>'+eur(r[1])+'</span></div>').join('')+'<div class="tot"><span>'+t('total')+'</span><span>'+eur(total)+'</span></div></div>';
+  const svc=svcOf(o);
+  return '<div class="sum">'+rows.map(r=>'<div><span>'+r[0]+'</span><span>'+eur(r[1])+'</span></div>').join('')+'<div class="tot"><span>'+t('total')+'</span><span>'+eur(total)+'</span></div>'+(svc?'<div class="net"><span>'+t('forYou')+' ('+t('platFee')+' − '+eur(svc)+')</span><span>'+eur(total-svc)+'</span></div>':'')+'</div>';
 }
 
 function renderDetail(o){
@@ -294,6 +297,9 @@ function paysOf(o){return (o.paymentIds&&o.paymentIds.length?o.paymentIds:[o.pay
 function totalOf(o){const ps=paysOf(o);if(ps.length)return ps.reduce((s,p)=>s+(Number(p.amountCents)||0),0);
   const t=Number(o.totalCents)||Number(o.externalTotalCents);if(t)return t;
   return (o.cart||[]).reduce((s,i)=>s+(i.totalCents!=null?Number(i.totalCents):(Number(i.unitCents)||0)*(Number(i.quantity)||1)),0)-(Number(o.discount&&o.discount.amountCents)||0)}
+// رسوم الخدمة تبع المنصة (Lieferando 0,99 €): الزبون بيدفعها بس بتروح للمنصة، مو إلك
+function svcOf(o){if(plat(o)==='NARA')return 0;const f=o.fees||{};return typeof f.service==='number'&&f.service>0?f.service:0}
+const netOf=o=>totalOf(o)-svcOf(o);
 function payOf(o){const ps=paysOf(o);const ms=new Set(ps.flatMap(p=>(p.paymentLines||[{method:p.method}]).map(l=>S(l.method).toUpperCase())));if(ms.size>1)return 'Mix';const p=ps[0];const m=S((p&&p.method)||(o.payment&&o.payment.method)||o.paymentMethod).toUpperCase();
   if(/MIXED/.test(m))return 'Mix';if(/CASH|BAR/.test(m))return 'Bar';if(/CARD|KARTE|EC/.test(m))return 'Karte';if(/ONLINE|PAID/.test(m))return 'Online';return plat(o)==='NARA'?(S(o.status).toUpperCase()==='COMPLETED'?'?':'offen'):'Online'}
 // طلبات الكاشير: بتنحسب بس إذا اندفعت (مو المفتوحة)، وعلى يوم الدفع
@@ -305,10 +311,10 @@ function groups(list){const g={};for(const o of list){(g[plat(o)]??=[]).push(o)}
 function renderStats(){
   const list=dayOrders(localDay(Date.now())).filter(o=>!cancelled(o));
   const cur=$('#plat').value;
-  const chips=groups(list).map(({k,list})=>{let sub=eur(list.reduce((s,o)=>s+totalOf(o),0));
+  const chips=groups(list).map(({k,list})=>{let sub=eur(list.reduce((s,o)=>s+netOf(o),0));
     if(k==='LOCO'){const c={};for(const o of list){const ch=PL[o.channel]||o.portalName||'Sides';c[ch]=(c[ch]||0)+1}sub+=' · '+Object.entries(c).map(([a,b])=>a+' '+b).join(' · ')}
     return '<button class="stat'+(cur===k?' on':'')+'" style="--pc:'+PC[k]+'" data-p="'+k+'"><b>'+(k==='NARA'?t('naraKasse'):PL[k])+'</b><strong>'+list.length+'</strong><span>'+esc(sub)+'</span></button>'});
-  const tot=list.reduce((s,o)=>s+totalOf(o),0);
+  const tot=list.reduce((s,o)=>s+netOf(o),0);
   $('#stats').innerHTML=chips.join('')+'<div class="stat total"><b>'+t('today')+'</b><strong>'+list.length+'</strong><span>'+eur(tot)+'</span></div><button class="stat rep" id="openrep">📊 '+t('report')+'</button><button class="stat rep" id="openarc">🗂 '+t('archive')+'</button>';
   document.querySelectorAll('.stat[data-p]').forEach(b=>b.onclick=()=>{const k=b.dataset.p;if(k==='NARA'){openRep();return}$('#plat').value=$('#plat').value===k?'ALL':k;selId=null;render()});
   $('#openrep').onclick=openRep;$('#openarc').onclick=openArc;
@@ -318,13 +324,13 @@ function reportHtml(day){
   const ok=list.filter(o=>!cancelled(o));
   const by={Bar:0,Karte:0,Online:0};let rows='';
   for(const {k,list:L} of groups(list)){
-    const good=L.filter(o=>!cancelled(o)),sum=good.reduce((s,o)=>s+totalOf(o),0);
-    rows+='<div class="rg" style="--pc:'+PC[k]+'"><span>'+(k==='NARA'?t('naraKasse'):PL[k])+' · '+good.length+' '+t('orders')+'</span><span>'+eur(sum)+'</span></div><table class="rt">'+
+    const good=L.filter(o=>!cancelled(o)),sum=good.reduce((s,o)=>s+totalOf(o),0),svc=good.reduce((s,o)=>s+svcOf(o),0);
+    rows+='<div class="rg" style="--pc:'+PC[k]+'"><span>'+(k==='NARA'?t('naraKasse'):PL[k])+' · '+good.length+' '+t('orders')+'</span><span>'+eur(sum-svc)+'</span></div>'+(svc?'<div class="rsvc"><span>'+t('custPaid')+' '+eur(sum)+'</span><span>− '+t('platFee')+' '+eur(svc)+'</span></div>':'')+'<table class="rt">'+
       L.map(o=>{const amt=totalOf(o),pm=payOf(o);if(!cancelled(o)){const ps=paysOf(o);if(ps.length){for(const p of ps)for(const l of (p.paymentLines||[{method:p.method,amountCents:p.amountCents}])){const k=/CASH/i.test(l.method)?'Bar':/CARD/i.test(l.method)?'Karte':null;if(k)by[k]+=Number(l.amountCents)||0}}else if(by[pm]!=null)by[pm]+=amt}
         return '<tr'+(cancelled(o)?' class="x"':'')+'><td>'+(isMgr?'<button class="tst" data-tst="'+esc(o.id)+'" title="'+esc(t('markTest'))+'">🧪</button> ':'')+new Date(dayOf(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+'</td><td>#'+esc(code(o))+'</td><td>'+(k==='LOCO'?esc(PL[o.channel]||o.portalName||''):'')+' '+(isDel(o)?t('delivery'):S(o.type)==='pickup'?t('pickup'):t('local'))+'</td><td>'+t(pm)+'</td><td class="n">'+eur(amt)+'</td></tr>'}).join('')+'</table>';
   }
-  const total=ok.reduce((s,o)=>s+totalOf(o),0),canc=list.length-ok.length;
-  return rows+'<div class="rsum"><div><span>'+t('orders')+'</span><span>'+ok.length+(canc?' (+'+canc+' '+t('plusCanc')+')':'')+'</span></div><div><span>'+t('Bar')+'</span><span>'+eur(by.Bar)+'</span></div><div><span>'+t('Karte')+'</span><span>'+eur(by.Karte)+'</span></div><div><span>'+t('onlinePlat')+'</span><span>'+eur(by.Online)+'</span></div><div class="big"><span>'+t('revenue')+'</span><span>'+eur(total)+'</span></div></div>'||'<p>'+t('noOrders')+'</p>';
+  const total=ok.reduce((s,o)=>s+totalOf(o),0),svcAll=ok.reduce((s,o)=>s+svcOf(o),0),canc=list.length-ok.length;
+  return rows+'<div class="rsum"><div><span>'+t('orders')+'</span><span>'+ok.length+(canc?' (+'+canc+' '+t('plusCanc')+')':'')+'</span></div><div><span>'+t('Bar')+'</span><span>'+eur(by.Bar)+'</span></div><div><span>'+t('Karte')+'</span><span>'+eur(by.Karte)+'</span></div><div><span>'+t('onlinePlat')+'</span><span>'+eur(by.Online)+'</span></div>'+(svcAll?'<div><span>'+t('custPaid')+'</span><span>'+eur(total)+'</span></div><div><span>'+t('platFee')+'</span><span>− '+eur(svcAll)+'</span></div>':'')+'<div class="big"><span>'+t(svcAll?'forYou':'revenue')+'</span><span>'+eur(total-svcAll)+'</span></div></div>'||'<p>'+t('noOrders')+'</p>';
 }
 function isoDay(t){const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function openRep(){const r=$('#rday');if(!r.value)r.value=isoDay(Date.now()-DAY_START_H*3600000);drawRep();$('#rep').hidden=false}
