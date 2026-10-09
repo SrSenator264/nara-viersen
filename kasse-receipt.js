@@ -12,7 +12,12 @@
     const items=cart.filter(i=>i.kind!==FEE);
     const feeCents=cart.filter(i=>i.kind===FEE).reduce((s,i)=>s+(Number(i.unitCents)||0)*(Number(i.quantity)||0),0);
     const gross=cart.reduce((s,i)=>s+(Number(i.unitCents)||0)*(Number(i.quantity)||0),0);
-    const discount=Number(o.discount&&o.discount.amountCents)||0;
+    // الخصم: من الكاشير (discount / billDiscount) أو من المنصة (عرض خاص، كوبون، ستامبات)
+    const discount=(Number((o.billDiscount||o.discount||{}).amountCents)||0)
+      +(Number(o.discountsCents)||0)+(Number(o.discountCents)||0)+(Number(o.stampCents)||0);
+    // طلب منصة: المجموع الرسمي من المنصة نفسها (إذا موجود) أدق من حسابنا
+    const official=Number(o.externalTotalCents)||(/LIEFERANDO|UBER|WOLT|LANCH|SIDES/i.test(String(o.platform||o.source||''))?Number(o.totalCents)||0:0);
+    const total=official||Math.max(0,gross-discount);
     const type=o.type==='delivery'?'DELIVERY':o.type==='pickup'?'PICKUP':'DINE_IN';
     const code=o.displayCode||o.externalOrderCode||('NARA-'+String(o.id||'').replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase());
     const platform=String(o.platform||o.source||'').toUpperCase();
@@ -28,7 +33,7 @@
       delivery:{address:[d.street,d.house].filter(Boolean).join(' '),floor:d.floor||'',postalCode:d.postal||'',city:d.city||'',notes:noteParts.join(' · ')},
       cart:items.map(i=>({quantity:Number(i.quantity)||1,name:i.name,totalCents:(Number(i.unitCents)||0)*(Number(i.quantity)||0),
         options:(i.options||[]).map(x=>({name:String(x.name||'').split(' / ')[0].trim(),quantity:x.quantity||1,totalCents:0})).filter(x=>x.name&&!/^einzel$/i.test(x.name)),notes:i.note||'',category:''})),
-      fees:{delivery:feeCents},discountsCents:discount,totalCents:gross-discount,cashDueCents:gross-discount,
+      fees:{delivery:feeCents},discountsCents:discount,totalCents:total,cashDueCents:Number(o.cashDueCents)||total,
       payment:{method},assignment:o.assignment||null,remarks:''
     };
   }
