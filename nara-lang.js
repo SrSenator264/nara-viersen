@@ -1,5 +1,7 @@
 // nara-lang.js — لغة وحدة لكل شاشات NARA (de / ar / en).
-// - المفتاح المشترك: localStorage 'nara-lang' (ومنكتب كمان 'nara-kasse-language' للتوافق مع الكود القديم).
+// - كل قسم إلو لغته لحاله (الكاشير غير المطبخ غير السواق…): <script src="nara-lang.js" data-section="kasse">
+//   المفتاح: localStorage 'nara-lang-<section>' (الكاشير: 'nara-kasse-language'، المطبخ: 'nara-kitchen-lang' للتوافق).
+//   وكل جهاز بيحفظ اختياره لحاله.
 // - العربي: لهجة شامية. الكلمات اللي ما بتترجم (أسماء شوارع، منتجات، Lieferando، BBQ، PIN، QR…) بتضل بحروف لاتينية.
 // الاستعمال:
 //   NARA_LANG.get()                         → 'de' | 'ar' | 'en'
@@ -8,8 +10,11 @@
 //   NARA_LANG.pick('Einzel / بدون منيو')    → لنصوص البيانات القديمة "ألماني / عربي": بيرجّع القسم المناسب
 //   NARA_LANG.mountSwitcher(el)             → أزرار DE · ع · EN
 (function () {
-  const KEYS = ['nara-lang', 'nara-kasse-language'];
   const OK = ['de', 'ar', 'en'];
+  const LEGACY = { kasse: 'nara-kasse-language', kitchen: 'nara-kitchen-lang' };
+  const me = document.currentScript;
+  const section = (me && me.dataset && me.dataset.section) || (document.documentElement.dataset.langSection) || 'app';
+  const KEYS = [LEGACY[section] || ('nara-lang-' + section)];
   function read() {
     for (const k of KEYS) { try { const v = localStorage.getItem(k); if (OK.includes(v)) return v; } catch (e) { /* ignore */ } }
     return 'de';
@@ -20,6 +25,7 @@
   }
   const api = {
     get: () => cur,
+    section,
     set(l) {
       if (!OK.includes(l)) return;
       cur = l;

@@ -4,9 +4,9 @@
 (function(){
   const $=s=>document.querySelector(s);
   const T={de:{fee:'Liefergebühr',min:'Mindestbestellwert',total:'Gesamt inkl. Lieferung',short:'Es fehlen noch',ok:'Mindestbestellwert erreicht',out:'Außerhalb des Liefergebiets',bad:'PLZ ungültig (5 Ziffern)',nocfg:'Zone nicht eingerichtet',err:'Gebühren nicht abrufbar (Server)',hint:'PLZ eingeben, dann erscheint die Liefergebühr.',waived:'Liefergebühr erlassen'},
-    ar:{fee:'رسم التوصيل',min:'الحد الأدنى للطلب',total:'الإجمالي مع التوصيل',short:'ناقص',ok:'الحد الأدنى مكتمل',out:'خارج منطقة التوصيل',bad:'الرمز البريدي غير صالح (5 أرقام)',nocfg:'المنطقة غير مضبوطة',err:'تعذّر جلب الرسوم (السيرفر)',hint:'اكتب الرمز البريدي ليظهر رسم التوصيل.',waived:'رسم التوصيل ملغى'},
+    ar:{fee:'أجرة التوصيل',min:'أقل طلب',total:'المجموع مع التوصيل',short:'لسّا ناقص',ok:'وصلنا للحد الأدنى',out:'برّا منطقة التوصيل',bad:'PLZ غلط (5 أرقام)',nocfg:'المنطقة مش مضبوطة',err:'ما قدرنا نجيب الأجرة (السيرفر)',hint:'اكتب الـ PLZ وبتطلع أجرة التوصيل.',waived:'أجرة التوصيل ملغاة'},
     en:{fee:'Delivery fee',min:'Minimum order',total:'Total incl. delivery',short:'Still missing',ok:'Minimum order reached',out:'Outside delivery area',bad:'Invalid postcode (5 digits)',nocfg:'Zone not configured',err:'Fees unavailable (server)',hint:'Enter the postcode to see the delivery fee.',waived:'Delivery fee waived'}};
-  const lang=()=>{try{return localStorage.getItem('nara-kasse-language')||document.documentElement.lang||'de'}catch(e){return 'de'}};
+  const lang=()=>{try{if(window.NARA_LANG)return window.NARA_LANG.get();const l=localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
   const tr=k=>(T[lang()]||T.de)[k]||T.de[k];
   const eur=c=>(c/100).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
   const cents=txt=>{const m=String(txt||'').replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.');return Math.round((parseFloat(m)||0)*100)};
@@ -59,6 +59,7 @@
   ($('#postal-code')||card).addEventListener('input',refresh);
   document.querySelectorAll('[data-order-type]').forEach(b=>b.addEventListener('click',again));
   document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',again));
+  window.addEventListener('nara-lang',again);
   new MutationObserver(refresh).observe(total,{childList:true,characterData:true,subtree:true});
   new MutationObserver(refresh).observe(card,{attributes:true,attributeFilter:['hidden']});
   document.addEventListener('nara-chip-ready',refresh);

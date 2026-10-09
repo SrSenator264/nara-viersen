@@ -6,11 +6,11 @@
 // 5) لمبة Lieferando بالرأس: 🟢 شغّال، 🟠 لازم تسجيل دخول / ما في طلبات عم توصل، 🔴 الجسر مسكّر.
 (function(){
   const $=s=>document.querySelector(s);
-  const lang=()=>{try{return localStorage.getItem('nara-kasse-language')||document.documentElement.lang||'de'}catch(e){return 'de'}};
-  const T={de:{ready:'Fertig ca.',in:'in',min:'Min',queue:'vorher in der Küche',dispatch:'🛵 Fahrer',ok:'läuft',login:'Login nötig!',nodata:'keine Daten',down:'Bridge aus!',learn:'Schätzung lernt noch'},
-    ar:{ready:'جاهز تقريباً',in:'بعد',min:'د',queue:'طلب قبله بالمطبخ',dispatch:'🛵 التوزيع',ok:'شغّال',login:'لازم تسجيل دخول!',nodata:'ما عم يوصل شي',down:'الجسر مسكّر!',learn:'التقدير لسا عم يتعلّم'},
-    en:{ready:'Ready approx.',in:'in',min:'min',queue:'ahead in the kitchen',dispatch:'🛵 Drivers',ok:'running',login:'login needed!',nodata:'no data',down:'bridge off!',learn:'estimate still learning'}};
-  const tr=k=>(T[lang()]||T.de)[k];
+  const lang=()=>{try{if(window.NARA_LANG)return window.NARA_LANG.get();const l=localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
+  const T={de:{ready:'Fertig ca.',in:'in',min:'Min',queue:'vorher in der Küche',dispatch:'🛵 Fahrer',ok:'läuft',login:'Login nötig!',nodata:'keine Daten',down:'Bridge aus!',learn:'Schätzung lernt noch',connect:'Tablet / Handy verbinden'},
+    ar:{ready:'جاهز تقريباً',in:'بعد',min:'د',queue:'طلب قبلو بالمطبخ',dispatch:'🛵 السواقين',ok:'شغّال',login:'بدّو تسجيل دخول!',nodata:'ما عم يوصل شي',down:'الجسر مسكّر!',learn:'التقدير لسّا عم يتعلّم',connect:'وصّل تابلت / موبايل'},
+    en:{ready:'Ready approx.',in:'in',min:'min',queue:'ahead in the kitchen',dispatch:'🛵 Drivers',ok:'running',login:'login needed!',nodata:'no data',down:'bridge off!',learn:'estimate still learning',connect:'Connect tablet / phone'}};
+  const tr=k=>(T[lang()]||T.de)[k]||T.de[k];
   const L=()=>window.NARA_LEGACY_KASSE_STATE;
   const cur=()=>{const l=L();return l&&l.getCurrent?l.getCurrent():null};
 
@@ -97,9 +97,11 @@
     let a=document.getElementById('nara-dispatch-link');
     if(!a){a=document.createElement('a');a.id='nara-dispatch-link';a.href='dispatch.html';a.style.cssText='font-weight:800;color:#e85f12;text-decoration:none;margin-inline:8px';h.appendChild(a)}
     a.textContent=tr('dispatch');
-    if(!document.getElementById('nara-connect-link')){const c=document.createElement('a');c.id='nara-connect-link';c.href='connect.html';c.textContent='📱';c.title='Tablet / Handy verbinden';c.style.cssText='font-size:1.2rem;text-decoration:none;margin-inline:6px';h.appendChild(c)}
+    if(!document.getElementById('nara-connect-link')){const c=document.createElement('a');c.id='nara-connect-link';c.href='connect.html';c.textContent='📱';c.style.cssText='font-size:1.2rem;text-decoration:none;margin-inline:6px';h.appendChild(c)}
+    const cl=document.getElementById('nara-connect-link');if(cl)cl.title=tr('connect');
     if(!document.getElementById('nara-platform-status'))drawPlatforms();
   }
   setInterval(mount,1000);mount();
+  window.addEventListener('nara-lang',()=>{mount();drawPlatforms();later()});
   window.NARA_KASSE_HELPERS={cityFor,estimate,employeeField};
 })();

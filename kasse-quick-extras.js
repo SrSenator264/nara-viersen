@@ -9,12 +9,12 @@
   if(!cartEl||!panel)return;
   const L=()=>window.NARA_LEGACY_KASSE_STATE;
   const cur=()=>{const l=L();return l&&l.getCurrent?l.getCurrent():null};
-  const lang=()=>{try{return localStorage.getItem('nara-kasse-language')||document.documentElement.lang||'de'}catch(e){return 'de'}};
+  const lang=()=>{try{if(window.NARA_LANG)return window.NARA_LANG.get();const l=localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
   const T={
-    de:{menu:'Menü',extra:'➕ Extra',title:'Extra hinzufügen',what:'Was genau? (optional)',ph:'z. B. extra Tomate, Plastikbecher',price:'Preis',note:'Notiz (optional)',for:'Für welchen Artikel? (optional)',alone:'Eigene Zeile',add:'Hinzufügen',cancel:'Abbrechen',per:'Preis pro Stück',need:'Bitte eingeben, was der Kunde möchte',other:'Anderer Preis'},
-    ar:{menu:'منيو',extra:'➕ أكتر',title:'إضافة شي مش بالمنيو',what:'شو بالضبط؟ (اختياري)',ph:'مثلاً بندورة زيادة، كاسة بلاستيك',price:'السعر',note:'ملاحظة (اختياري)',for:'لأي صنف؟ (اختياري)',alone:'سطر لحاله',add:'أضف',cancel:'إلغاء',per:'السعر لكل قطعة',need:'اكتب شو طلب الزبون',other:'سعر تاني'},
-    en:{menu:'Menu',extra:'➕ Extra',title:'Add extra',what:'What exactly? (optional)',ph:'e.g. extra tomato, plastic cup',price:'Price',note:'Note (optional)',for:'For which item? (optional)',alone:'Separate line',add:'Add',cancel:'Cancel',per:'Price per piece',need:'Type what the customer wants',other:'Other price'}};
-  const tr=k=>(T[lang()]||T.de)[k];
+    de:{menu:'Menü',extra:'➕ Extra',title:'Extra hinzufügen',what:'Was genau? (optional)',ph:'z. B. extra Tomate, Plastikbecher',price:'Preis',note:'Notiz (optional)',for:'Für welchen Artikel? (optional)',alone:'Eigene Zeile',add:'Hinzufügen',cancel:'Abbrechen',per:'Preis pro Stück',need:'Bitte eingeben, was der Kunde möchte',other:'Anderer Preis',bad:'Ungültiger Preis'},
+    ar:{menu:'منيو',extra:'➕ إكسترا',title:'زيد شي مش بالمنيو',what:'شو بالزبط؟ (مش ضروري)',ph:'مثلاً بندورة زيادة، كاسة بلاستيك',price:'السعر',note:'ملاحظة (مش ضروري)',for:'لأي صنف؟ (مش ضروري)',alone:'سطر لحالو',add:'زيد',cancel:'إلغاء',per:'السعر للقطعة',need:'اكتب شو بدّو الزبون',other:'سعر تاني',bad:'السعر مو مزبوط'},
+    en:{menu:'Menu',extra:'➕ Extra',title:'Add extra',what:'What exactly? (optional)',ph:'e.g. extra tomato, plastic cup',price:'Price',note:'Note (optional)',for:'For which item? (optional)',alone:'Separate line',add:'Add',cancel:'Cancel',per:'Price per piece',need:'Type what the customer wants',other:'Other price',bad:'Invalid price'}};
+  const tr=k=>(T[lang()]||T.de)[k]||T.de[k];
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const eur=c=>(c/100).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
   const SKIP=new Set(['DELIVERY_FEE','EXTRA']);
@@ -80,7 +80,7 @@
     const pb=e.target.closest('.qx-prices button');if(pb){price=Number(pb.dataset.c);modal.querySelectorAll('.qx-prices button').forEach(b=>b.classList.toggle('on',b===pb));const c=$('#qx-custom');if(c)c.value='';return}
     if(e.target.id==='qx-add'){
       const what=($('#qx-what').value||'').trim(),note=($('#qx-note').value||'').trim(),cc=customCents(),cents=cc==null?price:cc;
-      if(!Number.isInteger(cents)){$('#qx-err').textContent=tr('other')+' ?';return}
+      if(!Number.isInteger(cents)){$('#qx-err').textContent=tr('bad');return}
       const o=cur();if(!o)return closeExtra();o.cart=o.cart||[];
       const sel=$('#qx-for'),idx=sel&&sel.value!==''?Number(sel.value):-1,target=idx>=0?o.cart[idx]:null;
       if(target){target.options=target.options||[];target.options.push({id:'__extra-'+Date.now(),name:(what||'Extra')+(note?' ('+note+')':''),cents,group:'__extra',quantity:1});target.unitCents+=cents}
@@ -95,6 +95,7 @@
 
   function labels(){extraBtn.textContent=tr('extra');cartEl.querySelectorAll('.qx-menu').forEach(b=>b.remove());decorate()}
   document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setTimeout(labels,0)));
+  window.addEventListener('nara-lang',()=>setTimeout(labels,0));
   labels();
   window.NARA_QUICK_EXTRAS={toggleMenu,menuCents:()=>menuCents};
 })();

@@ -7,8 +7,8 @@
   const save=a=>{try{localStorage.setItem(K,JSON.stringify(a));return true}catch(e){return false}};
   const digits=s=>String(s||'').replace(/\D/g,'').replace(/^(0049|49)/,'0');
   const FIELDS={name:'customer-name',phone:'customer-phone',street:'street',house:'house-number',postal:'postal-code',city:'city',floor:'floor',bell:'bell-name',extra:'address-extra',notes:'driver-notes'};
-  const T={de:{use:'Übernehmen',none:''},ar:{use:'استخدم',none:''},en:{use:'Use',none:''}};
-  const lang=()=>{try{return localStorage.getItem('nara-kasse-language')||'de'}catch(e){return 'de'}};
+  const T={de:{use:'Übernehmen',none:''},ar:{use:'استعمل',none:''},en:{use:'Use',none:''}};
+  const lang=()=>{try{if(window.NARA_LANG)return window.NARA_LANG.get();const l=localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
   const phone=$('#customer-phone');if(!phone)return;
   const label=phone.closest('label');
   const box=document.createElement('div');box.id='phone-suggest';box.className='phone-suggest wide';box.hidden=true;

@@ -12,8 +12,8 @@
   const T2={de:'Bestellung wurde auf einem anderen Gerät geändert – neueste Version geladen.',ar:'الطلب انعدّل من جهاز تاني — حمّلت آخر نسخة.',en:'Order was changed on another device – latest version loaded.'};
   function note(){const m=document.querySelector('#message');if(m)m.textContent=T2[lang()]||T2.de}
   function replaceLocal(L,id,server){const list=L.getOrders(),i=list.findIndex(x=>String(x.id)===String(id));if(i<0)return false;const keep=list[i];Object.keys(keep).forEach(k=>delete keep[k]);Object.assign(keep,server);pushed[id]=hash(keep);return true}
-  const T={de:{on:'Server verbunden',off:'Offline – lokal gespeichert'},ar:{on:'متصل بالسيرفر',off:'بدون اتصال — محفوظ محلياً'},en:{on:'Server connected',off:'Offline – saved locally'}};
-  const lang=()=>{try{return ls.getItem('nara-kasse-language')||'de'}catch(e){return 'de'}};
+  const T={de:{on:'Server verbunden',off:'Offline – lokal gespeichert'},ar:{on:'متصل بالسيرفر',off:'ما في اتصال — محفوظ عالجهاز'},en:{on:'Server connected',off:'Offline – saved locally'}};
+  const lang=()=>{try{return (window.NARA_LANG&&NARA_LANG.get())||ls.getItem('nara-kasse-language')||'de'}catch(e){return 'de'}};
 
   // مؤشر الاتصال
   const dot=document.createElement('span');dot.id='nara-sync';dot.className='nara-sync';dot.dataset.state='off';dot.innerHTML='<i></i><span></span>';

@@ -4,7 +4,7 @@
   const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const FEE='DELIVERY_FEE';
   const api={ready:false,core:null};
-  function lang(){try{const l=localStorage.getItem('nara-kasse-language');return l==='en'?'en':'de'}catch(e){return 'de'}} // الفاتورة للزبون: ألماني (أو إنجليزي)، مو عربي
+  function lang(){try{const l=window.NARA_LANG?window.NARA_LANG.get():(localStorage.getItem('nara-kasse-language'));return l==='en'?'en':'de'}catch(e){return 'de'}} // الفاتورة للزبون: ألماني (أو إنجليزي)، مو عربي
 
   // طلب الكاشير -> الشكل الموحّد
   function toReceiptOrder(o,kind){

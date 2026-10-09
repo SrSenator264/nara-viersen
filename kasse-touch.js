@@ -4,8 +4,8 @@
   const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
   const card=$('.delivery-card'),cats=$('#categories'),prods=$('#products'),cart=$('.cart-panel');
   if(!card||!cats||!prods||!cart)return;
-  const T={de:{done:'Fertig',enter:'Lieferdaten eingeben'},ar:{done:'تم',enter:'أدخل بيانات التوصيل'},en:{done:'Done',enter:'Enter delivery details'}};
-  const lang=()=>{try{return localStorage.getItem('nara-kasse-language')||document.documentElement.lang||'de'}catch(e){return 'de'}};
+  const T={de:{done:'Fertig',enter:'Lieferdaten eingeben'},ar:{done:'خلصت',enter:'دخّل معلومات التوصيل'},en:{done:'Done',enter:'Enter delivery details'}};
+  const lang=()=>{try{return (window.NARA_LANG&&NARA_LANG.get())||localStorage.getItem('nara-kasse-language')||document.documentElement.lang||'de'}catch(e){return 'de'}};
   const tr=k=>(T[lang()]||T.de)[k];
 
   // 1) لون لكل قسم، والأصناف بتاخد لون القسم المختار
