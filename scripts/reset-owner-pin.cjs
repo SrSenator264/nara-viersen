@@ -30,7 +30,7 @@ const ask = q => { process.stdout.write(q); return lines.length ? Promise.resolv
   const err = A.validatePin(acc.role, p1);
   if (err) { console.log('✗ ' + err); process.exit(1); }
   const p2 = await ask('Nochmal / أعد كتابته: ');
-  if (p1 !== p2) { console.log('✗ Nicht gleich / مش متطابق'); process.exit(1); }
+  if (p1 !== p2) { console.log('✗ Nicht gleich / مو متطابق'); process.exit(1); }
   fs.copyFileSync(authFile, authFile + '.bak-' + Date.now());
   acc.pin = A.hashPin(p1); acc.active = true;
   for (const [k, s] of Object.entries(store.sessions || {})) if (s.employeeId === id) delete store.sessions[k];

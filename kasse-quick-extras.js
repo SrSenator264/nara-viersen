@@ -1,6 +1,6 @@
 // kasse-quick-extras.js — زرّين سريعين بالكاشير:
 // 1) "🍟 Menü +4 €" على كل صنف بالسلة: أي صنف بيصير منيو بكبسة (حتى لو ما إله منيو بالقائمة). كبسة تانية بتلغيه.
-// 2) "➕ Extra" تحت السلة: شي مش موجود بالمنيو (بندورة زيادة، كاسة بلاستيك…): سعر بكبسة، والاسم والملاحظة والصنف كلهم اختياري،
+// 2) "➕ Extra" تحت السلة: شي مو موجود بالمنيو (بندورة زيادة، كاسة بلاستيك…): سعر بكبسة، والاسم والملاحظة والصنف كلهم اختياري،
 //    إما سطر لحاله أو ملزوق على صنف معيّن (بيطلع تحته بالمطبخ والفاتورة).
 // سعر المنيو بيجي من إعدادات السيرفر (/api/kasse/settings)، الافتراضي 4 €.
 (function(){
@@ -12,7 +12,7 @@
   const lang=()=>{try{if(window.NARA_LANG)return window.NARA_LANG.get();const l=localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
   const T={
     de:{menu:'Menü',extra:'➕ Extra',title:'Extra hinzufügen',what:'Was genau? (optional)',ph:'z. B. extra Tomate, Plastikbecher',price:'Preis',note:'Notiz (optional)',for:'Für welchen Artikel? (optional)',alone:'Eigene Zeile',add:'Hinzufügen',cancel:'Abbrechen',per:'Preis pro Stück',need:'Bitte eingeben, was der Kunde möchte',other:'Anderer Preis',bad:'Ungültiger Preis'},
-    ar:{menu:'منيو',extra:'➕ إكسترا',title:'زيد شي مش بالمنيو',what:'شو بالزبط؟ (مش ضروري)',ph:'مثلاً بندورة زيادة، كاسة بلاستيك',price:'السعر',note:'ملاحظة (مش ضروري)',for:'لأي صنف؟ (مش ضروري)',alone:'سطر لحالو',add:'زيد',cancel:'إلغاء',per:'السعر للقطعة',need:'اكتب شو بدّو الزبون',other:'سعر تاني',bad:'السعر مو مزبوط'},
+    ar:{menu:'منيو',extra:'➕ إكسترا',title:'زيد شي مو بالمنيو',what:'شو بالزبط؟ (مو ضروري)',ph:'مثلاً بندورة زيادة، كاسة بلاستيك',price:'السعر',note:'ملاحظة (مو ضروري)',for:'لأي صنف؟ (مو ضروري)',alone:'سطر لحالو',add:'زيد',cancel:'إلغاء',per:'السعر للقطعة',need:'اكتب شو بدّو الزبون',other:'سعر تاني',bad:'السعر مو مزبوط'},
     en:{menu:'Menu',extra:'➕ Extra',title:'Add extra',what:'What exactly? (optional)',ph:'e.g. extra tomato, plastic cup',price:'Price',note:'Note (optional)',for:'For which item? (optional)',alone:'Separate line',add:'Add',cancel:'Cancel',per:'Price per piece',need:'Type what the customer wants',other:'Other price',bad:'Invalid price'}};
   const tr=k=>(T[lang()]||T.de)[k]||T.de[k];
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

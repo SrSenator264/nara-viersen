@@ -85,7 +85,7 @@ test('full flow: plan, send to driver, start, deliver, learn, come back', () => 
   assert.ok(!plan2.assignments.some(a => a.orderId === 'n1'));
   assert.equal(plan2.active.length, 1);
   // السائق التاني ما بيقدر يلمس جولة غيره
-  assert.throws(() => S.startRoute(data, route.id, { id: 'other', role: 'DRIVER' }), /مش إلك/);
+  assert.throws(() => S.startRoute(data, route.id, { id: 'other', role: 'DRIVER' }), /مو إلك/);
   const me = { id: north.driverId, role: 'DRIVER', name: north.name };
   // صفحة السائق: بدون أي مبلغ
   const mine = S.driverRoutes(data, north.driverId);

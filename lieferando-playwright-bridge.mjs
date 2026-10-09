@@ -19,7 +19,7 @@ import { renderLines, toText, toEscPos, printTcp } from './nara-receipt.mjs';
 
 const env = (k, d) => process.env[k] ?? d;
 const CFG = {
-  // 127.0.0.1 مش localhost: السيرفر بيسمع على IPv4 بس، وlocalhost ممكن يروح على ::1
+  // 127.0.0.1 مو localhost: السيرفر بيسمع على IPv4 بس، وlocalhost ممكن يروح على ::1
   base: env('NARA_BASE_URL', 'http://127.0.0.1:' + env('PORT', '4185')).replace(/\/$/, ''),
   serviceKey: env('NARA_SERVICE_KEY', ''),
   token: env('NARA_TOKEN', ''),
@@ -445,7 +445,7 @@ page.on('response', async r => {
 });
 
 // ───────────── QR "Zum Liefern scannen" ─────────────
-// Lieferando بتحط على ورقتها QR (mca.scoober.com/qr/?ref=CODE&id=…). الرابط مش بقائمة الطلبات،
+// Lieferando بتحط على ورقتها QR (mca.scoober.com/qr/?ref=CODE&id=…). الرابط مو بقائمة الطلبات،
 // فمنلقطه من أي رد بيحتويه (مثلاً لما حدا يكبس Print order) ومنحفظه حسب كود الطلب.
 const QR_RE = /https?:\/\/mca\.scoober\.com\/qr\/?\?ref=([A-Za-z0-9]+)(?:&|&amp;|\\u0026)id=([a-f0-9]{16,64})/g;
 let qrSaved = 0;
@@ -498,7 +498,7 @@ page.on('websocket', ws => {
   ws.on('framereceived', f => {
     const len = f.payload?.length ?? 0;
     if (CFG.debugWs) log(`WS frame ${len}B`);
-    // رسالة حقيقية (مو heartbeat) → اجلب. بس مش بأول 10 ثواني بعد التحميل (رسائل الاتصال نفسها كانت تعمل حلقة إعادة تحميل)،
+    // رسالة حقيقية (مو heartbeat) → اجلب. بس مو بأول 10 ثواني بعد التحميل (رسائل الاتصال نفسها كانت تعمل حلقة إعادة تحميل)،
     // وما في أكتر من إعادة تحميل وحدة كل 15 ثانية.
     if (len > 40 && Date.now() - loadedAt > 10000 && !wsTimer) wsTimer = setTimeout(() => { wsTimer = null; refresh(); }, Math.max(1500, 15000 - (Date.now() - loadedAt)));
   });

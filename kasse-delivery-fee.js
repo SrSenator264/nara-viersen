@@ -4,7 +4,7 @@
 (function(){
   const $=s=>document.querySelector(s);
   const T={de:{fee:'Liefergebühr',min:'Mindestbestellwert',total:'Gesamt inkl. Lieferung',short:'Es fehlen noch',ok:'Mindestbestellwert erreicht',out:'Außerhalb des Liefergebiets',bad:'PLZ ungültig (5 Ziffern)',nocfg:'Zone nicht eingerichtet',err:'Gebühren nicht abrufbar (Server)',hint:'PLZ eingeben, dann erscheint die Liefergebühr.',waived:'Liefergebühr erlassen'},
-    ar:{fee:'أجرة التوصيل',min:'أقل طلب',total:'المجموع مع التوصيل',short:'لسّا ناقص',ok:'وصلنا للحد الأدنى',out:'برّا منطقة التوصيل',bad:'PLZ غلط (5 أرقام)',nocfg:'المنطقة مش مضبوطة',err:'ما قدرنا نجيب الأجرة (السيرفر)',hint:'اكتب الـ PLZ وبتطلع أجرة التوصيل.',waived:'أجرة التوصيل ملغاة'},
+    ar:{fee:'أجرة التوصيل',min:'أقل طلب',total:'المجموع مع التوصيل',short:'لسّا ناقص',ok:'وصلنا للحد الأدنى',out:'برّا منطقة التوصيل',bad:'PLZ غلط (5 أرقام)',nocfg:'المنطقة مو مضبوطة',err:'ما قدرنا نجيب الأجرة (السيرفر)',hint:'اكتب الـ PLZ وبتطلع أجرة التوصيل.',waived:'أجرة التوصيل ملغاة'},
     en:{fee:'Delivery fee',min:'Minimum order',total:'Total incl. delivery',short:'Still missing',ok:'Minimum order reached',out:'Outside delivery area',bad:'Invalid postcode (5 digits)',nocfg:'Zone not configured',err:'Fees unavailable (server)',hint:'Enter the postcode to see the delivery fee.',waived:'Delivery fee waived'}};
   const lang=()=>{try{if(window.NARA_LANG)return window.NARA_LANG.get();const l=localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
   const tr=k=>(T[lang()]||T.de)[k]||T.de[k];

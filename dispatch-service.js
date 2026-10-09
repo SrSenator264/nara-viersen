@@ -52,7 +52,7 @@ function activeDrivers(data) {
   return { list: working.length ? working : drivers, assumed: !working.length && drivers.length > 0 };
 }
 
-// جولات مش خالصة: مرسلة للسائق (ASSIGNED) أو طالعة (startedAt)
+// جولات مو خالصة: مرسلة للسائق (ASSIGNED) أو طالعة (startedAt)
 const openRoutes = data => (data.deliveryRoutes || []).filter(r => !r.completedAt && r.status !== 'CANCELLED');
 
 // تقدير وقت المشوار: خط مستقيم × معامل طرق ÷ سرعة، مضروب بما تعلّمه البرنامج لهالمنطقة
@@ -115,7 +115,7 @@ function planFor(data, now = Date.now()) {
     stops: (r.orderIds || []).map(id => byId.get(String(id))).filter(Boolean).map(o => ({ orderId: o.id, code: kitchen.kitchenView(o, now).displayCode, delivered: delivered(o), address: addressOf(o).replace(/, Deutschland$/, ''), ...(pointOf(o, cache) || {}) })),
   }));
   const positions = Object.entries(data.driverPositions || {}).map(([id, p]) => ({ driverId: id, ...p }));
-  // الطلبات بدون موقع: منعرض رقم الطلب والعنوان، مش الـ id الداخلي
+  // الطلبات بدون موقع: منعرض رقم الطلب والعنوان، مو الـ id الداخلي
   result.unplaced = result.unplaced.map(u => { const o = byId.get(String(u.id)); return o ? { ...u, code: kitchen.kitchenView(o, now).displayCode, address: addressOf(o).replace(/, Deutschland$/, '') } : u; });
   return { ...result, shop: input.shop, assumedDrivers: input.assumedDrivers, learning: input.learning, active, positions };
 }
@@ -132,7 +132,7 @@ function assignRoute(data, { driverId, orderIds, etas }, user, now = new Date().
   const orders = ids.map(id => (data.orders || []).find(o => String(o.id) === id));
   if (orders.some(o => !o)) throw err(404, 'طلب غير موجود');
   if (orders.some(o => taken.has(String(o.id)))) throw err(409, 'طلب مرسل لسائق تاني');
-  if (orders.some(o => !isDelivery(o) || delivered(o))) throw err(409, 'طلب مش توصيل أو مسلّم');
+  if (orders.some(o => !isDelivery(o) || delivered(o))) throw err(409, 'طلب مو توصيل أو مسلّم');
   data.deliveryRoutes ??= [];
   const route = { id: 'route_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), employeeId: driver.id, employeeName: driver.name, orderIds: ids,
     plannedEtas: etas || null, status: 'ASSIGNED', source: 'AUTO_PLAN', createdAt: now, createdBy: user ? user.name : null, startedAt: null, completedAt: null, updatedAt: now };
@@ -149,7 +149,7 @@ function routeFor(data, routeId, user) {
   const r = (data.deliveryRoutes || []).find(x => x.id === routeId);
   if (!r) throw err(404, 'الجولة غير موجودة');
   const boss = user && ['OWNER', 'MANAGER', 'CASHIER'].includes(str(user.role).toUpperCase());
-  if (!boss && (!user || r.employeeId !== user.id)) throw err(403, 'هالجولة مش إلك');
+  if (!boss && (!user || r.employeeId !== user.id)) throw err(403, 'هالجولة مو إلك');
   return r;
 }
 
@@ -172,7 +172,7 @@ function startRoute(data, routeId, user, now = new Date().toISOString()) {
 // تسليم طلب: بيتسجّل الوقت والمكان، والبرنامج بيتعلّم من المشوار
 function deliverStop(data, orderId, user, pos, now = new Date().toISOString()) {
   const o = (data.orders || []).find(x => String(x.id) === String(orderId));
-  if (!o || !o.deliveryRouteId) throw err(404, 'الطلب مش بجولة');
+  if (!o || !o.deliveryRouteId) throw err(404, 'الطلب مو بجولة');
   const r = routeFor(data, o.deliveryRouteId, user);
   if (!r.startedAt) startRoute(data, r.id, user, now);
   if (o.deliveredAt) return { route: r, order: o, learned: null };
@@ -217,7 +217,7 @@ function paidOnline(o) {
 // إثبات تسليم بالصورة: الطلب مدفوع أونلاين وما حدا فتح الباب
 function proofDelivery(data, orderId, user, { file, pos }, now = new Date().toISOString()) {
   const o = (data.orders || []).find(x => String(x.id) === String(orderId));
-  if (!o || !o.deliveryRouteId) throw err(404, 'الطلب مش بجولة');
+  if (!o || !o.deliveryRouteId) throw err(404, 'الطلب مو بجولة');
   routeFor(data, o.deliveryRouteId, user);
   if (!paidOnline(o)) throw err(409, 'الصورة بس للطلبات المدفوعة أونلاين. طلب الكاش لازم ينسلّم باليد.');
   o.deliveryProof = { file, at: now, by: user ? user.name : null, reason: 'NOT_HANDED_OVER', ...(pos && Number.isFinite(pos.lat) ? { lat: pos.lat, lng: pos.lng } : {}) };

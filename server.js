@@ -228,7 +228,7 @@ http.createServer((req,res)=>{
       // قفل بين الأجهزة: كل حفظ بيرفع رقم النسخة (rev). جهاز بيبعت نسخة أقدم من اللي عالسيرفر = تعارض، ما منكتب فوق تعديل جهاز تاني.
       const storedRev=Number.isInteger(stored?.rev)?stored.rev:0;
       const clientId=String(payload.clientId||'').slice(0,64);
-      // تعارض بس إذا جهاز تاني عدّل الطلب (نفس الجهاز بنسخة متأخرة شوي مش تعارض)
+      // تعارض بس إذا جهاز تاني عدّل الطلب (نفس الجهاز بنسخة متأخرة شوي مو تعارض)
       if(stored&&Number.isInteger(order.rev)&&order.rev<storedRev&&!(clientId&&stored.revBy===clientId))return reply(res,409,{error:'الطلب انعدّل من جهاز تاني.',code:'ORDER_CONFLICT',orderId:stored.id,order:stored});
       const next={...order,id:String(order.id),displayCode,status:stored?.status||'OPEN',rev:storedRev+1,revBy:clientId||undefined,updatedAt:new Date().toISOString()};
       // حقول بيملكها السيرفر (المطبخ، التوزيع، التسليم): الكاشير ما بيكتب فوقها بنسخة قديمة

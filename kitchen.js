@@ -82,7 +82,7 @@ function isOtherStation(o) {
   return /loco/i.test(str(o.brand || o.brandName || o.restaurantName || o.restaurant)) || /^SIDES/i.test(str(o.source || o.platform));
 }
 
-const MAX_AGE_H = 12; // طلب مفتوح أقدم من 12 ساعة = منسي من يوم قبل، مش شغل المطبخ هلق
+const MAX_AGE_H = 12; // طلب مفتوح أقدم من 12 ساعة = منسي من يوم قبل، مو شغل المطبخ هلق
 // وقت الطلب: أول تاريخ صالح (acceptedAt أحياناً نص مكسور من الجسر القديم متل "22:27 - 4 Oct")،
 // وإذا ما في، طلبات الكاشير رقمها هو وقت إنشائها بالميلي ثانية
 function orderTime(o) {
@@ -99,7 +99,7 @@ function isStale(o, now = Date.now()) {
   return t != null && now - t > MAX_AGE_H * 3600000;
 }
 
-// "مدفوع" مش يعني "خلص": طلب الكاشير بيصير COMPLETED لما ينضرب Cash/Karte، بس لسا لازم ينطبخ ويتوصّل.
+// "مدفوع" مو يعني "خلص": طلب الكاشير بيصير COMPLETED لما ينضرب Cash/Karte، بس لسا لازم ينطبخ ويتوصّل.
 // منعتبره منتهي بس إذا: ملغي، أو انوصل، أو المنصة قالت DONE، أو طلب منصة مغلق، أو طلب كاشير مدفوع من أكتر من 90 دقيقة.
 const PAID_GRACE_MS = 90 * 60000;
 const PLATFORM_RE = /^(LIEFERANDO|UBER|WOLT|LANCH|SIDES)/i;
