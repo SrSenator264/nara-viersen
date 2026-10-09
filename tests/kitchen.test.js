@@ -4,6 +4,7 @@ const K = require('../kitchen.js');
 
 const NOW = Date.parse('2026-10-08T12:00:00Z');
 const kasseOrder = {
+  kitchenPrintedAt: '2026-10-08T11:00:00Z',
   id: 'o1', type: 'delivery', status: 'OPEN', createdAt: '2026-10-08T11:50:00Z', preparationMinutes: 20,
   delivery: { name: 'Ali', phone: '0151 000', street: 'Gereonstr.', house: '1', postal: '41747', notes: 'Klingel 2' },
   cart: [
@@ -139,9 +140,9 @@ test('dine-in table orders come first; startAt tells the kitchen when to begin',
   const cart = [{ name: 'Cheese Burger', quantity: 1, unitCents: 799 }];
   const at = m => new Date(NOW + m * 60000).toISOString();
   const orders = [
-    { id: 'd1', type: 'delivery', cart, createdAt: at(-15), prepMinutes: 20 },
-    { id: 't1', type: 'local', table: '3', cart, createdAt: at(-1), prepMinutes: 20 },
-    { id: 's1', type: 'delivery', cart, createdAt: at(-5), kitchenStartAt: at(90), requestedAt: at(150), prepMinutes: 20 },
+    { id: 'd1', type: 'delivery', cart, kitchenPrintedAt: at(-20), createdAt: at(-15), prepMinutes: 20 },
+    { id: 't1', type: 'local', table: '3', cart, kitchenPrintedAt: at(-20), createdAt: at(-1), prepMinutes: 20 },
+    { id: 's1', type: 'delivery', cart, kitchenPrintedAt: at(-20), createdAt: at(-5), kitchenStartAt: at(90), requestedAt: at(150), prepMinutes: 20 },
   ];
   const list = K.listKitchenOrders(orders, NOW);
   assert.deepEqual(list.map(o => o.id), ['t1', 'd1', 's1']);
@@ -159,4 +160,11 @@ test('platform says out for delivery → kitchen shows it as ready and the queue
   assert.equal(K.kitchenStatusOf({ ...out, liveStageSource: 'NARA' }), 'NEW');
   const P = require('../prep-learning.js');
   assert.deepEqual(Object.keys(P.forecast({ orders: [out, cooking] }, NOW).orders), ['l1']);
+});
+
+test('kasse order shows in the kitchen only after "Küche" was pressed', () => {
+  const NOW = Date.parse('2026-10-08T12:00:00Z');
+  const draft = { ...kasseOrder, id: 'draft' }; delete draft.kitchenPrintedAt;
+  assert.deepEqual(K.listKitchenOrders([draft], NOW).map(o => o.id), []);
+  assert.deepEqual(K.listKitchenOrders([{ ...draft, kitchenPrintedAt: '2026-10-08T11:59:00Z' }], NOW).map(o => o.id), ['draft']);
 });

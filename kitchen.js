@@ -130,11 +130,16 @@ function isClosedForOps(o, now = Date.now()) {
   return false;
 }
 
+// طلب كاشير لسا عم ينكتب (ما انكبس "المطبخ")
+function isDraft(o) { return sourceOf(o) === 'NARA' && !isOtherStation(o) && !o.kitchenPrintedAt && !o.kitchenSentAt && !str(o.kitchenStatus); }
+
 function isKitchenOrder(o, now = Date.now()) {
   if (!o || isClosedForOps(o, now)) return false;
   if (isStale(o, now)) return false;
   if (isOtherStation(o)) return false;
   if (!Array.isArray(o.cart) || !kitchenItems(o.cart).length) return false;
+  // طلب الكاشير بيطلع عالمطبخ بس بعد ما ينكبس "المطبخ" (مو وإنت عم تكتبو)
+  if (isDraft(o)) return false;
   if (str(o.kitchenStatus).toUpperCase() === 'PICKED_UP') {
     const at = ms(o.kitchenStatusAt);
     return at != null && now - at < KEEP_PICKED_UP_MIN * 60000;
@@ -179,4 +184,4 @@ function applyKitchenStatus(order, next, user, now = new Date().toISOString()) {
   return { from, to };
 }
 
-module.exports = { kitchenStatusOf, isClosedForOps, STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };
+module.exports = { isDraft, kitchenStatusOf, isClosedForOps, STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };

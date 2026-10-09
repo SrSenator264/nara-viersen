@@ -15,8 +15,8 @@ const base = () => ({
   deliveryRoutes: [],
   orders: [
     { id: 'p1', platform: 'LIEFERANDO', type: 'delivery', status: 'OPEN', createdAt: '2026-10-08T16:50:00Z', delivery: { lat: 51.287, lng: 6.381, street: 'X' }, cart: [{ name: 'A', quantity: 1 }] },
-    { id: 'k1', type: 'delivery', status: 'OPEN', createdAt: '2026-10-08T16:55:00Z', delivery: { street: 'Hauptstr.', house: '5', postal: '41747' }, cart: [{ name: 'B', quantity: 1 }] },
-    { id: 'k2', type: 'delivery', status: 'OPEN', createdAt: '2026-10-08T16:55:00Z', delivery: { street: 'Unbekannt', house: '1', postal: '41747' }, cart: [{ name: 'B', quantity: 1 }] },
+    { id: 'k1', type: 'delivery', status: 'OPEN', kitchenPrintedAt: '2026-10-08T16:56:00Z', createdAt: '2026-10-08T16:55:00Z', delivery: { street: 'Hauptstr.', house: '5', postal: '41747' }, cart: [{ name: 'B', quantity: 1 }] },
+    { id: 'k2', type: 'delivery', status: 'OPEN', kitchenPrintedAt: '2026-10-08T16:56:00Z', createdAt: '2026-10-08T16:55:00Z', delivery: { street: 'Unbekannt', house: '1', postal: '41747' }, cart: [{ name: 'B', quantity: 1 }] },
     { id: 'l1', brand: 'Loco Chicken', type: 'delivery', status: 'OPEN', createdAt: '2026-10-08T16:58:00Z', delivery: { lat: 51.25, lng: 6.33 }, cart: [{ name: 'Bucket', quantity: 1 }] },
     { id: 'pk', type: 'pickup', status: 'OPEN', cart: [{ name: 'C', quantity: 1 }] },
     { id: 'done', type: 'delivery', status: 'COMPLETED', delivery: { lat: 51.2, lng: 6.4 }, cart: [] },

@@ -86,7 +86,7 @@ function buildInput(data, now = Date.now()) {
 
   const fc = prep.forecast(data, now); // متى كل طلب رح يجهز فعلياً (متعلّم من المطبخ + الطابور)
   const orders = (data.orders || [])
-    .filter(o => isDelivery(o) && !delivered(o, now) && !kitchen.isStale(o, now) && !busy.has(String(o.id)))
+    .filter(o => isDelivery(o) && !delivered(o, now) && !kitchen.isStale(o, now) && !kitchen.isDraft(o) && !busy.has(String(o.id)))
     .map(o => {
       const p = pointOf(o, cache);
       const kv = kitchen.kitchenView(o, now);

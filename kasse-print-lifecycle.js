@@ -30,7 +30,9 @@
     try{await fetch('/api/kasse/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,order:o,stage:kind})})}catch(e){console.warn('[NARA][PRINT_LOG_FAILED]',e.message)}
   }
   async function print(kind,action){const o=current();if(!o||!(o.cart||[]).length){$('#message').textContent=t('empty');return}
-    log(o,action,kind);
+    // "المطبخ": الطلب لازم يكون محفوظ عالسيرفر قبل، وبعدها بيطلع عشاشة المطبخ
+    if(kind==='kitchen'){try{if(window.NARA_SYNC&&NARA_SYNC.pushOrders)await NARA_SYNC.pushOrders()}catch(e){}}
+    await log(o,action,kind);
     if(window.NARA_RECEIPT&&window.NARA_RECEIPT.print){
       // الكاشير بيستنى الطباعة قبل ما يعيد تحميل الصفحة بعد الدفع (حد أقصى 10 ثواني)
       const job=window.NARA_RECEIPT.print(o,kind);

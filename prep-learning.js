@@ -71,7 +71,7 @@ function forecast(data, now = Date.now(), extraCart = null) {
   const slots = Math.max(1, Number(data.settings && data.settings.kitchen && data.settings.kitchen.parallelOrders) || 10);
   const CLOSED = new Set(['COMPLETED', 'CANCELLED', 'STORNIERT', 'DONE']);
   const stale = o => require('./kitchen.js').isStale(o, now);
-  const open = (data.orders || []).filter(o => !require('./kitchen.js').isClosedForOps(o, now) && !stale(o) && cookItems(o.cart).length
+  const open = (data.orders || []).filter(o => !require('./kitchen.js').isClosedForOps(o, now) && !stale(o) && cookItems(o.cart).length && !require('./kitchen.js').isDraft(o)
     && !['READY', 'PICKED_UP'].includes(require('./kitchen.js').kitchenStatusOf(o))
     && !/loco/i.test(str(o.brand || o.brandName)) && !/^SIDES/i.test(str(o.source)));
   const free = Array(slots).fill(now);
