@@ -29,7 +29,7 @@ test('input: only open delivery orders (Loco too — our drivers deliver it), co
   const k1 = inp.orders.find(o => o.id === 'k1');
   assert.equal(k1.lat, 51.26);
   assert.ok(Number.isNaN(inp.orders.find(o => o.id === 'k2').lat));
-  assert.deepEqual(S.missingAddresses(base()), ['Unbekannt 1, 41747, Deutschland']);
+  assert.deepEqual(S.missingAddresses(base(), NOW), ['Unbekannt 1, 41747, Deutschland']);
 });
 
 test('drivers: clocked-in drivers only; if nobody clocked in, all active drivers (flagged)', () => {

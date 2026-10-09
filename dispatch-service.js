@@ -240,10 +240,10 @@ function driverRoutes(data, driverId) {
 }
 
 // العناوين اللي لسا ما إلها إحداثيات (للطلبات المفتوحة)
-function missingAddresses(data) {
+function missingAddresses(data, now = Date.now()) {
   const cache = data.geocodeCache || {}, out = new Set();
   for (const o of data.orders || []) {
-    if (!isDelivery(o) || delivered(o) || kitchen.isStale(o) || pointOf(o, cache)) continue;
+    if (!isDelivery(o) || delivered(o) || kitchen.isStale(o, now) || pointOf(o, cache)) continue;
     const a = addressOf(o); if (a && !(cache[addressKey(a)] && cache[addressKey(a)].failedAt)) out.add(a);
   }
   return [...out];

@@ -111,7 +111,7 @@ test('forgotten open orders from yesterday do not show in kitchen or dispatch', 
   assert.deepEqual(K.listKitchenOrders([old, kasseOrder], NOW).map(o => o.id), ['o1']);
   const S = require('../dispatch-service.js');
   const data = { settings: {}, employees: [], orders: [{ ...old, type: 'delivery', delivery: { street: 'X', house: '1', postal: '41747' } }] };
-  assert.deepEqual(S.missingAddresses(data), []);
+  assert.deepEqual(S.missingAddresses(data, NOW), []);
   assert.equal(S.buildInput(data, NOW).orders.length, 0);
 });
 
