@@ -63,8 +63,9 @@
     // الترويسة
     rows.push('<div class="rc-brand">IU GENE</div><div class="rc-small rc-c">Gereonstraße 1 · 41747 Viersen</div><div class="rc-small rc-c">'+t.tel+' 02162 5013538</div>');
     // رقم الطلب + المنصة + الوقت
+    const pb=platBox(r.platform);if(pb)rows.push(pb);
     rows.push('<div class="rc-code">'+esc(r.displayCode)+'</div>');
-    rows.push('<div class="rc-small rc-c">'+esc(stamp(r.placedAt))+(r.platform&&r.platform!=='NARA'?' · <b>'+esc(r.platform)+'</b>':'')+'</div>');
+    rows.push('<div class="rc-small rc-c">'+esc(stamp(r.placedAt))+'</div>');
     // نوع الطلب (شريط معكوس)
     rows.push('<div class="rc-type">'+esc(type)+'</div>');
     const due=r.requestedAt||r.dueAt||r.etaAt;
@@ -124,11 +125,18 @@
       notes:[d.notes,d.extra,o.remarks].filter(Boolean).join(' · '),createdAt:created,readyBy:isNaN(start)?'':new Date(start+prep*60000).toISOString(),
       items:r.cart.map(i=>({name:i.name,quantity:i.quantity,options:i.options,note:i.notes}))};
   }
+  // اسم المنصة كبير وواضح بإطار (للفاتورة وورقة المطبخ)
+  function platBox(src){
+    const P={LIEFERANDO:'LIEFERANDO','UBER EATS':'UBER EATS',UBER_EATS:'UBER EATS',WOLT:'WOLT',LANCH:'LANCH'};
+    const n=P[String(src||'').toUpperCase()];
+    return n?'<div class="rc-plat">'+esc(n)+'</div>':'';
+  }
   function kitchenHtml(o){
     const k=toKitchen(o),t=KT[lang()]||KT.de;
     const type=k.type==='pickup'?t.pickup:k.type==='local'?(t.dine+(k.table?' · '+t.table+' '+esc(k.table):'')):t.delivery;
-    const rows=['<div class="rc-brand">'+t.kitchen+'</div>','<div class="rc-code">'+esc(k.displayCode)+'</div>'];
-    if(k.source&&k.source!=='NARA')rows.push('<div class="rc-small rc-c"><b>'+esc(String(k.source).replace('_',' '))+'</b></div>');
+    const rows=['<div class="rc-brand">'+t.kitchen+'</div>'];
+    const pb=platBox(k.source);if(pb)rows.push(pb);
+    rows.push('<div class="rc-code">'+esc(k.displayCode)+'</div>');
     rows.push('<div class="rc-type">'+esc(type)+'</div>');
     rows.push('<div class="rc-c rc-small">'+esc(t.since)+' '+esc(hhmm(k.createdAt))+'</div>');
     if(hhmm(k.readyBy))rows.push('<div class="rc-c rc-when">'+esc(t.ready)+' '+esc(hhmm(k.readyBy))+'</div>');

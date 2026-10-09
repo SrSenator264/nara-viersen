@@ -10,6 +10,7 @@
 .nara-rc{font:13px/1.3 "Segoe UI",Arial,Helvetica,sans-serif;color:#000;width:100%;font-variant-numeric:tabular-nums}
 .nara-rc .rc-c{text-align:center}.nara-rc .rc-small{font-size:11px;line-height:1.35}
 .nara-rc .rc-brand{font-size:26px;font-weight:900;letter-spacing:.06em;text-align:center;line-height:1.1}
+.nara-rc .rc-plat{margin:8px 0 2px;padding:5px 4px;border:3px solid #000;border-radius:6px;text-align:center;font-size:24px;font-weight:900;letter-spacing:.06em;line-height:1.1}
 .nara-rc .rc-code{margin:8px 0 2px;font-size:25px;font-weight:900;text-align:center;letter-spacing:.02em;line-height:1.1}
 .nara-rc .rc-type{margin:8px 0 3px;padding:6px 4px;background:#000;color:#fff;text-align:center;font-size:21px;font-weight:900;letter-spacing:.08em;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .nara-rc .rc-when{font-size:15px;font-weight:700;margin-bottom:6px}
