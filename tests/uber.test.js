@@ -10,7 +10,7 @@ const order = {
   cartInfo: { cartItems: [
     { itemID: 'a', name: 'Cheese Burger (Menü)', quantity: { amount: 2 }, price: e5(10), notes: [{ title: rt('"Ohne Zwiebeln "') }],
       modifiers: [{ name: 'Wähle deinen Dip' }, { name: 'Ketchup', quantity: { amount: 1 }, price: e5(0) }, { name: 'Röstzwiebeln', quantity: { amount: 1 }, price: e5(0.5) }] },
-    { itemID: 'b', name: 'Taco', quantity: { amount: 1 }, price: e5(6.99), modifiers: null },
+    { itemID: 'b', name: 'Taco', quantity: { amount: 1 }, price: { ...e5(6.99), priceModification: { type: 'discount', discount: { formattedDiscountedPrice: '4,99 €' } } }, modifiers: null },
   ] },
   payment: { lineItems: [
     { label: rt('Subtotal'), value: rt('€27.99') }, { label: rt('Delivery Fee'), value: rt('€2.00') },
@@ -31,6 +31,7 @@ test('Uber order → NARA: items with options, notes, totals, address, QR', asyn
   assert.equal(burger.quantity, 2); assert.equal(burger.unitCents, 1050); assert.equal(burger.totalCents, 2100);
   assert.deepEqual(burger.options.map(o => o.name), ['Ketchup', 'Röstzwiebeln']);
   assert.equal(burger.note, 'Ohne Zwiebeln');
+  assert.equal(n.cart[1].discountCents, 200); assert.equal(burger.discountCents, undefined);
   assert.equal(n.cart.at(-1).kind, 'DELIVERY_FEE');
   assert.equal(n.totalCents, 2499); assert.equal(n.discountsCents, 500); assert.equal(n.deliveryFeeCents, 200);
   assert.equal(n.delivery.city, 'Viersen'); assert.equal(n.delivery.lat, 51.28);

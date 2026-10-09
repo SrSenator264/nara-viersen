@@ -31,7 +31,7 @@
       deliveryQrUrl:o.deliveryQrUrl||'',displayCode:code,externalOrderCode:code,placedAt:o.createdAt||o.placedAt||new Date().toISOString(),platform:plat,
       orderType:type,table:o.table||'',customerName:d.name||'',customerPhone:d.phone||'',
       delivery:{address:[d.street,d.house].filter(Boolean).join(' '),floor:d.floor||'',postalCode:d.postal||'',city:d.city||'',notes:noteParts.join(' · ')},
-      cart:items.map(i=>({quantity:Number(i.quantity)||1,name:i.name,totalCents:(Number(i.unitCents)||0)*(Number(i.quantity)||0),
+      cart:items.map(i=>({quantity:Number(i.quantity)||1,name:i.name,totalCents:(Number(i.unitCents)||0)*(Number(i.quantity)||0),discountCents:Number(i.discountCents)||0,
         options:(i.options||[]).map(x=>({name:String(x.name||'').split(' / ')[0].trim(),quantity:x.quantity||1,totalCents:0})).filter(x=>x.name&&!/^einzel$/i.test(x.name)),notes:i.note||'',category:''})),
       fees:{delivery:feeCents},discountsCents:discount,totalCents:total,cashDueCents:Number(o.cashDueCents)||total,
       payment:{method},assignment:o.assignment||null,remarks:''
@@ -54,7 +54,10 @@
 
   function html(o,kind){
     const r=toReceiptOrder(o,kind),t=TX[lang()]||TX.de,d=r.delivery||{},isDel=r.orderType==='DELIVERY',pm=r.payment.method;
-    const subtotal=r.cart.reduce((s,i)=>s+i.totalCents,0);
+    // خصم على الأصناف (عرض المنصة): السعر الأصلي مشطوب + السعر الجديد؛ والباقي من الخصم بسطر "Rabatt"
+    const itemDisc=r.cart.reduce((s,i)=>s+(i.discountCents||0),0);
+    const subtotal=r.cart.reduce((s,i)=>s+i.totalCents-(i.discountCents||0),0);
+    const restDisc=Math.max(0,(r.discountsCents||0)-itemDisc);
     const type=r.orderType==='PICKUP'?t.pickup:r.orderType==='DINE_IN'?(t.dine+(r.table?' · '+t.table+' '+esc(r.table):'')):t.delivery;
     const rows=[];
     // الترويسة
@@ -79,7 +82,7 @@
     if(isDel&&d.notes)rows.push('<div class="rc-note"><b>'+esc(t.note)+':</b> '+esc(d.notes)+'</div>');
     // الأصناف
     const items=r.cart.map(i=>{
-      let h='<div class="rc-item"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span><span class="rc-price">'+eur(i.totalCents)+'</span></div>';
+      let h='<div class="rc-item"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span><span class="rc-price">'+(i.discountCents?'<s class="rc-old">'+eur(i.totalCents)+'</s> '+eur(i.totalCents-i.discountCents):eur(i.totalCents))+'</span></div>';
       (i.options||[]).forEach(op=>{h+='<div class="rc-opt">+ '+(op.quantity>1?esc(op.quantity)+'× ':'')+esc(op.name)+'</div>'});
       if(i.notes)h+='<div class="rc-inote">! '+esc(i.notes)+'</div>';
       return h});
@@ -87,7 +90,7 @@
     // المجاميع
     let tot='<div class="rc-line2"><span>'+t.sub+'</span><span>'+eur(subtotal)+'</span></div>';
     if(r.fees&&r.fees.delivery)tot+='<div class="rc-line2"><span>'+t.deliv+'</span><span>'+eur(r.fees.delivery)+'</span></div>';
-    if(r.discountsCents)tot+='<div class="rc-line2"><span>'+t.disc+'</span><span>−'+eur(r.discountsCents)+'</span></div>';
+    if(restDisc)tot+='<div class="rc-line2"><span>'+t.disc+'</span><span>−'+eur(restDisc)+'</span></div>';
     tot+='<div class="rc-total"><span>'+t.total+'</span><span>'+eur(r.totalCents)+'</span></div>';
     rows.push('<div class="rc-totals">'+tot+'</div>');
     // الدفع

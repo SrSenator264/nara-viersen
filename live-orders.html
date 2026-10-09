@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Live Orders · NARA</title>
 <script src="nara-lang.js?v=20261009b" data-section="live"></script>
-<link rel="stylesheet" href="kasse-print-lifecycle.css?v=20261008">
+<link rel="stylesheet" href="kasse-print-lifecycle.css?v=20261009i">
 <style>
 :root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--warn:#e0a100;--late:#d1342f;--chip:#e9f4fb}
 *{box-sizing:border-box}
@@ -132,7 +132,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 <div id="arc" hidden><div class="rcard"><div class="rhead"><h2>🗂 <span data-t="archive"></span></h2><span class="sp"></span><input type="date" id="aday"><button id="aclose">✕</button></div><p class="arhint" data-t="arcHint"></p><div id="abody"></div></div></div>
 <div id="nara-print-sheet"></div>
 <script src="vendor/qrcode.bundle.js?v=20261008"></script>
-<script src="kasse-receipt.js?v=20261009h"></script>
+<script src="kasse-receipt.js?v=20261009i"></script>
 <script>
 (function(){
 const $=s=>document.querySelector(s);
@@ -237,17 +237,20 @@ function itemsHtml(o){
     const q=Number(i.quantity)||1,tot=i.totalCents!=null?Number(i.totalCents):(Number(i.unitCents)||0)*q;
     const opts=(i.options||[]).map(x=>/[؀-ۿ]/.test(S(x.name))?P(S(x.name)):S(x.name).split(' / ')[0]).filter(n=>n&&!/^einzel$/i.test(n)&&!/^__/.test(n));
     const note=S(i.note||i.notes);
-    return '<div class="it"><span class="q">'+q+'</span><span class="n">'+esc(P(i.name))+'</span><span class="p">'+eur(tot)+'</span>'+(opts.length?'<span class="opt">+ '+opts.map(esc).join(', ')+'</span>':'')+(note?'<span class="chip">'+esc(note)+'</span>':'')+'</div>'}).join('')).join('');
+    const dc=Number(i.discountCents)||0;
+    return '<div class="it"><span class="q">'+q+'</span><span class="n">'+esc(P(i.name))+'</span><span class="p">'+(dc?'<s style="color:#9a948e;font-weight:400">'+eur(tot)+'</s> <b style="color:#16a34a">'+eur(tot-dc)+'</b>':eur(tot))+'</span>'+(opts.length?'<span class="opt">+ '+opts.map(esc).join(', ')+'</span>':'')+(note?'<span class="chip">'+esc(note)+'</span>':'')+'</div>'}).join('')).join('');
 }
 function sumHtml(o){
   const cart=o.cart||[];
-  const sub=cart.filter(i=>!/FEE|TIP/.test(S(i.kind).toUpperCase())).reduce((s,i)=>s+(i.totalCents!=null?Number(i.totalCents):(Number(i.unitCents)||0)*(Number(i.quantity)||1)),0);
+  const goods=cart.filter(i=>!/FEE|TIP/.test(S(i.kind).toUpperCase()));
+  const itemDisc=goods.reduce((s,i)=>s+(Number(i.discountCents)||0),0);
+  const sub=goods.reduce((s,i)=>s+(i.totalCents!=null?Number(i.totalCents):(Number(i.unitCents)||0)*(Number(i.quantity)||1)),0)-itemDisc;
   const rows=[[t('subtotal'),sub]];
   const f=o.fees||{};
   const fee=(Number(o.deliveryFeeCents)||0)||(typeof f.delivery==='number'?f.delivery:0)||cart.filter(i=>S(i.kind).toUpperCase()==='DELIVERY_FEE').reduce((s,i)=>s+(Number(i.unitCents)||0)*(Number(i.quantity)||1),0);
   if(fee)rows.push([t('fee'),fee]);
   for(const [k,l] of [['service',t('service')],['smallOrder',t('small')]])if(typeof f[k]==='number'&&f[k])rows.push([l,f[k]]);
-  const disc=(Number(o.discountsCents)||0)+(Number(o.discountCents)||0)+(Number(o.stampCents)||0)+(Number(o.discount&&o.discount.amountCents)||0);
+  const disc=Math.max(0,(Number(o.discountsCents)||0)+(Number(o.discountCents)||0)+(Number(o.stampCents)||0)+(Number(o.discount&&o.discount.amountCents)||0)-itemDisc);
   if(disc)rows.push([t('disc'),-disc]);
   if(Number(o.tipCents))rows.push([t('tip'),Number(o.tipCents)]);
   const total=Number(o.totalCents)||Number(o.externalTotalCents)||rows.reduce((s,r)=>s+r[1],0);

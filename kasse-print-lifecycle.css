@@ -20,7 +20,7 @@
 .nara-rc .rc-note{margin:6px 0;padding:6px 9px;border:2px dashed #000;border-radius:7px;font-size:14px}
 .nara-rc .rc-items{margin:8px 0 4px;border-top:2px solid #000}
 .nara-rc .rc-item{display:grid;grid-template-columns:auto 1fr auto;gap:6px;align-items:baseline;padding:6px 0 2px;font-size:15px;font-weight:800}
-.nara-rc .rc-qty{min-width:2.2em}.nara-rc .rc-price{white-space:nowrap}
+.nara-rc .rc-qty{min-width:2.2em}.nara-rc .rc-price{white-space:nowrap}.nara-rc .rc-old{font-weight:400;opacity:.75}
 .nara-rc .rc-opt{padding:0 0 0 2.2em;font-size:12.5px;font-weight:500}
 .nara-rc .rc-inote{padding:1px 0 0 2.2em;font-size:12.5px;font-weight:800}
 .nara-rc .rc-item+.rc-item,.nara-rc .rc-opt+.rc-item,.nara-rc .rc-inote+.rc-item{border-top:1px dotted #000}

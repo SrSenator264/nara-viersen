@@ -61,6 +61,10 @@ function mapItem(it, warnings) {
   const optCents = options.reduce((s, o) => s + o.totalCents, 0);
   // سعر الصنف من أوبر = لقطعة وحدة (بدون الإضافات)
   const unit = (base || 0) + optCents;
+  // عرض خاص على الصنف: أوبر بيعطي السعر بعد الخصم (لقطعة، بدون الإضافات)
+  const pm = it.price && it.price.priceModification;
+  const after = pm && pm.discount ? moneyToCents(pm.discount.formattedDiscountedPrice) : null;
+  const itemDiscount = after != null && base != null && after < base ? (base - after) * qty : 0;
   const note = (Array.isArray(it.notes) ? it.notes : []).map(n => richText(n.title)).map(t => t.replace(/^"\s*|\s*"$/g, '').trim()).filter(Boolean).join(' · ');
   return {
     id: S(it.itemID || it.id),
@@ -68,6 +72,8 @@ function mapItem(it, warnings) {
     quantity: qty,
     unitCents: unit,
     totalCents: unit * qty,
+    // الخصم على هالسطر (للفاتورة: السعر الأصلي مشطوب وبعدو السعر بعد الخصم)
+    ...(itemDiscount ? { discountCents: itemDiscount } : {}),
     options,
     note, notes: note,
     category: /men[üu]/i.test(S(it.name)) ? 'Menü' : '',
