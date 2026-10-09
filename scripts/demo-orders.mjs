@@ -2,6 +2,9 @@
 //   node scripts/demo-orders.mjs        → بيعمل 10 طلبات تجربة (DEMO-…)
 //   node scripts/demo-orders.mjs clear  → بيلغي كل طلبات التجربة (بتختفي من المطبخ والتوزيع)
 // كل الطلبات معلّمة isTest، وما بتنحسب بالتقرير اليومي.
+import fs from 'node:fs';
+import path from 'node:path';
+const CODES = path.join(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..', 'data', 'demo-codes.json');
 const BASE = process.env.NARA_BASE_URL || 'http://127.0.0.1:' + (process.env.PORT || 4185);
 const now = Date.now(), iso = m => new Date(now + m * 60000).toISOString();
 const it = (name, category, qty = 1, cents = 999, options = [], note = '') => ({ name, category, quantity: qty, unitCents: cents, totalCents: cents * qty, options: options.map(n => ({ name: n, quantity: 1 })), note });
@@ -24,9 +27,14 @@ async function post(body) {
   return r.status;
 }
 const clear = process.argv.includes('clear');
+let saved = [];
+try { saved = JSON.parse(fs.readFileSync(CODES, 'utf8')); } catch { /* أول مرة */ }
+// كل تشغيلة إلها أكواد جديدة (D + الساعة + رقم)، لأن الطلب الملغي ما بيرجع ينفتح بنفس الكود
+const stamp = (Math.floor(Date.now() / 1000) % 46656).toString(36).toUpperCase().padStart(3, '0');
+const list = clear ? saved : ORDERS.map((_, i) => 'D' + stamp + '-' + String(i + 1).padStart(2, '0'));
 let n = 0;
-for (const [i, [src, ago, cart, remarks]] of ORDERS.entries()) {
-  const code = 'DEMO' + String(i + 1).padStart(2, '0');
+for (const [i, code] of list.entries()) {
+  const [src, ago, cart, remarks] = ORDERS[i % ORDERS.length];
   const source = src === 'NARA' ? 'LANCH' : src;
   const a = addr[i % addr.length], name = names[i % names.length];
   const total = cart.reduce((s, x) => s + x.totalCents, 0);
@@ -42,4 +50,5 @@ for (const [i, [src, ago, cart, remarks]] of ORDERS.entries()) {
   const st = await post({ source, order });
   if (st < 300) n++; else console.log(code, 'HTTP', st);
 }
-console.log(clear ? `✓ ${n} Demo-Bestellungen storniert.` : `✓ ${n} Demo-Bestellungen angelegt (DEMO01…DEMO10). Küche: http://localhost:${process.env.PORT || 4185}/kitchen.html`);
+try { fs.writeFileSync(CODES, JSON.stringify(clear ? [] : [...saved, ...list])); } catch (e) { console.log('(Codes nicht gespeichert: ' + e.message + ')'); }
+console.log(clear ? `✓ ${n} Demo-Bestellungen storniert.` : `✓ ${n} Demo-Bestellungen angelegt (${list[0]} …). Küche: http://localhost:${process.env.PORT || 4185}/kitchen.html`);

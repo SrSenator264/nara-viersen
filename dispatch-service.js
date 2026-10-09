@@ -34,7 +34,7 @@ function pointOf(o, cache) {
 }
 
 const isDelivery = o => str(o.type || o.orderType).toLowerCase() === 'delivery';
-const delivered = o => !!o.deliveredAt || CLOSED.has(str(o.status).toUpperCase()) || str(o.liveStage).toUpperCase() === 'DONE';
+const delivered = (o, now = Date.now()) => kitchen.isClosedForOps(o, now);
 
 function shopOf(data) {
   const s = (data.settings && data.settings.restaurantLocation) || {};
@@ -77,7 +77,7 @@ function buildInput(data, now = Date.now()) {
     const fresh = pos && Number.isFinite(pos.lat) && now - Date.parse(pos.at || 0) < 10 * MIN;
     const mine = routes.filter(r => r.employeeId === e.id);
     const out = mine.some(r => r.startedAt);
-    const remaining = mine.flatMap(r => (r.orderIds || []).map(id => ordersById.get(String(id))).filter(o => o && !delivered(o)))
+    const remaining = mine.flatMap(r => (r.orderIds || []).map(id => ordersById.get(String(id))).filter(o => o && !delivered(o, now)))
       .map(o => pointOf(o, cache)).filter(Boolean);
     // طالع: من موقعه (أو المحل إذا ما في GPS). مرسلة بس لسا ما طلع: من المحل
     const position = out && fresh ? { lat: pos.lat, lng: pos.lng } : (remaining.length || (fresh && out) ? shopOf(data) : (fresh ? { lat: pos.lat, lng: pos.lng } : null));
@@ -86,7 +86,7 @@ function buildInput(data, now = Date.now()) {
 
   const fc = prep.forecast(data, now); // متى كل طلب رح يجهز فعلياً (متعلّم من المطبخ + الطابور)
   const orders = (data.orders || [])
-    .filter(o => isDelivery(o) && !delivered(o) && !kitchen.isStale(o, now) && !busy.has(String(o.id)))
+    .filter(o => isDelivery(o) && !delivered(o, now) && !kitchen.isStale(o, now) && !busy.has(String(o.id)))
     .map(o => {
       const p = pointOf(o, cache);
       const kv = kitchen.kitchenView(o, now);
@@ -243,7 +243,7 @@ function driverRoutes(data, driverId) {
 function missingAddresses(data, now = Date.now()) {
   const cache = data.geocodeCache || {}, out = new Set();
   for (const o of data.orders || []) {
-    if (!isDelivery(o) || delivered(o) || kitchen.isStale(o, now) || pointOf(o, cache)) continue;
+    if (!isDelivery(o) || delivered(o, now) || kitchen.isStale(o, now) || pointOf(o, cache)) continue;
     const a = addressOf(o); if (a && !(cache[addressKey(a)] && cache[addressKey(a)].failedAt)) out.add(a);
   }
   return [...out];

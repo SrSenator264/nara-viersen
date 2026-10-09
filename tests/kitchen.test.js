@@ -71,7 +71,7 @@ test('platform order: source, code and ready time from platform start + prep', (
 test('list: closed and empty orders hidden, picked-up hidden after 10 minutes, sorted by state then deadline', () => {
   const orders = [
     { ...kasseOrder, id: 'a', kitchenStatus: 'READY' },
-    { ...kasseOrder, id: 'b', status: 'COMPLETED' },
+    { ...kasseOrder, id: 'b', status: 'COMPLETED', completedAt: '2026-10-08T10:00:00Z' },
     { ...kasseOrder, id: 'c', cart: [{ name: 'Lieferkosten', kind: 'DELIVERY_FEE', unitCents: 100, quantity: 1 }] },
     { ...kasseOrder, id: 'd', kitchenStatus: 'PICKED_UP', kitchenStatusAt: '2026-10-08T11:40:00Z' },
     { ...kasseOrder, id: 'e', kitchenStatus: 'PICKED_UP', kitchenStatusAt: '2026-10-08T11:55:00Z' },
@@ -120,4 +120,16 @@ test('broken acceptedAt text and cashier orders without date: age taken from a r
   assert.equal(K.orderTime({ id: '1790160934868' }), 1790160934868);
   assert.equal(K.isStale({ acceptedAt: '22:27 - 4 Oct', createdAt: '2026-10-04T20:05:56.728Z' }, NOW), true);
   assert.equal(K.isStale({ id: '1790160934868' }, NOW), true);
+});
+
+test('paid at the counter is not finished: a paid kasse delivery stays in kitchen and dispatch until delivered', () => {
+  const S = require('../dispatch-service.js');
+  const paid = { ...kasseOrder, id: 'paid', status: 'COMPLETED', completedAt: '2026-10-08T11:55:00Z', delivery: { ...kasseOrder.delivery, lat: 51.26, lng: 6.39 } };
+  assert.deepEqual(K.listKitchenOrders([paid], NOW).map(o => o.id), ['paid']);
+  const data = { settings: {}, employees: [], orders: [paid] };
+  assert.equal(S.buildInput(data, NOW).orders.length, 1);
+  assert.equal(K.isClosedForOps({ ...paid, deliveredAt: '2026-10-08T11:59:00Z' }, NOW), true);
+  assert.equal(K.isClosedForOps({ ...paid, completedAt: '2026-10-08T09:00:00Z' }, NOW), true); // vor 3 Std bezahlt → fertig
+  assert.equal(K.isClosedForOps({ ...platformOrder, status: 'COMPLETED' }, NOW), true);       // Plattform sagt fertig
+  assert.equal(K.isClosedForOps({ ...paid, status: 'CANCELLED' }, NOW), true);
 });

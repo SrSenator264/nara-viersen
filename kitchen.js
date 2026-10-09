@@ -99,8 +99,25 @@ function isStale(o, now = Date.now()) {
   return t != null && now - t > MAX_AGE_H * 3600000;
 }
 
+// "مدفوع" مش يعني "خلص": طلب الكاشير بيصير COMPLETED لما ينضرب Cash/Karte، بس لسا لازم ينطبخ ويتوصّل.
+// منعتبره منتهي بس إذا: ملغي، أو انوصل، أو المنصة قالت DONE، أو طلب منصة مغلق، أو طلب كاشير مدفوع من أكتر من 90 دقيقة.
+const PAID_GRACE_MS = 90 * 60000;
+const PLATFORM_RE = /^(LIEFERANDO|UBER|WOLT|LANCH|SIDES)/i;
+function isClosedForOps(o, now = Date.now()) {
+  if (!o) return true;
+  const st = str(o.status).toUpperCase();
+  if (st === 'CANCELLED' || st === 'STORNIERT') return true;
+  if (o.deliveredAt || str(o.liveStage).toUpperCase() === 'DONE') return true;
+  if (st === 'COMPLETED' || st === 'DONE') {
+    if (PLATFORM_RE.test(str(o.source || o.platform))) return true;
+    const t = ms(o.completedAt) ?? orderTime(o);
+    return t == null || now - t > PAID_GRACE_MS;
+  }
+  return false;
+}
+
 function isKitchenOrder(o, now = Date.now()) {
-  if (!o || CLOSED.has(str(o.status).toUpperCase())) return false;
+  if (!o || isClosedForOps(o, now)) return false;
   if (isStale(o, now)) return false;
   if (isOtherStation(o)) return false;
   if (!Array.isArray(o.cart) || !kitchenItems(o.cart).length) return false;
@@ -131,7 +148,7 @@ function listKitchenOrders(orders, now = Date.now(), catalog = null) {
 function applyKitchenStatus(order, next, user, now = new Date().toISOString()) {
   const to = str(next).toUpperCase();
   if (!STATES.includes(to)) { const e = new Error('حالة المطبخ غير صالحة'); e.status = 422; throw e; }
-  if (CLOSED.has(str(order.status).toUpperCase())) { const e = new Error('الطلب مغلق'); e.status = 409; throw e; }
+  if (isClosedForOps(order, Date.parse(now) || Date.now())) { const e = new Error('الطلب مغلق'); e.status = 409; throw e; }
   const from = STATES.includes(str(order.kitchenStatus).toUpperCase()) ? str(order.kitchenStatus).toUpperCase() : 'NEW';
   order.kitchenStatus = to;
   order.kitchenStatusAt = now;
@@ -146,4 +163,4 @@ function applyKitchenStatus(order, next, user, now = new Date().toISOString()) {
   return { from, to };
 }
 
-module.exports = { STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };
+module.exports = { isClosedForOps, STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };
