@@ -1,0 +1,14 @@
+{
+  "name": "NARA",
+  "short_name": "NARA",
+  "description": "NARA – Kasse, Live Orders, Küche & Fahrer",
+  "start_url": "/nara-app.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f2ef",
+  "theme_color": "#e34824",
+  "icons": [
+    { "src": "/icons/nara-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/nara-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
