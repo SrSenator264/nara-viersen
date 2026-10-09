@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>NARA · Team</title>
+<script src="nara-lang.js?v=20261009b" data-section="app"></script>
 <style>
 :root{--bg:#0f1419;--panel:#171e26;--line:#26313c;--tx:#f3f5f7;--mut:#9aa6b2;--ac:#7aa7ff;--ok:#4cc38a;--bad:#ff8a80}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -24,21 +25,27 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
 </head>
 <body>
 <main>
-  <div><h1>Team &amp; PINs · الفريق</h1><p class="sub">Konten, Rollen und PINs verwalten. Beträge sehen nur Inhaber und Manager.</p></div>
-  <section><h2>Mitarbeiter</h2><div id="team"></div><div class="msg" id="tmsg"></div></section>
-  <section><h2>Neues Konto · حساب جديد</h2>
-    <div class="add"><input id="n-name" placeholder="Name · الاسم"><select id="n-role"></select><input id="n-pin" type="password" inputmode="numeric" autocomplete="new-password" placeholder="PIN"><button class="pri" id="n-go">Anlegen</button></div>
+  <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h1 data-t="title"></h1><p class="sub" data-t="sub"></p></div><span id="lang-switch"></span></div>
+  <section><h2 data-t="staff"></h2><div id="team"></div><div class="msg" id="tmsg"></div></section>
+  <section><h2 data-t="newAcc"></h2>
+    <div class="add"><input id="n-name" data-tp="namePh"><select id="n-role"></select><input id="n-pin" type="password" inputmode="numeric" autocomplete="new-password" placeholder="PIN"><button class="pri" id="n-go" data-t="create"></button></div>
     <div class="msg" id="nmsg"></div>
-    <p class="sub">Kasse/Küche/Fahrer: mind. 4 Ziffern. Inhaber/Manager/Buchhaltung: mind. 6 Ziffern. Zu einfache PINs (1234, 0000) werden abgelehnt.</p>
+    <p class="sub" data-t="pinRules"></p>
   </section>
-  <section class="pay"><h2>Fahrer-Bezahlung pro Zone · أجر السائق</h2>
-    <p class="sub">Leer lassen = Standardsatz der Zone. Diese Beträge sieht nur ihr — nicht die Fahrer-App.</p>
+  <section class="pay"><h2 data-t="payH"></h2>
+    <p class="sub" data-t="payNote"></p>
     <div id="pay"></div><div class="msg" id="pmsg"></div>
   </section>
 </main>
 <script>
 (function(){
-  var ROLES={OWNER:'Inhaber · المالك',MANAGER:'Manager · مدير',CASHIER:'Kasse · كاشير',KITCHEN:'Küche · مطبخ',DRIVER:'Fahrer · سائق',ACCOUNTANT:'Buchhaltung · محاسب'};
+  var TT={"de": {"title": "Team & PINs", "sub": "Konten, Rollen und PINs verwalten. Beträge sehen nur Inhaber und Manager.", "staff": "Mitarbeiter", "newAcc": "Neues Konto", "namePh": "Name", "create": "Anlegen", "pinRules": "Kasse/Küche/Fahrer: mind. 4 Ziffern. Inhaber/Manager/Buchhaltung: mind. 6 Ziffern. Zu einfache PINs (1234, 0000) werden abgelehnt.", "payH": "Fahrer-Bezahlung pro Zone", "payNote": "Leer lassen = Standardsatz der Zone. Diese Beträge sieht nur ihr — nicht die Fahrer-App.", "OWNER": "Inhaber", "MANAGER": "Manager", "CASHIER": "Kasse", "KITCHEN": "Küche", "DRIVER": "Fahrer", "ACCOUNTANT": "Buchhaltung", "pinSet": "PIN gesetzt", "noPin": "keine PIN", "changePin": "PIN ändern", "newPinFor": "Neue PIN für ", "pinSaved": "PIN gespeichert.", "deact": "Deaktivieren", "act": "Aktivieren", "saved": "Gespeichert.", "created": "Konto angelegt.", "noDriver": "Noch kein aktiver Fahrer. Lege oben ein Konto mit der Rolle „Fahrer“ an.", "driver": "Fahrer", "std": "Standard", "factor": "Faktor", "level": "Stufe", "trainee": "Azubi/Probe", "new": "Neu", "exp": "Erfahren", "save": "Speichern", "badAmt": "Ungültiger Betrag.", "savedFor": ": gespeichert."}, "ar": {"title": "الفريق والرموز", "sub": "إدارة الحسابات والوظايف والرموز. المبالغ بيشوفها بس صاحب المحل والمدير.", "staff": "الموظفين", "newAcc": "حساب جديد", "namePh": "الاسم", "create": "اعمل الحساب", "pinRules": "كاشير/مطبخ/سواق: 4 أرقام عالأقل. صاحب المحل/مدير/محاسب: 6 أرقام عالأقل. الرموز السهلة (1234، 0000) ما بتنقبل.", "payH": "أجر السواق حسب المنطقة", "payNote": "اتركه فاضي = السعر العادي للمنطقة. هالمبالغ بتشوفوها إنتو بس، مش تطبيق السواق.", "OWNER": "صاحب المحل", "MANAGER": "مدير", "CASHIER": "كاشير", "KITCHEN": "مطبخ", "DRIVER": "سواق", "ACCOUNTANT": "محاسب", "pinSet": "في رمز", "noPin": "ما في رمز", "changePin": "غيّر الرمز", "newPinFor": "رمز جديد لـ ", "pinSaved": "انحفظ الرمز.", "deact": "وقّف", "act": "شغّل", "saved": "انحفظ.", "created": "انعمل الحساب.", "noDriver": "لسا ما في سواق شغّال. اعمل فوق حساب بوظيفة \"سواق\".", "driver": "السواق", "std": "العادي", "factor": "المعامل", "level": "المستوى", "trainee": "تدريب/تجربة", "new": "جديد", "exp": "خبرة", "save": "احفظ", "badAmt": "المبلغ غلط.", "savedFor": ": انحفظ."}, "en": {"title": "Team & PINs", "sub": "Manage accounts, roles and PINs. Only owner and managers see amounts.", "staff": "Employees", "newAcc": "New account", "namePh": "Name", "create": "Create", "pinRules": "Cashier/kitchen/driver: at least 4 digits. Owner/manager/accountant: at least 6 digits. Too simple PINs (1234, 0000) are rejected.", "payH": "Driver pay per zone", "payNote": "Leave empty = the zone’s standard rate. Only you see these amounts — not the driver app.", "OWNER": "Owner", "MANAGER": "Manager", "CASHIER": "Cashier", "KITCHEN": "Kitchen", "DRIVER": "Driver", "ACCOUNTANT": "Accountant", "pinSet": "PIN set", "noPin": "no PIN", "changePin": "Change PIN", "newPinFor": "New PIN for ", "pinSaved": "PIN saved.", "deact": "Deactivate", "act": "Activate", "saved": "Saved.", "created": "Account created.", "noDriver": "No active driver yet. Create an account with the role “Driver” above.", "driver": "Driver", "std": "Standard", "factor": "Factor", "level": "Level", "trainee": "Trainee", "new": "New", "exp": "Experienced", "save": "Save", "badAmt": "Invalid amount.", "savedFor": ": saved."}};
+  var LANG=(window.NARA_LANG&&NARA_LANG.get())||'de';
+  function tt(k){return t(k)}
+  function t(k){var d=TT[LANG]||TT.de;return d[k]!=null?d[k]:(TT.de[k]||k)}
+  document.querySelectorAll('[data-t]').forEach(function(el){el.textContent=t(el.dataset.t)});document.querySelectorAll('[data-tp]').forEach(function(el){el.placeholder=t(el.dataset.tp)});
+  if(window.NARA_LANG)NARA_LANG.mountSwitcher(document.getElementById('lang-switch'));
+  var ROLES={OWNER:t('OWNER'),MANAGER:t('MANAGER'),CASHIER:t('CASHIER'),KITCHEN:t('KITCHEN'),DRIVER:t('DRIVER'),ACCOUNTANT:t('ACCOUNTANT')};
   var $=function(id){return document.getElementById(id)};
   function api(m,u,b){return fetch(u,{method:m,credentials:'same-origin',headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined}).then(function(r){return r.json().catch(function(){return{}}).then(function(j){j.__s=r.status;return j})})}
   function say(id,t,ok){var e=$(id);e.textContent=t||'';e.className='msg'+(ok?' ok':'')}
@@ -52,38 +59,38 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
     var box=$('team');box.innerHTML='';
     team.filter(function(t){return t.role}).forEach(function(t){
       var r=document.createElement('div');r.className='row'+(t.active?'':' off');
-      var n=document.createElement('div');n.innerHTML='<div class="nm"></div><div class="tag"></div>';n.firstChild.textContent=t.name;n.lastChild.textContent=t.hasPin?'PIN gesetzt':'keine PIN';
+      var n=document.createElement('div');n.innerHTML='<div class="nm"></div><div class="tag"></div>';n.firstChild.textContent=t.name;n.lastChild.textContent=t.hasPin?tt('pinSet'):tt('noPin');
       var s=document.createElement('select');opt(s,t.role);
       s.onchange=function(){save(t,{role:s.value})};
-      var pb=document.createElement('button');pb.textContent='PIN ändern';pb.onclick=function(){var p=prompt('Neue PIN für '+t.name);if(p)api('POST','/api/auth/set-pin',{employeeId:t.id,pin:p}).then(function(j){say('tmsg',j.ok?'PIN gespeichert.':j.error,j.ok);load()})};
-      var ab=document.createElement('button');ab.textContent=t.active?'Deaktivieren':'Aktivieren';ab.onclick=function(){save(t,{active:!t.active})};
+      var pb=document.createElement('button');pb.textContent=tt('changePin');pb.onclick=function(){var p=prompt(tt('newPinFor')+t.name);if(p)api('POST','/api/auth/set-pin',{employeeId:t.id,pin:p}).then(function(j){say('tmsg',j.ok?tt('pinSaved'):j.error,j.ok);load()})};
+      var ab=document.createElement('button');ab.textContent=t.active?tt('deact'):tt('act');ab.onclick=function(){save(t,{active:!t.active})};
       [n,s,pb,ab].forEach(function(x){r.appendChild(x)});box.appendChild(r)
     });
   }
-  function save(t,patch){api('POST','/api/auth/staff',Object.assign({id:t.id,name:t.name,role:t.role,active:t.active},patch)).then(function(j){say('tmsg',j.ok?'Gespeichert.':j.error,j.ok);load()})}
-  $('n-go').onclick=function(){api('POST','/api/auth/staff',{name:$('n-name').value,role:$('n-role').value,pin:$('n-pin').value}).then(function(j){say('nmsg',j.ok?'Konto angelegt.':j.error,j.ok);if(j.ok){$('n-name').value='';$('n-pin').value='';load()}})};
+  function save(t,patch){api('POST','/api/auth/staff',Object.assign({id:t.id,name:t.name,role:t.role,active:t.active},patch)).then(function(j){say('tmsg',j.ok?tt('saved'):j.error,j.ok);load()})}
+  $('n-go').onclick=function(){api('POST','/api/auth/staff',{name:$('n-name').value,role:$('n-role').value,pin:$('n-pin').value}).then(function(j){say('nmsg',j.ok?tt('created'):j.error,j.ok);if(j.ok){$('n-name').value='';$('n-pin').value='';load()}})};
   function eur(c){return c==null?'':(c/100).toFixed(2).replace('.',',')}
   function cents(v){v=String(v).trim().replace(',','.');if(v==='')return null;var n=Math.round(parseFloat(v)*100);return isFinite(n)&&n>=0?n:NaN}
   function renderPay(){
     var box=$('pay');box.innerHTML='';if(!cfg)return;
     var ids={};team.forEach(function(t){if(t.role==='DRIVER'&&t.active)ids[t.id]=1});
     var list=drivers.filter(function(d){return ids[d.id]});
-    if(!list.length){box.innerHTML='<p class="sub">Noch kein aktiver Fahrer. Lege oben ein Konto mit der Rolle „Fahrer“ an.</p>';return}
+    if(!list.length){box.innerHTML='<p class="sub">'+t('noDriver')+'</p>';return}
     var tb=document.createElement('table');
-    var head='<tr><th>Fahrer</th>'+cfg.zones.map(function(z){return '<th>'+z.name+'<br><span class="tag">Standard '+eur(z.driverPayCents)+' €</span></th>'}).join('')+'<th>Faktor</th><th>Stufe</th><th></th></tr>';
+    var head='<tr><th>'+t('driver')+'</th>'+cfg.zones.map(function(z){return '<th>'+z.name+'<br><span class="tag">'+t('std')+' '+eur(z.driverPayCents)+' €</span></th>'}).join('')+'<th>'+t('factor')+'</th><th>'+t('level')+'</th><th></th></tr>';
     tb.innerHTML=head;
     list.forEach(function(d){
       var p=d.pay||{zoneCents:{}},tr=document.createElement('tr'),ins={};
       tr.innerHTML='<td><b></b></td>';tr.firstChild.firstChild.textContent=d.name;
       cfg.zones.forEach(function(z){var td=document.createElement('td'),i=document.createElement('input');i.inputMode='decimal';i.placeholder=eur(z.driverPayCents);i.value=eur((p.zoneCents||{})[z.id]);ins[z.id]=i;td.appendChild(i);tr.appendChild(td)});
       var f=document.createElement('input');f.inputMode='decimal';f.placeholder='1,0';f.value=p.factor==null?'':String(p.factor).replace('.',',');var tf=document.createElement('td');tf.appendChild(f);tr.appendChild(tf);
-      var lv=document.createElement('select');[['','—'],['trainee','Azubi/Probe'],['new','Neu'],['experienced','Erfahren']].forEach(function(o){var e=document.createElement('option');e.value=o[0];e.textContent=o[1];if((p.level||'')===o[0])e.selected=true;lv.appendChild(e)});var tl=document.createElement('td');tl.appendChild(lv);tr.appendChild(tl);
-      var sb=document.createElement('button');sb.className='pri';sb.textContent='Speichern';var ts=document.createElement('td');ts.appendChild(sb);tr.appendChild(ts);
+      var lv=document.createElement('select');[['','—'],['trainee',t('trainee')],['new',t('new')],['experienced',t('exp')]].forEach(function(o){var e=document.createElement('option');e.value=o[0];e.textContent=o[1];if((p.level||'')===o[0])e.selected=true;lv.appendChild(e)});var tl=document.createElement('td');tl.appendChild(lv);tr.appendChild(tl);
+      var sb=document.createElement('button');sb.className='pri';sb.textContent=t('save');var ts=document.createElement('td');ts.appendChild(sb);tr.appendChild(ts);
       sb.onclick=function(){
         var z={},bad=false;cfg.zones.forEach(function(zz){var c=cents(ins[zz.id].value);if(c!==null&&isNaN(c))bad=true;z[zz.id]=c});
         var fv=f.value.trim().replace(',','.');
-        if(bad){say('pmsg','Ungültiger Betrag.');return}
-        api('POST','/api/delivery/driver-pay',{employeeId:d.id,zoneCents:z,factor:fv===''?null:Number(fv),level:lv.value||null}).then(function(j){say('pmsg',j.ok?d.name+': gespeichert.':j.error,j.ok);if(j.ok)load()})
+        if(bad){say('pmsg',t('badAmt'));return}
+        api('POST','/api/delivery/driver-pay',{employeeId:d.id,zoneCents:z,factor:fv===''?null:Number(fv),level:lv.value||null}).then(function(j){say('pmsg',j.ok?d.name+t('savedFor'):j.error,j.ok);if(j.ok)load()})
       };
       tb.appendChild(tr)
     });

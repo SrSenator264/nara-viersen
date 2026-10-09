@@ -6,3 +6,5 @@ button:active:not(:disabled),.button:active,[role="button"]:active{transform:tra
 button:focus-visible,.button:focus-visible,[role="button"]:focus-visible{outline:3px solid #286bc1;outline-offset:3px}
 /* Global navigation stays available across the whole application. */
 .side{position:sticky;top:0;height:calc(100vh - 78px);overflow:auto;z-index:4}.side-backdrop{display:none}@media(max-width:700px){.side{display:block;position:fixed;inset-block:0;inset-inline-start:0;height:100vh;transform:translateX(-105%);transition:transform .22s ease;box-shadow:10px 0 35px #0005}.side.open{display:block;transform:translateX(0)}body.nav-open .side-backdrop{display:block;position:fixed;inset:0;z-index:3;background:#0007}.menu{position:relative;z-index:12}}
+/* RTL (عربي): القائمة الجانبية بتطلع من اليمين عالموبايل. */
+.side small{opacity:.7}@media(max-width:700px){html[dir="rtl"] .side{transform:translateX(105%);box-shadow:-10px 0 35px #0005}html[dir="rtl"] .side.open{inset:0 0 0 auto;transform:translateX(0)}}

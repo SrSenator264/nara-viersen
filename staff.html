@@ -1,45 +1,47 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="de" dir="ltr">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>NARA · الموظفون والورديات</title>
+  <title data-t="title">NARA · Mitarbeiter &amp; Schichten</title>
+  <script src="nara-lang.js?v=20261009b" data-section="app"></script>
   <link rel="stylesheet" href="nara-shell.css">
   <link rel="stylesheet" href="staff.css">
+  <style>.staff-header-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.staff-header-actions .back-link{margin-top:0}.profile-switches label{display:flex;gap:8px;align-items:center;font-weight:600}.profile-switches input{width:auto}</style>
 </head>
 <body>
   <main class="staff-page">
     <header class="staff-header">
-      <div><p class="eyebrow">إدارة التشغيل والحسابات</p><h1>الموظفون والورديات</h1><p>الحضور والانصراف، الورديات، وأجور العمال من مكان واحد.</p></div>
-      <a class="back-link" href="ai-control.html">العودة إلى مدير NARA</a>
+      <div><p class="eyebrow" data-t="eyebrow">Betrieb &amp; Abrechnung</p><h1 data-t="h1">Mitarbeiter &amp; Schichten</h1><p data-t="lead">Kommen &amp; Gehen, Schichten und Löhne an einem Ort.</p></div>
+      <div class="staff-header-actions"><span id="lang-switch"></span><a class="back-link" href="ai-control.html" data-t="back">Zurück zum NARA-Manager</a></div>
     </header>
     <section class="summary-grid">
-      <article><span>الموظفون</span><strong id="summary-employees">—</strong><small>المسجلون حالياً</small></article>
-      <article><span>الورديات المفتوحة</span><strong id="summary-shifts">—</strong><small>تعمل الآن</small></article>
-      <article><span>الحضور اليوم</span><strong id="summary-attendance">—</strong><small>آخر تسجيلات الحضور</small></article>
+      <article><span data-t="sumEmp">Mitarbeiter</span><strong id="summary-employees">—</strong><small data-t="sumEmpSub">aktuell angelegt</small></article>
+      <article><span data-t="sumShifts">Offene Schichten</span><strong id="summary-shifts">—</strong><small data-t="sumShiftsSub">laufen gerade</small></article>
+      <article><span data-t="sumAtt">Heute eingestempelt</span><strong id="summary-attendance">—</strong><small data-t="sumAttSub">letzte Einstempelungen</small></article>
     </section>
     <section class="workspace-grid">
       <article class="panel form-panel">
-        <div class="panel-title"><div><p class="eyebrow">بيانات الفريق</p><h2>إضافة موظف</h2></div></div>
+        <div class="panel-title"><div><p class="eyebrow" data-t="formEyebrow">Teamdaten</p><h2 data-t="formH">Mitarbeiter hinzufügen</h2></div></div>
         <form id="employee-form"><input id="employee-id" type="hidden">
-          <label>اسم الموظف<input id="name" required placeholder="مثال: أحمد محمد"></label>
-          <label>الدور<select id="role"><option value="CASHIER">كاشير</option><option value="KITCHEN">مطبخ</option><option value="MANAGER">مدير</option><option value="DRIVER">سائق</option><option value="ACCOUNTANT">محاسب</option></select></label>
-          <label>رمز الدخول (PIN)<input id="login-pin" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]*" placeholder="كاشير/مطبخ/سائق: 4 أرقام · مدير/محاسب: 6"><small id="pin-hint">الموظف بيفوت على NARA باسمه وهالرمز. اتركه فاضي إذا ما بدك تغيّره.</small></label>
-          <label>أجر الساعة (€)<input id="hourly-rate" type="number" min="0" step="0.01" required placeholder="مثال: 12.50"></label>
-          <label>نوع العقد<select id="contract-type"><option value="HOURLY">بالساعة</option><option value="MONTHLY">راتب شهري</option></select></label>
-          <fieldset class="profile-switches"><legend>ملفات الموظف</legend><label><input id="profile-internal" type="checkbox" checked> الملف الداخلي — التشغيل والتدريب</label><label><input id="profile-official" type="checkbox"> الملف الرسمي — المحاسبة والتصدير</label></fieldset>
-          <label>الاستراحة بالدقائق<input id="break-minutes" type="number" min="0" step="1" value="0"></label>
-          <label>خصم يومي (€)<input id="daily-deduction" type="number" min="0" step="0.01" value="0"></label>
-          <div class="form-buttons"><button id="employee-submit" class="primary" type="submit">حفظ الموظف</button><button id="cancel-edit" class="ghost" type="button" hidden onclick="cancelEdit()">إلغاء التعديل</button></div><p id="form-status" class="form-status" role="status"></p>
+          <label><span data-t="name">Name</span><input id="name" required placeholder="z. B. Ahmad Müller" data-tp="namePh"></label>
+          <label><span data-t="role">Rolle</span><select id="role"><option value="CASHIER" data-t="CASHIER">Kasse</option><option value="KITCHEN" data-t="KITCHEN">Küche</option><option value="MANAGER" data-t="MANAGER">Manager</option><option value="DRIVER" data-t="DRIVER">Fahrer</option><option value="ACCOUNTANT" data-t="ACCOUNTANT">Buchhaltung</option></select></label>
+          <label><span data-t="pin">Login-PIN</span><input id="login-pin" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]*" placeholder="Kasse/Küche/Fahrer: 4 Ziffern · Manager/Buchhaltung: 6" data-tp="pinPh"><small id="pin-hint" data-t="pinHint">Der Mitarbeiter meldet sich mit seinem Namen und dieser PIN bei NARA an. Leer lassen, wenn sie gleich bleiben soll.</small></label>
+          <label><span data-t="rate">Stundenlohn (€)</span><input id="hourly-rate" type="number" min="0" step="0.01" required placeholder="z. B. 12.50" data-tp="ratePh"></label>
+          <label><span data-t="contract">Vertragsart</span><select id="contract-type"><option value="HOURLY" data-t="hourly">Stundenlohn</option><option value="MONTHLY" data-t="monthly">Monatsgehalt</option></select></label>
+          <fieldset class="profile-switches"><legend data-t="profiles">Mitarbeiterprofile</legend><label><input id="profile-internal" type="checkbox" checked> <span data-t="profInternal">Internes Profil — Betrieb &amp; Einarbeitung</span></label><label><input id="profile-official" type="checkbox"> <span data-t="profOfficial">Offizielles Profil — Buchhaltung &amp; Export</span></label></fieldset>
+          <label><span data-t="break">Pause in Minuten</span><input id="break-minutes" type="number" min="0" step="1" value="0"></label>
+          <label><span data-t="deduction">Täglicher Abzug (€)</span><input id="daily-deduction" type="number" min="0" step="0.01" value="0"></label>
+          <div class="form-buttons"><button id="employee-submit" class="primary" type="submit" data-t="saveEmp">Mitarbeiter speichern</button><button id="cancel-edit" class="ghost" type="button" hidden onclick="cancelEdit()" data-t="cancelEdit">Bearbeitung abbrechen</button></div><p id="form-status" class="form-status" role="status"></p>
         </form>
       </article>
-      <article class="panel"><div class="panel-title"><div><p class="eyebrow">الفريق</p><h2>الموظفون</h2></div><button class="ghost" type="button" onclick="load()">تحديث</button></div><div id="employees" class="employee-list">جاري التحميل...</div></article>
+      <article class="panel"><div class="panel-title"><div><p class="eyebrow" data-t="teamEyebrow">Team</p><h2 data-t="teamH">Mitarbeiter</h2></div><button class="ghost" type="button" onclick="load()" data-t="refresh">Aktualisieren</button></div><div id="employees" class="employee-list" data-t="loading">Wird geladen …</div></article>
     </section>
-    <section class="panel attendance-panel"><div class="panel-title"><div><p class="eyebrow">التشغيل اليومي</p><h2>الورديات والحضور</h2></div><span id="status" class="live-status">جاري التحميل...</span></div><div id="shift-summary" class="empty-state">لا توجد ورديات مفتوحة حالياً.</div></section>
+    <section class="panel attendance-panel"><div class="panel-title"><div><p class="eyebrow" data-t="attEyebrow">Tagesbetrieb</p><h2 data-t="attH">Schichten &amp; Anwesenheit</h2></div><span id="status" class="live-status" data-t="loading">Wird geladen …</span></div><div id="shift-summary" class="empty-state" data-t="noOpenShifts">Gerade keine offenen Schichten.</div></section>
     <section class="panel payroll-panel">
-      <div class="panel-title"><div><p class="eyebrow">الحسابات اليومية</p><h2>أجور العمال والتسويات</h2></div><div class="report-actions"><input id="payroll-date" type="date"><button class="ghost" type="button" onclick="loadPayroll()">تحديث</button><button class="ghost" type="button" onclick="exportPayrollCsv()">تصدير Excel</button><button class="ghost" type="button" onclick="window.print()">طباعة / PDF</button></div></div>
-      <p class="report-note">المستحق = ساعات العمل × أجر الساعة. أي مبلغ غير مدفوع ينتقل تلقائياً كرصيد مستحق لليوم التالي. السجلات مصنفة إلى رسمي وتجريبي/داخلي.</p>
-      <div id="payroll-table" class="payroll-table">جاري تحميل تقرير الأجور...</div>
+      <div class="panel-title"><div><p class="eyebrow" data-t="payEyebrow">Tagesabrechnung</p><h2 data-t="payH">Löhne &amp; Abrechnung</h2></div><div class="report-actions"><input id="payroll-date" type="date"><button class="ghost" type="button" onclick="loadPayroll()" data-t="refresh">Aktualisieren</button><button class="ghost" type="button" onclick="exportPayrollCsv()" data-t="export">Excel-Export</button><button class="ghost" type="button" onclick="window.print()" data-t="print">Drucken / PDF</button></div></div>
+      <p class="report-note" data-t="payNote">Fällig = Arbeitsstunden × Stundenlohn. Was nicht bezahlt wird, geht automatisch als offener Betrag auf den nächsten Tag über. Einträge sind getrennt nach offiziell und Test/intern.</p>
+      <div id="payroll-table" class="payroll-table" data-t="payLoading">Lohnbericht wird geladen …</div>
     </section>
   </main>
   <script src="nara-shell.js"></script><script src="staff.js?v=20261009"></script>
