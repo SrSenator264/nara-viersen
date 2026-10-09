@@ -23,7 +23,8 @@
         <div class="panel-title"><div><p class="eyebrow">بيانات الفريق</p><h2>إضافة موظف</h2></div></div>
         <form id="employee-form"><input id="employee-id" type="hidden">
           <label>اسم الموظف<input id="name" required placeholder="مثال: أحمد محمد"></label>
-          <label>الدور<select id="role"><option value="CASHIER">كاشير</option><option value="KITCHEN">مطبخ</option><option value="MANAGER">مدير</option><option value="ACCOUNTANT">محاسب</option></select></label>
+          <label>الدور<select id="role"><option value="CASHIER">كاشير</option><option value="KITCHEN">مطبخ</option><option value="MANAGER">مدير</option><option value="DRIVER">سائق</option><option value="ACCOUNTANT">محاسب</option></select></label>
+          <label>رمز الدخول (PIN)<input id="login-pin" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]*" placeholder="كاشير/مطبخ/سائق: 4 أرقام · مدير/محاسب: 6"><small id="pin-hint">الموظف بيفوت على NARA باسمه وهالرمز. اتركه فاضي إذا ما بدك تغيّره.</small></label>
           <label>أجر الساعة (€)<input id="hourly-rate" type="number" min="0" step="0.01" required placeholder="مثال: 12.50"></label>
           <label>نوع العقد<select id="contract-type"><option value="HOURLY">بالساعة</option><option value="MONTHLY">راتب شهري</option></select></label>
           <fieldset class="profile-switches"><legend>ملفات الموظف</legend><label><input id="profile-internal" type="checkbox" checked> الملف الداخلي — التشغيل والتدريب</label><label><input id="profile-official" type="checkbox"> الملف الرسمي — المحاسبة والتصدير</label></fieldset>
@@ -41,6 +42,6 @@
       <div id="payroll-table" class="payroll-table">جاري تحميل تقرير الأجور...</div>
     </section>
   </main>
-  <script src="nara-shell.js"></script><script src="staff.js"></script>
+  <script src="nara-shell.js"></script><script src="staff.js?v=20261009"></script>
 </body>
 </html>
