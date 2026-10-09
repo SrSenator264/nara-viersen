@@ -10,10 +10,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const env = (k, d) => process.env[k] ?? d;
-const URL0 = env('UBER_URL', 'https://merchants.ubereats.com/manager/orders');
+// صفحة الطلبات الحيّة (نفس تطبيق تابلت أوبر، بالمتصفح): merchants.ubereats.com/orders
+const URL0 = env('UBER_URL', 'https://merchants.ubereats.com/orders');
 const PROFILE = env('UBER_PLAYWRIGHT_PROFILE', 'D:/NARA-Playwright/uber-profile');
-const OUT = env('UBER_DISCOVER_DIR', 'D:/NARA-Playwright/uber-data/discover');
-const MAX_FILES = 600;
+// كل تشغيل بمجلد جديد (التاريخ والوقت) كي ما تختلط التسجيلات
+const OUT = env('UBER_DISCOVER_DIR', 'D:/NARA-Playwright/uber-data/discover-' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19));
+const MAX_FILES = 3000;
+// ضجيج (إحصائيات، ترجمات، إعلانات): ما منحفظو
+const NOISE = /events|observer|ingest|translations|flipr|bug_report|replay|urate|moments|campaign|nps|fc_|silk_screen|xp_parameters/i;
 
 fs.mkdirSync(OUT, { recursive: true });
 const log = (...a) => console.log('[UBER]', ...a);
@@ -30,6 +34,7 @@ ctx.on('response', async r => {
     const req = r.request(), type = req.resourceType();
     if (!['xhr', 'fetch'].includes(type)) return;
     if (!/uber/i.test(r.url())) return;
+    if (NOISE.test(new URL(r.url()).pathname)) return;
     const ct = (r.headers()['content-type'] || '').toLowerCase();
     if (!/json|javascript|text\/plain/.test(ct)) return;
     if (n >= MAX_FILES) return;
@@ -51,7 +56,7 @@ page.on('websocket', ws => {
   log('websocket', ws.url().replace(/\?.*$/, ''));
   let k = 0;
   ws.on('framereceived', f => {
-    if (k++ > 30) return;
+    if (k++ > 300) return;
     const p = typeof f.payload === 'string' ? f.payload : '[binary]';
     fs.appendFileSync(path.join(OUT, '_websocket.txt'), new Date().toISOString() + ' ' + ws.url().replace(/\?.*$/, '') + '\n' + p.slice(0, 4000) + '\n\n');
   });
