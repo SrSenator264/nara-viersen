@@ -133,3 +133,18 @@ test('paid at the counter is not finished: a paid kasse delivery stays in kitche
   assert.equal(K.isClosedForOps({ ...platformOrder, status: 'COMPLETED' }, NOW), true);       // Plattform sagt fertig
   assert.equal(K.isClosedForOps({ ...paid, status: 'CANCELLED' }, NOW), true);
 });
+
+test('dine-in table orders come first; startAt tells the kitchen when to begin', () => {
+  const NOW = Date.parse('2026-10-09T12:00:00Z');
+  const cart = [{ name: 'Cheese Burger', quantity: 1, unitCents: 799 }];
+  const at = m => new Date(NOW + m * 60000).toISOString();
+  const orders = [
+    { id: 'd1', type: 'delivery', cart, createdAt: at(-15), prepMinutes: 20 },
+    { id: 't1', type: 'local', table: '3', cart, createdAt: at(-1), prepMinutes: 20 },
+    { id: 's1', type: 'delivery', cart, createdAt: at(-5), kitchenStartAt: at(90), requestedAt: at(150), prepMinutes: 20 },
+  ];
+  const list = K.listKitchenOrders(orders, NOW);
+  assert.deepEqual(list.map(o => o.id), ['t1', 'd1', 's1']);
+  assert.equal(list[0].priority, true);
+  assert.equal(list[2].startAt, at(90));
+});

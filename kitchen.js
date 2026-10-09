@@ -69,6 +69,10 @@ function kitchenView(o, now = Date.now(), catalog = null) {
     items: kitchenItems(o.cart, catalog),
     createdAt: new Date(created).toISOString(),
     readyBy: new Date(readyBy).toISOString(),
+    // وقت لازم نبلّش فيه (للملخص: منجمّع بس اللي وقتو هلق، مشان الأكل ما يبرد)
+    startAt: new Date(readyBy - prep * 60000).toISOString(),
+    // طلب الطاولة دايماً أولوية
+    priority: typeOf(o) === 'local',
     scheduled: !!o.requestedAt,
     preparationMinutes: prep,
     kitchenStatus: STATES.includes(str(o.kitchenStatus).toUpperCase()) ? str(o.kitchenStatus).toUpperCase() : 'NEW',
@@ -141,7 +145,9 @@ function listKitchenOrders(orders, now = Date.now(), catalog = null) {
   return (Array.isArray(orders) ? orders : [])
     .filter(o => isKitchenOrder(o, now))
     .map(o => kitchenView(o, now, catalog))
-    .sort((a, b) => (rank[a.kitchenStatus] - rank[b.kitchenStatus]) || (Date.parse(a.readyBy) - Date.parse(b.readyBy)));
+    .sort((a, b) => (rank[a.kitchenStatus] - rank[b.kitchenStatus])
+      || (a.kitchenStatus !== 'READY' ? (b.priority - a.priority) : 0)
+      || (Date.parse(a.readyBy) - Date.parse(b.readyBy)));
 }
 
 // تغيير حالة المطبخ + مزامنة مرحلة صفحة الطلبات الحية (PREPARE/HANDOVER)
