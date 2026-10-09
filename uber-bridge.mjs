@@ -85,15 +85,20 @@ async function handleActive(result, storeId) {
       order.placedAt = order.createdAt = order.acceptedAt = state.seen[id];
       // الطلب المجدول: إيمتى لازم يبلّش المطبخ (الموعد − السواقة التقديرية − التحضير)
       if (order.requestedAt && order.prepMinutes) order.kitchenStartAt = new Date(Date.parse(order.requestedAt) - (order.prepMinutes + 20) * 60000).toISOString();
-      const sig = sha(JSON.stringify([order.liveStage, order.cart, order.totalCents, order.dueAt, order.requestedAt, order.delivery, order.deliveryQrUrl ? 1 : 0]));
-      state.active[id] = { code: order.displayCode, store: storeId, at: now, ext: order.externalOrderCode };
+      // وقت التوصيل المتوقع بيتغيّر ثواني كل مرة: منقارن بالـ 5 دقايق كي ما نبعت نفس الطلب كل 5 ثواني
+      const r5 = v => v ? Math.round(Date.parse(v) / 300000) : null;
+      const sig = sha(JSON.stringify([order.liveStage, order.cart, order.totalCents, r5(order.dueAt), order.requestedAt, order.delivery, order.deliveryQrUrl ? 1 : 0]));
+      state.active[id] = { code: order.displayCode, store: storeId, at: now, ext: order.externalOrderCode, missingSince: null };
       if (state.sent[order.externalOrderCode] === sig) continue;
       try { fs.writeFileSync(P(`raw/${id}.json`), JSON.stringify(o)); } catch { /* تجاهل */ }
       await sendOrder(order, sig);
     }
-    // اللي كان بالقائمة واختفى (لنفس المحل): انسلّم للسواق
+    // اللي كان بالقائمة واختفى (لنفس المحل) أكتر من دقيقتين ورا بعض: انسلّم للسواق.
+    // (الصفحة أحياناً بتجيب قائمة فاضية لثانية، فما منصدّق أول مرة)
     for (const [id, a] of Object.entries(state.active)) {
       if (a.store !== storeId || present.has(id)) continue;
+      a.missingSince ??= now;
+      if (Date.now() - Date.parse(a.missingSince) < 120000) continue;
       const r = await post('/api/platform-orders/import', { source: 'UBER_EATS', order: { externalOrderCode: a.ext, liveStage: 'HANDOVER', platformStatus: 'GONE_FROM_ACTIVE', platformGoneAt: now } });
       if (r === 'retry') continue;
       log(`${a.code}: nicht mehr aktiv bei Uber → HANDOVER`);

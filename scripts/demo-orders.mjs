@@ -31,11 +31,20 @@ let saved = [];
 try { saved = JSON.parse(fs.readFileSync(CODES, 'utf8')); } catch { /* أول مرة */ }
 // كل تشغيلة إلها أكواد جديدة (D + الساعة + رقم)، لأن الطلب الملغي ما بيرجع ينفتح بنفس الكود
 const stamp = (Math.floor(Date.now() / 1000) % 46656).toString(36).toUpperCase().padStart(3, '0');
-const list = clear ? saved : ORDERS.map((_, i) => 'D' + stamp + '-' + String(i + 1).padStart(2, '0'));
+// "clear": كل طلبات التجربة المفتوحة (isTest) من ملف البيانات، مو بس آخر تشغيلة
+let openTests = [];
+if (clear) {
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(path.dirname(CODES), 'nara-admin.json'), 'utf8'));
+    openTests = (data.orders || []).filter(o => o.isTest && !['CANCELLED', 'STORNIERT'].includes(String(o.status || '').toUpperCase()))
+      .map(o => ({ code: String(o.externalOrderCode), source: String(o.source || '').toUpperCase() }));
+  } catch { /* بنستعمل الأكواد المحفوظة */ }
+}
+const list = clear ? (openTests.length ? openTests.map(x => x.code) : saved) : ORDERS.map((_, i) => 'D' + stamp + '-' + String(i + 1).padStart(2, '0'));
 let n = 0;
 for (const [i, code] of list.entries()) {
   const [src, ago, cart, remarks] = ORDERS[i % ORDERS.length];
-  const source = src === 'NARA' ? 'LANCH' : src;
+  const source = (clear && openTests[i] && openTests[i].source) || (src === 'NARA' ? 'LANCH' : src);
   const a = addr[i % addr.length], name = names[i % names.length];
   const total = cart.reduce((s, x) => s + x.totalCents, 0);
   const order = clear ? { externalOrderCode: code, liveStage: 'CANCELLED', isTest: true } : {
