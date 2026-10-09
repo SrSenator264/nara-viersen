@@ -103,7 +103,6 @@ export function normalizeUber(o, store = {}) {
   const service = Math.abs(find(/marketplace|service|uber.?s fee/i) || 0);
   // Barzahlung: Uber schreibt dann "Cash due" statt "Total"
   const cash = lines.some(l => /cash|bar(zahlung)?\b|zu zahlen/i.test(l.label));
-  const thirdParty = /THIRD_PARTY/i.test(S(o.fulfillmentType));
   const itemsSum = cart.reduce((s, i) => s + i.totalCents, 0);
   // Manche Angebote (z. B. 1+1 gratis) zieht Uber schon vor der Zwischensumme ab → als Rabatt zählen
   const preSub = subtotal != null && itemsSum - subtotal > 1 ? itemsSum - subtotal : 0;
@@ -156,11 +155,11 @@ export function normalizeUber(o, store = {}) {
     fees: { delivery: fee, service, small: 0 },
     totalCents: total,
     externalTotalCents: total,
-    // Bar + Uber-Kurier: der Kurier kassiert, nicht wir. Bar + eigener Fahrer: unser Fahrer kassiert.
-    payment: cash ? { method: 'CASH', paid: false, raw: 'uber', collectedBy: thirdParty ? 'UBER_COURIER' : 'DRIVER' } : { method: 'ONLINE', paid: true, raw: 'uber' },
+    // Bar: alle Fahrer sind unsere eigenen → unser Fahrer kassiert den ganzen Betrag
+    payment: cash ? { method: 'CASH', paid: false, raw: 'uber', collectedBy: 'DRIVER' } : { method: 'ONLINE', paid: true, raw: 'uber' },
     paymentMethod: cash ? 'CASH' : 'ONLINE',
-    externalPaymentStatus: cash ? (thirdParty ? 'CASH_UBER_COURIER' : 'CASH_ON_DELIVERY') : 'PAID_ON_PLATFORM',
-    cashDueCents: cash && !thirdParty ? total : 0,
+    externalPaymentStatus: cash ? 'CASH_ON_DELIVERY' : 'PAID_ON_PLATFORM',
+    cashDueCents: cash ? total : 0,
     asap: !requestedAt,
     requestedAt, platformReadyAt: readyAt, dueAt, etaAt: dueAt, prepMinutes,
     taxRate: Array.isArray(o.taxRateOptions) ? o.taxRateOptions.join(',') : '',
