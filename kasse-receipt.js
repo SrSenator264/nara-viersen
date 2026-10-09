@@ -149,6 +149,45 @@
       return h}).join('')+'</div>');
     return '<div class="nara-rc nara-rc-kitchen">'+rows.join('')+'</div>';
   }
+  // ───────── ورقة العرض (تحت الفاتورة، بعد قصّة نصّية): QR بقلب → تحميل تطبيقنا + خصم أول طلب ─────────
+  // الإعدادات: window.NARA_PROMO = {url, percent, days}  (الرابط لازم يتظبط لما ينشر التطبيق)
+  const PROMO_TX={
+    de:{hi:'Hat’s geschmeckt?',off:'RABATT',first:'auf deine erste Bestellung direkt bei uns',scan:'Scannen · App laden · sparen',same:'Gleiches Essen. Besserer Preis.',direct:'Direkt von uns – ohne Umweg.',code:'Dein Code',valid:'Gültig {d} Tage · nur für die erste Bestellung in der App'},
+    en:{hi:'Enjoyed it?',off:'OFF',first:'your first order directly with us',scan:'Scan · get the app · save',same:'Same food. Better price.',direct:'Straight from us.',code:'Your code',valid:'Valid {d} days · first app order only'}};
+  // كود قصير لكل طلب (منعرف منين إجا الزبون: المنصة + رقم الطلب)
+  function promoCode(o){
+    const src=String(o.platform||o.source||'').toUpperCase(),p=/UBER/.test(src)?'U':/LIEFERANDO/.test(src)?'L':/WOLT/.test(src)?'W':'N';
+    let h=0;const k=String(o.externalOrderCode||o.displayCode||o.id||'');for(let i=0;i<k.length;i++)h=(h*31+k.charCodeAt(i))>>>0;
+    return 'HERZ'+p+h.toString(36).toUpperCase().slice(-4).padStart(4,'0');
+  }
+  const HEART='M50 92C22 72 2 55 2 30 2 14 14 2 29 2c10 0 17 5 21 13C54 7 61 2 71 2c15 0 27 12 27 28 0 25-20 42-48 62z';
+  // QR بإطار قلب: المربع نفسو بيضل QR عادي (تصحيح أخطاء H) كي يقراه أي موبايل، وبالنص قلب زغير
+  function heartQr(url){
+    const m=window.NARA_QR.make(url,'H'),n=m.size,q=2,S=n+2*q;
+    let d='';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(m.isDark(r,c))d+='M'+(c+q)+' '+(r+q)+'h1v1h-1z';
+    // قلب زغير بالنص (≈ 6% من المساحة)
+    const hw=Math.max(5,Math.round(n*0.2)),hx=(S-hw)/2,hy=(S-hw)/2,sc=hw/100;
+    const mid='<rect x="'+(hx-0.6)+'" y="'+(hy-0.6)+'" width="'+(hw+1.2)+'" height="'+(hw+1.2)+'" fill="#fff"/><path transform="translate('+hx+' '+(hy+hw*0.04)+') scale('+sc+')" d="'+HEART+'" fill="#000"/>';
+    const qr='<svg x="23.5" y="13" width="53" height="53" viewBox="0 0 '+S+' '+S+'" shape-rendering="crispEdges"><rect width="'+S+'" height="'+S+'" fill="#fff"/><path d="'+d+'" fill="#000"/>'+mid+'</svg>';
+    return '<svg class="rc-heart" xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 104 98"><path d="'+HEART+'" fill="#fff" stroke="#000" stroke-width="4.5" stroke-linejoin="round"/>'+qr+'</svg>';
+  }
+  function promoHtml(o,cfg){
+    const c=Object.assign({url:'https://nara-viersen.de/a',percent:20,days:30},window.NARA_PROMO||{},cfg||{});
+    const t=PROMO_TX[lang()]||PROMO_TX.de,code=promoCode(o);
+    const url=c.url+(c.url.includes('?')?'&':'?')+'c='+encodeURIComponent(code); // كود قصير = QR أوضح (المنصة مخبّاية بالحرف الخامس: U/L/W)
+    let qr='';try{qr=heartQr(url)}catch(e){console.warn('[NARA][PROMO_QR_FAILED]',e.message)}
+    return '<div class="nara-rc nara-promo">'
+      +'<div class="pr-hi">'+esc(t.hi)+'</div>'
+      +'<div class="pr-big">'+esc(c.percent)+' %</div><div class="pr-off">'+esc(t.off)+'</div>'
+      +'<div class="pr-first">'+esc(t.first)+'</div>'
+      +qr
+      +'<div class="pr-scan">'+esc(t.scan)+'</div>'
+      +'<div class="pr-code">'+esc(t.code)+': <b>'+esc(code)+'</b></div>'
+      +'<div class="pr-same"><b>'+esc(t.same)+'</b><br>'+esc(t.direct)+'</div>'
+      +'<div class="rc-small rc-c">'+esc(t.valid.replace('{d}',c.days))+'</div>'
+      +'<div class="rc-brand pr-brand">IU GENE ♥ Viersen</div></div>';
+  }
+  api.promoHtml=promoHtml;api.promoCode=promoCode;
   api.toKitchen=toKitchen;api.kitchenHtml=kitchenHtml;
   api.toReceiptOrder=toReceiptOrder;api.html=html;
   window.NARA_RECEIPT=api;

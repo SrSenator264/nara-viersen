@@ -38,3 +38,15 @@
 
 /* تذكرة المطبخ: الأصناف أكبر، بدون أسعار */
 .nara-rc-kitchen .rc-kitem{font-size:19px;grid-template-columns:auto 1fr}.nara-rc-kitchen .rc-kopt{font-size:15px;font-weight:700}.nara-rc-kitchen .rc-inote{font-size:15px}.nara-rc-kitchen .rc-name{font-size:15px}
+
+/* ورقة العرض (تحت الفاتورة) */
+.nara-promo{text-align:center}
+.nara-promo .pr-hi{font-size:17px;font-weight:800;margin-top:4px}
+.nara-promo .pr-big{font-size:46px;font-weight:900;line-height:1;margin-top:4px;letter-spacing:-.02em}
+.nara-promo .pr-off{font-size:20px;font-weight:900;letter-spacing:.3em;margin-top:-2px}
+.nara-promo .pr-first{font-size:13px;font-weight:700;margin:4px 6px 6px}
+.nara-promo .rc-heart{display:block;width:78%;margin:4px auto 2px}
+.nara-promo .pr-scan{font-size:14px;font-weight:900;letter-spacing:.02em}
+.nara-promo .pr-code{margin:6px auto;padding:4px 8px;border:2px dashed #000;display:inline-block;font-size:14px;letter-spacing:.04em}
+.nara-promo .pr-same{font-size:13px;margin:4px 0}
+.nara-promo .pr-brand{font-size:15px;margin-top:6px}
