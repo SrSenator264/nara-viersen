@@ -22,11 +22,14 @@
   fetch('/api/kasse/settings',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Number.isInteger(j.menuSurchargeCents)){menuCents=j.menuSurchargeCents;window.NARA_MENU_SURCHARGE=menuCents;decorate()}}).catch(()=>{});
 
   const isMenu=it=>(it.options||[]).some(x=>x.id==='__menu'||x.id==='__quickmenu');
+  // زر المنيو بس للأصناف اللي إلها نسخة منيو بالقائمة (برغر، ساندويش…). المنيوهات والعروض والمشروبات ما إلها.
+  const productOf=it=>{const list=(typeof catalog!=='undefined'&&Array.isArray(catalog))?catalog:[];const pid=String(it.id||'').replace(/-\d+$/,'');return list.find(p=>p.id===pid)||list.find(p=>p.n===it.name)||null};
+  const canMenu=it=>{if(isMenu(it))return true;const p=productOf(it);return !!(p&&p.menuCents>0)&&!/men[uü]/i.test(String(it.name||''))};
   function commit(){const l=L();if(l){l.save();l.render()}}
 
   // منيو: تشغيل/إطفاء على سطر بالسلة
   function toggleMenu(index){
-    const o=cur();if(!o)return;const it=o.cart[index];if(!it||SKIP.has(it.kind))return;
+    const o=cur();if(!o)return;const it=o.cart[index];if(!it||SKIP.has(it.kind)||!canMenu(it))return;
     it.options=it.options||[];
     const quick=it.options.findIndex(x=>x.id==='__quickmenu'),native=it.options.findIndex(x=>x.id==='__menu');
     if(quick>=0){it.unitCents-=Number(it.options[quick].cents)||0;it.options.splice(quick,1)}
@@ -42,7 +45,7 @@
     (o.cart||[]).forEach((it,i)=>{
       const row=rows[i];if(!row)return;
       if(it.kind==='EXTRA'){const ed=row.querySelector('[data-act=edit]');if(ed)ed.remove();return} // سطر "أكتر" ما إله منتج يتعدّل
-      if(SKIP.has(it.kind))return;
+      if(SKIP.has(it.kind)||!canMenu(it))return;
       const ctr=row.querySelector('.cart-controls');if(!ctr||ctr.querySelector('.qx-menu'))return;
       const b=document.createElement('button');b.type='button';b.className='qx-menu'+(isMenu(it)?' on':'');b.dataset.index=String(i);
       b.textContent=isMenu(it)?'🍟 '+tr('menu')+' ✓':'🍟 '+tr('menu')+' +'+eur(menuCents);
