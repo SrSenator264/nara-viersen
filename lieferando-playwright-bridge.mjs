@@ -467,6 +467,23 @@ ctx.on('response', async r => {
   } catch { /* تجاهل */ }
 });
 
+// ───────────── تسجيل أزرار Lieferando (Handover / Done) ─────────────
+// خطوة أولى للمزامنة الأوتوماتيكية: لما حدا يكبس زر بصفحة Lieferando، منسجّل شو الطلب اللي بيروح
+// (العنوان والنوع والجسم بدون أي توكن) كرمال نعرف كيف نعمله نحنا بعدين. ما منبعت شي.
+let actSaved = 0;
+ctx.on('request', req => {
+  try {
+    const m = req.method();
+    if (m === 'GET' || m === 'OPTIONS' || actSaved >= 40) return;
+    const u = new URL(req.url());
+    if (!/takeaway|justeat|lieferando|scoober/i.test(u.hostname) || /log|metric|track|event|analytics|sentry/i.test(u.pathname)) return;
+    actSaved++;
+    const body = (req.postData() || '').slice(0, 4000).replace(/"(access_?token|refresh_?token|token|password|authorization)"\s*:\s*"[^"]*"/gi, '"$1":"***"');
+    fs.appendFileSync(P('actions-capture.jsonl'), JSON.stringify({ at: new Date().toISOString(), method: m, host: u.hostname, path: u.pathname, body }) + '\n');
+    log(`captured action ${m} ${u.pathname}`);
+  } catch { /* تجاهل */ }
+});
+
 let reloading = false, wsTimer = null, loadedAt = Date.now();
 async function refresh() {
   if (reloading) return;
