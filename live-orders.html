@@ -135,13 +135,13 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 <div id="arc" hidden><div class="rcard"><div class="rhead"><h2>🗂 <span data-t="archive"></span></h2><span class="sp"></span><input type="date" id="aday"><button id="aclose">✕</button></div><p class="arhint" data-t="arcHint"></p><div id="abody"></div></div></div>
 <div id="nara-print-sheet"></div>
 <script src="vendor/qrcode.bundle.js?v=20261008"></script>
-<script src="kasse-receipt.js?v=20261009n"></script>
+<script src="kasse-receipt.js?v=20261009p"></script>
 <script>
 (function(){
 const $=s=>document.querySelector(s);
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const eur=c=>(Number(c||0)/100).toFixed(2).replace('.',',')+' €';
-const S=v=>String(v??'').trim();
+const S=v=>String(v==null?'':v).trim();
 const T={
   de:{toKasse:'Zur Kasse',yourOrders:'Deine Bestellungen',allPlat:'Alle Plattformen',search:'Suchen: Code, Name, Straße',PREPARE:'Zubereiten',HANDOVER:'Übergabe',DONE:'Erledigt',
     pick:'Wähle eine Bestellung aus.',report:'Tagesbericht',print:'Drucken',pickup:'Abholung',delivery:'Lieferung',local:'Vor Ort',customer:'Kunde',minLate:'Min zu spät',min:'Min',
@@ -163,8 +163,8 @@ const T={
     naraKasse:'NARA till',today:'Today total',orders:'orders',plusCanc:'cancelled',Bar:'Cash',Karte:'Card',Mix:'Cash + card',Online:'Online',offen:'open',onlinePlat:'Online (platforms)',revenue:'Total revenue',noOrders:'No orders.',archive:'Archive',arcHint:'Finished orders leave the list after closing (5:00 am) and stay here in the archive.',arcView:'Archive',markTest:'Mark as test (not counted)',markTestQ:'Mark this order as a test? It will no longer count in the daily report.',testHint:'Mark test orders with 🧪 so they no longer count. Open till orders only count once paid.',custPaid:'Customer paid',platFee:'Service fee (goes to the platform)',forYou:'For you'}
 };
 const lang=window.NARA_LANG?NARA_LANG.get():'de';
-const t=k=>(T[lang]||T.de)[k]??T.de[k]??k;
-const P=x=>{const v=String(x??'');return window.NARA_LANG&&/[؀-ۿ]/.test(v)?NARA_LANG.pick(v):v};
+const t=k=>{const a=(T[lang]||T.de)[k];if(a!=null)return a;const b=T.de[k];return b!=null?b:k};
+const P=x=>{const v=String(x==null?'':x);return window.NARA_LANG&&/[؀-ۿ]/.test(v)?NARA_LANG.pick(v):v};
 document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
 document.querySelectorAll('[data-tp]').forEach(e=>e.placeholder=t(e.dataset.tp));
 if(window.NARA_LANG)NARA_LANG.mountSwitcher($('#langsw'));
@@ -309,7 +309,7 @@ const isKasse=o=>plat(o)==='NARA';
 const dayOf=o=>isKasse(o)?(Date.parse(o.completedAt||0)||when(o)):when(o);
 function dayOrders(day){return all.filter(o=>localDay(dayOf(o))===day&&!o.isTest&&!/^TEST/i.test(S(o.id))&&(!isKasse(o)||S(o.status).toUpperCase()==='COMPLETED'||cancelled(o)&&o.paidCents>0))}
 const ORDER=['LIEFERANDO','UBER_EATS','WOLT','LANCH','LOCO','NARA'];
-function groups(list){const g={};for(const o of list){(g[plat(o)]??=[]).push(o)}return ORDER.filter(k=>g[k]).map(k=>({k,list:g[k]}))}
+function groups(list){const g={};for(const o of list){(g[plat(o)]||(g[plat(o)]=[])).push(o)}return ORDER.filter(k=>g[k]).map(k=>({k,list:g[k]}))}
 function renderStats(){
   const list=dayOrders(localDay(Date.now())).filter(o=>!cancelled(o));
   const cur=$('#plat').value;

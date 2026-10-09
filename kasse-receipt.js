@@ -1,7 +1,7 @@
 // kasse-receipt.js — فاتورة موحّدة للكاشير: نفس قالب nara-receipt-core (شكل ورقة Lieferando) لكل المصادر.
 // بيحوّل طلب الكاشير للشكل الموحّد ثم بيبني HTML للطباعة 80mm. تذكرة المطبخ بنفس الشكل بدون أي مبلغ (kitchenHtml).
 (function(){
-  const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const FEE='DELIVERY_FEE';
   const api={ready:false,core:null};
   function lang(){try{const l=window.NARA_LANG?window.NARA_LANG.get():(localStorage.getItem('nara-kasse-language'));return l==='en'?'en':'de'}catch(e){return 'de'}} // الفاتورة للزبون: ألماني (أو إنجليزي)، مو عربي

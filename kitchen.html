@@ -117,7 +117,7 @@ button:disabled{opacity:.5}
   <section class="view" data-v="READY"><h2><span data-t="colReady"></span><span class="n"></span></h2><div class="list"></div></section>
   <section class="view" data-v="SUM"><h2><span data-t="sumTitle"></span></h2><div class="sum" id="sum"></div></section>
 </main>
-<script src="/kasse-receipt.js?v=20261009n"></script>
+<script src="/kasse-receipt.js?v=20261009p"></script>
 <script>
 (function(){
   const T={
@@ -150,9 +150,9 @@ button:disabled{opacity:.5}
   let sound=store.get('nara-kitchen-sound','1')==='1',autoPrint=store.get('nara-kitchen-autoprint','0')==='1',expandAll=store.get('nara-kitchen-expand','0')==='1';
   let view='NEW',orders=[],known=null,skew=0,busy=false,openIds=new Set(),hlItem=null;
   // نصوص بيانات مخلوطة "ألماني / عربي" → القسم المناسب للعرض بس
-  const P=x=>{const v=String(x??'');return NL&&/[؀-ۿ]/.test(v)?NL.pick(v):v};
-  const t=k=>(T[lang]||T.de)[k]??T.de[k]??k;
-  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const P=x=>{const v=String(x==null?'':x);return NL&&/[؀-ۿ]/.test(v)?NL.pick(v):v};
+  const t=k=>{const a=(T[lang]||T.de)[k];if(a!=null)return a;const b=T.de[k];return b!=null?b:k};
+  const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
   const NEXT={NEW:'PREPARING',PREPARING:'READY',READY:'PICKED_UP'},PREV={PREPARING:'NEW',READY:'PREPARING'},BTN={NEW:'start',PREPARING:'ready',READY:'picked'};
   const DRINK=/getr[äa]nk|drink|coffee|kaffee|tea\b|iced|frappuccino|cola|wasser|water|saft|juice|limo|sprite|fanta/i;
