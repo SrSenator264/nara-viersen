@@ -39,7 +39,8 @@ body.wide .list{grid-template-columns:1fr}
 .card.fresh{animation:flash 1s ease-in-out 3}.card.hl{outline:4px solid #a78bfa}
 @keyframes flash{50%{box-shadow:0 0 0 6px #60a5fa}}
 .row1{display:flex;align-items:center;gap:6px;padding:8px 10px 2px}
-.code{font-size:21px;font-weight:900;direction:ltr}
+.code{font-size:21px;font-weight:900;direction:ltr;white-space:nowrap}
+.lwarn{margin:0 10px 2px;padding:2px 8px;border-radius:6px;background:#fee2e2;color:var(--late);font-size:14px;font-weight:900;display:inline-block}
 .src{font-size:11px;font-weight:800;padding:2px 6px;border-radius:5px;background:#eef1f4;color:#334}
 .src.LIEFERANDO{background:#ff8000;color:#fff}.src.UBER_EATS{background:#06c167;color:#fff}.src.WOLT{background:#00c2e8;color:#fff}.src.LANCH{background:#222;color:#fff}
 .type{font-size:12px;font-weight:700;color:var(--muted)}
@@ -186,7 +187,9 @@ button:disabled{opacity:.5}
     const type=o.type==='local'?t('local')+(o.table?' '+esc(o.table):''):t(o.type);
     const timer=o.kitchenStatus==='READY'?'<b>'+tm.age+'</b><small>'+t('min')+'</small>'
       :tm.left<0?'<b>+'+(-tm.left)+'</b><small>'+t('late')+'</small>':'<b>'+tm.left+'</b><small>'+t('left')+'</small>';
-    const exp=o.expectedReadyAt&&o.kitchenStatus!=='READY'?hhmm(new Date(o.expectedReadyAt)):'';
+    // "جاهز تقريباً" بيطلع بس إذا التقدير أبعد من الوقت المطلوب (يعني رح يتأخر) — بالأحمر
+    const willBeLate=o.expectedReadyAt&&o.kitchenStatus!=='READY'&&Date.parse(o.expectedReadyAt)>Date.parse(o.readyBy)+60000;
+    const exp=willBeLate?hhmm(new Date(o.expectedReadyAt)):'';
     const hasNote=o.notes||o.items.some(i=>i.note);
     const cust=[o.customerName,o.address].filter(Boolean).join(' · ');
     const agg=new Map();for(const i of o.items){const k=itemKey(i);agg.set(k,{name:i.name,q:(agg.get(k)?.q||0)+i.quantity})}
@@ -201,7 +204,8 @@ button:disabled{opacity:.5}
     const pr=o.priority&&o.kitchenStatus!=='READY';
     return '<article class="card '+tm.cls+(pr?' prio':'')+(fresh?' fresh':'')+(open?' open':'')+(hl?' hl':'')+'" data-id="'+esc(o.id)+'">'
       +'<div class="row1"><span class="code">'+esc(o.displayCode)+'</span>'+(o.source!=='NARA'?'<span class="src '+esc(o.source)+'">'+esc(o.source.replace('_',' '))+'</span>':'')
-      +(pr?'<span class="ptag">🍽️ '+(o.table?t('table')+' '+esc(o.table):t('local'))+'</span>':'')+'<span class="type">'+(pr?'':type)+(exp?' · '+t('expect')+' '+exp:'')+'</span>'+(hasNote?'<span class="warn">⚠️</span>':'')+'<span class="timer">'+timer+'</span></div>'
+      +(pr?'<span class="ptag">🍽️ '+(o.table?t('table')+' '+esc(o.table):t('local'))+'</span>':'')+'<span class="type">'+(pr?'':type)+'</span>'+(hasNote?'<span class="warn">⚠️</span>':'')+'<span class="timer">'+timer+'</span></div>'
+      +(exp?'<div class="lwarn">⚠ '+t('expect')+' '+exp+'</div>':'')
       +(cust?'<div class="cust"><bdi>'+esc(cust)+'</bdi></div>':'')
       +'<div class="brief">'+brief+'</div>'
       +'<div class="more">'+(info?'<div class="info">'+info+'</div>':'')+(o.notes?'<div class="note">'+esc(t('note'))+': <bdi>'+esc(o.notes)+'</bdi></div>':'')+'<div class="items">'+items+'</div></div>'
