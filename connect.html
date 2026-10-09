@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tablets verbinden · NARA</title>
+<style>
+:root{--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#e34824}
+*{box-sizing:border-box}body{margin:0;background:#f4f2ef;color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,Arial,sans-serif}
+main{max-width:1100px;margin:0 auto;padding:24px 16px}
+h1{margin:0 0 6px}p.sub{margin:0 0 20px;color:var(--mute)}
+.warn{background:#fff3e0;border:1px solid #ffcc80;border-radius:14px;padding:14px 18px;margin-bottom:18px}
+.warn code{background:#fff;padding:2px 6px;border-radius:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.card{background:#fff;border-radius:18px;padding:18px;text-align:center;box-shadow:0 1px 3px #0000000d}
+.card h2{margin:0 0 2px;font-size:1.25rem}.card .who{color:var(--mute);margin:0 0 10px}
+.card svg{width:220px;height:220px}
+.url{direction:ltr;font:600 1rem ui-monospace,Consolas,monospace;word-break:break-all;background:#f6f4f1;border-radius:10px;padding:8px;margin-top:8px}
+.ips{color:var(--mute);font-size:.9rem;margin-top:14px;direction:ltr;text-align:left}
+a.back{color:var(--brand);font-weight:700;text-decoration:none}
+</style>
+</head>
+<body><main>
+<a class="back" href="kasse.html">← Kasse</a>
+<h1>📱 وصّل تابلت أو جوال</h1>
+<p class="sub">التابلت لازم يكون على نفس Wi-Fi تبع المحل. صوّر الكود بكاميرا التابلت، وبيفتح الصفحة. كل موظف بيفوت باسمه ورمزه.</p>
+<div id="warn" class="warn" hidden></div>
+<div class="grid" id="grid"></div>
+<div class="ips" id="ips"></div>
+</main>
+<script src="vendor/qrcode.bundle.js?v=20261008"></script>
+<script>
+(async function(){
+  const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  let j;try{j=await (await fetch('/api/system/lan',{cache:'no-store'})).json()}catch(e){j={ips:[]}}
+  const ip=(j.ips||[]).find(x=>/^192\.168\.|^10\.|^172\.(1[6-9]|2\d|3[01])\./.test(x.address))||(j.ips||[])[0];
+  if(!j.lanOpen){$('#warn').hidden=false;$('#warn').innerHTML='⚠️ السيرفر لسا مقفول على هالكمبيوتر بس. شغّل <code>NARA-Tablet-Freigabe.cmd</code> مرة وحدة، وبعدها ارجع لهالصفحة.'}
+  if(!ip){$('#grid').innerHTML='<p>ما لقيت الكمبيوتر على شبكة. تأكد إنه موصول بالـ Wi-Fi أو الكابل.</p>';return}
+  const base='http://'+ip.address+':'+(j.port||4185)+'/';
+  const pages=[['🍳 شاشة المطبخ','للتابلت بالمطبخ','kitchen.html'],['🛵 تطبيق السائق','لجوال كل سائق','driver.html'],['📋 Live Orders','لشاشة الطلبات','live-orders.html'],['💶 الكاشير','لتابلت كاشير تاني','kasse.html']];
+  $('#grid').innerHTML=pages.map(([t,w,p])=>'<div class="card"><h2>'+t+'</h2><p class="who">'+w+'</p>'+NARA_QR.svg(base+p,{level:'M',quiet:2})+'<div class="url">'+esc(base+p)+'</div></div>').join('');
+  $('#ips').textContent='IP: '+(j.ips||[]).map(x=>x.address+' ('+x.name+')').join(' · ');
+})();
+</script>
+</body></html>

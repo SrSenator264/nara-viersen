@@ -97,6 +97,7 @@
     let a=document.getElementById('nara-dispatch-link');
     if(!a){a=document.createElement('a');a.id='nara-dispatch-link';a.href='dispatch.html';a.style.cssText='font-weight:800;color:#e85f12;text-decoration:none;margin-inline:8px';h.appendChild(a)}
     a.textContent=tr('dispatch');
+    if(!document.getElementById('nara-connect-link')){const c=document.createElement('a');c.id='nara-connect-link';c.href='connect.html';c.textContent='📱';c.title='Tablet / Handy verbinden';c.style.cssText='font-size:1.2rem;text-decoration:none;margin-inline:6px';h.appendChild(c)}
     if(!document.getElementById('nara-platform-status'))drawPlatforms();
   }
   setInterval(mount,1000);mount();
