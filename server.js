@@ -230,6 +230,9 @@ http.createServer((req,res)=>{
       const clientId=String(payload.clientId||'').slice(0,64);
       // تعارض بس إذا جهاز تاني عدّل الطلب (نفس الجهاز بنسخة متأخرة شوي مو تعارض)
       if(stored&&Number.isInteger(order.rev)&&order.rev<storedRev&&!(clientId&&stored.revBy===clientId))return reply(res,409,{error:'الطلب انعدّل من جهاز تاني.',code:'ORDER_CONFLICT',orderId:stored.id,order:stored});
+      // بعد ما حدا دفع جزء (تقسيم الفاتورة): السلة مقفولة، بس المدير/صاحب المحل بيقدر يعدّل
+      const cartSig=c=>JSON.stringify((Array.isArray(c)?c:[]).map(i=>[String(i.name||''),Number(i.unitCents)||0,Number(i.quantity)||0]));
+      if(stored&&Number(stored.paidCents)>0&&cartSig(order.cart)!==cartSig(stored.cart)&&!(req.naraUser&&['OWNER','MANAGER'].includes(req.naraUser.role)))return reply(res,409,{error:'Teilzahlung erfolgt — Warenkorb gesperrt. Nur Manager kann ändern.',code:'PAID_LOCKED',orderId:stored.id,order:stored});
       const next={...order,id:String(order.id),displayCode,status:stored?.status||'OPEN',rev:storedRev+1,revBy:clientId||undefined,updatedAt:new Date().toISOString()};
       // حقول بيملكها السيرفر (المطبخ، التوزيع، التسليم): الكاشير ما بيكتب فوقها بنسخة قديمة
       if(stored)for(const k of ['kitchenStatus','kitchenStatusAt','kitchenStatusBy','preparingAt','readyAt','pickedUpAt','liveStage','liveStageSource','liveStageUpdatedAt','deliveryRouteId','driverId','assignment','assignmentStatus','outAt','deliveredAt','deliveryProof','paymentId','completedAt','paymentIds','paidCents','billDiscount'])if(stored[k]!==undefined)next[k]=stored[k];else delete next[k];

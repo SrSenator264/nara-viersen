@@ -169,3 +169,19 @@ test('Sides (Loco) import accepted from this PC and shows in status', async () =
   const st = await call('GET', '/api/platform-orders/status', null, S.cashier);
   assert.ok(st.json.platforms.some(p => p.source === 'SIDES'));
 });
+
+test('after a split part is paid the cart is locked for the cashier, manager can still change it', async () => {
+  const id = 'lock-' + Date.now();
+  const base = { id, type: 'local', cart: [{ name: 'Burger', unitCents: 1000, quantity: 2, options: [] }] };
+  const s = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', clientId: 'A', order: base }, S.cashier);
+  assert.equal(s.status, 200);
+  const pay = await call('POST', '/api/kasse/events', { action: 'FINALIZE_PAYMENT', order: { ...base, rev: s.json.rev }, partial: true, splitOf: 2, paymentLines: [{ method: 'CARD', amountCents: 1000 }] }, S.cashier);
+  assert.equal(pay.status, 200, JSON.stringify(pay.json));
+  const more = { ...base, rev: 99, cart: [{ ...base.cart[0], quantity: 3 }] };
+  const blocked = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', clientId: 'A', order: more }, S.cashier);
+  assert.equal(blocked.status, 409); assert.equal(blocked.json.code, 'PAID_LOCKED');
+  const same = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', clientId: 'A', order: { ...base, rev: 99, table: '4' } }, S.cashier);
+  assert.equal(same.status, 200);
+  const mgr = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', clientId: 'O', order: more }, S.owner);
+  assert.equal(mgr.status, 200);
+});

@@ -45,6 +45,7 @@
     const gross = ctx.total(o);
     const srv = await serverOrder(o.id);
     let paidBefore = (srv && srv.paidCents) || 0;
+    if (paidBefore > 0) o.paidCents = paidBefore; // السلة بتنقفل بالكاشير
     const lockedDiscount = paidBefore > 0 ? (srv.billDiscount || null) : null;
     const units = []; (o.cart || []).forEach(it => { for (let q = 0; q < (Number(it.quantity) || 0); q++) units.push({ name: it.name, cents: Number(it.unitCents) || 0 }); });
 
@@ -165,6 +166,7 @@
         const info = res && res.payment;
         if (!info || info.completed) { d.close(); ctx.fresh(); location.reload(); return; }
         paidBefore = info.paidCents;
+        o.paidCents = info.paidCents; try { ctx.save && ctx.save(); } catch (e) { /* ignore */ }
         st.partsPaid.push(st.partIdx);
         const p = parts(); let nextIdx = p.findIndex((_, i) => !st.partsPaid.includes(i));
         const doneN = st.partIdx + 1; st.partIdx = nextIdx < 0 ? st.partIdx : nextIdx; st.given = ''; st.cashPart = '';
