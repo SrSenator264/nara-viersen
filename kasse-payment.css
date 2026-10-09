@@ -1,0 +1,36 @@
+/* kasse-payment.css — شاشة الدفع */
+#np-dialog{width:min(760px,96vw);max-height:94vh;border:0;border-radius:22px;padding:22px 24px;box-shadow:0 30px 80px #0006;color:#16202a;font:16px/1.4 "Segoe UI",system-ui,Arial,sans-serif;overflow:auto}
+#np-dialog::backdrop{background:#17202a99;backdrop-filter:blur(3px)}
+#np-dialog h2{margin:0 0 12px;font-size:1.5rem}
+.np-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.np-sum div{background:#f4f6f8;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column}
+.np-sum span{color:#6b7580;font-size:.85rem}.np-sum b{font-size:1.15rem}
+.np-sum .np-disc{background:#fff4e5}.np-sum .np-disc b{color:#c2410c}
+.np-sum .np-big{background:#16202a;color:#fff}.np-sum .np-big span{color:#ffffffaa}.np-sum .np-big b{font-size:1.5rem}
+.np-row{border:1px solid #e3e7eb;border-radius:14px;padding:10px 12px;margin:0 0 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.np-row legend{padding:0 6px;font-weight:800;color:#6b7580;font-size:.85rem}
+.np-row[disabled]{opacity:.55}
+.np-chip{min-height:46px;padding:0 14px;border-radius:12px;border:1px solid #cfd6dd;background:#fff;font:inherit;font-weight:800;cursor:pointer;color:#16202a}
+.np-chip.on{background:#16202a;color:#fff;border-color:#16202a}
+.np-custom{display:inline-flex;gap:6px}.np-custom input,.np-staff input,#np-dialog label input{min-height:46px;width:84px;border:1px solid #cfd6dd;border-radius:12px;padding:0 10px;font:inherit;font-weight:700}
+.np-staff{display:inline-flex;gap:6px;align-items:center}.np-staff input{width:170px}.np-staff small{color:#b91c1c}
+.np-n{display:inline-flex;flex-wrap:wrap;gap:6px;margin-inline-start:auto}
+.np-items{border:1px solid #e3e7eb;border-radius:14px;padding:8px 12px;margin-bottom:10px;max-height:240px;overflow:auto}
+.np-sub{font-weight:800;color:#6b7580;font-size:.85rem;margin-bottom:4px}
+.np-unit{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f0f2f4}
+.np-unit small{color:#6b7580}.np-unit span:last-child{display:inline-flex;gap:4px}
+.np-p{width:40px;height:40px;border-radius:10px;border:1px solid #cfd6dd;background:#fff;font-weight:800;cursor:pointer}
+.np-p.on{background:#2563eb;color:#fff;border-color:#2563eb}
+.np-parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:10px}
+.np-part{border:2px solid #e3e7eb;border-radius:12px;background:#fff;padding:8px;display:flex;flex-direction:column;align-items:center;cursor:pointer;font:inherit}
+.np-part.on{border-color:#e34824}.np-part.paid{background:#ecfdf3;border-color:#16a34a;cursor:default}.np-part small{color:#16a34a;font-weight:800}
+.np-pay{border:1px solid #e3e7eb;border-radius:14px;padding:12px;display:grid;gap:10px}
+.np-amount{font-size:1.2rem}.np-amount b{font-size:1.5rem}
+.np-methods{display:flex;gap:8px;flex-wrap:wrap}.np-methods .np-chip{flex:1;min-height:56px;font-size:1.1rem}
+#np-dialog label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800}#np-dialog label input{width:160px}
+.np-quick{display:flex;gap:6px;flex-wrap:wrap}
+.np-change{padding:10px 12px;border-radius:12px;background:#ecfdf3;color:#15803d}.np-change.bad{background:#fef2f2;color:#b91c1c}
+.np-note{color:#6b7580}
+.np-msg{min-height:1.3em;margin:8px 0;color:#b45309;font-weight:700}
+.np-acts{display:flex;gap:10px}.np-acts button{flex:1;min-height:58px;border:0;border-radius:14px;font:inherit;font-weight:800;font-size:1.1rem;cursor:pointer}
+.np-cancel{background:#eef1f4}.np-go{background:#e34824;color:#fff}.np-go:disabled{opacity:.5}

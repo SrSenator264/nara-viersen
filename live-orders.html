@@ -141,19 +141,19 @@ const T={
     cancelled:'Storniert',none:'Keine Bestellungen hier.',offline:'Keine Verbindung',live:'Live',subtotal:'Zwischensumme',fee:'Liefergebühr',service:'Servicegebühr',small:'Mindermengenzuschlag',
     disc:'Rabatt',tip:'Trinkgeld',total:'Gesamt',delTag:'🛵 Lieferung',pickTag:'🛍 Abholung',verify:'Bestätigungscode:',ordered:'Bestellt um',dueBy:'Lieferung bis',items:'Artikel',
     cash:'💶 Bar',online:'💳 Online bezahlt',printOrder:'🖨 Bestellung drucken',toHandover:'Übergabe',done:'✓ Erledigt',back:'↩ Zurück',err:'Fehler: ',
-    naraKasse:'NARA Kasse',today:'Heute gesamt',orders:'Bestellungen',plusCanc:'storniert',Bar:'Bar',Karte:'Karte',Online:'Online',offen:'offen',onlinePlat:'Online (Plattformen)',revenue:'Umsatz gesamt',noOrders:'Keine Bestellungen.'},
+    naraKasse:'NARA Kasse',today:'Heute gesamt',orders:'Bestellungen',plusCanc:'storniert',Bar:'Bar',Karte:'Karte',Mix:'Bar + Karte',Online:'Online',offen:'offen',onlinePlat:'Online (Plattformen)',revenue:'Umsatz gesamt',noOrders:'Keine Bestellungen.'},
   ar:{toKasse:'رجوع للكاشير',yourOrders:'طلباتك',allPlat:'كل المنصات',search:'دوّر: الكود، الاسم، الشارع',PREPARE:'تحضير',HANDOVER:'تسليم',DONE:'خلصت',
     pick:'اختار طلب.',report:'تقرير اليوم',print:'اطبع',pickup:'استلام',delivery:'توصيل',local:'بالمحل',customer:'الزبون',minLate:'د متأخر',min:'د',
     cancelled:'ملغى',none:'ما في طلبات هون.',offline:'ما في اتصال',live:'Live',subtotal:'المجموع الفرعي',fee:'أجرة التوصيل',service:'رسوم الخدمة',small:'رسوم الطلب الصغير',
     disc:'خصم',tip:'بخشيش',total:'المجموع',delTag:'🛵 توصيل',pickTag:'🛍 استلام',verify:'كود التأكيد:',ordered:'انطلب الساعة',dueBy:'التوصيل لحد',items:'أصناف',
     cash:'💶 دفع كاش',online:'💳 مدفوع أونلاين',printOrder:'🖨 اطبع الطلب',toHandover:'تسليم',done:'✓ خلصت',back:'↩ رجوع',err:'غلط: ',
-    naraKasse:'NARA كاشير',today:'مجموع اليوم',orders:'طلبات',plusCanc:'ملغى',Bar:'كاش',Karte:'كرت',Online:'أونلاين',offen:'مفتوح',onlinePlat:'أونلاين (المنصات)',revenue:'مجموع المبيعات',noOrders:'ما في طلبات.'},
+    naraKasse:'NARA كاشير',today:'مجموع اليوم',orders:'طلبات',plusCanc:'ملغى',Bar:'كاش',Karte:'كرت',Mix:'كاش + كرت',Online:'أونلاين',offen:'مفتوح',onlinePlat:'أونلاين (المنصات)',revenue:'مجموع المبيعات',noOrders:'ما في طلبات.'},
   en:{toKasse:'Back to till',yourOrders:'Your orders',allPlat:'All platforms',search:'Search: code, name, street',PREPARE:'Prepare',HANDOVER:'Handover',DONE:'Done',
     pick:'Select an order.',report:'Daily report',print:'Print',pickup:'Pickup',delivery:'Delivery',local:'Dine-in',customer:'Customer',minLate:'min late',min:'min',
     cancelled:'Cancelled',none:'No orders here.',offline:'No connection',live:'Live',subtotal:'Subtotal',fee:'Delivery fee',service:'Service fee',small:'Small order fee',
     disc:'Discount',tip:'Tip',total:'Total',delTag:'🛵 Delivery',pickTag:'🛍 Pickup',verify:'Verification code:',ordered:'Ordered at',dueBy:'Deliver by',items:'items',
     cash:'💶 Cash',online:'💳 Paid online',printOrder:'🖨 Print order',toHandover:'Handover',done:'✓ Done',back:'↩ Back',err:'Error: ',
-    naraKasse:'NARA till',today:'Today total',orders:'orders',plusCanc:'cancelled',Bar:'Cash',Karte:'Card',Online:'Online',offen:'open',onlinePlat:'Online (platforms)',revenue:'Total revenue',noOrders:'No orders.'}
+    naraKasse:'NARA till',today:'Today total',orders:'orders',plusCanc:'cancelled',Bar:'Cash',Karte:'Card',Mix:'Cash + card',Online:'Online',offen:'open',onlinePlat:'Online (platforms)',revenue:'Total revenue',noOrders:'No orders.'}
 };
 const lang=window.NARA_LANG?NARA_LANG.get():'de';
 const t=k=>(T[lang]||T.de)[k]??T.de[k]??k;
@@ -278,11 +278,12 @@ document.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{stage=b.dataset
 $('#plat').onchange=()=>{selId=null;render()};$('#q').oninput=()=>{selId=null;render()};
 
 // ── Zähler je Plattform + Tagesbericht ──
-function totalOf(o){const p=o.paymentId&&pays[o.paymentId];if(p&&Number.isFinite(Number(p.amountCents)))return Number(p.amountCents);
+function paysOf(o){return (o.paymentIds&&o.paymentIds.length?o.paymentIds:[o.paymentId]).map(id=>id&&pays[id]).filter(Boolean)}
+function totalOf(o){const ps=paysOf(o);if(ps.length)return ps.reduce((s,p)=>s+(Number(p.amountCents)||0),0);
   const t=Number(o.totalCents)||Number(o.externalTotalCents);if(t)return t;
   return (o.cart||[]).reduce((s,i)=>s+(i.totalCents!=null?Number(i.totalCents):(Number(i.unitCents)||0)*(Number(i.quantity)||1)),0)-(Number(o.discount&&o.discount.amountCents)||0)}
-function payOf(o){const p=o.paymentId&&pays[o.paymentId];const m=S((p&&p.method)||(o.payment&&o.payment.method)||o.paymentMethod).toUpperCase();
-  if(/CASH|BAR/.test(m))return 'Bar';if(/CARD|KARTE|EC/.test(m))return 'Karte';if(/ONLINE|PAID/.test(m))return 'Online';return plat(o)==='NARA'?(S(o.status).toUpperCase()==='COMPLETED'?'?':'offen'):'Online'}
+function payOf(o){const ps=paysOf(o);const ms=new Set(ps.flatMap(p=>(p.paymentLines||[{method:p.method}]).map(l=>S(l.method).toUpperCase())));if(ms.size>1)return 'Mix';const p=ps[0];const m=S((p&&p.method)||(o.payment&&o.payment.method)||o.paymentMethod).toUpperCase();
+  if(/MIXED/.test(m))return 'Mix';if(/CASH|BAR/.test(m))return 'Bar';if(/CARD|KARTE|EC/.test(m))return 'Karte';if(/ONLINE|PAID/.test(m))return 'Online';return plat(o)==='NARA'?(S(o.status).toUpperCase()==='COMPLETED'?'?':'offen'):'Online'}
 function dayOrders(day){return all.filter(o=>localDay(when(o))===day&&!o.isTest&&!/^TEST/i.test(S(o.id)))}
 const ORDER=['LIEFERANDO','UBER_EATS','WOLT','LANCH','LOCO','NARA'];
 function groups(list){const g={};for(const o of list){(g[plat(o)]??=[]).push(o)}return ORDER.filter(k=>g[k]).map(k=>({k,list:g[k]}))}
@@ -304,8 +305,8 @@ function reportHtml(day){
   for(const {k,list:L} of groups(list)){
     const good=L.filter(o=>!cancelled(o)),sum=good.reduce((s,o)=>s+totalOf(o),0);
     rows+='<div class="rg" style="--pc:'+PC[k]+'"><span>'+(k==='NARA'?t('naraKasse'):PL[k])+' · '+good.length+' '+t('orders')+'</span><span>'+eur(sum)+'</span></div><table class="rt">'+
-      L.map(o=>{const t=totalOf(o),pm=payOf(o);if(!cancelled(o)&&by[pm]!=null)by[pm]+=t;
-        return '<tr'+(cancelled(o)?' class="x"':'')+'><td>'+new Date(when(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+'</td><td>#'+esc(code(o))+'</td><td>'+(k==='LOCO'?esc(PL[o.channel]||o.portalName||''):'')+' '+(isDel(o)?t('delivery'):S(o.type)==='pickup'?t('pickup'):t('local'))+'</td><td>'+t(pm)+'</td><td class="n">'+eur(t)+'</td></tr>'}).join('')+'</table>';
+      L.map(o=>{const amt=totalOf(o),pm=payOf(o);if(!cancelled(o)){const ps=paysOf(o);if(ps.length){for(const p of ps)for(const l of (p.paymentLines||[{method:p.method,amountCents:p.amountCents}])){const k=/CASH/i.test(l.method)?'Bar':/CARD/i.test(l.method)?'Karte':null;if(k)by[k]+=Number(l.amountCents)||0}}else if(by[pm]!=null)by[pm]+=amt}
+        return '<tr'+(cancelled(o)?' class="x"':'')+'><td>'+new Date(when(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+'</td><td>#'+esc(code(o))+'</td><td>'+(k==='LOCO'?esc(PL[o.channel]||o.portalName||''):'')+' '+(isDel(o)?t('delivery'):S(o.type)==='pickup'?t('pickup'):t('local'))+'</td><td>'+t(pm)+'</td><td class="n">'+eur(amt)+'</td></tr>'}).join('')+'</table>';
   }
   const total=ok.reduce((s,o)=>s+totalOf(o),0),canc=list.length-ok.length;
   return rows+'<div class="rsum"><div><span>'+t('orders')+'</span><span>'+ok.length+(canc?' (+'+canc+' '+t('plusCanc')+')':'')+'</span></div><div><span>'+t('Bar')+'</span><span>'+eur(by.Bar)+'</span></div><div><span>'+t('Karte')+'</span><span>'+eur(by.Karte)+'</span></div><div><span>'+t('onlinePlat')+'</span><span>'+eur(by.Online)+'</span></div><div class="big"><span>'+t('revenue')+'</span><span>'+eur(total)+'</span></div></div>'||'<p>'+t('noOrders')+'</p>';
