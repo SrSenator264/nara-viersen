@@ -93,7 +93,7 @@ function buildInput(data, now = Date.now()) {
       // Loco (Sides): مطبخها لحالو، فوقت الجهوزية من Sides نفسه (expectedTourStart)
       const locoReady = (/loco/i.test(String(o.brand || o.brandName || '')) || /^SIDES/i.test(String(o.source || ''))) && o.readyAt ? o.readyAt : null;
       const readyAt = o.kitchenStatus === 'READY' || o.kitchenStatus === 'PICKED_UP' ? new Date(now).toISOString() : locoReady || (fc.orders[o.id] ? fc.orders[o.id].readyAt : kv.readyBy);
-      return { id: o.id, code: kv.displayCode, lat: p ? p.lat : NaN, lng: p ? p.lng : NaN, zone: zoneOf(o), readyAt, dueAt: o.dueAt || o.etaAt || null, createdAt: o.createdAt || o.placedAt };
+      return { id: o.id, code: kv.displayCode, lat: p ? p.lat : NaN, lng: p ? p.lng : NaN, zone: zoneOf(o), readyAt, dueAt: o.promisedDueAt || o.dueAt || o.etaAt || null, createdAt: o.createdAt || o.placedAt };
     });
   const config = { ...((data.settings && data.settings.dispatch) || {}) };
   if (tm.model.stopMin) config.stopMin = tm.model.stopMin;

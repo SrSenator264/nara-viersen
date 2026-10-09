@@ -58,6 +58,10 @@ function quote(data, o, now = Date.now()) {
     items: prep.cookItems(cart).reduce((s, i) => s + i.qty, 0),
     prepMin: Math.round(prepMin), driveMin, km, distanceKnown,
     queue: fc.queue, slots: fc.slots,
+    customerName: str((o.delivery && o.delivery.name) || o.customerName),
+    address: [str(o.delivery && (o.delivery.address || o.delivery.street)), str(o.delivery && (o.delivery.postalCode || o.delivery.postal)), str(o.delivery && o.delivery.city)].filter(Boolean).join(', '),
+    notes: [str(o.delivery && o.delivery.notes), str(o.remarks)].filter(Boolean).join(' · '),
+    lines: cart.filter(i => !/FEE|TIP/i.test(str(i.kind))).map(i => ({ q: Number(i.quantity) || 1, name: str(i.name), opts: (i.options || []).map(x => str(x.name)).filter(Boolean), note: str(i.note) })),
     readyAt: new Date(readyAt).toISOString(),
     earliestAt: new Date(earliestAt).toISOString(),
   };
@@ -86,9 +90,12 @@ function quote(data, o, now = Date.now()) {
       recommendMin: minutes,
       deliverAt: new Date(now + minutes * MIN).toISOString(),
       platformMin, standardMin: S.standardMin,
-      // الوقت اللي لازم ينكتب: الثابت إذا بيكفي، وإلا اقتراحنا
-      setMin: Math.max(minutes, S.standardMin),
-      addMin: Math.max(0, minutes - platformMin),
+      // الوقت اللي وعدنا فيه الزبون: اللي اختارو الكاشير هون، وإلا الثابت تبعنا (60 د)
+      promisedMin: Number(o.promisedMin) || S.standardMin,
+      promisedSet: !!Number(o.promisedMin),
+      // إذا اقتراحنا أكتر من الوعد: لازم نزيد
+      setMin: Math.max(minutes, Number(o.promisedMin) || S.standardMin),
+      addMin: Math.max(0, minutes - (Number(o.promisedMin) || S.standardMin)),
     });
   }
   return out;

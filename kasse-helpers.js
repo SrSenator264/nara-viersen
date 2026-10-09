@@ -8,9 +8,9 @@
 (function(){
   const $=s=>document.querySelector(s);
   const lang=()=>{try{if(window.NARA_LANG)return window.NARA_LANG.get();const l=localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
-  const T={de:{ready:'Fertig ca.',in:'in',min:'Min',queue:'vorher in der Küche',dispatch:'🛵 Fahrer',ok:'läuft',login:'Login nötig!',nodata:'keine Daten',down:'Bridge aus!',learn:'Schätzung lernt noch',connect:'Tablet / Handy verbinden',qAccept:'Annehmen mit',qPlat:'Plattform',qAdd:'+{x} Min eintragen',qOk:'Zeit passt',qReady:'fertig',qDrive:'Fahrt',qNoAddr:'Adresse unbekannt',qPickup:'Abholung',qSched:'Geplant für',qCan:'✅ schaffen wir — Start {x}',qCannot:'⚠️ schaffen wir nicht — vorschlagen: {x}',qItems:'Artikel',qQueue:'in der Küche',qDone:'Erledigt',qEnough:'{x} Min reichen',qRaise:'auf {x} Min erhöhen',qReal:'realistisch: {x} Min'},
-    ar:{ready:'جاهز تقريباً',in:'بعد',min:'د',queue:'طلب قبلو بالمطبخ',dispatch:'🛵 السواقين',ok:'شغّال',login:'بدّو تسجيل دخول!',nodata:'ما عم يوصل شي',down:'الجسر مسكّر!',learn:'التقدير لسّا عم يتعلّم',connect:'وصّل تابلت / موبايل',qAccept:'اقبل بـ',qPlat:'المنصة',qAdd:'زيد +{x} د',qOk:'الوقت مزبوط',qReady:'جاهز',qDrive:'سواقة',qNoAddr:'العنوان مو معروف',qPickup:'استلام',qSched:'مجدول لـ',qCan:'✅ منلحق — بلّشوا {x}',qCannot:'⚠️ ما منلحق — اقترح: {x}',qItems:'قطعة',qQueue:'بالمطبخ',qDone:'تمام',qEnough:'{x} د بتكفي',qRaise:'زيد لـ {x} د',qReal:'بالحقيقة بيوصل بـ {x} د'},
-    en:{ready:'Ready approx.',in:'in',min:'min',queue:'ahead in the kitchen',dispatch:'🛵 Drivers',ok:'running',login:'login needed!',nodata:'no data',down:'bridge off!',learn:'estimate still learning',connect:'Connect tablet / phone',qAccept:'Accept with',qPlat:'Platform',qAdd:'add +{x} min',qOk:'time is fine',qReady:'ready',qDrive:'drive',qNoAddr:'address unknown',qPickup:'Pickup',qSched:'Scheduled for',qCan:'✅ we can make it — start {x}',qCannot:'⚠️ we can\'t make it — suggest: {x}',qItems:'items',qQueue:'in the kitchen',qDone:'Done',qEnough:'{x} min is enough',qRaise:'raise to {x} min',qReal:'realistic: {x} min'}};
+  const T={de:{ready:'Fertig ca.',in:'in',min:'Min',queue:'vorher in der Küche',dispatch:'🛵 Fahrer',ok:'läuft',login:'Login nötig!',nodata:'keine Daten',down:'Bridge aus!',learn:'Schätzung lernt noch',connect:'Tablet / Handy verbinden',qAccept:'Annehmen mit',qPlat:'Plattform',qAdd:'+{x} Min eintragen',qOk:'Zeit passt',qReady:'fertig',qDrive:'Fahrt',qNoAddr:'Adresse unbekannt',qPickup:'Abholung',qSched:'Geplant für',qCan:'✅ schaffen wir — Start {x}',qCannot:'⚠️ schaffen wir nicht — vorschlagen: {x}',qItems:'Artikel',qQueue:'in der Küche',qDone:'Erledigt',qEnough:'{x} Min reichen',qRaise:'auf {x} Min erhöhen',qReal:'realistisch: {x} Min',qDetails:'Details',qOn:'Zeit-Vorschläge einschalten',qOff:'Zeit-Vorschläge ausschalten',qChipHint:'Zeit wählen, die du bei der Plattform einträgst (Küche & Fahrer richten sich danach)'},
+    ar:{ready:'جاهز تقريباً',in:'بعد',min:'د',queue:'طلب قبلو بالمطبخ',dispatch:'🛵 السواقين',ok:'شغّال',login:'بدّو تسجيل دخول!',nodata:'ما عم يوصل شي',down:'الجسر مسكّر!',learn:'التقدير لسّا عم يتعلّم',connect:'وصّل تابلت / موبايل',qAccept:'اقبل بـ',qPlat:'المنصة',qAdd:'زيد +{x} د',qOk:'الوقت مزبوط',qReady:'جاهز',qDrive:'سواقة',qNoAddr:'العنوان مو معروف',qPickup:'استلام',qSched:'مجدول لـ',qCan:'✅ منلحق — بلّشوا {x}',qCannot:'⚠️ ما منلحق — اقترح: {x}',qItems:'قطعة',qQueue:'بالمطبخ',qDone:'تمام',qEnough:'{x} د بتكفي',qRaise:'زيد لـ {x} د',qReal:'بالحقيقة بيوصل بـ {x} د',qDetails:'التفاصيل',qOn:'شغّل اقتراحات الوقت',qOff:'طفّي اقتراحات الوقت',qChipHint:'نقّي الوقت اللي كتبتو عالمنصة (المطبخ والسواق بيمشوا عليه)'},
+    en:{ready:'Ready approx.',in:'in',min:'min',queue:'ahead in the kitchen',dispatch:'🛵 Drivers',ok:'running',login:'login needed!',nodata:'no data',down:'bridge off!',learn:'estimate still learning',connect:'Connect tablet / phone',qAccept:'Accept with',qPlat:'Platform',qAdd:'add +{x} min',qOk:'time is fine',qReady:'ready',qDrive:'drive',qNoAddr:'address unknown',qPickup:'Pickup',qSched:'Scheduled for',qCan:'✅ we can make it — start {x}',qCannot:'⚠️ we can\'t make it — suggest: {x}',qItems:'items',qQueue:'in the kitchen',qDone:'Done',qEnough:'{x} min is enough',qRaise:'raise to {x} min',qReal:'realistic: {x} min',qDetails:'Details',qOn:'Turn time suggestions on',qOff:'Turn time suggestions off',qChipHint:'Pick the time you set on the platform (kitchen & driver follow it)'}};
   const tr=k=>(T[lang()]||T.de)[k]||T.de[k];
   const L=()=>window.NARA_LEGACY_KASSE_STATE;
   const cur=()=>{const l=L();return l&&l.getCurrent?l.getCurrent():null};
@@ -99,28 +99,75 @@
   const markDone=id=>{try{localStorage.setItem(seenKey,JSON.stringify([String(id),...done()].slice(0,200)))}catch(e){}};
   const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fill=(k,x)=>tr(k).replace('{x}',x);
+  // تشغيل/إطفاء الاقتراحات (لكل جهاز): زر 🔔/🔕 جنب لمبات المنصات
+  const offKey='nara-quotes-off';
+  const quotesOff=()=>{try{return localStorage.getItem(offKey)==='1'}catch(e){return false}};
+  const setQuotesOff=v=>{try{localStorage.setItem(offKey,v?'1':'0')}catch(e){}drawQuotes();bellBtn()};
+  function bellBtn(){
+    const box=document.getElementById('nara-platform-status');if(!box)return;
+    let b=document.getElementById('nara-quote-bell');
+    if(!b){b=document.createElement('button');b.id='nara-quote-bell';b.type='button';b.style.cssText='border:1px solid #0002;background:#fff;border-radius:999px;min-width:34px;height:30px;cursor:pointer;font-size:1rem';b.onclick=()=>setQuotesOff(!quotesOff());box.appendChild(b)}
+    b.textContent=quotesOff()?'🔕':'🔔';b.title=tr(quotesOff()?'qOn':'qOff');
+  }
+  const CHIPS=[45,60,75,90];
+  let openQ=null;
+  async function promise(id,min){
+    try{const r=await fetch('/api/platform-orders/promise',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:id,minutes:min})});
+      if(r.ok){const q=quotes.find(x=>String(x.orderId)===String(id));if(q){q.promisedMin=min;q.promisedSet=true;q.addMin=Math.max(0,q.recommendMin-min);q.setMin=Math.max(q.recommendMin,min)}}}catch(e){}
+    drawQuotes();
+  }
+  function chips(q){
+    if(q.scheduled)return '';
+    return '<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">'+CHIPS.concat(CHIPS.includes(q.setMin)?[]:[q.setMin]).sort((a,b)=>a-b).map(m=>{
+      const on=q.promisedMin===m,tooShort=m<q.recommendMin;
+      return '<button data-qmin="'+m+'" data-qid="'+esc(q.orderId)+'" style="flex:1;min-width:48px;height:34px;border-radius:8px;font-weight:900;cursor:pointer;border:2px solid '+(on?'#1d2327':tooShort?'#fca5a5':'#d6dade')+';background:'+(on?'#1d2327':'#fff')+';color:'+(on?'#fff':tooShort?'#dc2626':'#1d2327')+'">'+m+'</button>'}).join('')+'</div>'
+      +'<div style="font-size:.72rem;color:#666;margin-top:3px">'+tr('qChipHint')+'</div>';
+  }
+  function head(q){
+    const c=PCOL[q.source]||'#555';
+    return '<div style="display:flex;align-items:center;gap:6px"><b dir="ltr" style="font-size:1.05rem">'+esc(q.code)+'</b><span style="background:'+c+';color:#fff;border-radius:5px;padding:1px 6px;font-size:.72rem;font-weight:800">'+esc(String(q.source).replace('_',' '))+'</span><span style="margin-inline-start:auto;font-size:.8rem;color:#666">'+q.items+' '+tr('qItems')+'</span></div>';
+  }
+  function mainLine(q,big){
+    if(q.scheduled)return '<div style="margin-top:4px;font-weight:800">'+tr('qSched')+' '+hm(q.requestedAt)+'</div><div style="font-weight:900;font-size:1.05rem;color:'+(q.feasible?'#16a34a':'#dc2626')+'">'+(q.feasible?fill('qCan',hm(q.startAt)):fill('qCannot',hm(q.suggestedAt)))+'</div>';
+    const enough=!(q.addMin>0);
+    return '<div style="margin-top:4px;font-size:'+(big?'1.6rem':'1.3rem')+';font-weight:900;color:'+(enough?'#16a34a':'#dc2626')+'">'+(enough?'✅ '+fill('qEnough',q.promisedMin):'⚠️ '+fill('qRaise',q.setMin))+'</div>'
+      +'<div style="font-size:.85rem;font-weight:700;color:#444">'+fill('qReal',q.recommendMin)+'</div>';
+  }
+  function det(q){
+    return '<div style="font-size:.82rem;color:#444;margin-top:3px">'+[q.scheduled?'':tr('qReady')+' '+hm(q.readyAt),q.type==='pickup'?tr('qPickup'):(q.distanceKnown?tr('qDrive')+' '+q.driveMin+' '+tr('min')+' · <bdi dir="ltr">'+q.km+' km</bdi>':tr('qNoAddr')),q.queue&&!q.scheduled?q.queue+' '+tr('qQueue'):''].filter(Boolean).join(' · ')+'</div>';
+  }
   function drawQuotes(){
     let box=document.getElementById('nara-quotes');
-    if(!box){box=document.createElement('div');box.id='nara-quotes';box.style.cssText='position:fixed;bottom:70px;inset-inline-start:14px;z-index:9000;display:flex;flex-direction:column;gap:8px;max-width:340px';document.body.appendChild(box)}
-    const gone=new Set(done()),list=quotes.filter(q=>!gone.has(String(q.orderId)));
-    box.innerHTML=list.map(q=>{
-      const c=PCOL[q.source]||'#555';
-      const head='<div style="display:flex;align-items:center;gap:6px"><b dir="ltr" style="font-size:1.05rem">'+esc(q.code)+'</b><span style="background:'+c+';color:#fff;border-radius:5px;padding:1px 6px;font-size:.72rem;font-weight:800">'+esc(String(q.source).replace('_',' '))+'</span><span style="margin-inline-start:auto;font-size:.8rem;color:#666">'+q.items+' '+tr('qItems')+'</span></div>';
-      const det='<div style="font-size:.82rem;color:#444;margin-top:3px">'+[q.scheduled?'':tr('qReady')+' '+hm(q.readyAt),q.type==='pickup'?tr('qPickup'):(q.distanceKnown?tr('qDrive')+' '+q.driveMin+' '+tr('min')+' · <bdi dir="ltr">'+q.km+' km</bdi>':tr('qNoAddr')),q.queue&&!q.scheduled?q.queue+' '+tr('qQueue'):''].filter(Boolean).join(' · ')+'</div>';
-      let main;
-      if(q.scheduled){
-        main='<div style="margin-top:4px;font-weight:800">'+tr('qSched')+' '+hm(q.requestedAt)+'</div><div style="font-weight:900;font-size:1.05rem;color:'+(q.feasible?'#16a34a':'#dc2626')+'">'+(q.feasible?fill('qCan',hm(q.startAt)):fill('qCannot',hm(q.suggestedAt)))+'</div>';
-      }else{
-        // الوقت الثابت (60 د) بيكفي؟ إذا لأ: زيد. ومنعرض كمان قديش فينا نكون أسرع.
-        const enough=!(q.addMin>0);
-        main='<div style="margin-top:4px;font-size:1.4rem;font-weight:900;color:'+(enough?'#16a34a':'#dc2626')+'">'+(enough?'✅ '+fill('qEnough',q.platformMin):'⚠️ '+fill('qRaise',q.setMin))+'</div>'
-          +'<div style="font-size:.85rem;font-weight:700;color:#444">'+fill('qReal',q.recommendMin)+'</div>';
-      }
-      return '<div style="background:#fff;color:#14181c;border-radius:12px;padding:10px 12px;box-shadow:0 6px 24px #0004;border-inline-start:6px solid '+c+'">'+head+main+det
-        +'<button data-qdone="'+esc(q.orderId)+'" style="margin-top:6px;width:100%;min-height:36px;border:0;border-radius:8px;background:#1d2327;color:#fff;font-weight:800;cursor:pointer">✓ '+tr('qDone')+'</button></div>';
-    }).join('');
+    if(!box){box=document.createElement('div');box.id='nara-quotes';box.style.cssText='position:fixed;bottom:70px;inset-inline-start:14px;z-index:9000;display:flex;flex-direction:column;gap:8px;max-width:360px;max-height:calc(100vh - 160px);overflow:auto';document.body.appendChild(box)}
+    const gone=new Set(done()),list=quotesOff()?[]:quotes.filter(q=>!gone.has(String(q.orderId)));
+    box.innerHTML=list.map(q=>'<div style="background:#fff;color:#14181c;border-radius:12px;padding:10px 12px;box-shadow:0 6px 24px #0004;border-inline-start:6px solid '+(PCOL[q.source]||'#555')+'">'+head(q)+mainLine(q)+det(q)+chips(q)
+      +'<div style="display:flex;gap:6px;margin-top:6px"><button data-qopen="'+esc(q.orderId)+'" style="flex:1;min-height:36px;border:1px solid #d6dade;border-radius:8px;background:#f4f6f8;font-weight:800;cursor:pointer">🔍 '+tr('qDetails')+'</button><button data-qdone="'+esc(q.orderId)+'" style="flex:1;min-height:36px;border:0;border-radius:8px;background:#1d2327;color:#fff;font-weight:800;cursor:pointer">✓ '+tr('qDone')+'</button></div></div>').join('');
+    drawModal();
   }
-  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-qdone]');if(b){markDone(b.dataset.qdone);drawQuotes()}});
+  // الكرت الكبير: كل تفاصيل الطلب لتقرّر
+  function drawModal(){
+    let m=document.getElementById('nara-quote-modal');
+    const q=openQ&&quotes.find(x=>String(x.orderId)===openQ);
+    if(!q){if(m)m.remove();return}
+    if(!m){m=document.createElement('div');m.id='nara-quote-modal';m.style.cssText='position:fixed;inset:0;z-index:9500;background:#0007;display:flex;align-items:center;justify-content:center;padding:14px';m.onclick=e=>{if(e.target===m){openQ=null;drawModal()}};document.body.appendChild(m)}
+    const lines=(q.lines||[]).map(l=>'<div style="padding:5px 0;border-top:1px dashed #e3e7eb"><b>'+l.q+'×</b> <bdi>'+esc(l.name)+'</bdi>'+(l.opts&&l.opts.length?'<div style="font-size:.85rem;color:#555;padding-inline-start:1.6em">+ '+l.opts.map(esc).join(', ')+'</div>':'')+(l.note?'<div style="font-size:.85rem;color:#dc2626;font-weight:800;padding-inline-start:1.6em">! <bdi>'+esc(l.note)+'</bdi></div>':'')+'</div>').join('');
+    m.innerHTML='<div style="background:#fff;color:#14181c;border-radius:16px;padding:16px 18px;width:min(520px,100%);max-height:90vh;overflow:auto;border-top:8px solid '+(PCOL[q.source]||'#555')+'">'
+      +'<div style="display:flex;align-items:center;gap:8px">'+head(q)+'<button data-qclose style="margin-inline-start:8px;border:0;background:#f4f6f8;border-radius:8px;width:36px;height:36px;font-size:1.1rem;cursor:pointer">✕</button></div>'
+      +mainLine(q,true)+det(q)
+      +(q.customerName||q.address?'<div style="margin-top:8px;padding:8px 10px;background:#f6f7f9;border-radius:10px"><b><bdi>'+esc(q.customerName)+'</bdi></b><div><bdi dir="ltr">'+esc(q.address)+'</bdi></div>'+(q.notes?'<div style="margin-top:4px;color:#92400e">📝 <bdi>'+esc(q.notes)+'</bdi></div>':'')+'</div>':'')
+      +'<div style="margin-top:8px">'+lines+'</div>'
+      +(q.platformMin&&!q.scheduled?'<div style="font-size:.8rem;color:#666;margin-top:6px">'+tr('qPlat')+': '+q.platformMin+' '+tr('min')+'</div>':'')
+      +chips(q)
+      +'<button data-qdone="'+esc(q.orderId)+'" style="margin-top:10px;width:100%;min-height:44px;border:0;border-radius:10px;background:#1d2327;color:#fff;font-weight:900;font-size:1rem;cursor:pointer">✓ '+tr('qDone')+'</button></div>';
+  }
+  document.addEventListener('click',e=>{
+    const t=e.target.closest&&e.target;if(!t)return;
+    const d=t.closest('[data-qdone]');if(d){markDone(d.dataset.qdone);if(openQ===d.dataset.qdone)openQ=null;drawQuotes();return}
+    const o=t.closest('[data-qopen]');if(o){openQ=o.dataset.qopen;drawModal();return}
+    if(t.closest('[data-qclose]')){openQ=null;drawModal();return}
+    const c=t.closest('[data-qmin]');if(c){promise(c.dataset.qid,Number(c.dataset.qmin));return}
+  });
+  setInterval(bellBtn,1500);
   // 4) زر التوزيع
   function mount(){
     const h=document.querySelector('header .header-actions');if(!h)return;

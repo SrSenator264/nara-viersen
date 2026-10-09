@@ -69,6 +69,7 @@ const RULES = [
   ['POST', /^\/api\/platform-orders\/import$/, 'service'],
   ['POST', /^\/api\/platform-orders\/(heartbeat|alert)$/, 'service'],
   ['GET', /^\/api\/platform-orders\/status$/, KITCH],
+  ['POST', /^\/api\/platform-orders\/promise$/, CASH],
   ['GET', /^\/api\/system\/lan$/, CASH],
   ['POST', /^\/api\/kasse\/events$/, KITCH],
   ['GET', /^\/api\/kasse-state$/, KITCH],

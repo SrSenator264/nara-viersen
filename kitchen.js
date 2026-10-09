@@ -52,7 +52,10 @@ function kitchenView(o, now = Date.now(), catalog = null) {
   const prep = Math.max(1, Number(o.preparationMinutes || d.preparationMinutes || o.prepMinutes) || 20);
   // وقت لازم يكون جاهز: من المنصة (dueAt - وقت التوصيل) أو من وقت الطلب + التحضير
   const platformStart = ms(o.kitchenStartAt);
-  const readyBy = platformStart ? platformStart + prep * 60000 : created + prep * 60000;
+  let readyBy = platformStart ? platformStart + prep * 60000 : created + prep * 60000;
+  // الكاشير اختار وقت التسليم (مثلاً 60 د): المطبخ لازم يخلص قبل بوقت السواقة
+  const promised = ms(o.promisedDueAt);
+  if (promised) readyBy = promised - (typeOf(o) === 'delivery' ? (Math.max(5, Number(o.driveMinutes) || 15) + 2) * 60000 : 0);
   const notes = [str(d.notes), str(d.extra), str(o.remarks), str(o.note)].filter(Boolean);
   return {
     id: o.id,

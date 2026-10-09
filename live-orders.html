@@ -187,7 +187,7 @@ function phone(o){return S(o.customerPhone)||S(D(o).phone)}
 const DAY_START_H=5;
 const localDay=t=>{const d=new Date(t-DAY_START_H*3600000);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 function when(o){const v=o.placedAt||o.createdAt||o.acceptedAt;const t=v?Date.parse(v):0;if(t)return t;const id=S(o.id).match(/1\d{12}/);return id?Number(id[0]):(Date.parse(o.completedAt||o.updatedAt||0)||0)}
-function due(o){const v=o.dueAt||o.etaAt||o.requestedAt;return v?(Date.parse(v)||0):0}
+function due(o){const v=o.promisedDueAt||o.dueAt||o.etaAt||o.requestedAt;return v?(Date.parse(v)||0):0}
 
 function ring(o,big){
   const now=Date.now(),d=due(o),p=when(o);

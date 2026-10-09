@@ -15,7 +15,7 @@ test('ASAP order: recommends minutes from size + distance, compares with platfor
   assert.ok(q.driveMin > 0 && q.km > 1);
   assert.equal(q.recommendMin % 5, 0);
   assert.equal(q.platformMin, 30);
-  assert.equal(q.addMin, Math.max(0, q.recommendMin - 30));
+  assert.equal(q.promisedMin, 60); assert.equal(q.addMin, Math.max(0, q.recommendMin - 60));
   const big = Q.quote({ orders: [] }, lf('2', { cart: cart(20) }), NOW);
   assert.ok(big.recommendMin > q.recommendMin, 'bigger order → more time');
 });
@@ -38,6 +38,8 @@ test('no platform time: compares with our standard 60 minutes', () => {
   const o = lf('8');
   const q = Q.quote({ orders: [] }, o, NOW);
   assert.equal(q.platformMin, 60); assert.equal(q.addMin, 0); assert.equal(q.setMin, 60);
+  const chosen = Q.quote({ orders: [] }, lf('10', { promisedMin: 45 }), NOW);
+  assert.equal(chosen.promisedMin, 45); assert.equal(chosen.promisedSet, true);
   const huge = Q.quote({ orders: [], settings: { kitchen: { parallelOrders: 1 } } }, lf('9', { cart: cart(120) }), NOW);
   assert.ok(huge.addMin > 0 && huge.setMin > 60);
 });
