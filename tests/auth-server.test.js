@@ -185,3 +185,15 @@ test('after a split part is paid the cart is locked for the cashier, manager can
   const mgr = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', clientId: 'O', order: more }, S.owner);
   assert.equal(mgr.status, 200);
 });
+
+test('printing: cashier reads config and prints, only manager saves settings', async () => {
+  const g = await call('GET', '/api/printing/config', null, S.cashier);
+  assert.equal(g.status, 200); assert.equal(g.json.config.routes.platform, 'epson');
+  assert.equal((await call('POST', '/api/printing/config', g.json.config, S.cashier)).status, 403);
+  const cfg = { ...g.json.config, auto: { ...g.json.config.auto, kitchenOnPlatformOrder: true } };
+  const s = await call('POST', '/api/printing/config', cfg, S.owner);
+  assert.equal(s.status, 200); assert.equal(s.json.config.auto.kitchenOnPlatformOrder, true);
+  const p = await call('POST', '/api/print', { kind: 'test' }, S.cashier);
+  assert.equal(p.status, 200); assert.equal(p.json.mode, 'browser');
+  assert.equal((await call('POST', '/api/print', { kind: 'test' })).status, 401);
+});

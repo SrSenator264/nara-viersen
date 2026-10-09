@@ -132,7 +132,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 <div id="arc" hidden><div class="rcard"><div class="rhead"><h2>🗂 <span data-t="archive"></span></h2><span class="sp"></span><input type="date" id="aday"><button id="aclose">✕</button></div><p class="arhint" data-t="arcHint"></p><div id="abody"></div></div></div>
 <div id="nara-print-sheet"></div>
 <script src="vendor/qrcode.bundle.js?v=20261008"></script>
-<script src="kasse-receipt.js?v=20261009k"></script>
+<script src="kasse-receipt.js?v=20261009n"></script>
 <script>
 (function(){
 const $=s=>document.querySelector(s);
@@ -279,6 +279,8 @@ function renderDetail(o){
 
 function printOrder(o){
   const R=window.NARA_RECEIPT,sheet=$('#nara-print-sheet');
+  // السيرفر بيبعتها للطابعة المختارة (Epson لطلبات المنصات)، أو نافذة المتصفح
+  if(R&&R.print){R.print(o,'customer');return}
   if(R&&R.ready){sheet.innerHTML=R.html(o,'customer')}
   else sheet.innerHTML='<div style="font:14px Arial"><b>#'+esc(code(o))+'</b><br>'+'<bdi>'+esc(title(o))+'</bdi>'+'<br>'+'<bdi>'+esc(custName(o))+'</bdi>'+'</div>';
   setTimeout(()=>window.print(),50);

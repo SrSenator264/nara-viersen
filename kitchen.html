@@ -117,7 +117,7 @@ button:disabled{opacity:.5}
   <section class="view" data-v="READY"><h2><span data-t="colReady"></span><span class="n"></span></h2><div class="list"></div></section>
   <section class="view" data-v="SUM"><h2><span data-t="sumTitle"></span></h2><div class="sum" id="sum"></div></section>
 </main>
-<script src="/kasse-receipt.js?v=20261009k"></script>
+<script src="/kasse-receipt.js?v=20261009n"></script>
 <script>
 (function(){
   const T={
@@ -171,6 +171,8 @@ button:disabled{opacity:.5}
   }
   function printTicket(o){
     if(!window.NARA_RECEIPT||!window.NARA_RECEIPT.kitchenHtml)return;
+    // السيرفر بيطبع عطابعة المطبخ (أو نافذة المتصفح إذا هيك مضبوط)
+    if(window.NARA_RECEIPT.print){window.NARA_RECEIPT.print({...o,id:o.id},'kitchen');return}
     let sheet=document.getElementById('nara-print-sheet');
     if(!sheet){sheet=document.createElement('section');sheet.id='nara-print-sheet';document.body.appendChild(sheet)}
     sheet.innerHTML=window.NARA_RECEIPT.kitchenHtml(o);window.print();setTimeout(()=>sheet.remove(),500);

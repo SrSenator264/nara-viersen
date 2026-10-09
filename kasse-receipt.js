@@ -188,6 +188,30 @@
       +'<div class="rc-brand pr-brand">IU GENE ♥ Viersen</div></div>';
   }
   api.promoHtml=promoHtml;api.promoCode=promoCode;
+  // الطباعة: السيرفر بيقرر أي طابعة (حسب إعدادات 🖨️). إذا الطابعة على "نافذة المتصفح" بنطبع هون.
+  // o: طلب (أو {id}) · kind: customer | kitchen | driver
+  api.print=async function(o,kind){
+    kind=kind||'customer';
+    let r=null;
+    try{
+      const body=o&&o.id&&!o.cart?{orderId:o.id,kind}:{orderId:o&&o.id,order:o,kind};
+      const res=await fetch('/api/print',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      r=await res.json().catch(()=>({}));
+      if(!res.ok)throw new Error(r.error||('HTTP '+res.status));
+    }catch(e){
+      // السيرفر ما قدر يطبع (طابعة مطفية…): منطبع من المتصفح كي ما يضيع الطلب
+      console.warn('[NARA][PRINT]',e.message);r={mode:'browser',error:e.message,promo:false};
+    }
+    if(r.mode==='browser'){
+      let sheet=document.getElementById('nara-print-sheet');
+      if(!sheet){sheet=document.createElement('section');sheet.id='nara-print-sheet';document.body.appendChild(sheet)}
+      sheet.innerHTML=kind==='kitchen'?kitchenHtml(o):(html(o,kind==='driver'?'driver':'customer')+(r.promo?'<div style="break-before:page;page-break-before:always"></div>'+promoHtml(o):''));
+      window.print();setTimeout(()=>{if(sheet.parentNode)sheet.innerHTML=''},500);
+    }
+    return r;
+  };
+  // إعدادات ورقة العرض من السيرفر (النسبة، الرابط، الأيام)
+  try{fetch('/api/printing/config',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.config)window.NARA_PROMO={url:j.config.promo.url,percent:j.config.promo.percent,days:j.config.promo.days}}).catch(()=>{})}catch(e){}
   api.toKitchen=toKitchen;api.kitchenHtml=kitchenHtml;
   api.toReceiptOrder=toReceiptOrder;api.html=html;
   window.NARA_RECEIPT=api;

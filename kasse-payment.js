@@ -164,7 +164,7 @@
         if (paidBefore === 0) await ctx.send('ORDER_SYNC');
         const res = await ctx.send('FINALIZE_PAYMENT', payload);
         const info = res && res.payment;
-        if (!info || info.completed) { d.close(); ctx.fresh(); location.reload(); return; }
+        if (!info || info.completed) { d.close(); ctx.fresh(); try { await (window.NARA_PRINT_PENDING || null); } catch (e) { /* ignore */ } location.reload(); return; }
         paidBefore = info.paidCents;
         o.paidCents = info.paidCents; try { ctx.save && ctx.save(); } catch (e) { /* ignore */ }
         st.partsPaid.push(st.partIdx);

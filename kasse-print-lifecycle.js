@@ -29,11 +29,14 @@
   async function log(o,action,kind){
     try{await fetch('/api/kasse/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,order:o,stage:kind})})}catch(e){console.warn('[NARA][PRINT_LOG_FAILED]',e.message)}
   }
-  function print(kind,action){const o=current();if(!o||!(o.cart||[]).length){$('#message').textContent=t('empty');return}showSheet(o,kind);log(o,action,kind);$('#message').textContent=t('sent')}
-  const printerDefaults=[{id:'system',name:'Windows / Systemdrucker',routes:['kitchen','customer','driver']},{id:'kitchen-1',name:'Küchen-Drucker',routes:['kitchen']},{id:'counter-1',name:'Kasse / Ausgabe',routes:['customer']},{id:'delivery-1',name:'Lieferung',routes:['driver']}];
-  function printers(){try{return JSON.parse(localStorage.getItem('nara-printers')||'null')||printerDefaults}catch{return printerDefaults}}
-  function savePrinters(v){localStorage.setItem('nara-printers',JSON.stringify(v))}
-  function mountPrinterSettings(){if(document.getElementById('nara-printer-settings'))return;const host=document.querySelector('header .header-actions')||document.querySelector('header');if(!host)return;const button=document.createElement('button');button.id='nara-printer-settings-toggle';button.type='button';button.textContent='🖨️';button.title=t('psTitle');button.dataset.plTitle='psTitle';host.appendChild(button);const panel=document.createElement('div');panel.id='nara-printer-settings';panel.hidden=true;panel.innerHTML='<h3 data-pl="psSetup">'+esc(t('psSetup'))+'</h3><p data-pl="psHelp">'+esc(t('psHelp'))+'</p><div id="nara-printer-list"></div><div class="nara-printer-add"><input id="nara-printer-name" data-pl-ph="psName" placeholder="'+esc(t('psName'))+'"><button type="button" id="nara-printer-add" data-pl="psAdd">'+esc(t('psAdd'))+'</button></div><button type="button" id="nara-printer-close" data-pl="psClose">'+esc(t('psClose'))+'</button>';document.body.appendChild(panel);const list=panel.querySelector('#nara-printer-list');function render(){const ps=printers();list.innerHTML=ps.map((p,i)=>`<div class="nara-printer-row"><input data-pname="${i}" value="${esc(p.name)}"><select data-prole="${i}"><option value="kitchen">${esc(t('rKitchen'))}</option><option value="customer">${esc(t('rCustomer'))}</option><option value="driver">${esc(t('rDriver'))}</option></select><button type="button" data-premove="${i}" title="${esc(t('remove'))}">×</button></div>`).join('');ps.forEach((p,i)=>{const s=list.querySelector(`[data-prole="${i}"]`);s.value=p.routes?.[0]||'customer'})}button.onclick=()=>{panel.hidden=!panel.hidden;if(!panel.hidden)render()};panel.addEventListener('nara-print-relabel',render);panel.querySelector('#nara-printer-close').onclick=()=>panel.hidden=true;panel.querySelector('#nara-printer-add').onclick=()=>{const n=panel.querySelector('#nara-printer-name').value.trim();if(!n)return;savePrinters([...printers(),{id:'custom-'+Date.now(),name:n,routes:['customer']}]);panel.querySelector('#nara-printer-name').value='';render()};list.addEventListener('input',e=>{const i=e.target.dataset.pname;if(i!==undefined){const ps=printers();ps[i].name=e.target.value;savePrinters(ps)}});list.addEventListener('change',e=>{const i=e.target.dataset.prole;if(i!==undefined){const ps=printers();ps[i].routes=[e.target.value];savePrinters(ps)}});list.addEventListener('click',e=>{const i=e.target.dataset.premove;if(i!==undefined){const ps=printers();ps.splice(Number(i),1);savePrinters(ps);render()}})}
+  async function print(kind,action){const o=current();if(!o||!(o.cart||[]).length){$('#message').textContent=t('empty');return}
+    log(o,action,kind);
+    if(window.NARA_RECEIPT&&window.NARA_RECEIPT.print){
+      // الكاشير بيستنى الطباعة قبل ما يعيد تحميل الصفحة بعد الدفع (حد أقصى 10 ثواني)
+      const job=window.NARA_RECEIPT.print(o,kind);
+      window.NARA_PRINT_PENDING=Promise.race([job.catch(()=>null),new Promise(r=>setTimeout(r,10000))]);
+      const r=await job;$('#message').textContent=r&&r.error?'⚠ '+r.error:t('sent');return}
+    showSheet(o,kind);$('#message').textContent=t('sent')}
   function mount(){
     const cart=$('#cart');if(!cart||document.getElementById('nara-print-tools'))return;
     const box=document.createElement('div');box.id='nara-print-tools';box.innerHTML='<div class="nara-order-identity"><span data-pl="code">'+esc(t('code'))+'</span><strong id="nara-order-code">—</strong></div><div class="nara-print-actions"><button type="button" data-print-kind="kitchen" data-pl="kitchen">'+esc(t('kitchen'))+'</button><button type="button" data-print-kind="customer" data-pl="customer">'+esc(t('customer'))+'</button><button type="button" data-print-kind="driver" data-pl="driver">'+esc(t('driver'))+'</button><button type="button" data-print-kind="reprint" data-pl="reprint">'+esc(t('reprint'))+'</button></div>';
@@ -43,7 +46,7 @@
   // تبديل اللغة: منحدّث نصوص أزرار الطباعة ولوحة الطابعات
   function relabel(){document.querySelectorAll('[data-pl]').forEach(el=>{el.textContent=t(el.dataset.pl)});document.querySelectorAll('[data-pl-ph]').forEach(el=>{el.placeholder=t(el.dataset.plPh)});document.querySelectorAll('[data-pl-title]').forEach(el=>{el.title=t(el.dataset.plTitle)});const p=document.getElementById('nara-printer-settings');if(p&&!p.hidden)p.dispatchEvent(new Event('nara-print-relabel'))}
   window.addEventListener('nara-lang',()=>setTimeout(relabel,0));document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-lang]'))setTimeout(relabel,0)});
-  mount();mountPrinterSettings();const sound=document.createElement('script');sound.src='kasse-print-sound.js?v=20261001';document.body.appendChild(sound);const lanch=document.createElement('script');lanch.src='kasse-lanch-import.js?v=20261001';document.body.appendChild(lanch);const lanchFile=document.createElement('script');lanchFile.src='kasse-lanch-file-preview.js?v=20261001';document.body.appendChild(lanchFile);
+  mount();const sound=document.createElement('script');sound.src='kasse-print-sound.js?v=20261001';document.body.appendChild(sound);const lanch=document.createElement('script');lanch.src='kasse-lanch-import.js?v=20261001';document.body.appendChild(lanch);const lanchFile=document.createElement('script');lanchFile.src='kasse-lanch-file-preview.js?v=20261001';document.body.appendChild(lanchFile);
 })();
 
 // Print the customer copy immediately after a successful local payment.
@@ -56,7 +59,7 @@
     const body=typeof init?.body==='string'?init.body:null;
     let payload=null;try{payload=body?JSON.parse(body):null}catch{}
     const response=await nativeFetch.apply(this,arguments);
-    if(payload?.action==='FINALIZE_PAYMENT'&&response.ok&&localStorage.getItem('nara-auto-print-payment')!=='false'){
+    if(payload?.action==='FINALIZE_PAYMENT'&&response.ok&&window.NARA_PRINT_AUTO_PAY!==false){
       // تقسيم الفاتورة: منطبع بس لما تندفع كلها، مو بعد كل جزء
       let done=true;try{const j=await response.clone().json();const p=j&&(j.payment||j);if(p&&p.completed===false)done=false}catch(e){}
       const button=done&&document.querySelector('[data-print-kind="customer"]');
@@ -64,32 +67,5 @@
     }
     return response;
   };
-})();
-
-(function(){
-  setTimeout(()=>{
-    const panel=document.querySelector('#nara-printer-settings');
-    if(!panel||panel.querySelector('#nara-auto-print-payment'))return;
-    const label=document.createElement('label');label.style.cssText='display:flex;gap:8px;align-items:center;margin:12px 0;font-weight:700';
-    const tt=window.NARA_PRINT_T||(k=>k==='auto'?'Automatisch nach Zahlung drucken':k);label.innerHTML='<input id="nara-auto-print-payment" type="checkbox" style="width:auto;margin:0"> <span data-pl="auto"></span>';label.querySelector('[data-pl]').textContent=tt('auto');
-    const input=label.querySelector('input');input.checked=localStorage.getItem('nara-auto-print-payment')!=='false';input.onchange=()=>localStorage.setItem('nara-auto-print-payment',String(input.checked));
-    panel.querySelector('h3')?.after(label);
-  },500);
-})();
-
-// Future-ready network printer fields and an explicit kitchen print fallback.
-(function(){
-  'use strict';
-  const read=()=>{try{return JSON.parse(localStorage.getItem('nara-printers')||'[]')}catch{return []}};
-  const write=v=>localStorage.setItem('nara-printers',JSON.stringify(v));
-  const enhance=()=>{
-    const panel=document.querySelector('#nara-printer-settings');
-    if(!panel||panel.dataset.enhanced)return;
-    panel.dataset.enhanced='1';
-    const add=panel.querySelector('.nara-printer-add');
-    if(add){const fields=document.createElement('div');fields.className='nara-printer-network-fields';const tt=window.NARA_PRINT_T||(k=>({ip:'IP-Adresse (z. B. 192.168.1.50)',port:'Port',net:'Netzwerk TCP/IP'}[k]||k));fields.innerHTML='<input id="nara-printer-ip" data-pl-ph="ip" placeholder=""><input id="nara-printer-port" type="number" data-pl-ph="port" placeholder="" value="9100"><select id="nara-printer-connection"><option value="windows">Windows / Chrome</option><option value="network" data-pl="net"></option><option value="usb">USB</option><option value="bluetooth">Bluetooth</option></select>';fields.querySelector('#nara-printer-ip').placeholder=tt('ip');fields.querySelector('#nara-printer-port').placeholder=tt('port');fields.querySelector('[data-pl="net"]').textContent=tt('net');add.before(fields);panel.querySelector('#nara-printer-add').addEventListener('click',()=>{const name=panel.querySelector('#nara-printer-name')?.value.trim();if(!name)return;const list=read();const item=list[list.length-1];if(item){item.ip=panel.querySelector('#nara-printer-ip')?.value.trim()||'';item.port=Number(panel.querySelector('#nara-printer-port')?.value||9100);item.connection=panel.querySelector('#nara-printer-connection')?.value||'windows';write(list)}})}
-  };
-  const last=()=>{const sheet=document.querySelector('#nara-print-sheet');if(sheet)localStorage.setItem('nara-last-print',JSON.stringify({kind:sheet.dataset.kind,at:new Date().toISOString()}))};
-  setTimeout(()=>{enhance();last()},200);
 })();
 
