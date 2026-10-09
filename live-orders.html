@@ -204,7 +204,8 @@ async function load(){
     if(!r.ok)throw Error(r.status);
     const j=await r.json(),today=localDay(Date.now());
     all=j.orders||[];pays={};for(const p of j.payments||[])pays[p.id]=p;
-    orders=all.filter(o=>plat(o)!=='NARA'&&!o.liveArchivedAt&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<12*3600000));
+    // طلبات التجربة اللي انلغت (NARA-Demo-Loeschen) ما بتطلع أبداً
+    orders=all.filter(o=>plat(o)!=='NARA'&&!o.liveArchivedAt&&!(o.isTest&&cancelled(o))&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<12*3600000));
     lastOk=Date.now();
   }catch(e){}
   render();
