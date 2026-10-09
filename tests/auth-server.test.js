@@ -136,6 +136,18 @@ test('two devices: an older version of an order cannot overwrite a newer one, se
   assert.equal(again.status, 200); assert.equal(again.json.order.kitchenStatus, 'READY');
 });
 
+test('same device with an older rev is not a conflict; another device is', async () => {
+  const id = 'cid-' + Date.now();
+  const base = { id, type: 'pickup', cart: [{ name: 'Burger', unitCents: 899, quantity: 1, options: [] }] };
+  const sync = (order, clientId) => call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', clientId, order }, S.cashier);
+  assert.equal((await sync(base, 'dev-A')).json.rev, 1);
+  assert.equal((await sync({ ...base, rev: 1 }, 'dev-A')).json.rev, 2);
+  const mine = await sync({ ...base, rev: 1, cart: [{ ...base.cart[0], quantity: 2 }] }, 'dev-A');
+  assert.equal(mine.status, 200); assert.equal(mine.json.rev, 3);
+  const other = await sync({ ...base, rev: 1, cart: [{ ...base.cart[0], quantity: 9 }] }, 'dev-B');
+  assert.equal(other.status, 409); assert.equal(other.json.order.cart[0].quantity, 2);
+});
+
 test('Lieferando bridge: heartbeat/alert from this PC, status for cashier, old Chrome extension rejected', async () => {
   assert.equal((await call('GET', '/api/platform-orders/status')).status, 401);
   let r = await call('GET', '/api/platform-orders/status', null, S.cashier);

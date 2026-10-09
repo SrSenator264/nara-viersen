@@ -46,7 +46,7 @@
     for(const o of jget(OK,[])){
       if(!o||!o.id||closed(o.status)||!hasContent(o))continue;
       const h=hash(o);if(pushed[o.id]===h)continue;
-      try{const r=await fetch('/api/kasse/events',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'ORDER_SYNC',employeeId:emp,order:Object.assign({},o,{employeeId:emp}),items:o.cart||[]})});
+      try{const r=await fetch('/api/kasse/events',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'ORDER_SYNC',clientId:(window.NARA_CLIENT_ID||''),employeeId:emp,order:Object.assign({},o,{employeeId:emp}),items:o.cart||[]})});
         const d=await r.json().catch(()=>({}));const L=window.NARA_LEGACY_KASSE_STATE;
         if(r.ok){pushed[o.id]=h;status(true);const lo=L&&L.getOrders().find(x=>String(x.id)===String(o.id));if(lo&&Number.isInteger(d.rev)&&lo.rev!==d.rev){lo.rev=d.rev;L.save()}}
         else if(r.status===409&&d.code==='ORDER_CONFLICT'&&d.order&&L){replaceLocal(L,o.id,d.order);L.save();L.render();note();status(true)}

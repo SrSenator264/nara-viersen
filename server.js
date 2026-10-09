@@ -227,8 +227,10 @@ http.createServer((req,res)=>{
       const displayCode=String(order.displayCode||stored?.displayCode||('NARA-'+String(order.id).replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase())).slice(0,32);
       // قفل بين الأجهزة: كل حفظ بيرفع رقم النسخة (rev). جهاز بيبعت نسخة أقدم من اللي عالسيرفر = تعارض، ما منكتب فوق تعديل جهاز تاني.
       const storedRev=Number.isInteger(stored?.rev)?stored.rev:0;
-      if(stored&&Number.isInteger(order.rev)&&order.rev<storedRev)return reply(res,409,{error:'الطلب انعدّل من جهاز تاني.',code:'ORDER_CONFLICT',orderId:stored.id,order:stored});
-      const next={...order,id:String(order.id),displayCode,status:stored?.status||'OPEN',rev:storedRev+1,updatedAt:new Date().toISOString()};
+      const clientId=String(payload.clientId||'').slice(0,64);
+      // تعارض بس إذا جهاز تاني عدّل الطلب (نفس الجهاز بنسخة متأخرة شوي مش تعارض)
+      if(stored&&Number.isInteger(order.rev)&&order.rev<storedRev&&!(clientId&&stored.revBy===clientId))return reply(res,409,{error:'الطلب انعدّل من جهاز تاني.',code:'ORDER_CONFLICT',orderId:stored.id,order:stored});
+      const next={...order,id:String(order.id),displayCode,status:stored?.status||'OPEN',rev:storedRev+1,revBy:clientId||undefined,updatedAt:new Date().toISOString()};
       // حقول بيملكها السيرفر (المطبخ، التوزيع، التسليم): الكاشير ما بيكتب فوقها بنسخة قديمة
       if(stored)for(const k of ['kitchenStatus','kitchenStatusAt','kitchenStatusBy','preparingAt','readyAt','pickedUpAt','liveStage','liveStageSource','liveStageUpdatedAt','deliveryRouteId','driverId','assignment','assignmentStatus','outAt','deliveredAt','deliveryProof','paymentId','completedAt','paymentIds','paidCents','billDiscount'])if(stored[k]!==undefined)next[k]=stored[k];else delete next[k];
       if(stored){current.orders=current.orders.map(x=>x.id===next.id?{...stored,...next}:x)}else current.orders.push(next);
