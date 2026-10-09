@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablets verbinden · NARA</title>
+<script src="nara-lang.js?v=20261009b" data-section="connect"></script>
 <style>
 :root{--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#e34824}
 *{box-sizing:border-box}body{margin:0;background:#f4f2ef;color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,Arial,sans-serif}
@@ -17,12 +18,13 @@ h1{margin:0 0 6px}p.sub{margin:0 0 20px;color:var(--mute)}
 .url{direction:ltr;font:600 1rem ui-monospace,Consolas,monospace;word-break:break-all;background:#f6f4f1;border-radius:10px;padding:8px;margin-top:8px}
 .ips{color:var(--mute);font-size:.9rem;margin-top:14px;direction:ltr;text-align:left}
 a.back{color:var(--brand);font-weight:700;text-decoration:none}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 </style>
 </head>
 <body><main>
-<a class="back" href="kasse.html">← Kasse</a>
-<h1>📱 وصّل تابلت أو جوال</h1>
-<p class="sub">التابلت لازم يكون على نفس Wi-Fi تبع المحل. صوّر الكود بكاميرا التابلت، وبيفتح الصفحة. كل موظف بيفوت باسمه ورمزه.</p>
+<div class="top"><a class="back" href="kasse.html" data-t="back"></a><span id="langsw"></span></div>
+<h1 data-t="h1"></h1>
+<p class="sub" data-t="sub"></p>
 <div id="warn" class="warn" hidden></div>
 <div class="grid" id="grid"></div>
 <div class="ips" id="ips"></div>
@@ -30,14 +32,28 @@ a.back{color:var(--brand);font-weight:700;text-decoration:none}
 <script src="vendor/qrcode.bundle.js?v=20261008"></script>
 <script>
 (async function(){
+  const T={
+    de:{title:'Tablets verbinden · NARA',back:'← Kasse',h1:'📱 Tablet oder Handy verbinden',sub:'Das Tablet muss im selben WLAN wie der Laden sein. QR-Code mit der Tablet-Kamera scannen, dann öffnet sich die Seite. Jeder Mitarbeiter meldet sich mit Namen und PIN an.',
+      lan:'⚠️ Der Server ist noch nur auf diesem Computer erreichbar. Einmal <code>NARA-Tablet-Freigabe.cmd</code> starten und dann diese Seite neu öffnen.',noip:'Kein Netzwerk gefunden. Prüfe, ob der Computer per WLAN oder Kabel verbunden ist.',
+      kitchen:'🍳 Küchenbildschirm',kitchenW:'Für das Tablet in der Küche',driver:'🛵 Fahrer-App',driverW:'Für das Handy jedes Fahrers',live:'📋 Live Orders',liveW:'Für den Bestell-Bildschirm',kasse:'💶 Kasse',kasseW:'Für ein zweites Kassen-Tablet'},
+    ar:{title:'وصّل تابلت · NARA',back:'رجوع للكاشير',h1:'📱 وصّل تابلت أو جوال',sub:'التابلت لازم يكون على نفس Wi-Fi تبع المحل. صوّر الـ QR بكاميرا التابلت، وبتفتح الصفحة. كل موظف بيفوت باسمه والـ PIN تبعه.',
+      lan:'⚠️ السيرفر لسا مسكّر على هالكمبيوتر بس. شغّل <code>NARA-Tablet-Freigabe.cmd</code> مرة وحدة، وبعدها ارجع لهالصفحة.',noip:'ما لقيت الكمبيوتر على الشبكة. تأكد إنه موصول بالـ Wi-Fi أو بالكابل.',
+      kitchen:'🍳 شاشة المطبخ',kitchenW:'لتابلت المطبخ',driver:'🛵 تطبيق السواق',driverW:'لجوال كل سواق',live:'📋 Live Orders',liveW:'لشاشة الطلبات',kasse:'💶 الكاشير',kasseW:'لتابلت كاشير تاني'},
+    en:{title:'Connect tablets · NARA',back:'← Till',h1:'📱 Connect a tablet or phone',sub:'The tablet must be on the same Wi-Fi as the shop. Scan the QR code with the tablet camera and the page opens. Every staff member logs in with their name and PIN.',
+      lan:'⚠️ The server is still only reachable from this computer. Run <code>NARA-Tablet-Freigabe.cmd</code> once, then come back to this page.',noip:'No network found. Make sure the computer is connected via Wi-Fi or cable.',
+      kitchen:'🍳 Kitchen screen',kitchenW:'For the kitchen tablet',driver:'🛵 Driver app',driverW:'For each driver\'s phone',live:'📋 Live Orders',liveW:'For the orders screen',kasse:'💶 Till',kasseW:'For a second till tablet'}
+  };
+  const lang=window.NARA_LANG?NARA_LANG.get():'de',t=k=>(T[lang]||T.de)[k]||T.de[k]||k;
+  document.title=t('title');document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
+  if(window.NARA_LANG)NARA_LANG.mountSwitcher(document.getElementById('langsw'));
   const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   let j;try{j=await (await fetch('/api/system/lan',{cache:'no-store'})).json()}catch(e){j={ips:[]}}
   const ip=(j.ips||[]).find(x=>/^192\.168\.|^10\.|^172\.(1[6-9]|2\d|3[01])\./.test(x.address))||(j.ips||[])[0];
-  if(!j.lanOpen){$('#warn').hidden=false;$('#warn').innerHTML='⚠️ السيرفر لسا مقفول على هالكمبيوتر بس. شغّل <code>NARA-Tablet-Freigabe.cmd</code> مرة وحدة، وبعدها ارجع لهالصفحة.'}
-  if(!ip){$('#grid').innerHTML='<p>ما لقيت الكمبيوتر على شبكة. تأكد إنه موصول بالـ Wi-Fi أو الكابل.</p>';return}
+  if(!j.lanOpen){$('#warn').hidden=false;$('#warn').innerHTML=t('lan')}
+  if(!ip){$('#grid').innerHTML='<p>'+esc(t('noip'))+'</p>';return}
   const base='http://'+ip.address+':'+(j.port||4185)+'/';
-  const pages=[['🍳 شاشة المطبخ','للتابلت بالمطبخ','kitchen.html'],['🛵 تطبيق السائق','لجوال كل سائق','driver.html'],['📋 Live Orders','لشاشة الطلبات','live-orders.html'],['💶 الكاشير','لتابلت كاشير تاني','kasse.html']];
-  $('#grid').innerHTML=pages.map(([t,w,p])=>'<div class="card"><h2>'+t+'</h2><p class="who">'+w+'</p>'+NARA_QR.svg(base+p,{level:'M',quiet:2})+'<div class="url">'+esc(base+p)+'</div></div>').join('');
+  const pages=[[t('kitchen'),t('kitchenW'),'kitchen.html'],[t('driver'),t('driverW'),'driver.html'],[t('live'),t('liveW'),'live-orders.html'],[t('kasse'),t('kasseW'),'kasse.html']];
+  $('#grid').innerHTML=pages.map(([ti,w,p])=>'<div class="card"><h2>'+esc(ti)+'</h2><p class="who">'+esc(w)+'</p>'+NARA_QR.svg(base+p,{level:'M',quiet:2})+'<div class="url">'+esc(base+p)+'</div></div>').join('');
   $('#ips').textContent='IP: '+(j.ips||[]).map(x=>x.address+' ('+x.name+')').join(' · ');
 })();
 </script>

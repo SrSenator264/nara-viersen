@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101820">
-<title>NARA · السائق</title>
+<title>NARA · Fahrer</title>
+<script src="nara-lang.js?v=20261009b" data-section="driver"></script>
 <style>
 :root{--bg:#f3f5f7;--card:#fff;--ink:#16202a;--muted:#6b7580;--line:#e2e6ea;--blue:#2563eb;--ok:#16a34a}
 *{box-sizing:border-box}
@@ -44,12 +45,14 @@ main{padding:12px 12px 90px}
 </style>
 </head>
 <body>
-<header><h1>🛵 طلباتي</h1><span class="gps" id="gps">📍 …</span></header>
+<header><h1 id="title">🛵</h1><span id="langsw"></span><span class="gps" id="gps">📍 …</span></header>
 <main id="main"><div class="empty">…</div></main>
 <div id="msg"></div>
 <input type="file" id="cam" accept="image/*" capture="environment" hidden>
 <script>
 (function(){
+  const T={"de": {"noGeo": "📍 Handy kann keinen Standort", "needHttps": "📍 Standort braucht https", "gpsOn": "📍 Standort aktiv", "welcome": "Willkommen zurück ✅", "allowGps": "📍 Standort im Browser erlauben", "noSignal": "📍 Kein Signal", "none": "Gerade keine Aufträge für dich 👌", "auto": "Die Seite aktualisiert sich selbst", "round": "Tour", "leftOf": " offen von ", "start": "▶️ Tour starten", "back": "🏠 Zurück im Laden", "route": "🗺️ Route in Google Maps", "floor": "Etage", "cash": "💶 Bar · Betrag steht auf dem Beleg", "paid": "✓ Bezahlt – kein Geld nehmen", "navi": "🧭 Navi", "delivered": "✅ Zugestellt", "photo": "📷 Niemand da? Bestellung an der Tür fotografieren", "proofSaved": "📷 Foto-Nachweis gespeichert", "login": "Bitte anmelden", "offline": "Keine Verbindung zum Server", "imgFail": "Foto konnte nicht geöffnet werden", "sending": "📤 Foto wird gesendet…", "proofDone": "📷 Nachweis gespeichert, Auftrag zugestellt ✅", "done": "Erledigt ✅", "title": "🛵 Meine Aufträge", "doc": "NARA · Fahrer"}, "ar": {"noGeo": "📍 الجوال ما بيدعم الموقع", "needHttps": "📍 الموقع بيحتاج رابط https", "gpsOn": "📍 الموقع شغّال", "welcome": "أهلاً بالرجعة ✅", "allowGps": "📍 اسمح للموقع من إعدادات المتصفح", "noSignal": "📍 ما في إشارة", "none": "ما في طلبات إلك هلق 👌", "auto": "الصفحة بتتحدث لحالها", "round": "جولة", "leftOf": " باقي من ", "start": "▶️ بلّش الجولة", "back": "🏠 رجعت للمحل", "route": "🗺️ افتح الطريق بـ Google Maps", "floor": "طابق", "cash": "💶 كاش · المبلغ مكتوب على الفاتورة", "paid": "✓ مدفوع، لا تاخد مصاري", "navi": "🧭 الطريق", "delivered": "✅ سلّمت الطلب", "photo": "📷 ما حدا فتح؟ صوّر الطلب عند الباب", "proofSaved": "📷 انحفظت صورة الإثبات", "login": "سجّل دخول", "offline": "ما في اتصال بالسيرفر", "imgFail": "الصورة ما انفتحت", "sending": "📤 عم تنبعت الصورة…", "proofDone": "📷 انحفظ الإثبات وانسلّم الطلب ✅", "done": "تمام ✅", "title": "🛵 طلباتي", "doc": "NARA · السواق"}, "en": {"noGeo": "📍 Phone has no location", "needHttps": "📍 Location needs https", "gpsOn": "📍 Location on", "welcome": "Welcome back ✅", "allowGps": "📍 Allow location in browser settings", "noSignal": "📍 No signal", "none": "No orders for you right now 👌", "auto": "This page updates by itself", "round": "Round", "leftOf": " left of ", "start": "▶️ Start round", "back": "🏠 Back at the shop", "route": "🗺️ Open route in Google Maps", "floor": "Floor", "cash": "💶 Cash · amount is on the receipt", "paid": "✓ Paid – take no money", "navi": "🧭 Navigate", "delivered": "✅ Delivered", "photo": "📷 Nobody home? Photo the order at the door", "proofSaved": "📷 Photo proof saved", "login": "Please log in", "offline": "No connection to the server", "imgFail": "Photo could not be opened", "sending": "📤 Sending photo…", "proofDone": "📷 Proof saved, order delivered ✅", "done": "Done ✅", "title": "🛵 My orders", "doc": "NARA · Driver"}};
+  const NL=window.NARA_LANG;const L=NL?NL.get():'de';const t=k=>(T[L]||T.de)[k]||T.de[k]||k;
   const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const hm=v=>{const d=new Date(v);return isNaN(d)?'':String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
   const $=s=>document.querySelector(s);
@@ -60,37 +63,37 @@ main{padding:12px 12px 90px}
   // الموقع: بيتبعت كل 15 ثانية طول ما الصفحة مفتوحة (بس وقت الشغل)
   function gps(state,text){const g=$('#gps');g.className='gps '+state;g.textContent=text}
   function startGps(){
-    if(!('geolocation' in navigator)){gps('off','📍 الجوال ما بيدعم الموقع');return}
-    if(!window.isSecureContext){gps('off','📍 الموقع بيحتاج رابط https');return}
+    if(!('geolocation' in navigator)){gps('off',t('noGeo'));return}
+    if(!window.isSecureContext){gps('off',t('needHttps'));return}
     navigator.geolocation.watchPosition(p=>{
-      last={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy};gps('on','📍 الموقع شغّال');
-      if(Date.now()-lastSent>15000){lastSent=Date.now();api('POST','/api/driver/position',last).then(j=>{if(j.finished){toast('أهلاً بالرجعة ✅');load()}}).catch(()=>{})}
-    },e=>gps('off',e.code===1?'📍 اسمح للموقع من إعدادات المتصفح':'📍 ما في إشارة'),{enableHighAccuracy:true,maximumAge:10000,timeout:20000});
+      last={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy};gps('on',t('gpsOn'));
+      if(Date.now()-lastSent>15000){lastSent=Date.now();api('POST','/api/driver/position',last).then(j=>{if(j.finished){toast(t('welcome'));load()}}).catch(()=>{})}
+    },e=>gps('off',e.code===1?t('allowGps'):t('noSignal')),{enableHighAccuracy:true,maximumAge:10000,timeout:20000});
   }
   async function keepAwake(){try{if('wakeLock' in navigator&&!wake){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>wake=null)}}catch(e){}}
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&routes.some(r=>r.startedAt))keepAwake()});
 
   function render(){
     const m=$('#main');
-    if(!routes.length){m.innerHTML='<div class="empty">ما في طلبات إلك هلق 👌<br><small>الصفحة بتتحدث لحالها</small></div>';return}
+    if(!routes.length){m.innerHTML='<div class="empty">'+t('none')+'<br><small>'+t('auto')+'</small></div>';return}
     m.innerHTML=routes.map(r=>{
       const left=r.stops.filter(s=>!s.delivered);
-      const head='<div class="rh"><b>جولة '+esc(r.roundId)+'</b><span>'+left.length+' باقي من '+r.stops.length+'</span></div>';
-      const action=!r.startedAt?'<button class="big" data-start="'+esc(r.routeId)+'">▶️ ابدأ الجولة</button>'
-        :r.allDelivered?'<button class="big sec" data-finish="'+esc(r.routeId)+'">🏠 رجعت للمحل</button>'
-        :(r.googleMapsUrl?'<a class="big sec" target="_blank" rel="noopener" href="'+esc(r.googleMapsUrl)+'">🗺️ افتح المسار بـ Google Maps</a>':'');
+      const head='<div class="rh"><b>'+t('round')+' '+esc(r.roundId)+'</b><span>'+left.length+t('leftOf')+r.stops.length+'</span></div>';
+      const action=!r.startedAt?'<button class="big" data-start="'+esc(r.routeId)+'">'+t('start')+'</button>'
+        :r.allDelivered?'<button class="big sec" data-finish="'+esc(r.routeId)+'">'+t('back')+'</button>'
+        :(r.googleMapsUrl?'<a class="big sec" target="_blank" rel="noopener" href="'+esc(r.googleMapsUrl)+'">'+t('route')+'</a>':'');
       const stops=r.stops.map((s,i)=>{
         const addr=[s.address,s.city].filter(Boolean).join(', ');
         const nav=Number.isFinite(s.lat)?'https://www.google.com/maps/dir/?api=1&destination='+s.lat+','+s.lng+'&travelmode=driving':'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(addr);
         return '<div class="stop'+(s.delivered?' done':'')+'"><div class="top"><span class="num">'+(s.delivered?'✓':i+1)+'</span><span class="code">'+esc(s.code)+'</span>'+(s.source!=='NARA'?'<span class="src '+esc(s.source)+'">'+esc(String(s.source).replace('_',' '))+'</span>':'')+'<span class="eta">'+(s.etaAt&&!s.delivered?'~'+hm(s.etaAt):'')+'</span></div>'
           +(s.name?'<div class="name"><bdi>'+esc(s.name)+'</bdi></div>':'')
-          +'<div class="addr"><a href="'+esc(nav)+'" target="_blank" rel="noopener"><bdi dir="ltr">'+esc(addr||'—')+'</bdi></a>'+(s.floor?' · طابق <bdi>'+esc(s.floor)+'</bdi>':'')+'</div>'
+          +'<div class="addr"><a href="'+esc(nav)+'" target="_blank" rel="noopener"><bdi dir="ltr">'+esc(addr||'—')+'</bdi></a>'+(s.floor?' · '+t('floor')+' <bdi>'+esc(s.floor)+'</bdi>':'')+'</div>'
           +(s.phone?'<div><a class="tel" href="tel:'+esc(String(s.phone).replace(/\s/g,''))+'">☎ <bdi dir="ltr">'+esc(s.phone)+'</bdi></a></div>':'')
           +(s.notes?'<div class="note"><bdi>'+esc(s.notes)+'</bdi></div>':'')
-          +'<div class="pay '+(s.cash?'cash':'paid')+'">'+(s.cash?'💶 كاش · المبلغ مكتوب على الفاتورة':'✓ مدفوع، لا تاخد مصاري')+'</div>'
-          +(!s.delivered&&r.startedAt?'<div class="acts"><a class="nav" href="'+esc(nav)+'" target="_blank" rel="noopener">🧭 ملاحة</a><button class="deliver" data-deliver="'+esc(s.orderId)+'">✅ تم التسليم</button></div>'
-            +(s.canProof?'<button class="photo" data-proof="'+esc(s.orderId)+'">📷 ما حدا فتح؟ صوّر الطلب عند الباب</button>':''):'')
-          +(s.proof?'<div class="proofok">📷 انحفظت صورة الإثبات</div>':'')+'</div>';
+          +'<div class="pay '+(s.cash?'cash':'paid')+'">'+(s.cash?t('cash'):t('paid'))+'</div>'
+          +(!s.delivered&&r.startedAt?'<div class="acts"><a class="nav" href="'+esc(nav)+'" target="_blank" rel="noopener">'+t('navi')+'</a><button class="deliver" data-deliver="'+esc(s.orderId)+'">'+t('delivered')+'</button></div>'
+            +(s.canProof?'<button class="photo" data-proof="'+esc(s.orderId)+'">'+t('photo')+'</button>':''):'')
+          +(s.proof?'<div class="proofok">'+t('proofSaved')+'</div>':'')+'</div>';
       }).join('');
       return '<section class="route">'+head+action+stops+'</section>';
     }).join('');
@@ -98,16 +101,16 @@ main{padding:12px 12px 90px}
   async function load(){
     if(busy)return;busy=true;
     try{const j=await api('GET','/api/driver/routes');const before=routes.length;routes=j.routes||[];if(routes.length>before&&before===0&&navigator.vibrate)navigator.vibrate([200,100,200]);render()}
-    catch(e){$('#main').innerHTML='<div class="empty">'+esc(e.message==='401'?'سجّل الدخول':'ما في اتصال بالسيرفر')+'</div>'}
+    catch(e){$('#main').innerHTML='<div class="empty">'+esc(e.message==='401'?t('login'):t('offline'))+'</div>'}
     finally{busy=false}
   }
   // صورة الإثبات: بتتصغّر على الجوال (أقصى 1280px) قبل ما تنبعت
   let proofFor=null;
-  function shrink(file){return new Promise((ok,bad)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const k=Math.min(1,1280/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);ok(c.toDataURL('image/jpeg',0.72))};img.onerror=()=>bad(Error('الصورة ما انفتحت'));img.src=url})}
+  function shrink(file){return new Promise((ok,bad)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const k=Math.min(1,1280/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);ok(c.toDataURL('image/jpeg',0.72))};img.onerror=()=>bad(Error(t('imgFail')));img.src=url})}
   $('#cam').addEventListener('change',async()=>{
     const f=$('#cam').files&&$('#cam').files[0];$('#cam').value='';if(!f||!proofFor)return;
-    toast('📤 عم تنبعت الصورة…');
-    try{const image=await shrink(f);await api('POST','/api/driver/proof',{orderId:proofFor,image,...(last||{})});toast('📷 انحفظ الإثبات وانسلّم الطلب ✅');if(navigator.vibrate)navigator.vibrate(80)}
+    toast(t('sending'));
+    try{const image=await shrink(f);await api('POST','/api/driver/proof',{orderId:proofFor,image,...(last||{})});toast(t('proofDone'));if(navigator.vibrate)navigator.vibrate(80)}
     catch(err){toast(err.message)}
     proofFor=null;await load();
   });
@@ -117,11 +120,12 @@ main{padding:12px 12px 90px}
     if(!st&&!dl&&!fn)return;const b=st||dl||fn;b.disabled=true;
     try{
       if(st){await api('POST','/api/driver/start',{routeId:st.dataset.start});keepAwake();const r=routes.find(x=>x.routeId===st.dataset.start);if(r&&r.googleMapsUrl)window.open(r.googleMapsUrl,'_blank')}
-      if(dl){await api('POST','/api/driver/delivered',{orderId:dl.dataset.deliver,...(last||{})});toast('تم ✅');if(navigator.vibrate)navigator.vibrate(80)}
-      if(fn){await api('POST','/api/driver/finish',{routeId:fn.dataset.finish});toast('أهلاً بالرجعة ✅')}
+      if(dl){await api('POST','/api/driver/delivered',{orderId:dl.dataset.deliver,...(last||{})});toast(t('done'));if(navigator.vibrate)navigator.vibrate(80)}
+      if(fn){await api('POST','/api/driver/finish',{routeId:fn.dataset.finish});toast(t('welcome'))}
     }catch(err){toast(err.message)}
     await load();
   });
+  document.title=t('doc');$('#title').textContent=t('title');if(NL)NL.mountSwitcher($('#langsw'),{buttonStyle:'min-width:30px;height:28px;border-radius:8px;border:1px solid #fff4;background:transparent;color:#fff;font-weight:800;font-size:13px'});
   startGps();load();setInterval(load,10000);
 })();
 </script>

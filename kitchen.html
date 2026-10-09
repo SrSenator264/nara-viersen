@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NARA · المطبخ</title>
+<script src="/nara-lang.js?v=20261009b" data-section="kitchen"></script>
 <link rel="stylesheet" href="/kasse-print-lifecycle.css">
 <style>
 :root{--bg:#101418;--panel:#181e24;--card:#fff;--ink:#14181c;--muted:#6b7580;--line:#e3e7eb;--new:#2563eb;--prep:#d97706;--ready:#16a34a;--late:#dc2626;--soon:#f59e0b}
@@ -85,7 +86,7 @@ button:disabled{opacity:.5}
 </head>
 <body>
 <header>
-  <h1 id="title">المطبخ</h1>
+  <h1 id="title"></h1>
   <nav class="tabs">
     <button class="tab on" data-v="NEW"><span data-t="colNew"></span><span class="n">0</span></button>
     <button class="tab" data-v="PREPARING"><span data-t="colPrep"></span><span class="n">0</span></button>
@@ -111,19 +112,37 @@ button:disabled{opacity:.5}
 <script>
 (function(){
   const T={
-    ar:{title:'المطبخ',colNew:'جديد',colPrep:'تحضير',colReady:'جاهز',sum:'الملخص',sumTitle:'المطلوب تحضيره الآن',start:'ابدأ',ready:'جاهز ✓',picked:'تم الاستلام',back:'رجوع',print:'طباعة',
-      delivery:'توصيل',pickup:'استلام',local:'محلي',table:'طاولة',min:'دقيقة',late:'متأخر',left:'باقي',empty:'لا يوجد',updated:'آخر تحديث',orders:'طلبات',
-      offline:'تعذر الاتصال بالسيرفر — تأكد أنه شغّال',login:'سجّل الدخول أولاً',note:'ملاحظة',floor:'طابق',drinks:'مشروبات',other:'أصناف',
-      expect:'متوقع',sumHint:'كل الأصناف من الطلبات الجديدة وقيد التحضير. اضغط على صنف لتشوف طلباته.',sumEmpty:'ما في شي للتحضير'},
-    de:{title:'Küche',colNew:'Neu',colPrep:'In Arbeit',colReady:'Fertig',sum:'Summe',sumTitle:'Jetzt zubereiten',start:'Starten',ready:'Fertig ✓',picked:'Abgeholt',back:'Zurück',print:'Drucken',
-      delivery:'Lieferung',pickup:'Abholung',local:'Vor Ort',table:'Tisch',min:'Min',late:'zu spät',left:'noch',empty:'Keine',updated:'Aktualisiert',orders:'Bestellungen',
-      offline:'Keine Verbindung zum Server',login:'Bitte zuerst anmelden',note:'Hinweis',floor:'Etage',drinks:'Getränke',other:'Artikel',
-      expect:'fertig ca.',sumHint:'Alle Artikel aus neuen und laufenden Bestellungen. Artikel antippen zeigt die Bestellungen.',sumEmpty:'Nichts zuzubereiten'}
+    ar:{title:'المطبخ',colNew:'جديد',colPrep:'عم ينطبخ',colReady:'جاهز',sum:'الملخص',sumTitle:'شو لازم نحضّر هلق',start:'بلّش',ready:'جاهز ✓',picked:'استلموه',back:'رجوع',print:'اطبع',
+      delivery:'توصيل',pickup:'استلام',local:'بالمحل',table:'طاولة',min:'د',late:'متأخر',left:'باقي',empty:'ما في طلبات',updated:'آخر تحديث',orders:'طلبات',
+      offline:'ما في اتصال بالسيرفر — شوف إذا شغّال',login:'سجّل دخول أول',note:'ملاحظة',floor:'الطابق',drinks:'مشروبات',other:'أكل',
+      expect:'جاهز تقريباً',sumHint:'كل الأصناف من الطلبات الجديدة واللي عم تنطبخ. دوس على صنف لتشوف طلباته.',sumEmpty:'ما في شي للتحضير',
+      expandT:'افتح كل الطلبات',soundT:'الصوت',autoprintT:'طباعة تلقائية',langT:'اللغة'},
+    de:{title:'Küche',colNew:'Neu',colPrep:'In Arbeit',colReady:'Fertig',sum:'Übersicht',sumTitle:'Jetzt zubereiten',start:'Starten',ready:'Fertig ✓',picked:'Abgeholt',back:'Zurück',print:'Drucken',
+      delivery:'Lieferung',pickup:'Abholung',local:'Vor Ort',table:'Tisch',min:'Min',late:'zu spät',left:'noch',empty:'Keine Bestellungen',updated:'Aktualisiert',orders:'Bestellungen',
+      offline:'Keine Verbindung zum Server — läuft er?',login:'Bitte zuerst anmelden',note:'Hinweis',floor:'Etage',drinks:'Getränke',other:'Speisen',
+      expect:'fertig ca.',sumHint:'Alle Artikel aus neuen und laufenden Bestellungen. Artikel antippen zeigt die Bestellungen.',sumEmpty:'Nichts zuzubereiten',
+      expandT:'Alle Bestellungen aufklappen',soundT:'Ton',autoprintT:'Automatisch drucken',langT:'Sprache'},
+    en:{title:'Kitchen',colNew:'New',colPrep:'Cooking',colReady:'Ready',sum:'Summary',sumTitle:'To prepare now',start:'Start',ready:'Ready ✓',picked:'Picked up',back:'Back',print:'Print',
+      delivery:'Delivery',pickup:'Pickup',local:'Dine-in',table:'Table',min:'min',late:'late',left:'left',empty:'No orders',updated:'Updated',orders:'orders',
+      offline:'No connection to the server — is it running?',login:'Please log in first',note:'Note',floor:'Floor',drinks:'Drinks',other:'Food',
+      expect:'ready ~',sumHint:'All items from new and cooking orders. Tap an item to see its orders.',sumEmpty:'Nothing to prepare',
+      expandT:'Expand all orders',soundT:'Sound',autoprintT:'Auto print',langT:'Language'}
   };
   const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-  let lang=store.get('nara-kitchen-lang','ar'),sound=store.get('nara-kitchen-sound','1')==='1',autoPrint=store.get('nara-kitchen-autoprint','0')==='1',expandAll=store.get('nara-kitchen-expand','0')==='1';
+  // اللغة المشتركة (nara-lang). إذا لسا ما انحفظت، منستعمل مفتاح المطبخ القديم ومننقله.
+  const LANGS=['de','ar','en'],NL=window.NARA_LANG;
+  // لغة المطبخ لحالها (غير الكاشير والسواق). الافتراضي عربي إذا لسا ما انختار.
+  let lang=(function(){
+    const old=store.get('nara-kitchen-lang',null);
+    const l=LANGS.includes(old)?old:'ar';
+    if(NL)NL.set(l);
+    return l;
+  })();
+  let sound=store.get('nara-kitchen-sound','1')==='1',autoPrint=store.get('nara-kitchen-autoprint','0')==='1',expandAll=store.get('nara-kitchen-expand','0')==='1';
   let view='NEW',orders=[],known=null,skew=0,busy=false,openIds=new Set(),hlItem=null;
-  const t=k=>(T[lang]||T.ar)[k]||k;
+  // نصوص بيانات مخلوطة "ألماني / عربي" → القسم المناسب للعرض بس
+  const P=x=>{const v=String(x??'');return NL&&/[؀-ۿ]/.test(v)?NL.pick(v):v};
+  const t=k=>(T[lang]||T.de)[k]??T.de[k]??k;
   const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
   const NEXT={NEW:'PREPARING',PREPARING:'READY',READY:'PICKED_UP'},PREV={PREPARING:'NEW',READY:'PREPARING'},BTN={NEW:'start',PREPARING:'ready',READY:'picked'};
@@ -132,7 +151,9 @@ button:disabled{opacity:.5}
   function layout(){document.body.classList.toggle('wide',window.innerWidth>=1300)}
   function applyLang(){
     document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
-    $('#title').textContent=t('title');$('#lang').textContent=lang==='ar'?'DE':'ع';
+    document.title='NARA · '+t('title');$('#title').textContent=t('title');
+    const nx=LANGS[(LANGS.indexOf(lang)+1)%LANGS.length];$('#lang').textContent={de:'DE',ar:'ع',en:'EN'}[nx];$('#lang').title=t('langT');
+    $('#expand').title=t('expandT');$('#sound').title=t('soundT');$('#autoprint').title=t('autoprintT');
     $$('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
   }
   function beep(){
@@ -161,9 +182,9 @@ button:disabled{opacity:.5}
     const hasNote=o.notes||o.items.some(i=>i.note);
     const cust=[o.customerName,o.address].filter(Boolean).join(' · ');
     const agg=new Map();for(const i of o.items){const k=itemKey(i);agg.set(k,{name:i.name,q:(agg.get(k)?.q||0)+i.quantity})}
-    const brief=[...agg.values()].map(i=>'<span>'+esc(i.q)+'× '+esc(i.name)+'</span>').join(' · ');
-    const items=o.items.map(i=>'<div class="it"><div class="n"><span class="q">'+esc(i.quantity)+'×</span>'+esc(i.name)+'</div>'
-      +(i.options||[]).map(x=>'<div class="o">+ '+(x.quantity>1?esc(x.quantity)+'× ':'')+esc(x.name)+'</div>').join('')
+    const brief=[...agg.values()].map(i=>'<span>'+esc(i.q)+'× '+esc(P(i.name))+'</span>').join(' · ');
+    const items=o.items.map(i=>'<div class="it"><div class="n"><span class="q">'+esc(i.quantity)+'×</span>'+esc(P(i.name))+'</div>'
+      +(i.options||[]).map(x=>'<div class="o">+ '+(x.quantity>1?esc(x.quantity)+'× ':'')+esc(P(x.name))+'</div>').join('')
       +(i.note?'<div class="x">! '+esc(i.note)+'</div>':'')+'</div>').join('');
     const info=[o.customerName?'<b><bdi>'+esc(o.customerName)+'</bdi></b>':'',o.phone?'<a href="tel:'+esc(o.phone.replace(/\s/g,''))+'">☎ '+esc(o.phone)+'</a>':'',
       o.address?'<bdi dir="ltr">'+esc(o.address)+(o.city?', '+esc(o.city):'')+'</bdi>':'',o.floor?t('floor')+': <bdi>'+esc(o.floor)+'</bdi>':''].filter(Boolean).join('<br>');
@@ -189,8 +210,8 @@ button:disabled{opacity:.5}
     }
     const rows=[...map.entries()],food=rows.filter(([,r])=>!DRINK.test(r.category+' '+r.name)),drinks=rows.filter(([,r])=>DRINK.test(r.category+' '+r.name));
     const sorter=(a,b)=>a[1].category.localeCompare(b[1].category)||b[1].count-a[1].count;
-    const html=list=>list.sort(sorter).map(([k,r])=>'<div class="srow'+(hlItem===k?' on':'')+'" data-item="'+esc(k)+'"><span class="c">'+r.count+'×</span><span class="t"><b>'+esc(r.name)+'</b>'
-      +(r.opts.size?'<div class="s">'+[...r.opts].map(([n,c])=>c+'× '+esc(n)).join(' · ')+'</div>':'')
+    const html=list=>list.sort(sorter).map(([k,r])=>'<div class="srow'+(hlItem===k?' on':'')+'" data-item="'+esc(k)+'"><span class="c">'+r.count+'×</span><span class="t"><b>'+esc(P(r.name))+'</b>'
+      +(r.opts.size?'<div class="s">'+[...r.opts].map(([n,c])=>c+'× '+esc(P(n))).join(' · ')+'</div>':'')
       +(r.notes?'<div class="s">⚠️ '+r.notes+'× <bdi>'+esc(t('note'))+'</bdi></div>':'')
       +'<div class="codes">'+[...r.codes].map(esc).join(' · ')+'</div></span></div>').join('');
     $('#sum').innerHTML=!rows.length?'<div class="empty">'+t('sumEmpty')+'</div>'
@@ -242,7 +263,7 @@ button:disabled{opacity:.5}
   $('#expand').onclick=()=>{expandAll=!expandAll;store.set('nara-kitchen-expand',expandAll?'1':'0');$('#expand').setAttribute('aria-pressed',expandAll);render(new Set())};
   $('#sound').onclick=()=>{sound=!sound;store.set('nara-kitchen-sound',sound?'1':'0');$('#sound').setAttribute('aria-pressed',sound);$('#sound').textContent=sound?'🔔':'🔕';if(sound)beep()};
   $('#autoprint').onclick=()=>{autoPrint=!autoPrint;store.set('nara-kitchen-autoprint',autoPrint?'1':'0');$('#autoprint').setAttribute('aria-pressed',autoPrint)};
-  $('#lang').onclick=()=>{lang=lang==='ar'?'de':'ar';store.set('nara-kitchen-lang',lang);applyLang();render(new Set())};
+  $('#lang').onclick=()=>{lang=LANGS[(LANGS.indexOf(lang)+1)%LANGS.length];if(NL)NL.set(lang);else store.set('nara-kitchen-lang',lang);applyLang();render(new Set());if(orders.length||known)setStatus(t('updated')+' '+hhmm(new Date(Date.now()+skew))+' · '+orders.length+' '+t('orders'))};
   $('#sound').setAttribute('aria-pressed',sound);$('#sound').textContent=sound?'🔔':'🔕';$('#autoprint').setAttribute('aria-pressed',autoPrint);$('#expand').setAttribute('aria-pressed',expandAll);
   window.addEventListener('resize',layout);layout();applyLang();show(store.get('nara-kitchen-view','NEW'));
   setInterval(()=>{$('#clock').textContent=hhmm(new Date(Date.now()+skew))},1000);

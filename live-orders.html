@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Live Orders · NARA</title>
+<script src="nara-lang.js?v=20261009b" data-section="live"></script>
 <link rel="stylesheet" href="kasse-print-lifecycle.css?v=20261008">
 <style>
 :root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--warn:#e0a100;--late:#d1342f;--chip:#e9f4fb}
@@ -104,26 +105,27 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
   <a class="brand" href="kasse.html"><i>🍴</i> Live Orders</a>
   <span class="sp"></span>
   <span class="sync" id="sync"><b></b><span>…</span></span>
-  <a class="back" href="kasse.html">Zur Kasse</a>
+  <span id="langsw"></span>
+  <a class="back" href="kasse.html" data-t="toKasse"></a>
 </header>
 <div class="stats" id="stats"></div>
 <main>
   <section class="panel list">
-    <h1>Your orders</h1>
+    <h1 data-t="yourOrders"></h1>
     <div class="tools">
-      <select id="plat"><option value="ALL">Alle Plattformen</option><option value="LIEFERANDO">Lieferando</option><option value="UBER_EATS">Uber Eats</option><option value="WOLT">Wolt</option><option value="LANCH">Lanch</option><option value="LOCO">Loco Chicken</option></select>
-      <input id="q" placeholder="Suchen: Code, Name, Straße">
+      <select id="plat"><option value="ALL" data-t="allPlat"></option><option value="LIEFERANDO">Lieferando</option><option value="UBER_EATS">Uber Eats</option><option value="WOLT">Wolt</option><option value="LANCH">Lanch</option><option value="LOCO">Loco Chicken</option></select>
+      <input id="q" data-tp="search">
     </div>
     <div class="tabs">
-      <button data-st="PREPARE" class="on">Prepare <small id="n-PREPARE">0</small></button>
-      <button data-st="HANDOVER">Handover <small id="n-HANDOVER">0</small></button>
-      <button data-st="DONE">Done <small id="n-DONE">0</small></button>
+      <button data-st="PREPARE" class="on"><span data-t="PREPARE"></span> <small id="n-PREPARE">0</small></button>
+      <button data-st="HANDOVER"><span data-t="HANDOVER"></span> <small id="n-HANDOVER">0</small></button>
+      <button data-st="DONE"><span data-t="DONE"></span> <small id="n-DONE">0</small></button>
     </div>
     <div class="cards" id="cards"></div>
   </section>
-  <section class="panel detail" id="detail"><p class="placeholder">Wähle einen Auftrag aus.</p></section>
+  <section class="panel detail" id="detail"></section>
 </main>
-<div id="rep" hidden><div class="rcard"><div class="rhead"><h2>📊 Tagesbericht</h2><span class="sp"></span><input type="date" id="rday"><button class="go" id="rprint">🖨 Drucken</button><button id="rclose">✕</button></div><div id="rbody"></div></div></div>
+<div id="rep" hidden><div class="rcard"><div class="rhead"><h2>📊 <span data-t="report"></span></h2><span class="sp"></span><input type="date" id="rday"><button class="go" id="rprint">🖨 <span data-t="print"></span></button><button id="rclose">✕</button></div><div id="rbody"></div></div></div>
 <div id="nara-print-sheet"></div>
 <script src="vendor/qrcode.bundle.js?v=20261008"></script>
 <script src="kasse-receipt.js?v=20261008b"></script>
@@ -133,6 +135,32 @@ const $=s=>document.querySelector(s);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const eur=c=>(Number(c||0)/100).toFixed(2).replace('.',',')+' €';
 const S=v=>String(v??'').trim();
+const T={
+  de:{toKasse:'Zur Kasse',yourOrders:'Deine Bestellungen',allPlat:'Alle Plattformen',search:'Suchen: Code, Name, Straße',PREPARE:'Zubereiten',HANDOVER:'Übergabe',DONE:'Erledigt',
+    pick:'Wähle eine Bestellung aus.',report:'Tagesbericht',print:'Drucken',pickup:'Abholung',delivery:'Lieferung',local:'Vor Ort',customer:'Kunde',minLate:'Min zu spät',min:'Min',
+    cancelled:'Storniert',none:'Keine Bestellungen hier.',offline:'Keine Verbindung',live:'Live',subtotal:'Zwischensumme',fee:'Liefergebühr',service:'Servicegebühr',small:'Mindermengenzuschlag',
+    disc:'Rabatt',tip:'Trinkgeld',total:'Gesamt',delTag:'🛵 Lieferung',pickTag:'🛍 Abholung',verify:'Bestätigungscode:',ordered:'Bestellt um',dueBy:'Lieferung bis',items:'Artikel',
+    cash:'💶 Bar',online:'💳 Online bezahlt',printOrder:'🖨 Bestellung drucken',toHandover:'Übergabe',done:'✓ Erledigt',back:'↩ Zurück',err:'Fehler: ',
+    naraKasse:'NARA Kasse',today:'Heute gesamt',orders:'Bestellungen',plusCanc:'storniert',Bar:'Bar',Karte:'Karte',Online:'Online',offen:'offen',onlinePlat:'Online (Plattformen)',revenue:'Umsatz gesamt',noOrders:'Keine Bestellungen.'},
+  ar:{toKasse:'رجوع للكاشير',yourOrders:'طلباتك',allPlat:'كل المنصات',search:'دوّر: الكود، الاسم، الشارع',PREPARE:'تحضير',HANDOVER:'تسليم',DONE:'خلصت',
+    pick:'اختار طلب.',report:'تقرير اليوم',print:'اطبع',pickup:'استلام',delivery:'توصيل',local:'بالمحل',customer:'الزبون',minLate:'د متأخر',min:'د',
+    cancelled:'ملغى',none:'ما في طلبات هون.',offline:'ما في اتصال',live:'Live',subtotal:'المجموع الفرعي',fee:'أجرة التوصيل',service:'رسوم الخدمة',small:'رسوم الطلب الصغير',
+    disc:'خصم',tip:'بخشيش',total:'المجموع',delTag:'🛵 توصيل',pickTag:'🛍 استلام',verify:'كود التأكيد:',ordered:'انطلب الساعة',dueBy:'التوصيل لحد',items:'أصناف',
+    cash:'💶 دفع كاش',online:'💳 مدفوع أونلاين',printOrder:'🖨 اطبع الطلب',toHandover:'تسليم',done:'✓ خلصت',back:'↩ رجوع',err:'غلط: ',
+    naraKasse:'NARA كاشير',today:'مجموع اليوم',orders:'طلبات',plusCanc:'ملغى',Bar:'كاش',Karte:'كرت',Online:'أونلاين',offen:'مفتوح',onlinePlat:'أونلاين (المنصات)',revenue:'مجموع المبيعات',noOrders:'ما في طلبات.'},
+  en:{toKasse:'Back to till',yourOrders:'Your orders',allPlat:'All platforms',search:'Search: code, name, street',PREPARE:'Prepare',HANDOVER:'Handover',DONE:'Done',
+    pick:'Select an order.',report:'Daily report',print:'Print',pickup:'Pickup',delivery:'Delivery',local:'Dine-in',customer:'Customer',minLate:'min late',min:'min',
+    cancelled:'Cancelled',none:'No orders here.',offline:'No connection',live:'Live',subtotal:'Subtotal',fee:'Delivery fee',service:'Service fee',small:'Small order fee',
+    disc:'Discount',tip:'Tip',total:'Total',delTag:'🛵 Delivery',pickTag:'🛍 Pickup',verify:'Verification code:',ordered:'Ordered at',dueBy:'Deliver by',items:'items',
+    cash:'💶 Cash',online:'💳 Paid online',printOrder:'🖨 Print order',toHandover:'Handover',done:'✓ Done',back:'↩ Back',err:'Error: ',
+    naraKasse:'NARA till',today:'Today total',orders:'orders',plusCanc:'cancelled',Bar:'Cash',Karte:'Card',Online:'Online',offen:'open',onlinePlat:'Online (platforms)',revenue:'Total revenue',noOrders:'No orders.'}
+};
+const lang=window.NARA_LANG?NARA_LANG.get():'de';
+const t=k=>(T[lang]||T.de)[k]??T.de[k]??k;
+const P=x=>{const v=String(x??'');return window.NARA_LANG&&/[؀-ۿ]/.test(v)?NARA_LANG.pick(v):v};
+document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
+document.querySelectorAll('[data-tp]').forEach(e=>e.placeholder=t(e.dataset.tp));
+if(window.NARA_LANG)NARA_LANG.mountSwitcher($('#langsw'));
 let orders=[],stage='PREPARE',selId=null,lastOk=0;
 
 const isLoco=o=>/loco/i.test(S(o.brand||o.brandName))||/^SIDES/i.test(S(o.source));
@@ -148,8 +176,8 @@ const D=o=>o.delivery||{};
 const isDel=o=>S(o.type||o.orderType).toLowerCase().startsWith('deliv');
 function street(o){const d=D(o),st=S(d.street),h=S(d.house||d.houseNumber);return (st&&h&&!new RegExp('\\s'+h.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$').test(st)?st+' '+h:st)||S(d.address)}
 function place(o){const d=D(o);return [S(d.postal||d.postalCode),S(d.city)].filter(Boolean).join(' ')}
-function title(o){if(!isDel(o))return 'Abholung';return [place(o),street(o)].filter(Boolean).join(', ')||'Lieferung'}
-function custName(o){return S(D(o).name)||S(o.customerName)||'Kunde'}
+function title(o){if(!isDel(o))return t('pickup');return [place(o),street(o)].filter(Boolean).join(', ')||t('delivery')}
+function custName(o){return S(D(o).name)||S(o.customerName)||t('customer')}
 function phone(o){return S(o.customerPhone)||S(D(o).phone)}
 const localDay=t=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 function when(o){const v=o.placedAt||o.createdAt||o.acceptedAt;const t=v?Date.parse(v):0;if(t)return t;const id=S(o.id).match(/1\d{12}/);return id?Number(id[0]):(Date.parse(o.completedAt||o.updatedAt||0)||0)}
@@ -161,7 +189,7 @@ function ring(o,big){
   if(!d||stageOf(o)==='DONE'){return '<div class="ring'+(big?' big':'')+'"><svg width="'+size+'" height="'+size+'"><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="#e7e3de" stroke-width="5"/></svg><span>'+(stageOf(o)==='DONE'?(cancelled(o)?'✕':'✓'):'ASAP')+'</span></div>'}
   const left=Math.round((d-now)/60000),total=Math.max(1,(d-(p||d-45*60000))/60000),frac=Math.max(0,Math.min(1,left/total));
   const col=left<0?'var(--late)':left<10?'var(--warn)':'var(--ok)';
-  return '<div class="ring'+(big?' big':'')+'"><svg width="'+size+'" height="'+size+'"><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="#e7e3de" stroke-width="5"/><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+(c*frac)+' '+c+'"/></svg><span style="color:'+(left<0?'var(--late)':'inherit')+'">'+Math.abs(left)+'<small>'+(left<0?'min zu spät':'min')+'</small></span></div>'
+  return '<div class="ring'+(big?' big':'')+'"><svg width="'+size+'" height="'+size+'"><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="#e7e3de" stroke-width="5"/><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+(c*frac)+' '+c+'"/></svg><span style="color:'+(left<0?'var(--late)':'inherit')+'">'+Math.abs(left)+'<small>'+(left<0?t('minLate'):t('min'))+'</small></span></div>'
 }
 
 async function load(){
@@ -188,9 +216,9 @@ function render(){
   const list=vis.filter(o=>stageOf(o)===stage).sort((a,b)=>stage==='DONE'?when(b)-when(a):(due(a)||when(a))-(due(b)||when(b)));
   if(selId&&!orders.some(o=>String(o.id)===selId))selId=null;
   if(!selId&&list[0])selId=String(list[0].id);
-  $('#cards').innerHTML=list.map(o=>'<button class="card'+(String(o.id)===selId?' sel':'')+'" style="--pc:'+PC[plat(o)]+'" data-id="'+esc(o.id)+'">'+ring(o)+'<div><h3>'+esc(title(o))+'</h3><p>'+esc(custName(o))+'</p><p>'+(o.asap===false||o.requestedAt?'🕒 '+new Date(due(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'ASAP')+' · <span class="code">#'+esc(code(o))+'</span></p></div><div>'+(cancelled(o)?'<span class="badge b-x">Storniert</span>':badge(o))+'</div></button>').join('')||'<p class="empty">Keine Aufträge hier.</p>';
+  $('#cards').innerHTML=list.map(o=>'<button class="card'+(String(o.id)===selId?' sel':'')+'" style="--pc:'+PC[plat(o)]+'" data-id="'+esc(o.id)+'">'+ring(o)+'<div><h3>'+'<bdi>'+esc(title(o))+'</bdi>'+'</h3><p>'+'<bdi>'+esc(custName(o))+'</bdi>'+'</p><p>'+(o.asap===false||o.requestedAt?'🕒 '+new Date(due(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'ASAP')+' · <span class="code">#'+esc(code(o))+'</span></p></div><div>'+(cancelled(o)?'<span class="badge b-x">'+t('cancelled')+'</span>':badge(o))+'</div></button>').join('')||'<p class="empty">'+t('none')+'</p>';
   document.querySelectorAll('.card').forEach(b=>b.onclick=()=>{selId=b.dataset.id;render()});
-  const sy=$('#sync');sy.classList.toggle('off',Date.now()-lastOk>20000);sy.querySelector('span').textContent=(Date.now()-lastOk>20000?'Keine Verbindung':'Live')+' · '+new Date(lastOk||Date.now()).toLocaleTimeString('de-DE');
+  const sy=$('#sync');sy.classList.toggle('off',Date.now()-lastOk>20000);sy.querySelector('span').textContent=(Date.now()-lastOk>20000?t('offline'):t('live'))+' · '+new Date(lastOk||Date.now()).toLocaleTimeString('de-DE');
   renderDetail(orders.find(o=>String(o.id)===selId));
 }
 
@@ -198,51 +226,51 @@ function itemsHtml(o){
   const cart=(o.cart||[]).filter(i=>!/FEE|TIP/.test(S(i.kind).toUpperCase()));
   const groups=[];
   for(const i of cart){const c=S(i.category);let g=groups.find(x=>x.c===c);if(!g)groups.push(g={c,items:[]});g.items.push(i)}
-  return groups.map(g=>(g.c?'<div class="cat">'+esc(g.c)+'</div>':'')+g.items.map(i=>{
+  return groups.map(g=>(g.c?'<div class="cat">'+esc(P(g.c))+'</div>':'')+g.items.map(i=>{
     const q=Number(i.quantity)||1,tot=i.totalCents!=null?Number(i.totalCents):(Number(i.unitCents)||0)*q;
-    const opts=(i.options||[]).map(x=>S(x.name).split(' / ')[0]).filter(n=>n&&!/^einzel$/i.test(n)&&!/^__/.test(n));
+    const opts=(i.options||[]).map(x=>/[؀-ۿ]/.test(S(x.name))?P(S(x.name)):S(x.name).split(' / ')[0]).filter(n=>n&&!/^einzel$/i.test(n)&&!/^__/.test(n));
     const note=S(i.note||i.notes);
-    return '<div class="it"><span class="q">'+q+'</span><span class="n">'+esc(i.name)+'</span><span class="p">'+eur(tot)+'</span>'+(opts.length?'<span class="opt">+ '+opts.map(esc).join(', ')+'</span>':'')+(note?'<span class="chip">'+esc(note)+'</span>':'')+'</div>'}).join('')).join('');
+    return '<div class="it"><span class="q">'+q+'</span><span class="n">'+esc(P(i.name))+'</span><span class="p">'+eur(tot)+'</span>'+(opts.length?'<span class="opt">+ '+opts.map(esc).join(', ')+'</span>':'')+(note?'<span class="chip">'+esc(note)+'</span>':'')+'</div>'}).join('')).join('');
 }
 function sumHtml(o){
   const cart=o.cart||[];
   const sub=cart.filter(i=>!/FEE|TIP/.test(S(i.kind).toUpperCase())).reduce((s,i)=>s+(i.totalCents!=null?Number(i.totalCents):(Number(i.unitCents)||0)*(Number(i.quantity)||1)),0);
-  const rows=[['Subtotal',sub]];
+  const rows=[[t('subtotal'),sub]];
   const f=o.fees||{};
   const fee=(Number(o.deliveryFeeCents)||0)||(typeof f.delivery==='number'?f.delivery:0)||cart.filter(i=>S(i.kind).toUpperCase()==='DELIVERY_FEE').reduce((s,i)=>s+(Number(i.unitCents)||0)*(Number(i.quantity)||1),0);
-  if(fee)rows.push(['Liefergebühr',fee]);
-  for(const [k,l] of [['service','Servicegebühr'],['smallOrder','Mindermengenzuschlag']])if(typeof f[k]==='number'&&f[k])rows.push([l,f[k]]);
+  if(fee)rows.push([t('fee'),fee]);
+  for(const [k,l] of [['service',t('service')],['smallOrder',t('small')]])if(typeof f[k]==='number'&&f[k])rows.push([l,f[k]]);
   const disc=(Number(o.discountsCents)||0)+(Number(o.discountCents)||0)+(Number(o.stampCents)||0)+(Number(o.discount&&o.discount.amountCents)||0);
-  if(disc)rows.push(['Rabatt',-disc]);
-  if(Number(o.tipCents))rows.push(['Trinkgeld',Number(o.tipCents)]);
+  if(disc)rows.push([t('disc'),-disc]);
+  if(Number(o.tipCents))rows.push([t('tip'),Number(o.tipCents)]);
   const total=Number(o.totalCents)||Number(o.externalTotalCents)||rows.reduce((s,r)=>s+r[1],0);
-  return '<div class="sum">'+rows.map(r=>'<div><span>'+r[0]+'</span><span>'+eur(r[1])+'</span></div>').join('')+'<div class="tot"><span>Total</span><span>'+eur(total)+'</span></div></div>';
+  return '<div class="sum">'+rows.map(r=>'<div><span>'+r[0]+'</span><span>'+eur(r[1])+'</span></div>').join('')+'<div class="tot"><span>'+t('total')+'</span><span>'+eur(total)+'</span></div></div>';
 }
 
 function renderDetail(o){
   const el=$('#detail');
-  if(!o){el.innerHTML='<p class="placeholder">Wähle einen Auftrag aus.</p>';return}
+  if(!o){el.innerHTML='<p class="placeholder">'+t('pick')+'</p>';return}
   const st=stageOf(o),cash=S(o.payment&&o.payment.method).toUpperCase()==='CASH';
   const n=(o.cart||[]).filter(i=>!/FEE|TIP/.test(S(i.kind).toUpperCase())).reduce((s,i)=>s+(Number(i.quantity)||1),0);
   const acc=Date.parse(o.acceptedAt||o.confirmedAt||o.placedAt||o.createdAt||0);
   const notes=[S(D(o).notes),S(o.remarks)].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
   const tel=phone(o);
   el.innerHTML=
-    '<div class="dh">'+ring(o,true)+'<div><h2>'+esc(title(o))+'</h2><div class="meta">#'+esc(code(o))+' · '+(isDel(o)?'🛵 Delivery':'🛍 Pickup')+' '+badge(o)+(cancelled(o)?' <span class="badge b-x">Storniert</span>':'')+'</div></div><span class="sp"></span></div>'+
-    '<div class="cust"><b>'+esc(custName(o))+'</b><div class="row">'+(tel?'<a href="tel:'+esc(tel.replace(/\s/g,''))+'">📞 '+esc(tel)+'</a>':'')+(o.verificationCode?'<span><b>Verification code:</b> '+esc(o.verificationCode)+'</span>':'')+'</div>'+
-      (acc?'<div class="row muted">Bestellt um '+new Date(acc).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+(due(o)?' · Lieferung bis '+new Date(due(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'')+'</div>':'')+
+    '<div class="dh">'+ring(o,true)+'<div><h2>'+'<bdi>'+esc(title(o))+'</bdi>'+'</h2><div class="meta">#'+esc(code(o))+' · '+(isDel(o)?t('delTag'):t('pickTag'))+' '+badge(o)+(cancelled(o)?' <span class="badge b-x">'+t('cancelled')+'</span>':'')+'</div></div><span class="sp"></span></div>'+
+    '<div class="cust"><b>'+'<bdi>'+esc(custName(o))+'</bdi>'+'</b><div class="row">'+(tel?'<a href="tel:'+esc(tel.replace(/\s/g,''))+'">📞 <bdi dir="ltr">'+esc(tel)+'</bdi>'+'</a>':'')+(o.verificationCode?'<span><b>'+t('verify')+'</b> '+esc(o.verificationCode)+'</span>':'')+'</div>'+
+      (acc?'<div class="row muted">'+t('ordered')+' '+new Date(acc).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+(due(o)?' · '+t('dueBy')+' '+new Date(due(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'')+'</div>':'')+
       notes.map(x=>'<div class="note">📝 '+esc(x)+'</div>').join('')+'</div>'+
-    '<div class="items"><div class="ih"><h3>'+n+' Items</h3><span class="pay'+(cash?' cash':'')+'">'+(cash?'💶 Bar · '+eur(o.cashDueCents||o.totalCents):'💳 Online bezahlt')+'</span></div>'+itemsHtml(o)+'</div>'+
+    '<div class="items"><div class="ih"><h3>'+n+' '+t('items')+'</h3><span class="pay'+(cash?' cash':'')+'">'+(cash?t('cash')+' · '+eur(o.cashDueCents||o.totalCents):t('online'))+'</span></div>'+itemsHtml(o)+'</div>'+
     sumHtml(o)+
-    '<div class="acts"><button class="sec" id="print">🖨 Print order</button>'+(cancelled(o)?'':st==='PREPARE'?'<button class="pri" id="adv" data-to="HANDOVER">Handover</button>':st==='HANDOVER'?'<button class="pri" id="adv" data-to="DONE">✓ Done</button>':'<button class="sec" id="adv" data-to="HANDOVER">↩ Zurück</button>')+'</div>';
+    '<div class="acts"><button class="sec" id="print">'+t('printOrder')+'</button>'+(cancelled(o)?'':st==='PREPARE'?'<button class="pri" id="adv" data-to="HANDOVER">'+t('toHandover')+'</button>':st==='HANDOVER'?'<button class="pri" id="adv" data-to="DONE">'+t('done')+'</button>':'<button class="sec" id="adv" data-to="HANDOVER">'+t('back')+'</button>')+'</div>';
   $('#print').onclick=()=>printOrder(o);
-  const a=$('#adv');if(a)a.onclick=async()=>{a.disabled=true;try{const r=await fetch('/api/live-orders/stage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:o.id,stage:a.dataset.to})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||r.status);Object.assign(o,j.order||{liveStage:a.dataset.to})}catch(e){a.disabled=false;a.textContent='Fehler: '+e.message;return}render()};
+  const a=$('#adv');if(a)a.onclick=async()=>{a.disabled=true;try{const r=await fetch('/api/live-orders/stage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:o.id,stage:a.dataset.to})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||r.status);Object.assign(o,j.order||{liveStage:a.dataset.to})}catch(e){a.disabled=false;a.textContent=t('err')+e.message;return}render()};
 }
 
 function printOrder(o){
   const R=window.NARA_RECEIPT,sheet=$('#nara-print-sheet');
   if(R&&R.ready){sheet.innerHTML=R.html(o,'customer')}
-  else sheet.innerHTML='<div style="font:14px Arial"><b>#'+esc(code(o))+'</b><br>'+esc(title(o))+'<br>'+esc(custName(o))+'</div>';
+  else sheet.innerHTML='<div style="font:14px Arial"><b>#'+esc(code(o))+'</b><br>'+'<bdi>'+esc(title(o))+'</bdi>'+'<br>'+'<bdi>'+esc(custName(o))+'</bdi>'+'</div>';
   setTimeout(()=>window.print(),50);
 }
 
@@ -263,9 +291,9 @@ function renderStats(){
   const cur=$('#plat').value;
   const chips=groups(list).map(({k,list})=>{let sub=eur(list.reduce((s,o)=>s+totalOf(o),0));
     if(k==='LOCO'){const c={};for(const o of list){const ch=PL[o.channel]||o.portalName||'Sides';c[ch]=(c[ch]||0)+1}sub+=' · '+Object.entries(c).map(([a,b])=>a+' '+b).join(' · ')}
-    return '<button class="stat'+(cur===k?' on':'')+'" style="--pc:'+PC[k]+'" data-p="'+k+'"><b>'+(k==='NARA'?'NARA Kasse':PL[k])+'</b><strong>'+list.length+'</strong><span>'+esc(sub)+'</span></button>'});
+    return '<button class="stat'+(cur===k?' on':'')+'" style="--pc:'+PC[k]+'" data-p="'+k+'"><b>'+(k==='NARA'?t('naraKasse'):PL[k])+'</b><strong>'+list.length+'</strong><span>'+esc(sub)+'</span></button>'});
   const tot=list.reduce((s,o)=>s+totalOf(o),0);
-  $('#stats').innerHTML=chips.join('')+'<div class="stat total"><b>Heute gesamt</b><strong>'+list.length+'</strong><span>'+eur(tot)+'</span></div><button class="stat rep" id="openrep">📊 Tagesbericht</button>';
+  $('#stats').innerHTML=chips.join('')+'<div class="stat total"><b>'+t('today')+'</b><strong>'+list.length+'</strong><span>'+eur(tot)+'</span></div><button class="stat rep" id="openrep">📊 '+t('report')+'</button>';
   document.querySelectorAll('.stat[data-p]').forEach(b=>b.onclick=()=>{const k=b.dataset.p;if(k==='NARA'){openRep();return}$('#plat').value=$('#plat').value===k?'ALL':k;selId=null;render()});
   $('#openrep').onclick=openRep;
 }
@@ -275,18 +303,18 @@ function reportHtml(day){
   const by={Bar:0,Karte:0,Online:0};let rows='';
   for(const {k,list:L} of groups(list)){
     const good=L.filter(o=>!cancelled(o)),sum=good.reduce((s,o)=>s+totalOf(o),0);
-    rows+='<div class="rg" style="--pc:'+PC[k]+'"><span>'+(k==='NARA'?'NARA Kasse':PL[k])+' · '+good.length+' Bestellungen</span><span>'+eur(sum)+'</span></div><table class="rt">'+
+    rows+='<div class="rg" style="--pc:'+PC[k]+'"><span>'+(k==='NARA'?t('naraKasse'):PL[k])+' · '+good.length+' '+t('orders')+'</span><span>'+eur(sum)+'</span></div><table class="rt">'+
       L.map(o=>{const t=totalOf(o),pm=payOf(o);if(!cancelled(o)&&by[pm]!=null)by[pm]+=t;
-        return '<tr'+(cancelled(o)?' class="x"':'')+'><td>'+new Date(when(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+'</td><td>#'+esc(code(o))+'</td><td>'+(k==='LOCO'?esc(PL[o.channel]||o.portalName||''):'')+' '+(isDel(o)?'Lieferung':S(o.type)==='pickup'?'Abholung':'Vor Ort')+'</td><td>'+pm+'</td><td class="n">'+eur(t)+'</td></tr>'}).join('')+'</table>';
+        return '<tr'+(cancelled(o)?' class="x"':'')+'><td>'+new Date(when(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+'</td><td>#'+esc(code(o))+'</td><td>'+(k==='LOCO'?esc(PL[o.channel]||o.portalName||''):'')+' '+(isDel(o)?t('delivery'):S(o.type)==='pickup'?t('pickup'):t('local'))+'</td><td>'+t(pm)+'</td><td class="n">'+eur(t)+'</td></tr>'}).join('')+'</table>';
   }
   const total=ok.reduce((s,o)=>s+totalOf(o),0),canc=list.length-ok.length;
-  return rows+'<div class="rsum"><div><span>Bestellungen</span><span>'+ok.length+(canc?' (+'+canc+' storniert)':'')+'</span></div><div><span>Bar</span><span>'+eur(by.Bar)+'</span></div><div><span>Karte</span><span>'+eur(by.Karte)+'</span></div><div><span>Online (Plattformen)</span><span>'+eur(by.Online)+'</span></div><div class="big"><span>Umsatz gesamt</span><span>'+eur(total)+'</span></div></div>'||'<p>Keine Bestellungen.</p>';
+  return rows+'<div class="rsum"><div><span>'+t('orders')+'</span><span>'+ok.length+(canc?' (+'+canc+' '+t('plusCanc')+')':'')+'</span></div><div><span>'+t('Bar')+'</span><span>'+eur(by.Bar)+'</span></div><div><span>'+t('Karte')+'</span><span>'+eur(by.Karte)+'</span></div><div><span>'+t('onlinePlat')+'</span><span>'+eur(by.Online)+'</span></div><div class="big"><span>'+t('revenue')+'</span><span>'+eur(total)+'</span></div></div>'||'<p>'+t('noOrders')+'</p>';
 }
 function isoDay(t){const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function openRep(){const r=$('#rday');if(!r.value)r.value=isoDay(Date.now());drawRep();$('#rep').hidden=false}
 function drawRep(){const [y,m,d]=$('#rday').value.split('-').map(Number);$('#rbody').innerHTML=reportHtml(y+'-'+m+'-'+d)}
 $('#rday').onchange=drawRep;$('#rclose').onclick=()=>{$('#rep').hidden=true};
-$('#rprint').onclick=()=>{const sh=$('#nara-print-sheet');sh.innerHTML='<div style="font:12px Arial"><b style="font-size:16px">Tagesbericht '+esc($('#rday').value)+'</b>'+$('#rbody').innerHTML+'</div>';setTimeout(()=>window.print(),50)};
+$('#rprint').onclick=()=>{const sh=$('#nara-print-sheet');sh.innerHTML='<div style="font:12px Arial"><b style="font-size:16px">'+esc(t('report'))+' '+esc($('#rday').value)+'</b>'+$('#rbody').innerHTML+'</div>';setTimeout(()=>window.print(),50)};
 load();setInterval(load,5000);setInterval(render,30000);
 })();
 </script>
