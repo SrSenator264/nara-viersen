@@ -65,9 +65,10 @@ body .product{min-height:136px;padding:14px 16px;display:flex;flex-direction:col
   background:var(--t-tile);color:var(--t-ink);border:2px solid #e2e6dc;border-inline-start:8px solid var(--c,#999);border-radius:18px;box-shadow:0 1px 0 #0000000d;
   transition:background-color .16s,color .16s,border-color .16s,transform .16s var(--t-ease),box-shadow .16s}
 body .product .product-name{font-size:1.2rem;font-weight:800;line-height:1.2}
-body .product .product-image{display:block;flex:none;width:calc(100% + 32px);height:100px;margin:-14px -16px 2px;max-width:none;object-fit:cover;border-radius:0;background:#e9ece6;transition:transform .25s var(--t-ease)}
+/* الصورة كاملة جوّا المربع (بلا قصّ): contain على خلفية بيضا */
+body .product .product-image{display:block;flex:none;width:calc(100% + 32px);height:124px;margin:-14px -16px 2px;max-width:none;object-fit:contain;object-position:center;padding:8px 10px 2px;box-sizing:border-box;border-radius:0;background:#fff;transition:transform .25s var(--t-ease)}
 body .product .product-image[hidden]{display:none}
-@media (hover:hover){body .product:hover .product-image{transform:scale(1.04)}}
+@media (hover:hover){body .product:hover .product-image{transform:scale(1.03)}}
 body .product .product-name,body .product .product-desc{flex:none}
 body .product .product-desc{font-size:.82rem;line-height:1.35;color:#686d63;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 body .product b{align-self:flex-start;padding:5px 13px;border-radius:999px;font-size:1.1rem;font-variant-numeric:tabular-nums;background:color-mix(in srgb,var(--c,#888) 14%,#fff);color:var(--c,var(--t-ink));transition:background-color .16s,color .16s}

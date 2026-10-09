@@ -74,6 +74,7 @@ const RULES = [
   ['POST', /^\/api\/printing\/config$/, MANAGERS],
   ['GET', /^\/api\/printing\/windows-printers$/, MANAGERS],
   ['POST', /^\/api\/print$/, KITCH],
+  ['POST', /^\/api\/orders\/mark-test$/, MANAGERS],
   ['GET', /^\/api\/system\/lan$/, CASH],
   ['POST', /^\/api\/kasse\/events$/, KITCH],
   ['GET', /^\/api\/kasse-state$/, KITCH],
