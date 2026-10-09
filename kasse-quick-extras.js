@@ -18,8 +18,8 @@
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const eur=c=>(c/100).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
   const SKIP=new Set(['DELIVERY_FEE','EXTRA']);
-  let menuCents=400;
-  fetch('/api/kasse/settings',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Number.isInteger(j.menuSurchargeCents)){menuCents=j.menuSurchargeCents;decorate()}}).catch(()=>{});
+  let menuCents=450;window.NARA_MENU_SURCHARGE=menuCents; // نفس سعر المنيو لكل الأصناف (من الإعدادات)
+  fetch('/api/kasse/settings',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Number.isInteger(j.menuSurchargeCents)){menuCents=j.menuSurchargeCents;window.NARA_MENU_SURCHARGE=menuCents;decorate()}}).catch(()=>{});
 
   const isMenu=it=>(it.options||[]).some(x=>x.id==='__menu'||x.id==='__quickmenu');
   function commit(){const l=L();if(l){l.save();l.render()}}
