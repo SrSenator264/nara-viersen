@@ -3,7 +3,7 @@
 // - كل ما المطبخ يضغط "ابدأ" ثم "جاهز"، منسجّل المدة الحقيقية مع أصناف الطلب.
 // - لكل صنف (مثلاً منيو Crunchy) منحسب الوسيط من الطلبات اللي فيها.
 // - وقت الطلب = أبطأ صنف فيه + شوي لكل قطعة زيادة.
-// - الطابور: المطبخ بيشتغل على كم طلب بنفس الوقت (قابل للتعديل، الافتراضي 3)،
+// - الطابور: المطبخ بيشتغل على كم طلب بنفس الوقت (قابل للتعديل، الافتراضي 10)،
 //   فالطلب الجديد بيستنى لحتى يفضى مكان، وهيك منعرف إيمتى رح يجهز فعلياً.
 
 const MIN = 60000;
@@ -68,7 +68,7 @@ function prepMinutes(m, cart) {
 // بيرجّع لكل طلب: إيمتى بيبلّش وإيمتى بيجهز. extraCart = طلب جديد لسا عم ينكتب بالكاشير.
 function forecast(data, now = Date.now(), extraCart = null) {
   const m = model(data);
-  const slots = Math.max(1, Number(data.settings && data.settings.kitchen && data.settings.kitchen.parallelOrders) || 3);
+  const slots = Math.max(1, Number(data.settings && data.settings.kitchen && data.settings.kitchen.parallelOrders) || 10);
   const CLOSED = new Set(['COMPLETED', 'CANCELLED', 'STORNIERT', 'DONE']);
   const stale = o => require('./kitchen.js').isStale(o, now);
   const open = (data.orders || []).filter(o => !require('./kitchen.js').isClosedForOps(o, now) && !stale(o) && cookItems(o.cart).length

@@ -259,4 +259,4 @@ async function geocode(address, fetchImpl = fetch) {
   return { lat: Number(j[0].lat), lng: Number(j[0].lon) };
 }
 
-module.exports = { DEFAULT_SHOP, addressOf, addressKey, pointOf, buildInput, planFor, missingAddresses, geocode, activeDrivers, assignRoute, cancelRoute, startRoute, deliverStop, finishRoute, driverRoutes, travelModel, paidOnline, proofDelivery };
+module.exports = { DEFAULT_SHOP, shopOf, addressOf, addressKey, pointOf, buildInput, planFor, missingAddresses, geocode, activeDrivers, assignRoute, cancelRoute, startRoute, deliverStop, finishRoute, driverRoutes, travelModel, paidOnline, proofDelivery };
