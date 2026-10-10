@@ -146,7 +146,7 @@ function eur(c){return (c/100).toFixed(2).replace('.',',')+' €'}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function save(){try{localStorage.setItem('cart',JSON.stringify(cart));localStorage.setItem('lang',lang)}catch(e){}}
 var byId={};MENU.forEach(function(p){byId[p.id]=p});
-window.NARA_WEB={cart:function(){return cart},menu:MENU,byId:byId,eur:function(c){return eur(c)}};
+window.NARA_WEB={cart:function(){return cart},setCart:function(o){cart=o||{};save();render()},openCart:function(){drawerOpen=true;render()},menu:MENU,byId:byId,eur:function(c){return eur(c)}};
 function count(){var n=0;for(var k in cart)n+=cart[k];return n}
 function sum(){var s=0;for(var k in cart)if(byId[k])s+=byId[k].p*cart[k];return s}
 function secOf(k){for(var i=0;i<SECS.length;i++)if(SECS[i].k===k)return SECS[i]}
@@ -202,7 +202,7 @@ document.addEventListener('click',function(e){
  if(el.dataset.mode){mode=el.dataset.mode;render();return}
  if(el.id==='openCart'||el.id==='bar'){drawerOpen=true;render();return}
  if(el.id==='closeCart'||el.id==='scrim'){drawerOpen=false;render();return}
- if(el.id==='orderBtn'){document.getElementById('note').hidden=false}
+ if(el.id==='orderBtn'){document.getElementById('note').hidden=false;try{localStorage.setItem('lastOrder',JSON.stringify(cart))}catch(e){}}
 });
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&drawerOpen){drawerOpen=false;render()}});
 window.addEventListener('hashchange',go);
@@ -272,6 +272,20 @@ html[dir=rtl] .guide.intro{right:auto;left:4vw}
  html[dir=rtl] .guide.intro{left:calc(50% - min(32vw,150px))}
  .in-glow{background:radial-gradient(60% 40% at 50% 32%,rgba(255,106,31,.32),transparent 70%)}
  .in-chips button{padding:10px 13px;font-size:14px}
+}
+
+.guide.intro .g-btn{transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out}
+.in-chips button.again{background:#F5EFE6;border-color:#F5EFE6;color:#0B0A09}
+.g-spark{position:absolute;left:50%;top:58%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#FFD27A;box-shadow:0 0 18px 8px rgba(255,140,40,.9),0 0 60px 30px rgba(255,90,20,.5);pointer-events:none;opacity:0}
+@media (prefers-reduced-motion:no-preference){
+ .guide.ignite .g-spark{animation:spark 1.3s ease-out both}
+ @keyframes spark{0%{opacity:0;transform:scale(.2) translateY(30px)}20%{opacity:1;transform:scale(.6) translateY(0)}55%{opacity:1;transform:scale(1.4)}75%{opacity:1;transform:scale(9);filter:blur(6px)}100%{opacity:0;transform:scale(14);filter:blur(14px)}}
+ .guide.ignite .g-btn img{animation:igniteIn 1.1s .75s cubic-bezier(.3,1.5,.5,1) both}
+ @keyframes igniteIn{0%{opacity:0;transform:scale(.15);filter:brightness(3) blur(8px)}60%{opacity:1;filter:brightness(1.6) blur(0)}100%{opacity:1;transform:scale(1);filter:none}}
+ .guide.ignite .in-text{opacity:0}
+ #intro .in-text{animation:textIn .7s 1.1s ease-out both}
+ @keyframes textIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+ .guide.intro.hop .g-btn img{animation:ghop .45s ease}
 }
 </style><script>(function(){
 if(!window.__THEME__||!window.__THEME__.guide)return;
@@ -352,18 +366,30 @@ function onRoute(){var r=route();g.classList.toggle('away',r==='burger');if(r!==
 
 var INTRO={h:{de:'Hey, ich bin Flamo.',en:"Hey, I'm Flamo.",ar:'أهلا، أنا فلامو.'},
  p:{de:'Schön, dass du da bist. Worauf hast du heute Hunger?',en:'Glad you stopped by. What are you hungry for today?',ar:'منوّر! شو جاي عبالك اليوم؟'},
+ lunch:{de:'Mittagspause? Ich hab was Schnelles für dich. Worauf hast du Hunger?',en:'Lunch break? I have something quick for you. What are you hungry for?',ar:'استراحة غدا؟ عندي شي سريع إلك. شو جاي عبالك؟'},
+ evening:{de:'Guten Abend! Zeit für was Richtiges. Worauf hast du Lust?',en:'Good evening! Time for something proper. What do you fancy?',ar:'مسا الخير! وقت أكلة محرزة. شو جاي عبالك؟'},
+ late:{de:'Späthunger? Wir haben bis 2 Uhr offen. Was darf es sein?',en:'Late-night hunger? We are open until 2 am. What will it be?',ar:'جوعان آخر الليل؟ نحنا فاتحين لـ ٢. شو بتحب؟'},
+ back:{de:'Schön, dich wiederzusehen! Wieder das Gleiche wie letztes Mal?',en:'Good to see you again! Same as last time?',ar:'أهلا من جديد! متل المرة الماضية؟'},
+ again:{de:'Wie letztes Mal',en:'Same as last time',ar:'متل المرة الماضية'},
  surprise:{de:'Überrasch mich',en:'Surprise me',ar:'فاجئني'},menu:{de:'Direkt zur Speisekarte →',en:'Straight to the menu →',ar:'خدني عالمنيو ←'}};
 var SNAMES=[['burger',{de:'Burger',en:'Burgers',ar:'برغر'}],['crispy',{de:'Crispy',en:'Crispy',ar:'كرسبي'}],['street',{de:'Street',en:'Street',ar:'ستريت'}],['orient',{de:'Orientalisch',en:'Oriental',ar:'شرقي'}],['sides',{de:'Sides',en:'Sides',ar:'مقبلات'}],['drinks',{de:'Drinks',en:'Drinks',ar:'مشروبات'}],['sweet',{de:'Desserts',en:'Desserts',ar:'حلويات'}]];
 var intro=null;
-function introHTML(){var l=L();return '<div class="in-glow" aria-hidden="true"></div><div class="in-top"><span class="in-brand" dir="ltr">'+(window.__THEME__.brandHtml||'')+'</span><div class="in-langs">'+['de','en','ar'].map(function(x){return '<button type="button" data-ilang="'+x+'" class="'+(x===l?'on':'')+'">'+(x==='ar'?'عربي':x.toUpperCase())+'</button>'}).join('')+'</div></div><div class="in-text"><h1>'+tr(INTRO.h)+'</h1><p id="inP"></p><div class="in-chips">'+SNAMES.map(function(s){return '<button type="button" data-go="'+s[0]+'">'+tr(s[1])+'</button>'}).join('')+'<button type="button" class="hot" data-go="surprise">'+tr(INTRO.surprise)+'</button></div><button type="button" class="in-skip" data-go="home">'+tr(INTRO.menu)+'</button></div>'}
-function typeP(){var el=intro.querySelector('#inP'),t=tr(INTRO.p),i=0;clearInterval(typing);el.textContent='';typing=setInterval(function(){i+=2;el.textContent=t.slice(0,i);if(i>=t.length)clearInterval(typing)},30);speak(tr(INTRO.h)+' '+t)}
-function openIntro(){intro=document.createElement('div');intro.id='intro';intro.setAttribute('role','dialog');intro.setAttribute('aria-label','Flamo');intro.innerHTML=introHTML();document.body.appendChild(intro);document.documentElement.classList.add('intro-on');g.classList.add('intro');bub.hidden=true;img.src='c/flamo-talk.webp';setTimeout(typeP,350);
+function lastOrder(){try{var o=JSON.parse(localStorage.getItem('lastOrder')||'null');if(o&&Object.keys(o).some(function(k){return o[k]>0&&W.byId[k]}))return o}catch(e){}return null}
+function introP(){return lastOrder()?INTRO.back:INTRO[timeTip()]||INTRO.p}
+function introHTML(){var l=L();return '<div class="in-glow" aria-hidden="true"></div><div class="in-top"><span class="in-brand" dir="ltr">'+(window.__THEME__.brandHtml||'')+'</span><div class="in-langs">'+['de','en','ar'].map(function(x){return '<button type="button" data-ilang="'+x+'" class="'+(x===l?'on':'')+'">'+(x==='ar'?'عربي':x.toUpperCase())+'</button>'}).join('')+'</div></div><div class="in-text"><h1>'+tr(INTRO.h)+'</h1><p id="inP"></p><div class="in-chips">'+SNAMES.map(function(s){return '<button type="button" data-go="'+s[0]+'">'+tr(s[1])+'</button>'}).join('')+'<button type="button" class="hot" data-go="surprise">'+tr(INTRO.surprise)+'</button>'+(lastOrder()?'<button type="button" class="hot again" data-go="again">'+tr(INTRO.again)+'</button>':'')+'</div><button type="button" class="in-skip" data-go="home">'+tr(INTRO.menu)+'</button></div>'}
+function typeP(){var el=intro.querySelector('#inP'),t=tr(introP()),i=0;clearInterval(typing);el.textContent='';typing=setInterval(function(){i+=2;el.textContent=t.slice(0,i);if(i>=t.length)clearInterval(typing)},30);speak(tr(INTRO.h)+' '+t)}
+function openIntro(){intro=document.createElement('div');intro.id='intro';intro.setAttribute('role','dialog');intro.setAttribute('aria-label','Flamo');intro.innerHTML=introHTML();document.body.appendChild(intro);document.documentElement.classList.add('intro-on');g.classList.add('intro');bub.hidden=true;img.src='c/flamo-talk.webp';var spark=document.createElement('span');spark.className='g-spark';spark.setAttribute('aria-hidden','true');g.appendChild(spark);g.classList.add('ignite');setTimeout(function(){g.classList.remove('ignite');spark.remove()},2200);setTimeout(typeP,1300);
+ var prevT=0;function preview(k){clearTimeout(prevT);img.src=k&&IMG[k]?'c/m-'+k+'.webp':'c/flamo-talk.webp';g.classList.remove('hop');void g.offsetWidth;g.classList.add('hop')}
+ intro.addEventListener('pointerover',function(e){var b=e.target.closest('[data-go]');if(b&&IMG[b.dataset.go])preview(b.dataset.go)});
+ intro.addEventListener('pointerout',function(e){var b=e.target.closest('[data-go]');if(b&&IMG[b.dataset.go]){prevT=setTimeout(function(){if(intro)img.src='c/flamo-talk.webp'},250)}});
+ intro.addEventListener('focusin',function(e){var b=e.target.closest('[data-go]');if(b&&IMG[b.dataset.go])preview(b.dataset.go)});
+ var btn=g.querySelector('#gBtn');intro.addEventListener('pointermove',function(e){var r=btn.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=Math.max(-1,Math.min(1,(e.clientX-cx)/(innerWidth/2))),dy=Math.max(-1,Math.min(1,(e.clientY-cy)/(innerHeight/2)));btn.style.setProperty('--ry',(dx*14).toFixed(1)+'deg');btn.style.setProperty('--rx',(-dy*9).toFixed(1)+'deg')});
  intro.addEventListener('click',function(e){var b=e.target.closest('[data-go],[data-ilang]');if(!b)return;
   if(b.dataset.ilang){var lb=document.querySelector('[data-lang="'+b.dataset.ilang+'"]');if(lb)lb.click();setTimeout(function(){intro.innerHTML=introHTML();typeP()},60);return}
-  var go=b.dataset.go;if(go==='surprise'){go=SNAMES[Math.floor(Math.random()*SNAMES.length)][0]}
+  var go=b.dataset.go;if(go==='again'){var lo=lastOrder();if(lo)W.setCart(JSON.parse(JSON.stringify(lo)));closeIntro('home');setTimeout(function(){W.openCart()},700);return}if(go==='surprise'){go=SNAMES[Math.floor(Math.random()*SNAMES.length)][0]}
   closeIntro(go)})}
 function closeIntro(go){if(!intro)return;try{sessionStorage.setItem('flamoIntro','1')}catch(e){}
- intro.classList.add('out');document.documentElement.classList.remove('intro-on');g.classList.remove('intro');dock();
+ intro.classList.add('out');var gb=g.querySelector('#gBtn');gb.style.removeProperty('--rx');gb.style.removeProperty('--ry');document.documentElement.classList.remove('intro-on');g.classList.remove('intro');dock();
  setTimeout(function(){if(intro){intro.remove();intro=null}},700);
  if(go&&go!=='home'){location.hash=go}else{img.src='c/mascot.webp';setTimeout(function(){say(timeTip())},900)}}
 function setVoice(on){voice=on;vbtn.setAttribute('aria-pressed',on?'true':'false');vbtn.setAttribute('aria-label',tr(on?TPL.voiceOn:TPL.voiceOff));vbtn.title=tr(on?TPL.voiceOn:TPL.voiceOff);try{localStorage.setItem('flamoVoice',on?'1':'0')}catch(e){}if(!on&&window.speechSynthesis)speechSynthesis.cancel()}
