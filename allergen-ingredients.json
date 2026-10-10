@@ -1,0 +1,12 @@
+{
+  "_note": "Zutaten-Register (Quelle für Allergene & Zusatzstoffe). Nur Angaben vom Etikett, Lieferanten-Datenblatt oder ausdrückliche Inhaberangabe. status: confirmed | pending (Rückfrage offen) | missing (Etikett fehlt).",
+  "updated": "2026-10-10",
+  "ingredients": {
+    "brot-baeckerei": { "name": "Brot / Brötchen (türkische Bäckerei: Burger-Bun, Brioche, Baguette, Hot-Dog)", "status": "pending", "contains": ["Gluten (Weizen)", "Milch"], "source": "Inhaberangabe 2026-10-10: Hefe, Mehl, Milch", "open": "Allergenliste der Bäckerei anfragen: Brioche enthält meist Ei und Butter; Sesam bei Sesam-Buns; Spuren?" },
+    "hackfleisch-rind-kalb": { "name": "Burger-Patty, frisch (Rind + Kalb)", "status": "pending", "contains": [], "source": "Inhaberangabe 2026-10-10: immer frische Mischung Rind und Kalb", "open": "Werden Gewürze, Zwiebeln, Paniermehl oder Ei ins Fleisch gemischt? Wenn ja: Etikett der Gewürzmischung (Senf/Sellerie möglich)." },
+    "puten-bacon": { "name": "Bacon (Pute)", "status": "missing", "contains": [], "source": "Inhaberangabe 2026-10-10: Puten-Bacon", "open": "Etikett fotografieren" },
+    "monin-sirupe": { "name": "Sirupe (Monin): Karamell, Vanille, Haselnuss, Mokka, Schokolade, Frucht-Sorten", "status": "missing", "contains": [], "source": "Inhaberangabe 2026-10-10: alle Sirupe von Monin", "open": "Rückseite jeder verwendeten Flasche fotografieren (Sorten unterscheiden sich, z. B. Saucen mit Milch, Farbstoffe)" },
+    "h-milch": { "name": "H-Milch", "status": "confirmed", "contains": ["Milch"], "source": "Inhaberangabe 2026-10-10: haltbare Milch" },
+    "gruener-tee": { "name": "Grüner Tee (Beutel, mit heißem Wasser aufgegossen)", "status": "confirmed", "contains": [], "source": "Inhaberangabe 2026-10-10: normaler grüner Tee im Beutel" }
+  }
+}
