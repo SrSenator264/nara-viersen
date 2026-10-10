@@ -673,10 +673,10 @@ function speak(t){
   var vs=speechSynthesis.getVoices().filter(function(v){return v.lang&&v.lang.toLowerCase().indexOf(code)===0});
   if(vs.length)u.voice=vs[0];u.lang=code==='ar'?'ar-SA':code==='en'?'en-US':'de-DE';u.rate=1.05;u.pitch=1.35;speechSynthesis.speak(u)}catch(e){}
 }
-function talk(ms){if(route()!=='home'||(intro&&!intro.classList.contains('out')))return;clearTimeout(talkT);if(g.classList.contains('perch')){g.classList.add('talking');talkT=setTimeout(function(){g.classList.remove('talking')},ms);return}setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/flamo-talk.webp'},220);talkT=setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/mascot.webp'},ms)}
+function talk(ms){if(intro&&!intro.classList.contains('out'))return;if(route()!=='home'){if(g.classList.contains('away'))return;var wait=Math.max(0,busyUntil-Date.now(),danceUntil-Date.now());if(wait){setTimeout(function(){if(!clipOn||clipOn==='talk')clip('talk',Math.max(1500,ms-wait))},wait+50)}else if(!clipOn)clip('talk',ms);return}clearTimeout(talkT);if(g.classList.contains('perch')){g.classList.add('talking');talkT=setTimeout(function(){g.classList.remove('talking')},ms);return}setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/flamo-talk.webp'},220);talkT=setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/mascot.webp'},ms)}
 function show(text,keep,pid){
  clearTimeout(timer);clearInterval(typing);bub.hidden=false;txtEl.textContent='';
- act.hidden=!pid;if(pid)setTimeout(function(){clip('present',6500)},Math.max(0,danceUntil-Date.now()));if(pid){act.textContent=tr(TPL.addBtn);act.setAttribute('data-add',pid)}else act.removeAttribute('data-add');
+ act.hidden=!pid;if(pid)setTimeout(function(){clip('present',6500)},Math.max(0,danceUntil-Date.now(),busyUntil-Date.now())+60);if(pid){act.textContent=tr(TPL.addBtn);act.setAttribute('data-add',pid)}else act.removeAttribute('data-add');
  var i=0;typing=setInterval(function(){i+=2;txtEl.textContent=text.slice(0,i);if(i>=text.length)clearInterval(typing)},28);
  talk(Math.max(3500,text.length*70));speak(text);
  if(!keep)timer=setTimeout(function(){bub.hidden=true},pid?9000:6500);
@@ -684,9 +684,9 @@ function show(text,keep,pid){
 function say(key,keep){show(tr(TIPS[key]),keep)}
 function hop(){g.classList.remove('hop');void g.offsetWidth;g.classList.add('hop')}
 function pose(r){if(intro&&!intro.classList.contains('out'))return;var src=r==='home'&&g.classList.contains('perch')?'c/flamo-sit.webp':'c/'+(IMG[r]?'m-'+r:'mascot')+'.webp';if(img.getAttribute('src')!==src){g.classList.add('swap');setTimeout(function(){if(intro&&!intro.classList.contains('out')){g.classList.remove('swap');return}img.src=src;g.classList.remove('swap')},180)}}
-var clipT=0,danceUntil=0;
+var clipT=0,danceUntil=0,clipOn='',busyUntil=0;
 function poseSrc(){var r=route();return r==='home'?(g.classList.contains('perch')?'c/flamo-sit.webp':'c/mascot.webp'):'c/'+(IMG[r]?'m-'+r:'mascot')+'.webp'}
-function clip(name,ms){if(intro||g.classList.contains('perch'))return;clearTimeout(clipT);img.src='c/flamo-'+name+'.webp';clipT=setTimeout(function(){img.src=poseSrc()},ms)}
+function clip(name,ms){if(intro||g.classList.contains('perch'))return;clearTimeout(clipT);clipOn=name;img.src='c/flamo-'+name+'.webp';clipT=setTimeout(function(){clipOn='';img.src=poseSrc()},ms)}
 function dock(){g.classList.remove('welcome');setTimeout(perch,0)}
 /* Flamo sitzt auf einer Kachel (Startseite): Po auf der Oberkante, Beine hängen über die Kachel */
 var SEAT=.698,perchKey='burger',perchT=0,walking=false,WALK='c/flamo-step.webp',WALK_R=370/269,SPIN_R=381/367;
@@ -720,7 +720,7 @@ function perchTo(k){
  setTimeout(function(){g.classList.remove('walking','face-left');var sp=perchSpot(tile,SPIN_R);g.style.top=sp.y+'px';img.src='c/flamo-spin.webp';
   setTimeout(function(){walking=false;img.src='c/flamo-sit.webp';perch();hop()},1500)},220+dur*1000+60);
 }
-function onRoute(){var r=route();setTimeout(perch,60);if(r!=='home'&&IMG[r])setTimeout(function(){clip('point',1400)},260);g.classList.toggle('away',r==='burger');if(r!=='home')dock();pose(r);hop();
+function onRoute(){var r=route();setTimeout(perch,60);if(r!=='home'&&IMG[r]){busyUntil=Date.now()+1700;setTimeout(function(){clip('point',1400)},260)}g.classList.toggle('away',r==='burger');if(r!=='home')dock();pose(r);hop();
  if(r==='home'){say(g.classList.contains('welcome')?'home':timeTip());return}
  var s=Math.random()<.6?suggestion():null; if(s)show(s.t,false,s.id); else say(r);
 }
