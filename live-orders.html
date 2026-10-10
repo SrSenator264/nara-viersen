@@ -43,7 +43,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 .ring span small{font-weight:600;font-size:.68rem;color:var(--mute);margin-top:2px}
 .ring.big{width:74px;height:74px}.ring.big span{font-size:1.3rem}
 .badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.02em;white-space:nowrap}
-.b-LIEFERANDO{background:#fff1e6;color:#d65a00}.b-UBER_EATS{background:#e6f6ec;color:#0b7a3b}.b-WOLT{background:#e6f4fb;color:#0a7cb2}.b-LANCH{background:#f1eafd;color:#6b3fc4}.b-LOCO{background:#fde8e8;color:#c21f1f}.b-NARA{background:#eceff1;color:#37474f}
+.b-WEB{background:#fde8e9;color:#b3141c}.b-LIEFERANDO{background:#fff1e6;color:#d65a00}.b-UBER_EATS{background:#e6f6ec;color:#0b7a3b}.b-WOLT{background:#e6f4fb;color:#0a7cb2}.b-LANCH{background:#f1eafd;color:#6b3fc4}.b-LOCO{background:#fde8e8;color:#c21f1f}.b-NARA{background:#eceff1;color:#37474f}
 .b-x{background:#fde8e8;color:#c21f1f}
 .detail{padding:24px 26px;min-height:420px;display:flex;flex-direction:column}
 .dh{display:flex;gap:16px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line)}
@@ -119,7 +119,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
   <section class="panel list">
     <h1 data-t="yourOrders"></h1>
     <div class="tools">
-      <select id="plat"><option value="ALL" data-t="allPlat"></option><option value="LIEFERANDO">Lieferando</option><option value="UBER_EATS">Uber Eats</option><option value="WOLT">Wolt</option><option value="LANCH">Lanch</option><option value="LOCO">Loco Chicken</option></select>
+      <select id="plat"><option value="ALL" data-t="allPlat"></option><option value="WEB">Website</option><option value="LIEFERANDO">Lieferando</option><option value="UBER_EATS">Uber Eats</option><option value="WOLT">Wolt</option><option value="LANCH">Lanch</option><option value="LOCO">Loco Chicken</option></select>
       <input id="q" data-tp="search">
     </div>
     <div class="tabs">
@@ -135,7 +135,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 <div id="arc" hidden><div class="rcard"><div class="rhead"><h2>🗂 <span data-t="archive"></span></h2><span class="sp"></span><input type="date" id="aday"><button id="aclose">✕</button></div><p class="arhint" data-t="arcHint"></p><div id="abody"></div></div></div>
 <div id="nara-print-sheet"></div>
 <script src="vendor/qrcode.bundle.js?v=20261008"></script>
-<script src="kasse-receipt.js?v=20261009p"></script>
+<script src="kasse-receipt.js?v=20261010a"></script>
 <script>
 (function(){
 const $=s=>document.querySelector(s);
@@ -171,10 +171,10 @@ if(window.NARA_LANG)NARA_LANG.mountSwitcher($('#langsw'));
 let orders=[],stage='PREPARE',selId=null,lastOk=0,arcSel=null;
 
 const isLoco=o=>/loco/i.test(S(o.brand||o.brandName))||/^SIDES/i.test(S(o.source));
-function plat(o){if(isLoco(o))return 'LOCO';const p=S(o.platform||o.source).toUpperCase();if(/LIEFERANDO/.test(p))return 'LIEFERANDO';if(/UBER/.test(p))return 'UBER_EATS';if(/WOLT/.test(p))return 'WOLT';if(/LANCH/.test(p))return 'LANCH';return 'NARA'}
-const PC={LIEFERANDO:'#ff8000',UBER_EATS:'#06c167',WOLT:'#009de0',LANCH:'#7b4ddb',LOCO:'#d62828',NARA:'#37474f'};
+function plat(o){if(isLoco(o))return 'LOCO';const p=S(o.platform||o.source).toUpperCase();if(/LIEFERANDO/.test(p))return 'LIEFERANDO';if(/UBER/.test(p))return 'UBER_EATS';if(/WOLT/.test(p))return 'WOLT';if(/LANCH/.test(p))return 'LANCH';if(/^WEB/.test(p))return 'WEB';return 'NARA'}
+const PC={WEB:'#E3262F',LIEFERANDO:'#ff8000',UBER_EATS:'#06c167',WOLT:'#009de0',LANCH:'#7b4ddb',LOCO:'#d62828',NARA:'#37474f'};
 let all=[],pays={};
-const PL={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',LOCO:'Loco',NARA:'NARA'};
+const PL={WEB:'Website',LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',LOCO:'Loco',NARA:'NARA'};
 function badge(o){const p=plat(o);let t=PL[p];if(p==='LOCO'&&o.channel&&o.channel!=='SIDES')t+=' · '+(PL[o.channel]||o.portalName||'');return '<span class="badge b-'+p+'">'+esc(t)+'</span>'}
 function stageOf(o){const st=S(o.status).toUpperCase();if(st==='CANCELLED')return 'DONE';const s=S(o.liveStage).toUpperCase();if(s==='DONE'||st==='COMPLETED')return 'DONE';if(s==='HANDOVER')return 'HANDOVER';return 'PREPARE'}
 const cancelled=o=>S(o.status).toUpperCase()==='CANCELLED';
@@ -308,7 +308,7 @@ function payOf(o){if(o.payment&&o.payment.collectedBy==='UBER_COURIER')return 'O
 const isKasse=o=>plat(o)==='NARA';
 const dayOf=o=>isKasse(o)?(Date.parse(o.completedAt||0)||when(o)):when(o);
 function dayOrders(day){return all.filter(o=>localDay(dayOf(o))===day&&!o.isTest&&!/^TEST/i.test(S(o.id))&&(!isKasse(o)||S(o.status).toUpperCase()==='COMPLETED'||cancelled(o)&&o.paidCents>0))}
-const ORDER=['LIEFERANDO','UBER_EATS','WOLT','LANCH','LOCO','NARA'];
+const ORDER=['WEB','LIEFERANDO','UBER_EATS','WOLT','LANCH','LOCO','NARA'];
 function groups(list){const g={};for(const o of list){(g[plat(o)]||(g[plat(o)]=[])).push(o)}return ORDER.filter(k=>g[k]).map(k=>({k,list:g[k]}))}
 function renderStats(){
   const list=dayOrders(localDay(Date.now())).filter(o=>!cancelled(o));

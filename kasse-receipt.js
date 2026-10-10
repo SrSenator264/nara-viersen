@@ -16,7 +16,7 @@
     const discount=(Number((o.billDiscount||o.discount||{}).amountCents)||0)
       +(Number(o.discountsCents)||0)+(Number(o.discountCents)||0)+(Number(o.stampCents)||0);
     // طلب منصة: المجموع الرسمي من المنصة نفسها (إذا موجود) أدق من حسابنا
-    const official=Number(o.externalTotalCents)||(/LIEFERANDO|UBER|WOLT|LANCH|SIDES/i.test(String(o.platform||o.source||''))?Number(o.totalCents)||0:0);
+    const official=Number(o.externalTotalCents)||(/LIEFERANDO|UBER|WOLT|LANCH|SIDES|^WEB$/i.test(String(o.platform||o.source||''))?Number(o.totalCents)||0:0);
     const total=official||Math.max(0,gross-discount);
     const type=o.type==='delivery'?'DELIVERY':o.type==='pickup'?'PICKUP':'DINE_IN';
     const code=o.displayCode||o.externalOrderCode||('NARA-'+String(o.id||'').replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase());
@@ -127,7 +127,7 @@
   }
   // اسم المنصة كبير وواضح بإطار (للفاتورة وورقة المطبخ)
   function platBox(src){
-    const P={LIEFERANDO:'LIEFERANDO','UBER EATS':'UBER EATS',UBER_EATS:'UBER EATS',WOLT:'WOLT',LANCH:'LANCH'};
+    const P={LIEFERANDO:'LIEFERANDO','UBER EATS':'UBER EATS',UBER_EATS:'UBER EATS',WOLT:'WOLT',LANCH:'LANCH',WEB:'WEBSITE'};
     const n=P[String(src||'').toUpperCase()];
     return n?'<div class="rc-plat">'+esc(n)+'</div>':'';
   }

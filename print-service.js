@@ -65,7 +65,7 @@ function sanitize(input) {
   return c;
 }
 
-const isPlatform = o => /LIEFERANDO|UBER|WOLT|LANCH/i.test(str(o && (o.platform || o.source)));
+const isPlatform = o => /LIEFERANDO|UBER|WOLT|LANCH|^WEB$/i.test(str(o && (o.platform || o.source)));
 // أي دور للطلب: فاتورة الزبون لطلب منصة → platform، غير هيك → kasse
 function roleFor(o, kind) {
   if (kind === 'kitchen') return 'kitchen';

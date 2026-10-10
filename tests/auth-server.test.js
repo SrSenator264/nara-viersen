@@ -197,3 +197,19 @@ test('printing: cashier reads config and prints, only manager saves settings', a
   assert.equal(p.status, 200); assert.equal(p.json.mode, 'browser');
   assert.equal((await call('POST', '/api/print', { kind: 'test' })).status, 401);
 });
+
+test('website order: public, server-priced, status by token only', async () => {
+  const menu = (await call('GET', '/api/menu')).json.products;
+  const simple = menu.find(p => !p.hidden && !p.unavailable && p.cents >= 1500 && !(p.dips || []).some(o => o.required) && !(p.requiredGroups || []).length && !p.menuCents);
+  const bad = await call('POST', '/api/web-orders', { type: 'pickup', cart: [{ id: simple.id, q: 1 }], customer: { name: 'X', phone: '1' } });
+  assert.equal(bad.status, 422); assert.equal(bad.json.code, 'NAME');
+  const r = await call('POST', '/api/web-orders', { type: 'pickup', cart: [{ id: simple.id, q: 2, u: 1 }], customer: { name: 'Test Kunde', phone: '0151 0000000' }, payment: 'CASH' });
+  assert.equal(r.status, 201, r.text);
+  assert.equal(r.json.order.totalCents, simple.cents * 2);
+  assert.equal(r.json.order.step, 'received');
+  const s = await call('GET', '/api/web-orders/status?t=' + r.json.token);
+  assert.equal(s.status, 200); assert.equal(s.json.order.code, r.json.order.code);
+  assert.equal(s.json.order.customerName, undefined);
+  assert.equal((await call('GET', '/api/web-orders/status?t=xxxxxxxxxxxxxxxx')).status, 404);
+  assert.equal((await call('GET', '/api/kasse-state')).status, 401);
+});

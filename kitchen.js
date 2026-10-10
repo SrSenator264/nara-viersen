@@ -18,6 +18,7 @@ function sourceOf(o) {
   if (/UBER/.test(p)) return 'UBER_EATS';
   if (/WOLT/.test(p)) return 'WOLT';
   if (/LANCH/.test(p)) return 'LANCH';
+  if (/^WEB/.test(p)) return 'WEB';
   return 'NARA';
 }
 
@@ -116,7 +117,7 @@ function isStale(o, now = Date.now()) {
 // "مدفوع" مو يعني "خلص": طلب الكاشير بيصير COMPLETED لما ينضرب Cash/Karte، بس لسا لازم ينطبخ ويتوصّل.
 // منعتبره منتهي بس إذا: ملغي، أو انوصل، أو المنصة قالت DONE، أو طلب منصة مغلق، أو طلب كاشير مدفوع من أكتر من 90 دقيقة.
 const PAID_GRACE_MS = 90 * 60000;
-const PLATFORM_RE = /^(LIEFERANDO|UBER|WOLT|LANCH|SIDES)/i;
+const PLATFORM_RE = /^(LIEFERANDO|UBER|WOLT|LANCH|SIDES|WEB)/i;
 function isClosedForOps(o, now = Date.now()) {
   if (!o) return true;
   const st = str(o.status).toUpperCase();
