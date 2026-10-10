@@ -211,5 +211,9 @@ test('website order: public, server-priced, status by token only', async () => {
   assert.equal(s.status, 200); assert.equal(s.json.order.code, r.json.order.code);
   assert.equal(s.json.order.customerName, undefined);
   assert.equal((await call('GET', '/api/web-orders/status?t=xxxxxxxxxxxxxxxx')).status, 404);
+  const placed = (await call('GET', '/api/kasse/open-orders', null, S.owner)).json.orders.find(o => o.displayCode === r.json.order.code);
+  assert.ok(placed, 'web order visible to staff');
+  assert.equal((await call('POST', '/api/live-orders/stage', { id: placed.id, stage: 'CANCELLED' }, S.owner)).status, 200);
+  assert.equal((await call('GET', '/api/web-orders/status?t=' + r.json.token)).json.order.step, 'cancelled');
   assert.equal((await call('GET', '/api/kasse-state')).status, 401);
 });
