@@ -2,16 +2,6 @@
   "_note": "Zutaten-Register (Quelle für Allergene & Zusatzstoffe). Nur Angaben vom Etikett, Lieferanten-Datenblatt oder ausdrückliche Inhaberangabe. status: confirmed | pending (Rückfrage offen) | missing (Etikett fehlt).",
   "updated": "2026-10-10",
   "ingredients": {
-    "brot-baeckerei": {
-      "name": "Brot / Brötchen der türkischen Bäckerei (Baguette, Fladen, sonstige)",
-      "status": "pending",
-      "contains": [
-        "Gluten (Weizen)",
-        "Milch"
-      ],
-      "source": "Inhaberangabe 2026-10-10: Hefe, Mehl, Milch",
-      "open": "Allergenliste der Bäckerei anfragen; welche Brote kommen von dort?"
-    },
     "hackfleisch-rind-kalb": {
       "name": "Burger-Patty, frisch (Rind + Kalb)",
       "status": "confirmed",
@@ -86,6 +76,14 @@
       "usedFor": "French Tacos, Shawarma-Rollen",
       "source": "Inhaberangabe 2026-10-10 (Foto Vorderseite)",
       "open": "Rückseite (Zutaten/Allergene) fotografieren; ersetzt die alte Inhaberangabe 'Gluten, Milch' der Taco-Tortilla"
+    },
+    "baguette-jacob": {
+      "name": "Baguette (Jacob Brot, Velbert)",
+      "status": "missing",
+      "contains": [],
+      "usedFor": "Sandwiches im Baguette (Shawarma doppelt, Falafel doppelt, Crispy Filet Sandwich …)",
+      "source": "Inhaberangabe 2026-10-10: Baguette von Jacob",
+      "open": "Deklaration fehlt – evtl. auf anderen Seiten des Dr.-Berns-Berichts 2018/085-2"
     }
   },
   "recipes": {
