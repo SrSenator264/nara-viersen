@@ -579,7 +579,7 @@ function speak(t){
   var vs=speechSynthesis.getVoices().filter(function(v){return v.lang&&v.lang.toLowerCase().indexOf(code)===0});
   if(vs.length)u.voice=vs[0];u.lang=code==='ar'?'ar-SA':code==='en'?'en-US':'de-DE';u.rate=1.05;u.pitch=1.35;speechSynthesis.speak(u)}catch(e){}
 }
-function talk(ms){if(route()!=='home')return;clearTimeout(talkT);if(g.classList.contains('perch')){g.classList.add('talking');talkT=setTimeout(function(){g.classList.remove('talking')},ms);return}setTimeout(function(){if(route()==='home'&&!g.classList.contains('perch'))img.src='c/flamo-talk.webp'},220);talkT=setTimeout(function(){if(route()==='home'&&!g.classList.contains('perch'))img.src='c/mascot.webp'},ms)}
+function talk(ms){if(route()!=='home'||(intro&&!intro.classList.contains('out')))return;clearTimeout(talkT);if(g.classList.contains('perch')){g.classList.add('talking');talkT=setTimeout(function(){g.classList.remove('talking')},ms);return}setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/flamo-talk.webp'},220);talkT=setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/mascot.webp'},ms)}
 function show(text,keep,pid){
  clearTimeout(timer);clearInterval(typing);bub.hidden=false;txtEl.textContent='';
  act.hidden=!pid;if(pid)setTimeout(function(){clip('present',6500)},Math.max(0,danceUntil-Date.now()));if(pid){act.textContent=tr(TPL.addBtn);act.setAttribute('data-add',pid)}else act.removeAttribute('data-add');
@@ -589,7 +589,7 @@ function show(text,keep,pid){
 }
 function say(key,keep){show(tr(TIPS[key]),keep)}
 function hop(){g.classList.remove('hop');void g.offsetWidth;g.classList.add('hop')}
-function pose(r){var src=r==='home'&&g.classList.contains('perch')?'c/flamo-sit.webp':'c/'+(IMG[r]?'m-'+r:'mascot')+'.webp';if(img.getAttribute('src')!==src){g.classList.add('swap');setTimeout(function(){img.src=src;g.classList.remove('swap')},180)}}
+function pose(r){if(intro&&!intro.classList.contains('out'))return;var src=r==='home'&&g.classList.contains('perch')?'c/flamo-sit.webp':'c/'+(IMG[r]?'m-'+r:'mascot')+'.webp';if(img.getAttribute('src')!==src){g.classList.add('swap');setTimeout(function(){if(intro&&!intro.classList.contains('out')){g.classList.remove('swap');return}img.src=src;g.classList.remove('swap')},180)}}
 var clipT=0,danceUntil=0;
 function poseSrc(){var r=route();return r==='home'?(g.classList.contains('perch')?'c/flamo-sit.webp':'c/mascot.webp'):'c/'+(IMG[r]?'m-'+r:'mascot')+'.webp'}
 function clip(name,ms){if(intro||g.classList.contains('perch'))return;clearTimeout(clipT);img.src='c/flamo-'+name+'.webp';clipT=setTimeout(function(){img.src=poseSrc()},ms)}
@@ -597,8 +597,8 @@ function dock(){g.classList.remove('welcome');setTimeout(perch,0)}
 /* Flamo sitzt auf einer Kachel (Startseite): Po auf der Oberkante, Beine hängen über die Kachel */
 var SEAT=.698,perchKey='burger',perchT=0;
 function perch(){
- var tile=route()==='home'&&!intro&&!g.classList.contains('welcome')&&document.querySelector('#app .sec-'+perchKey);
- if(!tile){if(g.classList.contains('perch')){g.classList.remove('perch','talking');g.style.top=g.style.left='';if(route()==='home'&&!intro)img.src='c/mascot.webp'}return}
+ var introOn=intro&&!intro.classList.contains('out');var tile=route()==='home'&&!introOn&&!g.classList.contains('welcome')&&document.querySelector('#app .sec-'+perchKey);
+ if(!tile){if(g.classList.contains('perch')){g.classList.remove('perch','talking');g.style.top=g.style.left='';if(route()==='home'&&!introOn)img.src='c/mascot.webp'}return}
  if(!g.classList.contains('perch')){g.classList.add('perch');img.src='c/flamo-sit.webp'}
  var r=tile.getBoundingClientRect(),w=g.offsetWidth,ih=w*338/246,rtl=document.documentElement.dir==='rtl';
  var x=rtl?r.left+Math.min(28,r.width*.06):r.right-w-Math.min(28,r.width*.06);
@@ -643,8 +643,11 @@ function setVoice(on){voice=on;vbtn.setAttribute('aria-pressed',on?'true':'false
 setVoice(voice);
 if(!window.speechSynthesis)vbtn.hidden=true;
 var seen=false;try{seen=sessionStorage.getItem('flamoIntro')==='1'}catch(e){}
+if(/[?&]intro\b/.test(location.search))seen=false;
 if(route()==='home'&&!seen){openIntro()}else{dock();if(route()==='home')setTimeout(function(){say(timeTip())},600)}
 window.addEventListener('scroll',function(){if(window.scrollY>40&&!intro)dock()},{passive:true});
+/* Klick aufs Logo: Flamo begrüßt noch einmal (schwarzer Startbildschirm) */
+document.addEventListener('click',function(e){var l=e.target.closest&&e.target.closest('.brand');if(!l||intro)return;e.preventDefault();if(location.hash&&location.hash!=='#home')location.hash='home';window.scrollTo(0,0);setTimeout(function(){if(!intro){bub.hidden=true;openIntro()}},80)});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&intro)closeIntro('home')});
 window.addEventListener('hashchange',function(){setTimeout(onRoute,30)});
 vbtn.addEventListener('click',function(){setVoice(!voice);if(voice)speak(txtEl.textContent||tr(TIPS.home))});
