@@ -74,17 +74,36 @@ function poseSrc(){var r=route();return r==='home'?(g.classList.contains('perch'
 function clip(name,ms){if(intro||g.classList.contains('perch'))return;clearTimeout(clipT);img.src='c/flamo-'+name+'.webp';clipT=setTimeout(function(){img.src=poseSrc()},ms)}
 function dock(){g.classList.remove('welcome');setTimeout(perch,0)}
 /* Flamo sitzt auf einer Kachel (Startseite): Po auf der Oberkante, Beine hängen über die Kachel */
-var SEAT=.698,perchKey='burger',perchT=0;
+var SEAT=.698,perchKey='burger',perchT=0,walking=false,WALK='c/mascot.webp',WALK_R=900/762;
+/* echte Lauf-Animation, sobald es sie gibt (c/flamo-walk.webp), sonst stehender Flamo mit Watschel-Schritten */
+(function(){var t=new Image();t.onload=function(){WALK='c/flamo-walk.webp';WALK_R=t.naturalHeight/t.naturalWidth};t.src='c/flamo-walk.webp'})();
+function perchSpot(tile,standing){
+ var r=tile.getBoundingClientRect(),w=g.offsetWidth,rtl=document.documentElement.dir==='rtl';
+ var x=rtl?r.left+Math.min(28,r.width*.06):r.right-w-Math.min(28,r.width*.06);
+ var y=standing?r.top-w*WALK_R:r.top-w*338/246*SEAT;
+ return {x:Math.round(x+window.scrollX),y:Math.round(y+window.scrollY)};
+}
 function perch(){
+ if(walking)return;
  var introOn=intro&&!intro.classList.contains('out');var tile=route()==='home'&&!introOn&&!g.classList.contains('welcome')&&document.querySelector('#app .sec-'+perchKey);
  if(!tile){if(g.classList.contains('perch')){g.classList.remove('perch','talking');g.style.top=g.style.left='';if(route()==='home'&&!introOn)img.src='c/mascot.webp'}return}
  if(!g.classList.contains('perch')){g.classList.add('perch');img.src='c/flamo-sit.webp'}
- var r=tile.getBoundingClientRect(),w=g.offsetWidth,ih=w*338/246,rtl=document.documentElement.dir==='rtl';
- var x=rtl?r.left+Math.min(28,r.width*.06):r.right-w-Math.min(28,r.width*.06);
- g.style.left=Math.round(x+window.scrollX)+'px';
- g.style.top=Math.round(r.top+window.scrollY-ih*SEAT)+'px';
+ var p=perchSpot(tile,false);g.style.left=p.x+'px';g.style.top=p.y+'px';
 }
-function perchTo(k){if(k===perchKey||!document.querySelector('#app .sec-'+k))return;perchKey=k;g.classList.add('jump');setTimeout(function(){perch();g.classList.remove('jump');hop()},260)}
+/* aufstehen → zur neuen Kachel laufen → wieder hinsetzen */
+function perchTo(k){
+ var tile=document.querySelector('#app .sec-'+k),old=document.querySelector('#app .sec-'+perchKey);
+ if(k===perchKey||!tile||walking||!g.classList.contains('perch'))return;
+ perchKey=k;walking=true;bub.hidden=true;
+ var a=old?perchSpot(old,true):null,b=perchSpot(tile,true),fromX=parseFloat(g.style.left)||b.x;
+ var dist=Math.hypot(b.x-fromX,b.y-(a?a.y:b.y)),dur=Math.max(.7,Math.min(1.8,dist/420));
+ g.style.setProperty('--wd',dur+'s');
+ g.classList.toggle('face-left',b.x<fromX);
+ img.src=WALK;g.classList.add('standup');
+ if(a){g.style.top=a.y+'px'}
+ setTimeout(function(){g.classList.remove('standup');g.classList.add('walking');g.style.left=b.x+'px';g.style.top=b.y+'px'},220);
+ setTimeout(function(){g.classList.remove('walking','face-left');walking=false;img.src='c/flamo-sit.webp';perch();hop()},220+dur*1000+60);
+}
 function onRoute(){var r=route();setTimeout(perch,60);g.classList.toggle('away',r==='burger');if(r!=='home')dock();pose(r);hop();
  if(r==='home'){say(g.classList.contains('welcome')?'home':timeTip());return}
  var s=Math.random()<.6?suggestion():null; if(s)show(s.t,false,s.id); else say(r);

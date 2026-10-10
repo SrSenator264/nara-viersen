@@ -96,3 +96,13 @@ html[dir=rtl] .guide.perch .g-voice{right:auto;left:-4px}
  @keyframes perchHop{40%{transform:translateY(-16px) rotate(-4deg)}}
 }
 @media (max-width:520px){.guide.perch{width:118px}.guide.perch .g-bubble{right:calc(100% - 18px);max-width:min(220px,calc(100vw - 150px));font-size:14px}html[dir=rtl] .guide.perch .g-bubble{left:calc(100% - 18px)}}
+
+/* Flamo läuft von Kachel zu Kachel */
+.guide.perch.standup{transition:top .2s ease-out}
+.guide.perch.walking{transition:left var(--wd,1s) linear,top var(--wd,1s) ease-in-out}
+.guide.perch.walking .g-voice{opacity:0}
+.guide.face-left .g-btn img{scale:-1 1}
+@media (prefers-reduced-motion:no-preference){
+ .guide.perch.walking .g-btn img{animation:waddle .36s ease-in-out infinite;transform-origin:50% 100%}
+ @keyframes waddle{0%,100%{transform:rotate(-5deg) translateY(0)}25%{transform:rotate(0) translateY(-7px)}50%{transform:rotate(5deg) translateY(0)}75%{transform:rotate(0) translateY(-7px)}}
+}
