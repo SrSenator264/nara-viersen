@@ -35,7 +35,7 @@ function tr(o){return o[L()]||o.de}
 function route(){var h=(location.hash||'#home').slice(1);return IMG[h]?h:'home'}
 function rnd(a){return a[Math.floor(Math.random()*a.length)]}
 function fill(t,p){return t.replace('{n}',p.n).replace('{p}',W.eur(p.p))}
-function cartItems(){var c=W.cart(),out=[];for(var k in c)if(c[k]>0&&W.byId[k])out.push(W.byId[k]);return out}
+function cartItems(){var c=W.cart(),out=[];for(var k in c){var l=c[k];if(l&&l.q>0&&W.byId[l.id])out.push(W.byId[l.id])}return out}
 function pool(f){return W.menu.filter(f)}
 function pickFrom(list,key){if(!list.length)return null;var p,i=0;do{p=rnd(list);i++}while(list.length>1&&lastPick[key]===p.id&&i<5);lastPick[key]=p.id;return p}
 // اقتراح ذكي: حسب السلة، وإلا منتج من القسم
@@ -85,7 +85,7 @@ var INTRO={h:{de:'Hey, ich bin Flamo.',en:"Hey, I'm Flamo.",ar:'أهلا، أن�
  surprise:{de:'Überrasch mich',en:'Surprise me',ar:'فاجئني'},menu:{de:'Direkt zur Speisekarte →',en:'Straight to the menu →',ar:'خدني عالمنيو ←'}};
 var SNAMES=[['burger',{de:'Burger',en:'Burgers',ar:'برغر'}],['crispy',{de:'Crispy',en:'Crispy',ar:'كرسبي'}],['street',{de:'Street',en:'Street',ar:'ستريت'}],['orient',{de:'Orientalisch',en:'Oriental',ar:'شرقي'}],['sides',{de:'Sides',en:'Sides',ar:'مقبلات'}],['drinks',{de:'Drinks',en:'Drinks',ar:'مشروبات'}],['sweet',{de:'Desserts',en:'Desserts',ar:'حلويات'}]];
 var intro=null;
-function lastOrder(){try{var o=JSON.parse(localStorage.getItem('lastOrder')||'null');if(o&&Object.keys(o).some(function(k){return o[k]>0&&W.byId[k]}))return o}catch(e){}return null}
+function lastOrder(){try{var o=JSON.parse(localStorage.getItem('lastOrder')||'null');if(o&&Object.keys(o).some(function(k){var l=o[k];return typeof l==='number'?l>0&&W.byId[k]:l&&l.q>0&&W.byId[l.id]}))return o}catch(e){}return null}
 function introP(){return lastOrder()?INTRO.back:INTRO[timeTip()]||INTRO.p}
 function introHTML(){var l=L();return '<div class="in-glow" aria-hidden="true"></div><div class="in-top"><span class="in-brand" dir="ltr">'+(window.__THEME__.brandHtml||'')+'</span><div class="in-langs">'+['de','en','ar'].map(function(x){return '<button type="button" data-ilang="'+x+'" class="'+(x===l?'on':'')+'">'+(x==='ar'?'عربي':x.toUpperCase())+'</button>'}).join('')+'</div></div><div class="in-text"><h1>'+tr(INTRO.h)+'</h1><p id="inP"></p><div class="in-chips">'+SNAMES.map(function(s){return '<button type="button" data-go="'+s[0]+'">'+tr(s[1])+'</button>'}).join('')+'<button type="button" class="hot" data-go="surprise">'+tr(INTRO.surprise)+'</button>'+(lastOrder()?'<button type="button" class="hot again" data-go="again">'+tr(INTRO.again)+'</button>':'')+'</div><button type="button" class="in-skip" data-go="home">'+tr(INTRO.menu)+'</button></div>'}
 function typeP(){var el=intro.querySelector('#inP'),t=tr(introP()),i=0;clearInterval(typing);el.textContent='';typing=setInterval(function(){i+=2;el.textContent=t.slice(0,i);if(i>=t.length)clearInterval(typing)},30);speak(tr(INTRO.h)+' '+t)}
@@ -114,9 +114,9 @@ window.addEventListener('hashchange',function(){setTimeout(onRoute,30)});
 vbtn.addEventListener('click',function(){setVoice(!voice);if(voice)speak(txtEl.textContent||tr(TIPS.home))});
 g.querySelector('#gBtn').addEventListener('click',function(){dock();hop();var s=suggestion();if(s)show(s.t,false,s.id);else say(route()==='home'?timeTip():route())});
 document.addEventListener('click',function(e){
- var a=e.target.closest('[data-add]');
- if(a){hop();setTimeout(function(){var s=suggestion();if(s&&a.id!=='gAct')show(tr(TIPS.added)+' '+s.t,false,s.id);else show(tr(TIPS.added),false)},60)}
  if(e.target.closest('[data-lang]'))setTimeout(function(){setVoice(voice);say(route()==='home'?timeTip():route())},40);
 });
+window.addEventListener('nara-added',function(){hop();setTimeout(function(){var s=suggestion();if(s)show(tr(TIPS.added)+' '+s.t,false,s.id);else show(tr(TIPS.added),false)},120)});
+window.addEventListener('nara-product',function(){bub.hidden=true});
 if(route()!=='home'){dock();pose(route());g.classList.toggle('away',route()==='burger')}
 })();

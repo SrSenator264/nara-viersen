@@ -2,6 +2,7 @@ import json
 menu=open('menu.json',encoding='utf-8').read()
 base=open('base.css',encoding='utf-8').read()
 app=open('app.js',encoding='utf-8').read()
+ON=open('optnames.json',encoding='utf-8').read()
 GUIDE='<style>'+open('guide.css',encoding='utf-8').read()+'</style><script>'+open('guide.js',encoding='utf-8').read()+'</script>'
 FONTS={'A':'family=Anton&family=Archivo:wght@400;600;800&family=Cairo:wght@500;800;900','B':'family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Cairo:wght@500;800;900'}
 CSS={'A':"""
@@ -77,7 +78,7 @@ for k in 'AB':
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?{FONTS[k]}&display=swap">
 <style>{CSS[k].split('/*')[0]}{CSS[k]}{base}</style>
 <div id="app"></div>
-<script>window.__MENU__={menu};{themejs}</script>
+<script>window.__MENU__={menu};window.__ON__={ON};{themejs}</script>
 <script>{app}</script>{GUIDE if k=='B' else ''}
 """
   # put theme tokens before base so base uses them; theme overrides after base
