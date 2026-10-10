@@ -369,7 +369,12 @@ async function handleList(list) {
     const id = String(x.id);
     const st = mapStatus(x.status);
     const known = state.sent[id] !== undefined;
-    if ((st.stage === 'DONE' || st.stage === 'CANCELLED') && !known) continue; // لا نغرق السيرفر بطلبات قديمة
+    // طلب خلص أو انلغى والجسر ما شافه: إذا من آخر 18 ساعة منسجّله (الجسر كان واقف أو ما وصله شي)، الأقدم منتجاهله
+    if ((st.stage === 'DONE' || st.stage === 'CANCELLED') && !known) {
+      const placed = Date.parse(x.placed_date || x.created_at || '');
+      if (!(Date.now() - placed < 18 * 3600000)) continue;
+      log(`late import ${S(x.public_reference)} ${st.stage} (missed while the bridge had no data)`);
+    }
     if (!shapeDumped && st.stage === 'PREPARE') dumpShape(x);
 
     const o = normalize(x, st);
@@ -516,6 +521,14 @@ async function beat() {
   if (loggedOut) await alertServer('SESSION_EXPIRED', { url });
   const silentMs = Date.now() - (lastOkAt || Date.now());
   if (lastOkAt && silentMs > Math.max(CFG.refreshMs * 4, 120000)) await alertServer('NO_DATA', { silentSeconds: Math.round(silentMs / 1000) });
+  // ما عم يوصل شي: إعادة التحميل العادية ما عم تكفي، فمنفتح صفحة الطلبات من جديد (كل 5 دقايق بالأكتر)
+  if (lastOkAt && silentMs > Math.max(CFG.refreshMs * 3, 360000) && !reloading && Date.now() - (beat.lastGoto || 0) > 300000) {
+    beat.lastGoto = Date.now(); reloading = true;
+    log('no data for ' + Math.round(silentMs / 60000) + ' min, reopening the orders page');
+    try { await page.goto('https://live-orders.takeaway.com/orders', { waitUntil: 'domcontentloaded' }); loadedAt = Date.now(); }
+    catch (e) { console.error('[NARA] reopen failed: ' + e.message); }
+    finally { reloading = false; }
+  }
   await tryPost('/api/platform-orders/heartbeat', { source: 'LIEFERANDO', bridge: 'playwright', lastOkAt: lastOkAt ? new Date(lastOkAt).toISOString() : null, loggedOut }, { quiet: true });
 }
 setInterval(() => beat().catch(e => console.error('[NARA] heartbeat:', e.message)), 60000);
