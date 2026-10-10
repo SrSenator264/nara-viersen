@@ -31,3 +31,35 @@ html[dir=rtl] .g-row{flex-direction:row-reverse}
 .guide.welcome .g-voice{display:none}
 .g-act{display:block;margin-top:8px;border:0;border-radius:999px;background:#111;color:#fff;font-weight:800;font-size:14px;padding:9px 14px}
 .g-row .g-btn{flex:1 1 auto;min-width:0}
+
+html.intro-on,html.intro-on body{overflow:hidden}
+#intro{position:fixed;inset:0;z-index:40;background:#0B0A09;color:#F5EFE6;display:flex;flex-direction:column;padding:calc(18px + env(safe-area-inset-top,0px)) max(16px,5vw) calc(24px + env(safe-area-inset-bottom,0px));transition:opacity .6s ease,transform .6s ease;font-family:var(--body)}
+html[dir=rtl] #intro{font-family:var(--ar)}
+#intro.out{opacity:0;transform:scale(1.04);pointer-events:none}
+.in-glow{position:absolute;inset:0;background:radial-gradient(42% 52% at 72% 58%,rgba(255,106,31,.32),transparent 70%);pointer-events:none}
+html[dir=rtl] .in-glow{background:radial-gradient(42% 52% at 28% 58%,rgba(255,106,31,.32),transparent 70%)}
+.in-top{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.in-brand{font-family:var(--display);font-weight:800;font-size:24px}
+.in-langs{display:flex;border:1.5px solid #3A3631;border-radius:999px;overflow:hidden}
+.in-langs button{border:0;background:transparent;color:#F5EFE6;padding:8px 11px;font-weight:800;font-size:13px}
+.in-langs button.on{background:#F5EFE6;color:#0B0A09}
+.in-text{position:relative;margin-block:auto;max-width:520px;display:flex;flex-direction:column;gap:14px}
+.in-text h1{margin:0;font-family:var(--display);font-weight:var(--dw);font-size:clamp(40px,6vw,76px);line-height:.95;letter-spacing:-.03em}
+html[dir=rtl] .in-text h1{letter-spacing:0;line-height:1.15}
+.in-text p{margin:0;font-size:clamp(18px,2vw,22px);line-height:1.4;min-height:2.8em;color:#D9CFC2}
+.in-chips{display:flex;flex-wrap:wrap;gap:8px}
+.in-chips button{border:1.5px solid #F5EFE6;background:transparent;color:#F5EFE6;border-radius:999px;padding:11px 16px;font-weight:800;font-size:15px}
+.in-chips button:hover,.in-chips button:focus-visible{background:#F5EFE6;color:#0B0A09}
+.in-chips button.hot{background:#FF6A1F;border-color:#FF6A1F;color:#111}
+.in-skip{align-self:flex-start;border:0;background:transparent;color:#B9AE9C;font-weight:700;padding:8px 0;text-decoration:underline}
+.guide.intro{z-index:41;right:4vw;bottom:6vh;width:min(42vw,520px);transition:right .9s cubic-bezier(.5,0,.2,1),bottom .9s cubic-bezier(.5,0,.2,1),width .9s cubic-bezier(.5,0,.2,1)}
+html[dir=rtl] .guide.intro{right:auto;left:4vw}
+.guide.intro .g-bubble,.guide.intro .g-voice{display:none}
+.guide.intro .g-btn img{filter:drop-shadow(0 30px 40px rgba(0,0,0,.6))}
+@media (max-width:760px){
+ .in-text{margin-block:auto 0}
+ .guide.intro{width:min(64vw,300px);right:calc(50% - min(32vw,150px));bottom:auto;top:15vh}
+ html[dir=rtl] .guide.intro{left:calc(50% - min(32vw,150px))}
+ .in-glow{background:radial-gradient(60% 40% at 50% 32%,rgba(255,106,31,.32),transparent 70%)}
+ .in-chips button{padding:10px 13px;font-size:14px}
+}

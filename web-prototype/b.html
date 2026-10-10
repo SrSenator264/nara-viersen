@@ -241,6 +241,38 @@ html[dir=rtl] .g-row{flex-direction:row-reverse}
 .guide.welcome .g-voice{display:none}
 .g-act{display:block;margin-top:8px;border:0;border-radius:999px;background:#111;color:#fff;font-weight:800;font-size:14px;padding:9px 14px}
 .g-row .g-btn{flex:1 1 auto;min-width:0}
+
+html.intro-on,html.intro-on body{overflow:hidden}
+#intro{position:fixed;inset:0;z-index:40;background:#0B0A09;color:#F5EFE6;display:flex;flex-direction:column;padding:calc(18px + env(safe-area-inset-top,0px)) max(16px,5vw) calc(24px + env(safe-area-inset-bottom,0px));transition:opacity .6s ease,transform .6s ease;font-family:var(--body)}
+html[dir=rtl] #intro{font-family:var(--ar)}
+#intro.out{opacity:0;transform:scale(1.04);pointer-events:none}
+.in-glow{position:absolute;inset:0;background:radial-gradient(42% 52% at 72% 58%,rgba(255,106,31,.32),transparent 70%);pointer-events:none}
+html[dir=rtl] .in-glow{background:radial-gradient(42% 52% at 28% 58%,rgba(255,106,31,.32),transparent 70%)}
+.in-top{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.in-brand{font-family:var(--display);font-weight:800;font-size:24px}
+.in-langs{display:flex;border:1.5px solid #3A3631;border-radius:999px;overflow:hidden}
+.in-langs button{border:0;background:transparent;color:#F5EFE6;padding:8px 11px;font-weight:800;font-size:13px}
+.in-langs button.on{background:#F5EFE6;color:#0B0A09}
+.in-text{position:relative;margin-block:auto;max-width:520px;display:flex;flex-direction:column;gap:14px}
+.in-text h1{margin:0;font-family:var(--display);font-weight:var(--dw);font-size:clamp(40px,6vw,76px);line-height:.95;letter-spacing:-.03em}
+html[dir=rtl] .in-text h1{letter-spacing:0;line-height:1.15}
+.in-text p{margin:0;font-size:clamp(18px,2vw,22px);line-height:1.4;min-height:2.8em;color:#D9CFC2}
+.in-chips{display:flex;flex-wrap:wrap;gap:8px}
+.in-chips button{border:1.5px solid #F5EFE6;background:transparent;color:#F5EFE6;border-radius:999px;padding:11px 16px;font-weight:800;font-size:15px}
+.in-chips button:hover,.in-chips button:focus-visible{background:#F5EFE6;color:#0B0A09}
+.in-chips button.hot{background:#FF6A1F;border-color:#FF6A1F;color:#111}
+.in-skip{align-self:flex-start;border:0;background:transparent;color:#B9AE9C;font-weight:700;padding:8px 0;text-decoration:underline}
+.guide.intro{z-index:41;right:4vw;bottom:6vh;width:min(42vw,520px);transition:right .9s cubic-bezier(.5,0,.2,1),bottom .9s cubic-bezier(.5,0,.2,1),width .9s cubic-bezier(.5,0,.2,1)}
+html[dir=rtl] .guide.intro{right:auto;left:4vw}
+.guide.intro .g-bubble,.guide.intro .g-voice{display:none}
+.guide.intro .g-btn img{filter:drop-shadow(0 30px 40px rgba(0,0,0,.6))}
+@media (max-width:760px){
+ .in-text{margin-block:auto 0}
+ .guide.intro{width:min(64vw,300px);right:calc(50% - min(32vw,150px));bottom:auto;top:15vh}
+ html[dir=rtl] .guide.intro{left:calc(50% - min(32vw,150px))}
+ .in-glow{background:radial-gradient(60% 40% at 50% 32%,rgba(255,106,31,.32),transparent 70%)}
+ .in-chips button{padding:10px 13px;font-size:14px}
+}
 </style><script>(function(){
 if(!window.__THEME__||!window.__THEME__.guide)return;
 var W=window.NARA_WEB;
@@ -317,12 +349,30 @@ function onRoute(){var r=route();g.classList.toggle('away',r==='burger');if(r!==
  if(r==='home'){say(g.classList.contains('welcome')?'home':timeTip());return}
  var s=Math.random()<.6?suggestion():null; if(s)show(s.t,false,s.id); else say(r);
 }
+
+var INTRO={h:{de:'Hey, ich bin Flamo.',en:"Hey, I'm Flamo.",ar:'أهلا، أنا فلامو.'},
+ p:{de:'Schön, dass du da bist. Worauf hast du heute Hunger?',en:'Glad you stopped by. What are you hungry for today?',ar:'منوّر! شو جاي عبالك اليوم؟'},
+ surprise:{de:'Überrasch mich',en:'Surprise me',ar:'فاجئني'},menu:{de:'Direkt zur Speisekarte →',en:'Straight to the menu →',ar:'خدني عالمنيو ←'}};
+var SNAMES=[['burger',{de:'Burger',en:'Burgers',ar:'برغر'}],['crispy',{de:'Crispy',en:'Crispy',ar:'كرسبي'}],['street',{de:'Street',en:'Street',ar:'ستريت'}],['orient',{de:'Orientalisch',en:'Oriental',ar:'شرقي'}],['sides',{de:'Sides',en:'Sides',ar:'مقبلات'}],['drinks',{de:'Drinks',en:'Drinks',ar:'مشروبات'}],['sweet',{de:'Desserts',en:'Desserts',ar:'حلويات'}]];
+var intro=null;
+function introHTML(){var l=L();return '<div class="in-glow" aria-hidden="true"></div><div class="in-top"><span class="in-brand" dir="ltr">'+(window.__THEME__.brandHtml||'')+'</span><div class="in-langs">'+['de','en','ar'].map(function(x){return '<button type="button" data-ilang="'+x+'" class="'+(x===l?'on':'')+'">'+(x==='ar'?'عربي':x.toUpperCase())+'</button>'}).join('')+'</div></div><div class="in-text"><h1>'+tr(INTRO.h)+'</h1><p id="inP"></p><div class="in-chips">'+SNAMES.map(function(s){return '<button type="button" data-go="'+s[0]+'">'+tr(s[1])+'</button>'}).join('')+'<button type="button" class="hot" data-go="surprise">'+tr(INTRO.surprise)+'</button></div><button type="button" class="in-skip" data-go="home">'+tr(INTRO.menu)+'</button></div>'}
+function typeP(){var el=intro.querySelector('#inP'),t=tr(INTRO.p),i=0;clearInterval(typing);el.textContent='';typing=setInterval(function(){i+=2;el.textContent=t.slice(0,i);if(i>=t.length)clearInterval(typing)},30);speak(tr(INTRO.h)+' '+t)}
+function openIntro(){intro=document.createElement('div');intro.id='intro';intro.setAttribute('role','dialog');intro.setAttribute('aria-label','Flamo');intro.innerHTML=introHTML();document.body.appendChild(intro);document.documentElement.classList.add('intro-on');g.classList.add('intro');bub.hidden=true;img.src='c/flamo-talk.webp';setTimeout(typeP,350);
+ intro.addEventListener('click',function(e){var b=e.target.closest('[data-go],[data-ilang]');if(!b)return;
+  if(b.dataset.ilang){var lb=document.querySelector('[data-lang="'+b.dataset.ilang+'"]');if(lb)lb.click();setTimeout(function(){intro.innerHTML=introHTML();typeP()},60);return}
+  var go=b.dataset.go;if(go==='surprise'){go=SNAMES[Math.floor(Math.random()*SNAMES.length)][0]}
+  closeIntro(go)})}
+function closeIntro(go){if(!intro)return;try{sessionStorage.setItem('flamoIntro','1')}catch(e){}
+ intro.classList.add('out');document.documentElement.classList.remove('intro-on');g.classList.remove('intro');dock();
+ setTimeout(function(){if(intro){intro.remove();intro=null}},700);
+ if(go&&go!=='home'){location.hash=go}else{img.src='c/mascot.webp';setTimeout(function(){say(timeTip())},900)}}
 function setVoice(on){voice=on;vbtn.setAttribute('aria-pressed',on?'true':'false');vbtn.setAttribute('aria-label',tr(on?TPL.voiceOn:TPL.voiceOff));vbtn.title=tr(on?TPL.voiceOn:TPL.voiceOff);try{localStorage.setItem('flamoVoice',on?'1':'0')}catch(e){}if(!on&&window.speechSynthesis)speechSynthesis.cancel()}
 setVoice(voice);
 if(!window.speechSynthesis)vbtn.hidden=true;
-say('home',true);
-setTimeout(function(){dock();if(route()==='home')say(timeTip())},3600);
-window.addEventListener('scroll',function(){if(window.scrollY>40)dock()},{passive:true});
+var seen=false;try{seen=sessionStorage.getItem('flamoIntro')==='1'}catch(e){}
+if(route()==='home'&&!seen){openIntro()}else{dock();if(route()==='home')setTimeout(function(){say(timeTip())},600)}
+window.addEventListener('scroll',function(){if(window.scrollY>40&&!intro)dock()},{passive:true});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&intro)closeIntro('home')});
 window.addEventListener('hashchange',function(){setTimeout(onRoute,30)});
 vbtn.addEventListener('click',function(){setVoice(!voice);if(voice)speak(txtEl.textContent||tr(TIPS.home))});
 g.querySelector('#gBtn').addEventListener('click',function(){dock();hop();var s=suggestion();if(s)show(s.t,false,s.id);else say(route()==='home'?timeTip():route())});

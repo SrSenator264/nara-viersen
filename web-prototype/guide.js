@@ -74,12 +74,30 @@ function onRoute(){var r=route();g.classList.toggle('away',r==='burger');if(r!==
  if(r==='home'){say(g.classList.contains('welcome')?'home':timeTip());return}
  var s=Math.random()<.6?suggestion():null; if(s)show(s.t,false,s.id); else say(r);
 }
+
+var INTRO={h:{de:'Hey, ich bin Flamo.',en:"Hey, I'm Flamo.",ar:'أهلا، أنا فلامو.'},
+ p:{de:'Schön, dass du da bist. Worauf hast du heute Hunger?',en:'Glad you stopped by. What are you hungry for today?',ar:'منوّر! شو جاي عبالك اليوم؟'},
+ surprise:{de:'Überrasch mich',en:'Surprise me',ar:'فاجئني'},menu:{de:'Direkt zur Speisekarte →',en:'Straight to the menu →',ar:'خدني عالمنيو ←'}};
+var SNAMES=[['burger',{de:'Burger',en:'Burgers',ar:'برغر'}],['crispy',{de:'Crispy',en:'Crispy',ar:'كرسبي'}],['street',{de:'Street',en:'Street',ar:'ستريت'}],['orient',{de:'Orientalisch',en:'Oriental',ar:'شرقي'}],['sides',{de:'Sides',en:'Sides',ar:'مقبلات'}],['drinks',{de:'Drinks',en:'Drinks',ar:'مشروبات'}],['sweet',{de:'Desserts',en:'Desserts',ar:'حلويات'}]];
+var intro=null;
+function introHTML(){var l=L();return '<div class="in-glow" aria-hidden="true"></div><div class="in-top"><span class="in-brand" dir="ltr">'+(window.__THEME__.brandHtml||'')+'</span><div class="in-langs">'+['de','en','ar'].map(function(x){return '<button type="button" data-ilang="'+x+'" class="'+(x===l?'on':'')+'">'+(x==='ar'?'عربي':x.toUpperCase())+'</button>'}).join('')+'</div></div><div class="in-text"><h1>'+tr(INTRO.h)+'</h1><p id="inP"></p><div class="in-chips">'+SNAMES.map(function(s){return '<button type="button" data-go="'+s[0]+'">'+tr(s[1])+'</button>'}).join('')+'<button type="button" class="hot" data-go="surprise">'+tr(INTRO.surprise)+'</button></div><button type="button" class="in-skip" data-go="home">'+tr(INTRO.menu)+'</button></div>'}
+function typeP(){var el=intro.querySelector('#inP'),t=tr(INTRO.p),i=0;clearInterval(typing);el.textContent='';typing=setInterval(function(){i+=2;el.textContent=t.slice(0,i);if(i>=t.length)clearInterval(typing)},30);speak(tr(INTRO.h)+' '+t)}
+function openIntro(){intro=document.createElement('div');intro.id='intro';intro.setAttribute('role','dialog');intro.setAttribute('aria-label','Flamo');intro.innerHTML=introHTML();document.body.appendChild(intro);document.documentElement.classList.add('intro-on');g.classList.add('intro');bub.hidden=true;img.src='c/flamo-talk.webp';setTimeout(typeP,350);
+ intro.addEventListener('click',function(e){var b=e.target.closest('[data-go],[data-ilang]');if(!b)return;
+  if(b.dataset.ilang){var lb=document.querySelector('[data-lang="'+b.dataset.ilang+'"]');if(lb)lb.click();setTimeout(function(){intro.innerHTML=introHTML();typeP()},60);return}
+  var go=b.dataset.go;if(go==='surprise'){go=SNAMES[Math.floor(Math.random()*SNAMES.length)][0]}
+  closeIntro(go)})}
+function closeIntro(go){if(!intro)return;try{sessionStorage.setItem('flamoIntro','1')}catch(e){}
+ intro.classList.add('out');document.documentElement.classList.remove('intro-on');g.classList.remove('intro');dock();
+ setTimeout(function(){if(intro){intro.remove();intro=null}},700);
+ if(go&&go!=='home'){location.hash=go}else{img.src='c/mascot.webp';setTimeout(function(){say(timeTip())},900)}}
 function setVoice(on){voice=on;vbtn.setAttribute('aria-pressed',on?'true':'false');vbtn.setAttribute('aria-label',tr(on?TPL.voiceOn:TPL.voiceOff));vbtn.title=tr(on?TPL.voiceOn:TPL.voiceOff);try{localStorage.setItem('flamoVoice',on?'1':'0')}catch(e){}if(!on&&window.speechSynthesis)speechSynthesis.cancel()}
 setVoice(voice);
 if(!window.speechSynthesis)vbtn.hidden=true;
-say('home',true);
-setTimeout(function(){dock();if(route()==='home')say(timeTip())},3600);
-window.addEventListener('scroll',function(){if(window.scrollY>40)dock()},{passive:true});
+var seen=false;try{seen=sessionStorage.getItem('flamoIntro')==='1'}catch(e){}
+if(route()==='home'&&!seen){openIntro()}else{dock();if(route()==='home')setTimeout(function(){say(timeTip())},600)}
+window.addEventListener('scroll',function(){if(window.scrollY>40&&!intro)dock()},{passive:true});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&intro)closeIntro('home')});
 window.addEventListener('hashchange',function(){setTimeout(onRoute,30)});
 vbtn.addEventListener('click',function(){setVoice(!voice);if(voice)speak(txtEl.textContent||tr(TIPS.home))});
 g.querySelector('#gBtn').addEventListener('click',function(){dock();hop();var s=suggestion();if(s)show(s.t,false,s.id);else say(route()==='home'?timeTip():route())});
