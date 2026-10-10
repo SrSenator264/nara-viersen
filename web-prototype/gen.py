@@ -65,7 +65,7 @@ body[data-route=drinks] .add{background:#1E7FA8}
 body[data-route=sweet] .add{background:#C8487A}
 @media (max-width:700px){.sec{min-height:180px}.sec img{height:90%;opacity:.95}.shero-in{flex-basis:55%}.shero-m .mascot{width:140px}}
 """}
-THEME={'A':{'brandHtml':'iu gene','heroMascot':False,'num':'stand','text':{'h1':{'de':'Eine Halle.<br><em>Sieben</em> Stände.','en':'One hall.<br><em>Seven</em> stands.','ar':'محل واحد.<br><em>سبع</em> زوايا.'},'lede':{'de':'Burger, Crispy, Street, Orientalisch, Drinks und Desserts. Such dir an jedem Stand was aus, alles landet in einem Warenkorb.','en':'Burgers, crispy chicken, street food, oriental, drinks and desserts. Pick from every stand, it all goes into one cart.','ar':'برغر، كرسبي، ستريت فود، أكل شرقي، مشروبات وحلويات. اختار من كل زاوية، وكلو بسلة وحدة.'}}},
+THEME={'A':{'brandHtml':'iu gene','heroMascot':False,'guide':True,'num':'stand','text':{'h1':{'de':'Eine Halle.<br><em>Sieben</em> Stände.','en':'One hall.<br><em>Seven</em> stands.','ar':'محل واحد.<br><em>سبع</em> زوايا.'},'lede':{'de':'Burger, Crispy, Street, Orientalisch, Drinks und Desserts. Such dir an jedem Stand was aus, alles landet in einem Warenkorb.','en':'Burgers, crispy chicken, street food, oriental, drinks and desserts. Pick from every stand, it all goes into one cart.','ar':'برغر، كرسبي، ستريت فود، أكل شرقي، مشروبات وحلويات. اختار من كل زاوية، وكلو بسلة وحدة.'}}},
 'B':{'brandHtml':'iu gene<span style="color:#FF3B30">.</span>','heroMascot':False,'guide':True,'num':'none','text':{'h1':{'de':'Hunger?<br>Such dir eine Farbe aus.','en':'Hungry?<br>Pick a colour.','ar':'جوعان؟<br>اختار لون.'},'lede':{'de':'Jede Farbe ist eine Ecke voller Essen. Alles kommt in einen Warenkorb, abholen oder liefern lassen.','en':'Every colour is a corner full of food. It all goes into one cart, pickup or delivery.','ar':'كل لون زاوية مليانة أكل. كلو بسلة وحدة، استلام أو توصيل.'}}}}
 TITLE={'A':'Die Halle Prototyp','B':'Farbfelder Prototyp'}
 for k in 'AB':
@@ -79,7 +79,7 @@ for k in 'AB':
 <style>{CSS[k].split('/*')[0]}{CSS[k]}{base}</style>
 <div id="app"></div>
 <script>window.__MENU__={menu};window.__ON__={ON};{themejs}</script>
-<script>{app}</script>{GUIDE if k=='B' else ''}
+<script>{app}</script>{GUIDE}
 """
   # put theme tokens before base so base uses them; theme overrides after base
   tokens,rest=CSS[k].split('\n.top',1) if '\n.top' in CSS[k] else (CSS[k],'')
