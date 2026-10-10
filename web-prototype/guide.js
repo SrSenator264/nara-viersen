@@ -74,13 +74,13 @@ function poseSrc(){var r=route();return r==='home'?(g.classList.contains('perch'
 function clip(name,ms){if(intro||g.classList.contains('perch'))return;clearTimeout(clipT);img.src='c/flamo-'+name+'.webp';clipT=setTimeout(function(){img.src=poseSrc()},ms)}
 function dock(){g.classList.remove('welcome');setTimeout(perch,0)}
 /* Flamo sitzt auf einer Kachel (Startseite): Po auf der Oberkante, Beine hängen über die Kachel */
-var SEAT=.698,perchKey='burger',perchT=0,walking=false,WALK='c/mascot.webp',WALK_R=900/762;
+var SEAT=.698,perchKey='burger',perchT=0,walking=false,WALK='c/flamo-step.webp',WALK_R=370/269,SPIN_R=381/367;
 /* echte Lauf-Animation, sobald es sie gibt (c/flamo-walk.webp), sonst stehender Flamo mit Watschel-Schritten */
 (function(){var t=new Image();t.onload=function(){WALK='c/flamo-walk.webp';WALK_R=t.naturalHeight/t.naturalWidth};t.src='c/flamo-walk.webp'})();
-function perchSpot(tile,standing){
+function perchSpot(tile,standing){var ratio=standing===true?WALK_R:standing;
  var r=tile.getBoundingClientRect(),w=g.offsetWidth,rtl=document.documentElement.dir==='rtl';
  var x=rtl?r.left+Math.min(28,r.width*.06):r.right-w-Math.min(28,r.width*.06);
- var y=standing?r.top-w*WALK_R:r.top-w*338/246*SEAT;
+ var y=standing?r.top-w*ratio:r.top-w*338/246*SEAT;
  return {x:Math.round(x+window.scrollX),y:Math.round(y+window.scrollY)};
 }
 function perch(){
@@ -102,9 +102,10 @@ function perchTo(k){
  img.src=WALK;g.classList.add('standup');
  if(a){g.style.top=a.y+'px'}
  setTimeout(function(){g.classList.remove('standup');g.classList.add('walking');g.style.left=b.x+'px';g.style.top=b.y+'px'},220);
- setTimeout(function(){g.classList.remove('walking','face-left');walking=false;img.src='c/flamo-sit.webp';perch();hop()},220+dur*1000+60);
+ setTimeout(function(){g.classList.remove('walking','face-left');var sp=perchSpot(tile,SPIN_R);g.style.top=sp.y+'px';img.src='c/flamo-spin.webp';
+  setTimeout(function(){walking=false;img.src='c/flamo-sit.webp';perch();hop()},1500)},220+dur*1000+60);
 }
-function onRoute(){var r=route();setTimeout(perch,60);g.classList.toggle('away',r==='burger');if(r!=='home')dock();pose(r);hop();
+function onRoute(){var r=route();setTimeout(perch,60);if(r!=='home'&&IMG[r])setTimeout(function(){clip('point',1400)},260);g.classList.toggle('away',r==='burger');if(r!=='home')dock();pose(r);hop();
  if(r==='home'){say(g.classList.contains('welcome')?'home':timeTip());return}
  var s=Math.random()<.6?suggestion():null; if(s)show(s.t,false,s.id); else say(r);
 }

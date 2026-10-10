@@ -104,5 +104,5 @@ html[dir=rtl] .guide.perch .g-voice{right:auto;left:-4px}
 .guide.face-left .g-btn img{scale:-1 1}
 @media (prefers-reduced-motion:no-preference){
  .guide.perch.walking .g-btn img{animation:waddle .36s ease-in-out infinite;transform-origin:50% 100%}
- @keyframes waddle{0%,100%{transform:rotate(-5deg) translateY(0)}25%{transform:rotate(0) translateY(-7px)}50%{transform:rotate(5deg) translateY(0)}75%{transform:rotate(0) translateY(-7px)}}
+ @keyframes waddle{0%,100%{transform:rotate(-2deg) translateY(0)}25%{transform:rotate(0) translateY(-4px)}50%{transform:rotate(2deg) translateY(0)}75%{transform:rotate(0) translateY(-4px)}}
 }
