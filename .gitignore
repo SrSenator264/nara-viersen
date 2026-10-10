@@ -32,3 +32,5 @@ work/
 *poc*
 publish-staging-*/
 nara-worker-deploy-archive-backup-*/
+
+flamo-source/
