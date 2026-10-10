@@ -53,7 +53,7 @@
       ],
       "source": "Deklaration Dr. Berns Laboratorium, Bericht 2018/085-2 S. 7 (Analyse 26.07.2018), Foto vom Inhaber 2026-10-10",
       "open": "Gleiche Rezeptur noch aktuell? Sesam-Variante (Sesam-Bun) separat bestätigen.",
-      "usedFor": "Burger, Hot Dogs, Sandwiches (Inhaberangabe 2026-10-10)"
+      "usedFor": "Hot-Dog-Brötchen (ohne Sesam); Basis der Burger-Buns"
     },
     "frappe-saucen": {
       "name": "Saucen für Frappé (z. B. Karamell, Schoko, White Mocha)",
@@ -79,11 +79,31 @@
     },
     "baguette-jacob": {
       "name": "Baguette (Jacob Brot, Velbert – türkische Bäckerei, einziger Brotlieferant)",
-      "status": "missing",
-      "contains": [],
+      "status": "pending",
+      "contains": [
+        "Sesam"
+      ],
       "usedFor": "Sandwiches im Baguette (Shawarma doppelt, Falafel doppelt, Crispy Filet Sandwich …)",
-      "source": "Inhaberangabe 2026-10-10: Baguette von Jacob",
+      "source": "Inhaberangabe 2026-10-10: Baguette von Jacob; mit Sesam (Inhaberangabe 2026-10-10)",
       "open": "Deklaration fehlt – evtl. auf anderen Seiten des Dr.-Berns-Berichts 2018/085-2"
+    },
+    "burger-bun-sesam": {
+      "name": "Burger-Bun (Brioche mit Sesam, Jacob)",
+      "status": "confirmed",
+      "contains": [
+        "Gluten (Weizen, Gerste)",
+        "Ei",
+        "Milch",
+        "Sesam"
+      ],
+      "mayContain": [
+        "Soja",
+        "Senf"
+      ],
+      "additives": [
+        "mit Farbstoff (E160a)"
+      ],
+      "source": "Brioche-Deklaration Dr. Berns 2018/085-2 + Inhaberangabe 2026-10-10: alle Brote außer Hot-Dog-Brötchen mit Sesam"
     }
   },
   "recipes": {
