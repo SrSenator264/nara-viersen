@@ -113,7 +113,7 @@ const allowed = (access, role) => Array.isArray(access) && access.includes(role)
 
 // ───────── ملفات ثابتة مسموحة ─────────
 const BLOCKED_DIRS = new Set(['data', 'logs', 'node_modules', 'tests', 'scripts', 'checkpoint', 'local-ocr-output']);
-const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js']);
+const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'sides-login-save.ps1']);
 const STATIC_EXT = new Set(['.html', '.js', '.mjs', '.css', '.png', '.jpg', '.jpeg', '.webp', '.avif', '.gif', '.svg', '.ico', '.woff', '.woff2', '.webmanifest', '.mp3', '.wav', '.ogg']);
 function staticAllowed(rel) {
   const parts = String(rel || '').split(/[\\/]+/).filter(Boolean);
