@@ -78,7 +78,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       onWay:'Unterwegs',sent:'Geschickt',leftOf:'{a} von {b} offen',cancelSend:'Senden abbrechen',next:'Nächste Tour',after:'Danach',
       depart:'Los {a} · zurück {b}',late:'{n} zu spät',sendTo:'📤 An {n} senden',route:'🗺️ Route',noOrders:'Gerade keine Bestellungen für ihn',
       unplaced:'Bestellungen ohne Position auf der Karte',unplacedHint:'Adresse fehlt oder ist falsch, oder wird noch gesucht (dauert bis zu einer Minute). Adresse an der Kasse korrigieren.',
-      noAddr:'Ohne Adresse',noOpen:'Keine offenen Lieferungen.',sentToast:'📤 An {n} geschickt',updated:'Aktualisiert {t}',login:'Bitte zuerst anmelden',loadErr:'Plan konnte nicht geladen werden: ',cancelled:'Senden abgebrochen'},
+      noAddr:'Ohne Adresse',waiting:'Wartet auf einen Fahrer',waitingHint:'Diese Bestellungen haben eine Position, aber es gibt noch keinen Fahrer, dem das System sie geben kann.',noOpen:'Keine offenen Lieferungen.',sentToast:'📤 An {n} geschickt',updated:'Aktualisiert {t}',login:'Bitte zuerst anmelden',loadErr:'Plan konnte nicht geladen werden: ',cancelled:'Senden abgebrochen'},
     ar:{title:'التوزيع',autoT:'بيبعت أول جولة لكل سواق لحاله لما يجي وقتها',auto:'بعت أوتوماتيك',
       noMap:'الخريطة ما حمّلت (ما في إنترنت؟). الخطة شغّالة بدونها.',shop:'المحل',
       learned:'🧠 تعلّم من {n} مشوار · معامل {f}×',learning:'🧠 لسا عم يتعلّم (ما في توصيلات مسجّلة)',
@@ -88,7 +88,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       onWay:'بالطريق',sent:'مبعوتة',leftOf:'{a} باقي من {b}',cancelSend:'لغي البعت',next:'الجولة الجاية',after:'بعدها',
       depart:'طلوع {a} · رجعة {b}',late:'{n} متأخر',sendTo:'📤 بعت لـ{n}',route:'🗺️ المسار',noOrders:'ما في طلبات إله هلق',
       unplaced:'طلبات بدون موقع على الخريطة',unplacedHint:'العنوان ناقص أو غلط، أو لسا عم يندوّر عليه (بياخد لحد دقيقة). صلّح العنوان بالكاشير.',
-      noAddr:'بدون عنوان',noOpen:'ما في طلبات توصيل مفتوحة.',sentToast:'📤 انبعتت لـ {n}',updated:'تحديث {t}',login:'سجّل دخول أول',loadErr:'ما قدرت حمّل الخطة: ',cancelled:'انلغى البعت'},
+      noAddr:'بدون عنوان',waiting:'ناطرة سواق',waitingHint:'هالطلبات إلها موقع، بس ما في سواق لحتى البرنامج يعطيه ياها.',noOpen:'ما في طلبات توصيل مفتوحة.',sentToast:'📤 انبعتت لـ {n}',updated:'تحديث {t}',login:'سجّل دخول أول',loadErr:'ما قدرت حمّل الخطة: ',cancelled:'انلغى البعت'},
     en:{title:'Driver dispatch',autoT:'Sends the first tour to each driver automatically when it is time',auto:'Auto send',
       noMap:'Map did not load (no internet?). Planning still works without it.',shop:'Shop',
       learned:'🧠 Learned from {n} trips · factor {f}×',learning:'🧠 Still learning (no deliveries recorded)',
@@ -98,7 +98,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       onWay:'On the way',sent:'Sent',leftOf:'{a} of {b} left',cancelSend:'Cancel sending',next:'Next tour',after:'After that',
       depart:'Leave {a} · back {b}',late:'{n} late',sendTo:'📤 Send to {n}',route:'🗺️ Route',noOrders:'No orders for this driver right now',
       unplaced:'Orders without a map position',unplacedHint:'Address missing or wrong, or still being looked up (takes up to a minute). Fix the address at the till.',
-      noAddr:'No address',noOpen:'No open delivery orders.',sentToast:'📤 Sent to {n}',updated:'Updated {t}',login:'Please log in first',loadErr:'Could not load the plan: ',cancelled:'Sending cancelled'}
+      noAddr:'No address',waiting:'Waiting for a driver',waitingHint:'These orders have a position, but there is no driver yet for the system to give them to.',noOpen:'No open delivery orders.',sentToast:'📤 Sent to {n}',updated:'Updated {t}',login:'Please log in first',loadErr:'Could not load the plan: ',cancelled:'Sending cancelled'}
   };
   const lang=window.NARA_LANG?NARA_LANG.get():'de';
   const t=(k,v)=>String((T[lang]||T.de)[k]??T.de[k]??k).replace(/\{(\w+)\}/g,(m,x)=>v&&v[x]!=null?v[x]:m);
@@ -137,6 +137,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       t.stops.forEach((s,i)=>{line.push([s.lat,s.lng]);pts.push([s.lat,s.lng]);L.marker([s.lat,s.lng],{icon:pin(i+1,c),opacity:.85}).addTo(layer).bindTooltip(esc(s.code)+' · '+esc(d.name)+' · '+hm(s.etaAt))});
       line.push(shop);L.polyline(line,{color:c,weight:3,dashArray:'6 8',opacity:.8}).addTo(layer);
     }
+    for(const u of plan.unplaced||[])if(Number.isFinite(u.lat)){L.marker([u.lat,u.lng],{icon:pin('•','#8a8f98'),opacity:.9}).addTo(layer).bindTooltip(esc(u.code||'')+' · '+esc(u.address||''));pts.push([u.lat,u.lng])}
     for(const p of plan.positions||[])if(Number.isFinite(p.lat)){L.marker([p.lat,p.lng],{icon:L.divIcon({className:'',html:'<div class="car">🛵</div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(layer).bindTooltip(esc(p.name||'')+' · '+hm(p.at),{permanent:true,direction:'top'});pts.push([p.lat,p.lng])}
     if(!fitted&&pts.length>1){map.fitBounds(pts,{padding:[30,30]});fitted=true}
   }
@@ -167,7 +168,9 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       if(!d.tours.length&&!act.length)h+='<div class="tour muted">'+t('noOrders')+'</div>';
       h+='</section>';
     }
-    if((plan.unplaced||[]).length)h+='<div class="box warn"><h3>'+t('unplaced')+'</h3><div class="muted">'+t('unplacedHint')+'</div>'+plan.unplaced.map(u=>'<div>• <b>'+esc(u.code||u.id)+'</b> '+esc(u.address||(u.reason==='NO_DRIVERS'?'':t('noAddr')))+'</div>').join('')+'</div>';
+    const noLoc=(plan.unplaced||[]).filter(u=>u.reason!=='NO_DRIVERS'||!Number.isFinite(u.lat)),waiting=(plan.unplaced||[]).filter(u=>u.reason==='NO_DRIVERS'&&Number.isFinite(u.lat));
+    if(waiting.length)h+='<div class="box warn"><h3>'+t('waiting')+' ('+waiting.length+')</h3><div class="muted">'+t('waitingHint')+'</div>'+waiting.map(u=>'<div>• <b>'+esc(u.code||u.id)+'</b> '+esc(u.address||'')+'</div>').join('')+'</div>';
+    if(noLoc.length)h+='<div class="box warn"><h3>'+t('unplaced')+'</h3><div class="muted">'+t('unplacedHint')+'</div>'+noLoc.map(u=>'<div>• <b>'+esc(u.code||u.id)+'</b> '+esc(u.address||t('noAddr'))+'</div>').join('')+'</div>';
     if(!(plan.drivers||[]).some(d=>d.tours.length)&&!(plan.active||[]).length&&!(plan.unplaced||[]).length)h+='<div class="box muted">'+t('noOpen')+'</div>';
     side.innerHTML=h;
   }

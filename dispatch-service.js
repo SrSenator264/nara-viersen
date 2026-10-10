@@ -116,7 +116,7 @@ function planFor(data, now = Date.now()) {
   }));
   const positions = Object.entries(data.driverPositions || {}).map(([id, p]) => ({ driverId: id, ...p }));
   // الطلبات بدون موقع: منعرض رقم الطلب والعنوان، مو الـ id الداخلي
-  result.unplaced = result.unplaced.map(u => { const o = byId.get(String(u.id)); return o ? { ...u, code: kitchen.kitchenView(o, now).displayCode, address: addressOf(o).replace(/, Deutschland$/, '') } : u; });
+  result.unplaced = result.unplaced.map(u => { const o = byId.get(String(u.id)); return o ? { ...u, code: kitchen.kitchenView(o, now).displayCode, address: addressOf(o).replace(/, Deutschland$/, ''), ...(pointOf(o, cache) || {}) } : u; });
   return { ...result, shop: input.shop, assumedDrivers: input.assumedDrivers, learning: input.learning, active, positions };
 }
 
