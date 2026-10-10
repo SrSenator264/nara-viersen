@@ -72,8 +72,8 @@ for k in 'AB':
   th=THEME[k]
   numjs="function(i){return 'STAND '+String(i+1).padStart(2,'0')}" if th['num']=='stand' else "function(){return ''}"
   themejs="window.__THEME__={brandHtml:%s,heroMascot:%s,guide:%s,numLabel:%s,text:%s};"%(json.dumps(th['brandHtml']),'true' if th['heroMascot'] else 'false','true' if th.get('guide') else 'false',numjs,json.dumps(th['text'],ensure_ascii=False))
-  html=f"""<title>{TITLE[k]}</title>
-<meta name="theme-color" content="{'#141210' if k=='A' else '#111111'}">
+  html=f"""<meta charset="utf-8"><title>{TITLE[k]}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="{'#141210' if k=='A' else '#111111'}">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?{FONTS[k]}&display=swap">
 <style>{CSS[k].split('/*')[0]}{CSS[k]}{base}</style>
