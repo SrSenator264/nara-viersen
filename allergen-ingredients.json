@@ -37,7 +37,7 @@
       "source": "Inhaberangabe 2026-10-10: normaler grüner Tee im Beutel"
     },
     "brioche-jacob": {
-      "name": "Brioche-Weizenbrötchen (Jacob Brot, Velbert)",
+      "name": "Brioche-Weizenbrötchen (Jacob Brot, Velbert – türkische Bäckerei, einziger Brotlieferant)",
       "status": "confirmed",
       "contains": [
         "Gluten (Weizen, Gerste)",
@@ -78,7 +78,7 @@
       "open": "Rückseite (Zutaten/Allergene) fotografieren; ersetzt die alte Inhaberangabe 'Gluten, Milch' der Taco-Tortilla"
     },
     "baguette-jacob": {
-      "name": "Baguette (Jacob Brot, Velbert)",
+      "name": "Baguette (Jacob Brot, Velbert – türkische Bäckerei, einziger Brotlieferant)",
       "status": "missing",
       "contains": [],
       "usedFor": "Sandwiches im Baguette (Shawarma doppelt, Falafel doppelt, Crispy Filet Sandwich …)",
