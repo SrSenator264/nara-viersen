@@ -25,9 +25,17 @@ var TPL={
 };
 var IMG={burger:1,crispy:1,street:1,orient:1,sides:1,drinks:1,sweet:1};
 var g=document.createElement('div');g.className='guide welcome';g.id='guide';
-g.innerHTML='<div class="g-bubble" id="gBubble" role="status" aria-live="polite"><span id="gText"></span><button type="button" class="g-act" id="gAct" hidden></button></div><div class="g-row"><button type="button" class="g-voice" id="gVoice" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="w" d="M16 9a4 4 0 0 1 0 6"/><path class="w" d="M18.5 6.5a8 8 0 0 1 0 11"/></svg></button><button type="button" class="g-btn" id="gBtn" aria-label="Flamo"><img id="gImg" src="c/mascot.webp" alt=""></button></div>';
+g.innerHTML='<div class="g-bubble" id="gBubble" role="status" aria-live="polite"><span id="gText"></span><button type="button" class="g-act" id="gAct" hidden></button></div><div class="g-row"><button type="button" class="g-voice" id="gVoice" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="w" d="M16 9a4 4 0 0 1 0 6"/><path class="w" d="M18.5 6.5a8 8 0 0 1 0 11"/></svg></button><button type="button" class="g-btn" id="gBtn" aria-label="Flamo"><img id="gImg" src="c/mascot.webp" alt=""><video id="gVid" muted playsinline loop preload="auto" hidden aria-hidden="true"></video></button></div>';
 document.body.appendChild(g);
-var bub=g.querySelector('#gBubble'),txtEl=g.querySelector('#gText'),act=g.querySelector('#gAct'),img=g.querySelector('#gImg'),vbtn=g.querySelector('#gVoice');
+var bub=g.querySelector('#gBubble'),txtEl=g.querySelector('#gText'),act=g.querySelector('#gAct'),img=g.querySelector('#gImg'),vidEl=g.querySelector('#gVid'),vbtn=g.querySelector('#gVoice');
+/* HD-Clips als WebM (VP9 mit Transparenz): schärfer, Wolle sichtbar, kleiner als animiertes WebP.
+   Safari/iOS kann das nicht → dort bleibt das animierte WebP. */
+var imgEl=img,curSrc=imgEl.getAttribute('src'),HDV={'flamo-talk':1,'flamo-wave-hd':1,'flamo-dance':1,'flamo-happy':1,'flamo-present':1,'flamo-spin':1,'flamo-step':1,'flamo-point':1};
+var useVid=!!(vidEl&&vidEl.canPlayType&&vidEl.canPlayType('video/webm; codecs="vp9"'))&&!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+img={get src(){return curSrc},set src(v){curSrc=v;var m=/c\/(flamo-[a-z-]+)\.webp$/.exec(v||'');
+ if(useVid&&m&&HDV[m[1]]){var w='c/'+m[1]+'.webm';if(vidEl.getAttribute('src')!==w){vidEl.src=w}vidEl.hidden=false;imgEl.hidden=true;var p=vidEl.play();if(p&&p.catch)p.catch(function(){vidEl.hidden=true;imgEl.hidden=false;imgEl.src=v})}
+ else{if(!vidEl.hidden){vidEl.pause();vidEl.hidden=true}imgEl.hidden=false;imgEl.src=v}},getAttribute:function(){return curSrc}};
+if(vidEl)vidEl.addEventListener('error',function(){useVid=false;vidEl.hidden=true;imgEl.hidden=false;imgEl.src=curSrc});
 var timer=0,typing=0,talkT=0,voice=false,lastPick={};
 try{voice=localStorage.getItem('flamoVoice')==='1'}catch(e){}
 function L(){return document.documentElement.lang||'de'}

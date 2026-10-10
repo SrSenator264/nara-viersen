@@ -501,15 +501,15 @@ html[dir=rtl] .guide{right:auto;left:16px;align-items:flex-start;transition:left
 .guide.welcome{right:calc(50% - 150px);bottom:calc(50% - 230px);width:300px;align-items:center}
 html[dir=rtl] .guide.welcome{left:calc(50% - 150px)}
 .g-btn{pointer-events:auto;border:0;background:transparent;padding:0;cursor:pointer;width:100%}
-.g-btn img{width:100%;height:auto;display:block;filter:drop-shadow(0 14px 16px rgba(0,0,0,.3));transition:opacity .18s,transform .18s}
-.guide.swap .g-btn img{opacity:0;transform:scale(.85)}
+.g-btn :is(img,video){width:100%;height:auto;display:block;filter:drop-shadow(0 14px 16px rgba(0,0,0,.3));transition:opacity .18s,transform .18s}
+.guide.swap .g-btn :is(img,video){opacity:0;transform:scale(.85)}
 .g-bubble{pointer-events:auto;background:#fff;color:#111;font-weight:800;font-size:15px;line-height:1.3;padding:12px 14px;border-radius:18px 18px 4px 18px;box-shadow:0 8px 24px rgba(0,0,0,.25);width:max-content;max-width:min(260px,calc(100vw - 48px));min-height:1.3em}
 html[dir=rtl] .g-bubble{border-radius:18px 18px 18px 4px}
 .guide.welcome .g-bubble{font-size:19px;max-width:min(320px,calc(100vw - 48px));border-radius:22px;text-align:center}
 @media (prefers-reduced-motion:no-preference){
- .guide.hop .g-btn img{animation:ghop .55s ease}
+ .guide.hop .g-btn :is(img,video){animation:ghop .55s ease}
  @keyframes ghop{30%{transform:translateY(-14px) rotate(-6deg)}60%{transform:translateY(0) rotate(3deg)}}
- .guide:not(.welcome) .g-btn img{animation:gidle 3.4s ease-in-out infinite}
+ .guide:not(.welcome) .g-btn :is(img,video){animation:gidle 3.4s ease-in-out infinite}
  @keyframes gidle{50%{transform:translateY(-5px)}}
 }
 @media (prefers-reduced-motion:reduce){.guide{transition:none}}
@@ -553,7 +553,7 @@ html[dir=rtl] .in-text h1{letter-spacing:0;line-height:1.15}
 .guide.intro{z-index:41;right:4vw;bottom:6vh;width:min(42vw,520px);transition:right .9s cubic-bezier(.5,0,.2,1),bottom .9s cubic-bezier(.5,0,.2,1),width .9s cubic-bezier(.5,0,.2,1)}
 html[dir=rtl] .guide.intro{right:auto;left:4vw}
 .guide.intro .g-bubble,.guide.intro .g-voice{display:none}
-.guide.intro .g-btn img{filter:drop-shadow(0 30px 40px rgba(0,0,0,.6))}
+.guide.intro .g-btn :is(img,video){filter:drop-shadow(0 30px 40px rgba(0,0,0,.6))}
 @media (max-width:760px){
  .in-text{margin-block:auto 0}
  .guide.intro{width:min(64vw,300px);right:calc(50% - min(32vw,150px));bottom:auto;top:15vh}
@@ -568,29 +568,29 @@ html[dir=rtl] .guide.intro{right:auto;left:4vw}
 @media (prefers-reduced-motion:no-preference){
  .guide.ignite .g-spark{animation:spark 1.3s ease-out both}
  @keyframes spark{0%{opacity:0;transform:scale(.2) translateY(30px)}20%{opacity:1;transform:scale(.6) translateY(0)}55%{opacity:1;transform:scale(1.4)}75%{opacity:1;transform:scale(9);filter:blur(6px)}100%{opacity:0;transform:scale(14);filter:blur(14px)}}
- .guide.ignite .g-btn img{animation:igniteIn 1.1s .75s cubic-bezier(.3,1.5,.5,1) both}
+ .guide.ignite .g-btn :is(img,video){animation:igniteIn 1.1s .75s cubic-bezier(.3,1.5,.5,1) both}
  @keyframes igniteIn{0%{opacity:0;transform:scale(.15);filter:brightness(3) blur(8px)}60%{opacity:1;filter:brightness(1.6) blur(0)}100%{opacity:1;transform:scale(1);filter:none}}
  .guide.ignite .in-text{opacity:0}
  #intro .in-text{animation:textIn .7s 1.1s ease-out both}
  @keyframes textIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
- .guide.intro.hop .g-btn img{animation:ghop .45s ease}
+ .guide.intro.hop .g-btn :is(img,video){animation:ghop .45s ease}
 }
 
 /* Flamo auf der Kachel */
 .guide.perch{position:absolute;right:auto;bottom:auto;width:170px;transition:opacity .25s,transform .25s;z-index:6}
 html[dir=rtl] .guide.perch{left:auto}
-.guide.perch .g-btn img{filter:drop-shadow(0 10px 10px rgba(0,0,0,.28));animation:none}
+.guide.perch .g-btn :is(img,video){filter:drop-shadow(0 10px 10px rgba(0,0,0,.28));animation:none}
 .guide.perch .g-bubble{position:absolute;bottom:auto;top:8%;right:calc(100% - 26px);border-radius:18px 4px 18px 18px}
 html[dir=rtl] .guide.perch .g-bubble{right:auto;left:calc(100% - 26px);border-radius:4px 18px 18px 18px}
 .guide.perch .g-voice{position:absolute;top:-4px;right:-4px;left:auto;margin:0;width:36px;height:36px}
 html[dir=rtl] .guide.perch .g-voice{right:auto;left:-4px}
 .guide.perch.jump{opacity:0;transform:translateY(-30px) scale(.85)}
 @media (prefers-reduced-motion:no-preference){
- .guide.perch .g-btn img{transform-origin:50% 70%;animation:perchIdle 4s ease-in-out infinite}
+ .guide.perch .g-btn :is(img,video){transform-origin:50% 70%;animation:perchIdle 4s ease-in-out infinite}
  @keyframes perchIdle{0%,100%{transform:rotate(0) scaleY(1)}50%{transform:rotate(-1.5deg) scaleY(1.02)}}
- .guide.perch.talking .g-btn img{animation:perchTalk .5s ease-in-out infinite}
+ .guide.perch.talking .g-btn :is(img,video){animation:perchTalk .5s ease-in-out infinite}
  @keyframes perchTalk{0%,100%{transform:rotate(0) scaleY(1)}30%{transform:rotate(1.5deg) scaleY(1.035)}70%{transform:rotate(-1deg) scaleY(.99)}}
- .guide.perch.hop .g-btn img{animation:perchHop .5s ease}
+ .guide.perch.hop .g-btn :is(img,video){animation:perchHop .5s ease}
  @keyframes perchHop{40%{transform:translateY(-16px) rotate(-4deg)}}
 }
 @media (max-width:520px){.guide.perch{width:118px}.guide.perch .g-bubble{right:calc(100% - 18px);max-width:min(220px,calc(100vw - 150px));font-size:14px}html[dir=rtl] .guide.perch .g-bubble{left:calc(100% - 18px)}}
@@ -599,11 +599,13 @@ html[dir=rtl] .guide.perch .g-voice{right:auto;left:-4px}
 .guide.perch.standup{transition:top .2s ease-out}
 .guide.perch.walking{transition:left var(--wd,1s) linear,top var(--wd,1s) ease-in-out}
 .guide.perch.walking .g-voice{opacity:0}
-.guide.face-left .g-btn img{scale:-1 1}
+.guide.face-left .g-btn :is(img,video){scale:-1 1}
 @media (prefers-reduced-motion:no-preference){
- .guide.perch.walking .g-btn img{animation:waddle .36s ease-in-out infinite;transform-origin:50% 100%}
+ .guide.perch.walking .g-btn :is(img,video){animation:waddle .36s ease-in-out infinite;transform-origin:50% 100%}
  @keyframes waddle{0%,100%{transform:rotate(-2deg) translateY(0)}25%{transform:rotate(0) translateY(-4px)}50%{transform:rotate(2deg) translateY(0)}75%{transform:rotate(0) translateY(-4px)}}
 }
+
+.g-btn video{width:100%;height:auto;display:block;background:transparent}
 </style><script>(function(){
 if(!window.__THEME__||!window.__THEME__.guide)return;
 var W=window.NARA_WEB;
@@ -631,9 +633,17 @@ var TPL={
 };
 var IMG={burger:1,crispy:1,street:1,orient:1,sides:1,drinks:1,sweet:1};
 var g=document.createElement('div');g.className='guide welcome';g.id='guide';
-g.innerHTML='<div class="g-bubble" id="gBubble" role="status" aria-live="polite"><span id="gText"></span><button type="button" class="g-act" id="gAct" hidden></button></div><div class="g-row"><button type="button" class="g-voice" id="gVoice" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="w" d="M16 9a4 4 0 0 1 0 6"/><path class="w" d="M18.5 6.5a8 8 0 0 1 0 11"/></svg></button><button type="button" class="g-btn" id="gBtn" aria-label="Flamo"><img id="gImg" src="c/mascot.webp" alt=""></button></div>';
+g.innerHTML='<div class="g-bubble" id="gBubble" role="status" aria-live="polite"><span id="gText"></span><button type="button" class="g-act" id="gAct" hidden></button></div><div class="g-row"><button type="button" class="g-voice" id="gVoice" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="w" d="M16 9a4 4 0 0 1 0 6"/><path class="w" d="M18.5 6.5a8 8 0 0 1 0 11"/></svg></button><button type="button" class="g-btn" id="gBtn" aria-label="Flamo"><img id="gImg" src="c/mascot.webp" alt=""><video id="gVid" muted playsinline loop preload="auto" hidden aria-hidden="true"></video></button></div>';
 document.body.appendChild(g);
-var bub=g.querySelector('#gBubble'),txtEl=g.querySelector('#gText'),act=g.querySelector('#gAct'),img=g.querySelector('#gImg'),vbtn=g.querySelector('#gVoice');
+var bub=g.querySelector('#gBubble'),txtEl=g.querySelector('#gText'),act=g.querySelector('#gAct'),img=g.querySelector('#gImg'),vidEl=g.querySelector('#gVid'),vbtn=g.querySelector('#gVoice');
+/* HD-Clips als WebM (VP9 mit Transparenz): schärfer, Wolle sichtbar, kleiner als animiertes WebP.
+   Safari/iOS kann das nicht → dort bleibt das animierte WebP. */
+var imgEl=img,curSrc=imgEl.getAttribute('src'),HDV={'flamo-talk':1,'flamo-wave-hd':1,'flamo-dance':1,'flamo-happy':1,'flamo-present':1,'flamo-spin':1,'flamo-step':1,'flamo-point':1};
+var useVid=!!(vidEl&&vidEl.canPlayType&&vidEl.canPlayType('video/webm; codecs="vp9"'))&&!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+img={get src(){return curSrc},set src(v){curSrc=v;var m=/c\/(flamo-[a-z-]+)\.webp$/.exec(v||'');
+ if(useVid&&m&&HDV[m[1]]){var w='c/'+m[1]+'.webm';if(vidEl.getAttribute('src')!==w){vidEl.src=w}vidEl.hidden=false;imgEl.hidden=true;var p=vidEl.play();if(p&&p.catch)p.catch(function(){vidEl.hidden=true;imgEl.hidden=false;imgEl.src=v})}
+ else{if(!vidEl.hidden){vidEl.pause();vidEl.hidden=true}imgEl.hidden=false;imgEl.src=v}},getAttribute:function(){return curSrc}};
+if(vidEl)vidEl.addEventListener('error',function(){useVid=false;vidEl.hidden=true;imgEl.hidden=false;imgEl.src=curSrc});
 var timer=0,typing=0,talkT=0,voice=false,lastPick={};
 try{voice=localStorage.getItem('flamoVoice')==='1'}catch(e){}
 function L(){return document.documentElement.lang||'de'}
