@@ -39,7 +39,10 @@
   const schedCust=()=>{clearTimeout(custTimer);custTimer=setTimeout(syncCustomers,1500)};
 
   // ───────── الطلبات المفتوحة ─────────
-  const pushed={};let ordBusy=false,ordTimer=0;
+  // آخر نسخة بعتناها لكل طلب — محفوظة عالجهاز، لحتى إعادة تحميل الصفحة ما تبعت كل الطلبات من جديد (وتعمل تعارض مع جهاز تاني)
+  const PK='nara-kasse-pushed',pushed=jget(PK,{});let ordBusy=false,ordTimer=0,pkT=0;
+  const savePushed=()=>{clearTimeout(pkT);pkT=setTimeout(()=>{const ids=new Set(jget(OK,[]).map(o=>String(o&&o.id)));Object.keys(pushed).forEach(k=>{if(!ids.has(k))delete pushed[k]});jset(PK,pushed)},500)};
+  const same=(a,b)=>JSON.stringify([a.cart||[],a.delivery||null,a.type||'',a.table||a.tableNumber||'',a.notes||a.note||''])===JSON.stringify([b.cart||[],b.delivery||null,b.type||'',b.table||b.tableNumber||'',b.notes||b.note||'']);
   const hasContent=o=>(o.cart&&o.cart.length)||(o.delivery&&(o.delivery.phone||o.delivery.name));
   async function pushOrders(){
     const emp=ls.getItem('nara-cashier-employee-id')||'';
@@ -48,9 +51,9 @@
       const h=hash(o);if(pushed[o.id]===h)continue;
       try{const r=await fetch('/api/kasse/events',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action:'ORDER_SYNC',clientId:(window.NARA_CLIENT_ID||''),employeeId:emp,order:Object.assign({},o,{employeeId:emp}),items:o.cart||[]})});
         const d=await r.json().catch(()=>({}));const L=window.NARA_LEGACY_KASSE_STATE;
-        if(r.ok){pushed[o.id]=h;status(true);const lo=L&&L.getOrders().find(x=>String(x.id)===String(o.id));if(lo&&Number.isInteger(d.rev)&&lo.rev!==d.rev){lo.rev=d.rev;L.save()}}
-        else if(r.status===409&&(d.code==='ORDER_CONFLICT'||d.code==='PAID_LOCKED')&&d.order&&L){replaceLocal(L,o.id,d.order);L.save();L.render();note();status(true)}
-        else if(r.status===409||r.status===422){pushed[o.id]=h;status(true)}else if(r.status>=500)throw new Error('HTTP '+r.status)}
+        if(r.ok){pushed[o.id]=h;savePushed();status(true);const lo=L&&L.getOrders().find(x=>String(x.id)===String(o.id));if(lo&&Number.isInteger(d.rev)&&lo.rev!==d.rev){lo.rev=d.rev;L.save()}}
+        else if(r.status===409&&(d.code==='ORDER_CONFLICT'||d.code==='PAID_LOCKED')&&d.order&&L){const quiet=same(o,d.order);replaceLocal(L,o.id,d.order);savePushed();L.save();L.render();if(!quiet)note();status(true)}
+        else if(r.status===409||r.status===422){pushed[o.id]=h;savePushed();status(true)}else if(r.status>=500)throw new Error('HTTP '+r.status)}
       catch(e){status(false);return}
     }
   }
@@ -64,12 +67,12 @@
         const local=list.find(x=>String(x.id)===String(s.id));
         if(local){
           // انعدّل على جهاز تاني ونحنا ما عدّلنا شي هون من آخر مزامنة: منحدّث نسختنا
-          if(Number.isInteger(s.rev)&&s.rev>(Number(local.rev)||0)&&pushed[s.id]===hash(local)&&!closed(local.status)){replaceLocal(L,s.id,s);changed=true}
+          if(Number.isInteger(s.rev)&&s.rev>(Number(local.rev)||0)&&(pushed[s.id]===hash(local)||same(local,s))&&!closed(local.status)){replaceLocal(L,s.id,s);savePushed();changed=true}
           continue;
         }
         const plat=String(s.platform||s.source||'NARA').toUpperCase();
-        if(!['local','pickup','delivery'].includes(s.type)||/LIEFERANDO|UBER|WOLT|LANCH/.test(plat))continue;
-        list.push(s);pushed[s.id]=hash(s);changed=true;
+        if(!['local','pickup','delivery'].includes(s.type)||/LIEFERANDO|UBER|WOLT|LANCH|SIDES|^WEB/.test(plat))continue;
+        list.push(s);pushed[s.id]=hash(s);savePushed();changed=true;
       }
       for(const c of d.closed||[]){const l=list.find(x=>String(x.id)===String(c.id));if(l&&!closed(l.status)){l.status=c.status;changed=true}}
       if(changed){L.save();L.render()}
