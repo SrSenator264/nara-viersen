@@ -3,14 +3,14 @@
   "updated": "2026-10-10",
   "ingredients": {
     "brot-baeckerei": {
-      "name": "Brot / Brötchen (türkische Bäckerei: Burger-Bun, Brioche, Baguette, Hot-Dog)",
+      "name": "Brot / Brötchen der türkischen Bäckerei (Baguette, Fladen, sonstige)",
       "status": "pending",
       "contains": [
         "Gluten (Weizen)",
         "Milch"
       ],
       "source": "Inhaberangabe 2026-10-10: Hefe, Mehl, Milch",
-      "open": "Allergenliste der Bäckerei anfragen: Brioche enthält meist Ei und Butter; Sesam bei Sesam-Buns; Spuren?"
+      "open": "Allergenliste der Bäckerei anfragen; welche Brote kommen von dort?"
     },
     "hackfleisch-rind-kalb": {
       "name": "Burger-Patty, frisch (Rind + Kalb)",
@@ -45,6 +45,24 @@
       "status": "confirmed",
       "contains": [],
       "source": "Inhaberangabe 2026-10-10: normaler grüner Tee im Beutel"
+    },
+    "brioche-jacob": {
+      "name": "Brioche-Weizenbrötchen (Jacob Brot, Velbert)",
+      "status": "confirmed",
+      "contains": [
+        "Gluten (Weizen, Gerste)",
+        "Ei",
+        "Milch"
+      ],
+      "mayContain": [
+        "Soja",
+        "Senf"
+      ],
+      "additives": [
+        "mit Farbstoff (E160a)"
+      ],
+      "source": "Deklaration Dr. Berns Laboratorium, Bericht 2018/085-2 S. 7 (Analyse 26.07.2018), Foto vom Inhaber 2026-10-10",
+      "open": "Gleiche Rezeptur noch aktuell? Sesam-Variante (Sesam-Bun) separat bestätigen."
     }
   }
 }
