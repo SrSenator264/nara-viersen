@@ -21,7 +21,7 @@ function defaults() {
       { id: 'epson', name: 'Epson TM-m30II', mode: 'browser', winName: '', ip: '', port: 9100, width: 80, cut: 'partial' },
     ],
     routes: { kasse: 'kasse', platform: 'epson', kitchen: 'epson', driver: 'epson' },
-    auto: { afterPayment: true, kitchenOnPlatformOrder: false, receiptOnPlatformOrder: false },
+    auto: { afterPayment: true, kitchenOnPlatformOrder: false, receiptOnPlatformOrder: false, webOrder: true },
     promo: { enabled: true, platforms: ['LIEFERANDO', 'UBER_EATS', 'WOLT'], percent: 20, days: 30, url: 'https://nara-viersen.de/a' },
     copies: { kasse: 1, platform: 1, kitchen: 1, driver: 1 },
   };
