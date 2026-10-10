@@ -23,6 +23,7 @@ function eur(c){return (c/100).toFixed(2).replace('.',',')+' €'}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function save(){try{localStorage.setItem('cart',JSON.stringify(cart));localStorage.setItem('lang',lang)}catch(e){}}
 var byId={};MENU.forEach(function(p){byId[p.id]=p});
+window.NARA_WEB={cart:function(){return cart},menu:MENU,byId:byId,eur:function(c){return eur(c)}};
 function count(){var n=0;for(var k in cart)n+=cart[k];return n}
 function sum(){var s=0;for(var k in cart)if(byId[k])s+=byId[k].p*cart[k];return s}
 function secOf(k){for(var i=0;i<SECS.length;i++)if(SECS[i].k===k)return SECS[i]}

@@ -1,4 +1,4 @@
-.guide{position:fixed;z-index:26;right:16px;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:116px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;transition:right .9s cubic-bezier(.5,0,.2,1),bottom .9s cubic-bezier(.5,0,.2,1),width .9s cubic-bezier(.5,0,.2,1);pointer-events:none}
+.guide{position:fixed;z-index:26;right:16px;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:160px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;transition:right .9s cubic-bezier(.5,0,.2,1),bottom .9s cubic-bezier(.5,0,.2,1),width .9s cubic-bezier(.5,0,.2,1);pointer-events:none}
 html[dir=rtl] .guide{right:auto;left:16px;align-items:flex-start;transition:left .9s cubic-bezier(.5,0,.2,1),bottom .9s cubic-bezier(.5,0,.2,1),width .9s cubic-bezier(.5,0,.2,1)}
 .guide.welcome{right:calc(50% - 150px);bottom:calc(50% - 230px);width:300px;align-items:center}
 html[dir=rtl] .guide.welcome{left:calc(50% - 150px)}
@@ -15,10 +15,19 @@ html[dir=rtl] .g-bubble{border-radius:18px 18px 18px 4px}
  @keyframes gidle{50%{transform:translateY(-5px)}}
 }
 @media (prefers-reduced-motion:reduce){.guide{transition:none}}
-@media (max-width:520px){.guide{width:92px}.guide.welcome{width:230px;right:calc(50% - 115px)}html[dir=rtl] .guide.welcome{left:calc(50% - 115px)}}
+@media (max-width:520px){.guide{width:134px}.guide.welcome{width:230px;right:calc(50% - 115px)}html[dir=rtl] .guide.welcome{left:calc(50% - 115px)}}
 
 .guide .g-btn{transition:opacity .35s,transform .35s}
 .guide.away .g-btn{opacity:0;transform:translateY(30px) scale(.6);pointer-events:none}
 .shero-bar{align-self:flex-end;width:min(440px,48%);margin-block-end:-2px;margin-inline-start:auto;line-height:0}
 .shero-bar img{width:100%;height:auto}
 @media (max-width:700px){.shero-bar{width:62%}}
+
+.g-row{display:flex;align-items:flex-end;gap:6px;width:100%}
+html[dir=rtl] .g-row{flex-direction:row-reverse}
+.g-voice{pointer-events:auto;flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:0;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.25);margin-bottom:6px}
+.g-voice[aria-pressed=false] .w{opacity:.15}
+.g-voice[aria-pressed=true]{background:#111;color:#fff}
+.guide.welcome .g-voice{display:none}
+.g-act{display:block;margin-top:8px;border:0;border-radius:999px;background:#111;color:#fff;font-weight:800;font-size:14px;padding:9px 14px}
+.g-row .g-btn{flex:1 1 auto;min-width:0}
