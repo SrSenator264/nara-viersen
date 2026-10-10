@@ -41,8 +41,9 @@ function qtyOf(id){var n=0;for(var k in cart)if(cart[k].id===id)n+=cart[k].q;ret
 function count(){var n=0;for(var k in cart)n+=cart[k].q;return n}
 function sum(){var s=0;for(var k in cart)s+=cart[k].u*cart[k].q;return s}
 function secOf(k){for(var i=0;i<SECS.length;i++)if(SECS[i].k===k)return SECS[i]}
-function gName(g){var x=ON[g];return x?(x[lang]||x.de):g.replace(/^__/,'')}
-function oName(n){var x=ON[n];return x?(x[lang]||x.de):n}
+var GEMO={__drink:'🥤',__sauce:'🫙',Dips:'🥣','Ihre Extras':'✨'};
+function gName(g){var x=ON[g];return (GEMO[g]?GEMO[g]+' ':'')+(x?(x[lang]||x.de):g.replace(/^__/,''))}
+function oName(n){var x=ON[n],e=window.NARA_EMOJI?NARA_EMOJI.ing(n):'';return (e?e+' ':'')+(x?(x[lang]||x.de):n)}
 window.NARA_WEB={cart:function(){return cart},setCart:function(o){cart=normCart(o||{});save();render()},openCart:function(){drawerOpen=true;render()},add:addSimple,menu:MENU,byId:byId,eur:function(c){return eur(c)}};
 var MS={burger:1,crispy:1,street:1,orient:1,drinks:1,sweet:1,sides:1};
 function mascot(size,k){return '<img class="mascot" src="c/'+(k&&MS[k]?'m-'+k:'mascot')+'.webp" alt="" width="'+size+'" height="'+Math.round(size*1.18)+'">'}

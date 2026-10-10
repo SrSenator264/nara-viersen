@@ -8,15 +8,15 @@
   const T = {
     de: { title: 'Bezahlen', total: 'Summe', discount: 'Rabatt', toPay: 'Zu zahlen', paid: 'Schon bezahlt', open: 'Offen', none: 'Kein Rabatt', pct: '%', eur: '€', custom: 'Eigener', staff: '👤 Personalessen', staffCode: 'Mitarbeiter-Code', check: 'Prüfen', staffOk: 'Personalessen', badCode: 'Code ungültig',
       split: '🧾 Rechnung teilen', noSplit: 'Nicht teilen', equal: 'Gleich teilen', byItem: 'Nach Artikeln', people: 'Personen', person: 'Person', part: 'Teil', partPaid: 'bezahlt', assign: 'Wer hat was?', unassigned: 'Noch nicht zugeordnet',
-      cash: '💶 Bar', card: '💳 Karte', mixed: 'Bar + Karte', given: 'Gegeben', change: 'Rückgeld', notEnough: 'Zu wenig gegeben', cashPart: 'Bar-Anteil', cardRest: 'Rest auf Karte',
+      cash: '💶 Bar', card: '💳 Karte', mixed: '🔀 Bar + Karte', given: 'Gegeben', change: 'Rückgeld', notEnough: 'Zu wenig gegeben', cashPart: 'Bar-Anteil', cardRest: 'Rest auf Karte',
       cancel: 'Abbrechen', payAll: 'Bezahlen', payPart: 'Teil {n} bezahlen', done: 'Bezahlt ✓', partDone: 'Teil {n} bezahlt ✓ – weiter mit Teil {m}', err: 'Fehler', assignAll: 'Bitte zuerst alle Artikel einer Person zuordnen.' },
     ar: { title: 'الدفع', total: 'المجموع', discount: 'خصم', toPay: 'المطلوب', paid: 'اندفع', open: 'باقي', none: 'بلا خصم', pct: '٪', eur: '€', custom: 'غير', staff: '👤 أكل موظف', staffCode: 'كود الموظف', check: 'تحقق', staffOk: 'أكل موظف', badCode: 'الكود غلط',
       split: '🧾 قسّم الفاتورة', noSplit: 'بلا تقسيم', equal: 'بالتساوي', byItem: 'حسب الأصناف', people: 'أشخاص', person: 'شخص', part: 'جزء', partPaid: 'اندفع', assign: 'مين أكل شو؟', unassigned: 'لسا مو موزّع',
-      cash: '💶 كاش', card: '💳 كرت', mixed: 'كاش + كرت', given: 'أعطى', change: 'الباقي إلو', notEnough: 'المبلغ ما بيكفي', cashPart: 'قديش كاش', cardRest: 'الباقي عالكرت',
+      cash: '💶 كاش', card: '💳 كرت', mixed: '🔀 كاش + كرت', given: 'أعطى', change: 'الباقي إلو', notEnough: 'المبلغ ما بيكفي', cashPart: 'قديش كاش', cardRest: 'الباقي عالكرت',
       cancel: 'إلغاء', payAll: 'ادفع', payPart: 'ادفع الجزء {n}', done: 'اندفع ✓', partDone: 'الجزء {n} اندفع ✓ – هلق الجزء {m}', err: 'صار في غلط', assignAll: 'وزّع كل الأصناف عالأشخاص أول.' },
     en: { title: 'Payment', total: 'Total', discount: 'Discount', toPay: 'To pay', paid: 'Already paid', open: 'Open', none: 'No discount', pct: '%', eur: '€', custom: 'Custom', staff: '👤 Staff meal', staffCode: 'Employee code', check: 'Check', staffOk: 'Staff meal', badCode: 'Invalid code',
       split: '🧾 Split bill', noSplit: 'No split', equal: 'Split equally', byItem: 'By items', people: 'people', person: 'Person', part: 'Part', partPaid: 'paid', assign: 'Who had what?', unassigned: 'Not assigned yet',
-      cash: '💶 Cash', card: '💳 Card', mixed: 'Cash + card', given: 'Given', change: 'Change', notEnough: 'Not enough given', cashPart: 'Cash part', cardRest: 'Rest on card',
+      cash: '💶 Cash', card: '💳 Card', mixed: '🔀 Cash + card', given: 'Given', change: 'Change', notEnough: 'Not enough given', cashPart: 'Cash part', cardRest: 'Rest on card',
       cancel: 'Cancel', payAll: 'Pay', payPart: 'Pay part {n}', done: 'Paid ✓', partDone: 'Part {n} paid ✓ – next: part {m}', err: 'Error', assignAll: 'Please assign every item to a person first.' },
   };
   const lang = () => (window.NARA_LANG && NARA_LANG.get()) || 'de';

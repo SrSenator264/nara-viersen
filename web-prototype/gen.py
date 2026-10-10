@@ -1,7 +1,7 @@
 import json
 menu=open('menu.json',encoding='utf-8').read()
 base=open('base.css',encoding='utf-8').read()
-app=open('app.js',encoding='utf-8').read()
+app=open('nara-emoji.js',encoding='utf-8').read()+'\n'+open('app.js',encoding='utf-8').read()
 ON=open('optnames.json',encoding='utf-8').read()
 GUIDE='<style>'+open('guide.css',encoding='utf-8').read()+'</style><script>'+open('guide.js',encoding='utf-8').read()+'</script>'
 FONTS={'C':'family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Cairo:wght@500;800;900','A':'family=Anton&family=Archivo:wght@400;600;800&family=Cairo:wght@500;800;900','B':'family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Cairo:wght@500;800;900'}

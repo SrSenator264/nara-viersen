@@ -8,12 +8,12 @@
 (function(){
   'use strict';
   const T={
-    de:{single:'Einzeln',menu:'Als Menü',add:'Hinzufügen',save:'Änderung speichern',required:'Pflicht',pick:'Bitte wählen: {x}',more:'anzeigen',less:'ausblenden',note:'Notiz',notePh:'Notiz für die Küche …',qty:'Menge',incl:'inkl.',close:'Schließen',
-      groups:{__drink:'Getränk',__sauce:'Sauce (im Menü inklusive)',Dips:'Dip extra (separat im Becher)','Ihre Extras':'Extras im Burger'}},
-    ar:{single:'لحالو',menu:'منيو',add:'زيد عالطلب',save:'احفظ التعديل',required:'لازم',pick:'لازم تنقّي: {x}',more:'فرجيني',less:'خبّي',note:'ملاحظة',notePh:'ملاحظة للمطبخ …',qty:'الكمية',incl:'ضمن السعر',close:'سكّر',
-      groups:{__drink:'المشروب',__sauce:'الصوص (ضمن المنيو)',Dips:'ديب زيادة (بعلبة لحال)','Ihre Extras':'إضافات جوّا البرغر'}},
-    en:{single:'Single',menu:'As menu',add:'Add to order',save:'Save changes',required:'Required',pick:'Please choose: {x}',more:'show',less:'hide',note:'Note',notePh:'Note for the kitchen …',qty:'Qty',incl:'incl.',close:'Close',
-      groups:{__drink:'Drink',__sauce:'Sauce (included in menu)',Dips:'Extra dip (separate cup)','Ihre Extras':'Extras inside the burger'}}};
+    de:{single:'Einzeln',menu:'Als Menü',add:'Hinzufügen',save:'Änderung speichern',required:'Pflicht',pick:'Bitte wählen: {x}',more:'anzeigen',less:'ausblenden',note:'📝 Notiz',notePh:'Notiz für die Küche …',qty:'Menge',incl:'inkl.',close:'Schließen',
+      groups:{__drink:'🥤 Getränk',__sauce:'🫙 Sauce (im Menü inklusive)',Dips:'🥣 Dip extra (separat im Becher)','Ihre Extras':'✨ Extras im Burger'}},
+    ar:{single:'لحالو',menu:'منيو',add:'زيد عالطلب',save:'احفظ التعديل',required:'لازم',pick:'لازم تنقّي: {x}',more:'فرجيني',less:'خبّي',note:'📝 ملاحظة',notePh:'ملاحظة للمطبخ …',qty:'الكمية',incl:'ضمن السعر',close:'سكّر',
+      groups:{__drink:'🥤 المشروب',__sauce:'🫙 الصوص (ضمن المنيو)',Dips:'🥣 ديب زيادة (بعلبة لحال)','Ihre Extras':'✨ إضافات جوّا البرغر'}},
+    en:{single:'Single',menu:'As menu',add:'Add to order',save:'Save changes',required:'Required',pick:'Please choose: {x}',more:'show',less:'hide',note:'📝 Note',notePh:'Note for the kitchen …',qty:'Qty',incl:'incl.',close:'Close',
+      groups:{__drink:'🥤 Drink',__sauce:'🫙 Sauce (included in menu)',Dips:'🥣 Extra dip (separate cup)','Ihre Extras':'✨ Extras inside the burger'}}};
   // ملاحظات سريعة للمطبخ (ألماني لأنو بتنطبع)
   const QUICK=['ohne Zwiebeln','ohne Tomaten','ohne Gurke','ohne Salat','ohne Soße','extra scharf','gut durch'];
   const L=()=>{try{const l=window.NARA_LANG?NARA_LANG.get():localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
@@ -53,7 +53,7 @@
     const id=o.id||o.name,v=(S.sel[g.group]||{})[id],on=!!v,multi=MULTI.has(g.group);
     const price=o.cents?'+'+eur(o.cents):(g.required?t('incl'):'');
     return '<button type="button" class="npd-tile'+(on?' on':'')+'" data-g="'+esc(g.group)+'" data-o="'+esc(id)+'">'
-      +'<span class="n">'+esc(oname(o.name))+'</span><span class="pr">'+esc(price)+'</span>'
+      +'<span class="n">'+esc(window.NARA_EMOJI?NARA_EMOJI.deco(oname(o.name)):oname(o.name))+'</span><span class="pr">'+esc(price)+'</span>'
       +(multi&&on?'<span class="q"><i data-minus="1">−</i><b>'+v.qty+'</b></span>':'')+'</button>';
   }
   function draw(){

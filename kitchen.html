@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NARA · المطبخ</title>
-<script src="/nara-lang.js?v=20261009b" data-section="kitchen"></script>
+<script src="/nara-lang.js?v=20261009b" data-section="kitchen"></script><script src="/nara-emoji.js?v=20261010a"></script>
 <link rel="stylesheet" href="/kasse-print-lifecycle.css?v=20261009k">
 <style>
 :root{--bg:#101418;--panel:#181e24;--card:#fff;--ink:#14181c;--muted:#6b7580;--line:#e3e7eb;--new:#2563eb;--prep:#d97706;--ready:#16a34a;--late:#dc2626;--soon:#f59e0b}
@@ -121,17 +121,17 @@ button:disabled{opacity:.5}
 <script>
 (function(){
   const T={
-    ar:{title:'المطبخ',colNew:'جديد',colPrep:'عم ينطبخ',colReady:'جاهز',sum:'الملخص',sumTitle:'شو لازم نحضّر هلق',start:'بلّش',ready:'جاهز ✓',picked:'استلموه',back:'رجوع',print:'اطبع',
+    ar:{title:'المطبخ',colNew:'🆕 جديد',colPrep:'🔥 عم ينطبخ',colReady:'✅ جاهز',sum:'الملخص',sumTitle:'شو لازم نحضّر هلق',start:'🔥 بلّش',ready:'جاهز ✓',picked:'استلموه',back:'رجوع',print:'اطبع',
       delivery:'توصيل',pickup:'استلام',local:'بالمحل',table:'طاولة',min:'د',late:'متأخر',left:'باقي',empty:'ما في طلبات',updated:'آخر تحديث',orders:'طلبات',
       offline:'ما في اتصال بالسيرفر — شوف إذا شغّال',login:'سجّل دخول أول',note:'ملاحظة',floor:'الطابق',drinks:'مشروبات',other:'أكل',
       expect:'جاهز تقريباً',sumHint:'بس اللي لازم ينعمل هلق (الطلبات اللي عم تنطبخ واللي وقتها هلق). دوس على صنف لتشوف طلباته.',sumEmpty:'ما في شي للتحضير هلق',later:'لبعدين — لا تبلّش فيهن هلق',from:'من',prio:'أولوية',
       expandT:'افتح كل الطلبات',soundT:'الصوت',autoprintT:'طباعة تلقائية',langT:'اللغة'},
-    de:{title:'Küche',colNew:'Neu',colPrep:'In Arbeit',colReady:'Fertig',sum:'Übersicht',sumTitle:'Jetzt zubereiten',start:'Starten',ready:'Fertig ✓',picked:'Abgeholt',back:'Zurück',print:'Drucken',
+    de:{title:'Küche',colNew:'🆕 Neu',colPrep:'🔥 In Arbeit',colReady:'✅ Fertig',sum:'Übersicht',sumTitle:'Jetzt zubereiten',start:'🔥 Starten',ready:'Fertig ✓',picked:'Abgeholt',back:'Zurück',print:'Drucken',
       delivery:'Lieferung',pickup:'Abholung',local:'Vor Ort',table:'Tisch',min:'Min',late:'zu spät',left:'noch',empty:'Keine Bestellungen',updated:'Aktualisiert',orders:'Bestellungen',
       offline:'Keine Verbindung zum Server — läuft er?',login:'Bitte zuerst anmelden',note:'Hinweis',floor:'Etage',drinks:'Getränke',other:'Speisen',
       expect:'fertig ca.',sumHint:'Nur was jetzt dran ist (laufende Bestellungen und alle, deren Startzeit jetzt ist). Artikel antippen zeigt die Bestellungen.',sumEmpty:'Gerade nichts zuzubereiten',later:'Später — noch nicht anfangen',from:'ab',prio:'Vorrang',
       expandT:'Alle Bestellungen aufklappen',soundT:'Ton',autoprintT:'Automatisch drucken',langT:'Sprache'},
-    en:{title:'Kitchen',colNew:'New',colPrep:'Cooking',colReady:'Ready',sum:'Summary',sumTitle:'To prepare now',start:'Start',ready:'Ready ✓',picked:'Picked up',back:'Back',print:'Print',
+    en:{title:'Kitchen',colNew:'🆕 New',colPrep:'🔥 Cooking',colReady:'✅ Ready',sum:'Summary',sumTitle:'To prepare now',start:'🔥 Start',ready:'Ready ✓',picked:'Picked up',back:'Back',print:'Print',
       delivery:'Delivery',pickup:'Pickup',local:'Dine-in',table:'Table',min:'min',late:'late',left:'left',empty:'No orders',updated:'Updated',orders:'orders',
       offline:'No connection to the server — is it running?',login:'Please log in first',note:'Note',floor:'Floor',drinks:'Drinks',other:'Food',
       expect:'ready ~',sumHint:'Only what is due now (cooking orders and those whose start time is now). Tap an item to see its orders.',sumEmpty:'Nothing to prepare right now',later:'Later — don\'t start yet',from:'from',prio:'Priority',
@@ -197,7 +197,7 @@ button:disabled{opacity:.5}
     const agg=new Map();for(const i of o.items){const k=itemKey(i);agg.set(k,{name:i.name,q:(agg.get(k)?.q||0)+i.quantity})}
     const brief=[...agg.values()].map(i=>'<span>'+esc(i.q)+'× '+esc(P(i.name))+'</span>').join(' · ');
     const items=o.items.map(i=>'<div class="it"><div class="n"><span class="q">'+esc(i.quantity)+'×</span>'+esc(P(i.name))+'</div>'
-      +(i.options||[]).map(x=>'<div class="o">+ '+(x.quantity>1?esc(x.quantity)+'× ':'')+esc(P(x.name))+'</div>').join('')
+      +(i.options||[]).map(x=>'<div class="o">'+(x.quantity>1?esc(x.quantity)+'× ':'')+esc(window.NARA_EMOJI?NARA_EMOJI.deco(P(x.name)):'+ '+P(x.name))+'</div>').join('')
       +(i.note?'<div class="x">! '+esc(i.note)+'</div>':'')+'</div>').join('');
     const info=[o.customerName?'<b><bdi>'+esc(o.customerName)+'</bdi></b>':'',o.phone?'<a href="tel:'+esc(o.phone.replace(/\s/g,''))+'">☎ '+esc(o.phone)+'</a>':'',
       o.address?'<bdi dir="ltr">'+esc(o.address)+(o.city?', '+esc(o.city):'')+'</bdi>':'',o.floor?t('floor')+': <bdi>'+esc(o.floor)+'</bdi>':''].filter(Boolean).join('<br>');
@@ -239,7 +239,7 @@ button:disabled{opacity:.5}
     const row=(k,r,later)=>'<div class="srow'+(hlItem===k?' on':'')+'" data-item="'+esc(k)+'"><span class="c">'+r.count+'×</span><span class="t"><b>'+esc(P(r.name))+'</b>'
       +(r.prio&&!later?'<div><span class="prio" dir="auto">🍽️ '+r.prio+'× '+esc(t('prio'))+'</span></div>':'')
       +(later&&isFinite(r.first)?'<div><span class="at" dir="auto">⏰ '+esc(t('from'))+' '+hhmm(new Date(r.first))+'</span></div>':'')
-      +(r.opts.size?'<div class="s">'+[...r.opts].map(([n,c])=>c+'× '+esc(P(n))).join(' · ')+'</div>':'')
+      +(r.opts.size?'<div class="s">'+[...r.opts].map(([n,c])=>c+'× '+esc(window.NARA_EMOJI?NARA_EMOJI.deco(P(n)):P(n))).join(' · ')+'</div>':'')
       +(r.notes?'<div class="s">⚠️ '+r.notes+'× <bdi>'+esc(t('note'))+'</bdi></div>':'')
       +'<div class="codes">'+r.codes.map(esc).join(' · ')+'</div></span></div>';
     const block=(rows,later)=>{
