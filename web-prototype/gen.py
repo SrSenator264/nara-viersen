@@ -4,7 +4,7 @@ base=open('base.css',encoding='utf-8').read()
 app=open('app.js',encoding='utf-8').read()
 ON=open('optnames.json',encoding='utf-8').read()
 GUIDE='<style>'+open('guide.css',encoding='utf-8').read()+'</style><script>'+open('guide.js',encoding='utf-8').read()+'</script>'
-FONTS={'A':'family=Anton&family=Archivo:wght@400;600;800&family=Cairo:wght@500;800;900','B':'family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Cairo:wght@500;800;900'}
+FONTS={'C':'family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Cairo:wght@500;800;900','A':'family=Anton&family=Archivo:wght@400;600;800&family=Cairo:wght@500;800;900','B':'family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Cairo:wght@500;800;900'}
 CSS={'A':"""
 /* A · Die Halle: dark food hall, every section a numbered stand with its own colour */
 :root{--bg:#141210;--fg:#F3EBDD;--topbg:#141210;--topfg:#F3EBDD;--line:#4A4540;--line2:#E3DACB;--card:#F3EBDD;--cardfg:#141210;--cta:#FFB000;--ctaink:#141210;--focus:#FFB000;
@@ -65,15 +65,31 @@ body[data-route=drinks] .add{background:#1E7FA8}
 body[data-route=sweet] .add{background:#C8487A}
 @media (max-width:700px){.sec{min-height:180px}.sec img{height:90%;opacity:.95}.shero-in{flex-basis:55%}.shero-m .mascot{width:140px}}
 """}
-THEME={'A':{'brandHtml':'iu gene','heroMascot':False,'guide':True,'num':'stand','text':{'h1':{'de':'Eine Halle.<br><em>Sieben</em> Stände.','en':'One hall.<br><em>Seven</em> stands.','ar':'محل واحد.<br><em>سبع</em> زوايا.'},'lede':{'de':'Burger, Crispy, Street, Orientalisch, Drinks und Desserts. Such dir an jedem Stand was aus, alles landet in einem Warenkorb.','en':'Burgers, crispy chicken, street food, oriental, drinks and desserts. Pick from every stand, it all goes into one cart.','ar':'برغر، كرسبي، ستريت فود، أكل شرقي، مشروبات وحلويات. اختار من كل زاوية، وكلو بسلة وحدة.'}}},
+CSS['C']=CSS['B']+"""
+/* C · Halle in Farbe: dark food hall, every stand a big colour field with huge type */
+:root{--bg:#0E0C0A;--fg:#F5EFE6;--topbg:#0E0C0A;--topfg:#F5EFE6;--line:#3A3631;--line2:#E8DCC8;--card:#FFF8EE;--cardfg:#111;--cta:#FF6A1F;--ctaink:#111;color-scheme:dark}
+.top{border-bottom:1px solid #26221E}
+.cartbtn{background:#FF6A1F;color:#111}.cartbtn b{background:#111;color:#fff}
+.hero h1 em{font-style:normal;color:#FF6A1F}
+.secs{gap:12px;padding-inline:max(12px,calc((100% - 1344px)/2));padding-block:0 48px}
+.sec{border-radius:28px;padding-inline:clamp(20px,4vw,48px)}
+.sec .num{display:inline-flex;align-self:flex-start;font-family:var(--body);font-weight:800;font-size:13px;letter-spacing:.14em;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.18);color:inherit;margin-bottom:6px}
+.sec:nth-child(even) .num{align-self:flex-end}
+.sec img{inset-inline-end:clamp(20px,4vw,48px)}
+.sec:nth-child(even) img{inset-inline-start:clamp(20px,4vw,48px)}
+.menu{color:var(--fg)}
+.menu h2,.menu h3{color:var(--fg)}
+@media (max-width:700px){.secs{gap:10px}.sec{border-radius:22px}.sec .num{font-size:11px}}
+"""
+THEME={'C':{'brandHtml':'iu gene<span style="color:#FF6A1F">.</span>','heroMascot':False,'guide':True,'num':'stand','text':{'h1':{'de':'Eine Halle.<br><em>Sieben</em> Stände.','en':'One hall.<br><em>Seven</em> stands.','ar':'محل واحد.<br><em>سبع</em> زوايا.'},'lede':{'de':'Burger, Crispy, Street, Orientalisch, Drinks und Desserts. Such dir an jedem Stand was aus, alles landet in einem Warenkorb.','en':'Burgers, crispy chicken, street food, oriental, drinks and desserts. Pick from every stand, it all goes into one cart.','ar':'برغر، كرسبي، ستريت فود، أكل شرقي، مشروبات وحلويات. اختار من كل زاوية، وكلو بسلة وحدة.'}}},'A':{'brandHtml':'iu gene','heroMascot':False,'guide':True,'num':'stand','text':{'h1':{'de':'Eine Halle.<br><em>Sieben</em> Stände.','en':'One hall.<br><em>Seven</em> stands.','ar':'محل واحد.<br><em>سبع</em> زوايا.'},'lede':{'de':'Burger, Crispy, Street, Orientalisch, Drinks und Desserts. Such dir an jedem Stand was aus, alles landet in einem Warenkorb.','en':'Burgers, crispy chicken, street food, oriental, drinks and desserts. Pick from every stand, it all goes into one cart.','ar':'برغر، كرسبي، ستريت فود، أكل شرقي، مشروبات وحلويات. اختار من كل زاوية، وكلو بسلة وحدة.'}}},
 'B':{'brandHtml':'iu gene<span style="color:#FF3B30">.</span>','heroMascot':False,'guide':True,'num':'none','text':{'h1':{'de':'Hunger?<br>Such dir eine Farbe aus.','en':'Hungry?<br>Pick a colour.','ar':'جوعان؟<br>اختار لون.'},'lede':{'de':'Jede Farbe ist eine Ecke voller Essen. Alles kommt in einen Warenkorb, abholen oder liefern lassen.','en':'Every colour is a corner full of food. It all goes into one cart, pickup or delivery.','ar':'كل لون زاوية مليانة أكل. كلو بسلة وحدة، استلام أو توصيل.'}}}}
-TITLE={'A':'Die Halle Prototyp','B':'Farbfelder Prototyp'}
-for k in 'AB':
+TITLE={'C':'Halle in Farbe','A':'Die Halle Prototyp','B':'Farbfelder Prototyp'}
+for k in 'ABC':
   th=THEME[k]
   numjs="function(i){return 'STAND '+String(i+1).padStart(2,'0')}" if th['num']=='stand' else "function(){return ''}"
   themejs="window.__THEME__={brandHtml:%s,heroMascot:%s,guide:%s,numLabel:%s,text:%s};"%(json.dumps(th['brandHtml']),'true' if th['heroMascot'] else 'false','true' if th.get('guide') else 'false',numjs,json.dumps(th['text'],ensure_ascii=False))
   html=f"""<meta charset="utf-8"><title>{TITLE[k]}</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="{'#141210' if k=='A' else '#111111'}">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="{'#141210' if k=='A' else '#0E0C0A' if k=='C' else '#111111'}">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?{FONTS[k]}&display=swap">
 <style>{CSS[k].split('/*')[0]}{CSS[k]}{base}</style>
