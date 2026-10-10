@@ -62,14 +62,8 @@
         "mit Farbstoff (E160a)"
       ],
       "source": "Deklaration Dr. Berns Laboratorium, Bericht 2018/085-2 S. 7 (Analyse 26.07.2018), Foto vom Inhaber 2026-10-10",
-      "open": "Gleiche Rezeptur noch aktuell? Sesam-Variante (Sesam-Bun) separat bestätigen."
-    },
-    "frappe-basis": {
-      "name": "Frappé-Basis (Pulver)",
-      "status": "missing",
-      "contains": [],
-      "source": "Inhaberangabe 2026-10-10",
-      "open": "Etikett fotografieren"
+      "open": "Gleiche Rezeptur noch aktuell? Sesam-Variante (Sesam-Bun) separat bestätigen.",
+      "usedFor": "Burger, Hot Dogs, Sandwiches (Inhaberangabe 2026-10-10)"
     },
     "frappe-saucen": {
       "name": "Saucen für Frappé (z. B. Karamell, Schoko, White Mocha)",
@@ -84,20 +78,27 @@
       "contains": [],
       "source": "Inhaberangabe 2026-10-10",
       "open": "Etikett fotografieren"
+    },
+    "tortilla-altan": {
+      "name": "Altan Tortillas Dürüm Ø 30 cm (18 Stück, 1620 g)",
+      "status": "missing",
+      "contains": [],
+      "usedFor": "French Tacos, Shawarma-Rollen",
+      "source": "Inhaberangabe 2026-10-10 (Foto Vorderseite)",
+      "open": "Rückseite (Zutaten/Allergene) fotografieren; ersetzt die alte Inhaberangabe 'Gluten, Milch' der Taco-Tortilla"
     }
   },
   "recipes": {
     "frappe": {
       "desc": "Alle Frappés",
       "components": [
-        "frappe-basis",
         "h-milch",
         "eis",
         "monin-sirupe (manchmal)",
         "frappe-saucen",
         "spruehsahne"
       ],
-      "source": "Inhaberangabe 2026-10-10: Basis-Pulver, manchmal Sirup, Milch, Eis, Sauce, Sprühsahne; kein Püree"
+      "source": "Inhaberangabe 2026-10-10: Milch, Eis, manchmal Sirup, Sauce, Sprühsahne; kein Basis-Pulver, kein Püree"
     }
   }
 }
