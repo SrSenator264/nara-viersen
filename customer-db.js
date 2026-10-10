@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const dispatch = require('./dispatch-service.js');
+const bizDay = require('./business-day.js');
 
 const DAY = 86400000;
 const OWN = new Set(['KASSE', 'WEB', 'DINE_IN', 'PHONE']);
@@ -27,9 +28,11 @@ const bump = (obj, k, n = 1) => { if (k !== '' && k != null) obj[k] = (obj[k] ||
 // وقت برلين (يوم الأسبوع 0=أحد، والساعة)
 const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Berlin', weekday: 'short', hour: '2-digit', hourCycle: 'h23' });
 const WD = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+// اليوم بيتحسب حسب "يوم الشغل" (طلب 00:30 ليلة السبت = الجمعة)، والساعة بتضل الساعة الحقيقية
 function berlin(ms) {
   const p = Object.fromEntries(fmt.formatToParts(new Date(ms)).map(x => [x.type, x.value]));
-  return { weekday: WD[p.weekday], hour: Number(p.hour) };
+  const q = Object.fromEntries(fmt.formatToParts(new Date(ms - bizDay.startHour * 3600000)).map(x => [x.type, x.value]));
+  return { weekday: WD[q.weekday], hour: Number(p.hour) };
 }
 
 const isTest = o => o.isTest === true || /DEMO|TEST/i.test(str(o.displayCode || o.externalOrderCode));

@@ -6,7 +6,7 @@ function applyStaffLang(){document.querySelectorAll('[data-t]').forEach(el=>{con
 document.addEventListener('DOMContentLoaded',applyStaffLang);if(document.readyState!=='loading')applyStaffLang();
 const $=id=>document.getElementById(id);
 let employees=[],shifts=[],events=[],payroll=[];
-const today=()=>new Date().toISOString().slice(0,10);
+const today=()=>window.NARA_DAY?NARA_DAY.today():new Date().toISOString().slice(0,10);
 let logins=new Set();
 async function api(url,options){const r=await fetch(url,{headers:{'Content-Type':'application/json'},...options});const j=await r.json();if(!r.ok)throw Error(j.error||t('apiErr'));return j;}
 function money(cents){return `${(Number(cents||0)/100).toFixed(2)} €`;}
@@ -17,7 +17,7 @@ async function load(){
   try{logins=new Set(((await api('/api/auth/employees')).employees||[]).map(x=>x.id))}catch(e){logins=new Set()}
   await loadPayroll(date);
   const open=shifts.filter(x=>x.status==='OPEN');
-  $('summary-employees').textContent=employees.length;$('summary-shifts').textContent=open.length;$('summary-attendance').textContent=events.filter(x=>x.action==='CLOCK_IN'&&String(x.at||x.createdAt||'').slice(0,10)===date).length;
+  $('summary-employees').textContent=employees.length;$('summary-shifts').textContent=open.length;$('summary-attendance').textContent=events.filter(x=>x.action==='CLOCK_IN'&&(window.NARA_DAY?NARA_DAY.dayOf(x.at||x.createdAt||''):String(x.at||x.createdAt||'').slice(0,10))===date).length;
   $('employees').innerHTML=employees.length?employees.map(e=>{const s=shifts.find(x=>x.employeeId===e.id&&x.status==='OPEN');const present=events.some(x=>x.employeeId===e.id&&x.action==='CLOCK_IN'&&!x.closedAt);const internal=e.internalProfileEnabled!==false,official=e.officialProfileEnabled===true;return `<div class="employee-card"><div><h3>${esc(e.name)} <span class="workforce-badge ${logins.has(e.id)?'official':'internal'}" title="${t('loginTitle')}">${logins.has(e.id)?t('hasLogin'):t('noLogin')}</span> <span class="workforce-badge internal">${internal?t('intOn'):t('intOff')}</span> <span class="workforce-badge official">${official?t('offOn'):t('offOff')}</span></h3><small>${esc(t(e.role)||e.role)} · ${present?t('present'):t('absent')} · ${s?t('shiftOpen'):t('noShift')} · ${t('rateLbl')}: ${money(e.hourlyRateCents)}</small></div><div class="employee-actions"><button class="ghost" onclick="editEmployee('${e.id}')">${t('edit')}</button><button class="${present?'active':''}" onclick="clock('${e.id}','${s?.id||''}')">${present?t('clockOut'):t('clockIn')}</button><button class="ghost" onclick="shift('${e.id}','${s?.id||''}')">${s?t('closeShift'):t('openShift')}</button></div></div>`}).join(''):t('noEmp');
   $('status').textContent=`${employees.length} ${t('statEmp')} · ${open.length} ${t('statShift')} · ${events.length} ${t('statAtt')}`;
   $('shift-summary').innerHTML=open.length?open.map(s=>{const e=employees.find(x=>x.id===s.employeeId);return `<span>${esc(e?.name||s.employeeId)} · ${t('started')} ${new Date(s.startAt).toLocaleString(LANG==='ar'?'ar-DE':LANG==='en'?'en-GB':'de-DE')}</span>`}).join(' | '):t('noShifts');
