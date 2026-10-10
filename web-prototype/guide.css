@@ -77,3 +77,22 @@ html[dir=rtl] .guide.intro{right:auto;left:4vw}
  @keyframes textIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
  .guide.intro.hop .g-btn img{animation:ghop .45s ease}
 }
+
+/* Flamo auf der Kachel */
+.guide.perch{position:absolute;right:auto;bottom:auto;width:170px;transition:opacity .25s,transform .25s;z-index:6}
+html[dir=rtl] .guide.perch{left:auto}
+.guide.perch .g-btn img{filter:drop-shadow(0 10px 10px rgba(0,0,0,.28));animation:none}
+.guide.perch .g-bubble{position:absolute;bottom:auto;top:8%;right:calc(100% - 26px);border-radius:18px 4px 18px 18px}
+html[dir=rtl] .guide.perch .g-bubble{right:auto;left:calc(100% - 26px);border-radius:4px 18px 18px 18px}
+.guide.perch .g-voice{position:absolute;top:-4px;right:-4px;left:auto;margin:0;width:36px;height:36px}
+html[dir=rtl] .guide.perch .g-voice{right:auto;left:-4px}
+.guide.perch.jump{opacity:0;transform:translateY(-30px) scale(.85)}
+@media (prefers-reduced-motion:no-preference){
+ .guide.perch .g-btn img{transform-origin:50% 70%;animation:perchIdle 4s ease-in-out infinite}
+ @keyframes perchIdle{0%,100%{transform:rotate(0) scaleY(1)}50%{transform:rotate(-1.5deg) scaleY(1.02)}}
+ .guide.perch.talking .g-btn img{animation:perchTalk .5s ease-in-out infinite}
+ @keyframes perchTalk{0%,100%{transform:rotate(0) scaleY(1)}30%{transform:rotate(1.5deg) scaleY(1.035)}70%{transform:rotate(-1deg) scaleY(.99)}}
+ .guide.perch.hop .g-btn img{animation:perchHop .5s ease}
+ @keyframes perchHop{40%{transform:translateY(-16px) rotate(-4deg)}}
+}
+@media (max-width:520px){.guide.perch{width:118px}.guide.perch .g-bubble{right:calc(100% - 18px);max-width:min(220px,calc(100vw - 150px));font-size:14px}html[dir=rtl] .guide.perch .g-bubble{left:calc(100% - 18px)}}
