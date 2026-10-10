@@ -252,6 +252,9 @@ function normalize(x, st) {
     withAlcohol: !!x.with_alcohol,
     remarks: S(x.remarks),
     courierName: courier ? S(deepFind(courier, /name/i)) : '',
+    // أوقات السواق الحقيقية (NARA بيتعلّم منها الخريطة): الاستلام بس بعد ما يطلع، والتسليم بس لما ينسلّم فعلاً
+    platformPickupAt: /in_delivery|delivered/i.test(S(x.status)) ? iso(x.delivery_service_pickup_time) : null,
+    platformDeliveredAt: /^delivered$/i.test(S(x.status)) ? iso(x.delivery_service_delivery_time) : null,
     parseStatus: (warnings.length || !st.known) ? 'CHECK' : 'OK',
     warnings,
     sourceUpdatedAt: iso(first(x.updated_at, x.confirmed_at, x.created_at)) || new Date().toISOString(),
@@ -375,7 +378,7 @@ async function handleList(list) {
     const rec = buildReceipt(o);
     o.receiptText = rec.text;
 
-    const sig = sha(JSON.stringify([o.liveStage, o.totalCents, o.cart, o.delivery, o.payment, o.requestedAt, o.readyForKitchen, o.remarks, o.customerPhone, o.deliveryQrUrl]));
+    const sig = sha(JSON.stringify([o.liveStage, o.totalCents, o.cart, o.delivery, o.payment, o.requestedAt, o.readyForKitchen, o.remarks, o.customerPhone, o.deliveryQrUrl, o.platformPickupAt, o.platformDeliveredAt]));
     if (state.sent[id] !== sig) {
       fs.writeFileSync(P(`raw/${id}.json`), JSON.stringify(x));
       const body = { source: 'LIEFERANDO', order: o };
