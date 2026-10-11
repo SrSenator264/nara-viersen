@@ -157,6 +157,7 @@ function geminiAdapter({ key, model, base, fetchImpl = fetch }) {
   return {
     name: 'gemini:' + model,
     init: (system, history, user) => ({ system, contents: [...history.map(h => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: h.content }] })), { role: 'user', parts: [{ text: user }] }] }),
+    nudge(st, text) { const last = st.contents[st.contents.length - 1]; if (last && last.role === 'user') last.parts.push({ text }); else st.contents.push({ role: 'user', parts: [{ text }] }); },
     async finalNoTools(st, nudge) { const last = st.contents[st.contents.length - 1]; if (last && last.role === 'user') last.parts.push({ text: nudge }); else st.contents.push({ role: 'user', parts: [{ text: nudge }] }); return this.call(st, true); },
     async call(st, noTools) {
       const r = await fetchImpl(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
@@ -240,8 +241,14 @@ async function chat(input, { adapter, menu, W, catalog, products, popular, maxRo
     rounds++;
     const t0 = Date.now(), r = await adapter.call(st); ms.push(Date.now() - t0 + (r.calls.length ? 'ms+' + r.calls.map(c => c.name).join(',') : 'ms'));
     usage.in += r.usage.in; usage.out += r.usage.out;
-    if (!r.calls.length) { text = r.text; done = true; break; }
-    adapter.addResults(st, r.calls, r.calls.map(c => ex.run(c.name, c.args)));
+    if (!r.calls.length) {
+      const claims = /(button|knopf|warenkorb|add to cart|الزر|زر |السلة)/i.test(r.text) && /show_draft"?\s*:\s*true|الزر|button|knopf/i.test(r.text);
+      if (claims && !ex.getDraft() && !st.nudged && adapter.nudge) { st.nudged = true; ms.push('nudge:no-draft'); adapter.nudge(st, 'You mentioned the add-to-cart button, but no order has been successfully priced yet, so there is no button. Either call price_order now with the exact option ids (after the customer has chosen everything), or ask the customer for the missing choice. Do not say there is a button unless price_order succeeded.'); continue; }
+      text = r.text; done = true; break;
+    }
+    const results = r.calls.map(c => ex.run(c.name, c.args));
+    results.forEach((x, i) => { if (r.calls[i].name === 'price_order') ms.push('price:' + (x && x.ok ? 'ok' : (x && (x.code || x.error)) + (x && x.missing_group ? '/' + x.missing_group : ''))); });
+    adapter.addResults(st, r.calls, results);
   }
   if (!done && adapter.finalNoTools) {
     try { const r = await adapter.finalNoTools(st, 'Now answer the customer. Do not call any tool. If a required choice is still missing, ask the customer for it (list the options). Reply ONLY with the JSON object.'); usage.in += r.usage.in; usage.out += r.usage.out; if (r.text) { text = r.text; done = true; } } catch { /* fall through */ }

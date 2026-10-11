@@ -134,3 +134,10 @@ test('chat: glued bold names are restored to the menu name; draft shown when the
   assert.equal(r.reply, 'Hier: **Korean Wings** ist bereit, tippe auf den Button.');
   assert.ok(r.draft && r.draft.totalCents === 1199);
 });
+
+test('chat: a reply that points at a button without any priced draft gets one correction round', async () => {
+  const a = fake([{ text: '{"reply":"Tippe auf den Button!","show_draft":true}' }, { calls: [{ id: 'a', name: 'price_order', args: { lines: [{ id: 2, qty: 1 }] } }] }, { text: '{"reply":"Bereit: Tippe auf den Button.","show_draft":true}' }]);
+  let nudged = 0; a.nudge = () => { nudged++; };
+  const r = await F.chat({ message: 'x' }, { adapter: a, menu, W, catalog: [], products: [] });
+  assert.equal(nudged, 1); assert.equal(r.ok, true); assert.ok(r.draft && r.draft.totalCents === 1199);
+});
