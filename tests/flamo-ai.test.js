@@ -56,7 +56,7 @@ test('chat: plain text answers are tolerated, markdown stripped, endless tool lo
 
 test('prompt: language, cart and injection rules are present', () => {
   const p = F.systemPrompt({ lang: 'ar', cart: [{ name: 'Wings', qty: 2 }] });
-  assert.match(p, /Arabic/); assert.match(p, /Wings/); assert.match(p, /untrusted/); assert.match(p, /show_draft/);
+  assert.match(p, /Arabic/); assert.match(p, /Wings/); assert.match(p, /untrusted/); assert.match(p, /show_draft/); assert.match(p, /ASK FIRST/); assert.match(p, /Never pick a drink/);
 });
 
 test('provider choice: Gemini first, explicit override, none without keys', () => {
