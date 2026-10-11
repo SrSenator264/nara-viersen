@@ -110,3 +110,30 @@ html[dir=rtl] .guide.perch .g-voice{right:auto;left:-4px}
 .g-btn video{width:100%;height:auto;display:block;background:transparent}
 
 .guide.perch .g-btn video{animation:none!important}
+
+/* ── KI-Chat mit Flamo ── */
+.g-chatbtn{width:36px;height:36px;border-radius:50%;border:0;background:#fff;color:#111;box-shadow:0 4px 14px rgba(0,0,0,.25);display:grid;place-items:center;cursor:pointer;margin-inline-end:6px}
+.guide.welcome .g-chatbtn,.guide.intro .g-chatbtn{display:none}
+.guide.perch .g-chatbtn{position:absolute;top:-4px;left:-4px;right:auto;margin:0}
+html[dir=rtl] .guide.perch .g-chatbtn{left:auto;right:-4px}
+.g-chat{position:fixed;z-index:40;right:16px;bottom:16px;width:min(380px,calc(100vw - 32px));height:min(540px,calc(100vh - 32px));display:flex;flex-direction:column;background:#fff;color:#111;border-radius:22px;box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden;font-family:inherit}
+html[dir=rtl] .g-chat{right:auto;left:16px}
+.g-chat[hidden]{display:none}
+.gc-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#111;color:#fff;font-size:16px}
+.gc-x{background:transparent;border:0;color:#fff;font-size:26px;line-height:1;cursor:pointer;padding:0 4px}
+.gc-list{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#faf6ef}
+.gc-m{max-width:86%;padding:9px 12px;border-radius:16px;font-size:15px;line-height:1.35;white-space:pre-wrap;word-break:break-word}
+.gc-m.bot{align-self:flex-start;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.12);border-end-start-radius:4px}
+.gc-m.user{align-self:flex-end;background:#111;color:#fff;border-end-end-radius:4px}
+.gc-m.typing{opacity:.55;letter-spacing:2px}
+.gc-draft{padding:10px 12px;border-top:1px solid #eadfce;background:#fff}
+.gc-draft ul{list-style:none;margin:0 0 6px;padding:0;font-size:14px}
+.gc-draft li{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
+.gc-draft li span{font-weight:800;white-space:nowrap}
+.gc-total{display:flex;justify-content:space-between;font-size:14px;font-weight:800;border-top:1px dashed #d9cdb9;padding-top:6px;margin-bottom:8px}
+.gc-add{width:100%;min-height:44px;border:0;border-radius:12px;background:#e8541e;color:#fff;font-weight:900;font-size:16px;cursor:pointer}
+.gc-form{display:flex;gap:8px;padding:10px;border-top:1px solid #eadfce;background:#fff}
+.gc-form input{flex:1;min-width:0;border:1.5px solid #d9cdb9;border-radius:12px;padding:11px 12px;font-size:16px;font-family:inherit}
+.gc-form button{border:0;border-radius:12px;background:#111;color:#fff;font-weight:800;padding:0 16px;cursor:pointer}
+.gc-form button:disabled{opacity:.5}
+@media (max-width:520px){.g-chat{right:0;left:0;bottom:0;width:100%;height:min(82vh,640px);border-radius:22px 22px 0 0}html[dir=rtl] .g-chat{left:0}}

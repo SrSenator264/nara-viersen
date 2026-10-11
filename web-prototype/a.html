@@ -329,7 +329,9 @@ function secOf(k){for(var i=0;i<SECS.length;i++)if(SECS[i].k===k)return SECS[i]}
 var GEMO={__drink:'🥤',__sauce:'🫙',Dips:'🥣','Ihre Extras':'✨'};
 function gName(g){var x=ON[g];return (GEMO[g]?GEMO[g]+' ':'')+(x?(x[lang]||x.de):g.replace(/^__/,''))}
 function oName(n){var x=ON[n],e=window.NARA_EMOJI?NARA_EMOJI.ing(n):'';return (e?e+' ':'')+(x?(x[lang]||x.de):n)}
-window.NARA_WEB={cart:function(){return cart},setCart:function(o){cart=normCart(o||{});save();render()},openCart:function(){drawerOpen=true;render()},add:addSimple,menu:MENU,byId:byId,eur:function(c){return eur(c)}};
+/* Entwurf von Flamo (vom Server geprüft) in den Warenkorb legen: Optionsnamen/-preise aus dem Menü ergänzen */
+function addLines(ls){var n=0;(ls||[]).forEach(function(l){var p=byId[l&&l.id];if(!p||!(l.q>=1))return;var o=[];(l.o||[]).forEach(function(x){((p.o||[]).forEach(function(g){if(g.g!==x.g)return;(g.x||[]).forEach(function(it){if(it.i===x.i)o.push({g:g.g,i:it.i,n:it.n,c:it.c||0})})}))});var line={id:p.id,q:Math.min(20,l.q|0),m:l.m&&p.mc?1:0,o:o,nt:'',u:l.u>0?l.u:(l.m&&p.mc?p.mc:p.p)};var k=lineKey(line);if(cart[k])cart[k].q+=line.q;else cart[k]=line;n+=line.q});if(n){save();render();try{window.dispatchEvent(new CustomEvent('nara-added',{detail:{id:0}}))}catch(e){}}return n}
+window.NARA_WEB={addLines:addLines,cart:function(){return cart},setCart:function(o){cart=normCart(o||{});save();render()},openCart:function(){drawerOpen=true;render()},add:addSimple,menu:MENU,byId:byId,eur:function(c){return eur(c)}};
 var MS={burger:1,crispy:1,street:1,orient:1,drinks:1,sweet:1,sides:1};
 function mascot(size,k){return '<img class="mascot" src="c/'+(k&&MS[k]?'m-'+k:'mascot')+'.webp" alt="" width="'+size+'" height="'+Math.round(size*1.18)+'">'}
 
@@ -651,6 +653,33 @@ html[dir=rtl] .guide.perch .g-voice{right:auto;left:-4px}
 .g-btn video{width:100%;height:auto;display:block;background:transparent}
 
 .guide.perch .g-btn video{animation:none!important}
+
+/* ── KI-Chat mit Flamo ── */
+.g-chatbtn{width:36px;height:36px;border-radius:50%;border:0;background:#fff;color:#111;box-shadow:0 4px 14px rgba(0,0,0,.25);display:grid;place-items:center;cursor:pointer;margin-inline-end:6px}
+.guide.welcome .g-chatbtn,.guide.intro .g-chatbtn{display:none}
+.guide.perch .g-chatbtn{position:absolute;top:-4px;left:-4px;right:auto;margin:0}
+html[dir=rtl] .guide.perch .g-chatbtn{left:auto;right:-4px}
+.g-chat{position:fixed;z-index:40;right:16px;bottom:16px;width:min(380px,calc(100vw - 32px));height:min(540px,calc(100vh - 32px));display:flex;flex-direction:column;background:#fff;color:#111;border-radius:22px;box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden;font-family:inherit}
+html[dir=rtl] .g-chat{right:auto;left:16px}
+.g-chat[hidden]{display:none}
+.gc-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#111;color:#fff;font-size:16px}
+.gc-x{background:transparent;border:0;color:#fff;font-size:26px;line-height:1;cursor:pointer;padding:0 4px}
+.gc-list{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:#faf6ef}
+.gc-m{max-width:86%;padding:9px 12px;border-radius:16px;font-size:15px;line-height:1.35;white-space:pre-wrap;word-break:break-word}
+.gc-m.bot{align-self:flex-start;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.12);border-end-start-radius:4px}
+.gc-m.user{align-self:flex-end;background:#111;color:#fff;border-end-end-radius:4px}
+.gc-m.typing{opacity:.55;letter-spacing:2px}
+.gc-draft{padding:10px 12px;border-top:1px solid #eadfce;background:#fff}
+.gc-draft ul{list-style:none;margin:0 0 6px;padding:0;font-size:14px}
+.gc-draft li{display:flex;justify-content:space-between;gap:10px;padding:3px 0}
+.gc-draft li span{font-weight:800;white-space:nowrap}
+.gc-total{display:flex;justify-content:space-between;font-size:14px;font-weight:800;border-top:1px dashed #d9cdb9;padding-top:6px;margin-bottom:8px}
+.gc-add{width:100%;min-height:44px;border:0;border-radius:12px;background:#e8541e;color:#fff;font-weight:900;font-size:16px;cursor:pointer}
+.gc-form{display:flex;gap:8px;padding:10px;border-top:1px solid #eadfce;background:#fff}
+.gc-form input{flex:1;min-width:0;border:1.5px solid #d9cdb9;border-radius:12px;padding:11px 12px;font-size:16px;font-family:inherit}
+.gc-form button{border:0;border-radius:12px;background:#111;color:#fff;font-weight:800;padding:0 16px;cursor:pointer}
+.gc-form button:disabled{opacity:.5}
+@media (max-width:520px){.g-chat{right:0;left:0;bottom:0;width:100%;height:min(82vh,640px);border-radius:22px 22px 0 0}html[dir=rtl] .g-chat{left:0}}
 </style><script>(function(){
 if(!window.__THEME__||!window.__THEME__.guide)return;
 var W=window.NARA_WEB;
@@ -689,6 +718,13 @@ img={get src(){return curSrc},set src(v){curSrc=v;var m=/c\/(flamo-[a-z-]+)\.web
  if(useVid&&m&&HDV[m[1]]){var w='c/'+m[1]+'.webm';if(vidEl.getAttribute('src')!==w){vidEl.src=w}vidEl.hidden=false;imgEl.hidden=true;var p=vidEl.play();if(p&&p.catch)p.catch(function(){vidEl.hidden=true;imgEl.hidden=false;imgEl.src=v})}
  else{if(!vidEl.hidden){vidEl.pause();vidEl.hidden=true}imgEl.hidden=false;imgEl.src=v}},getAttribute:function(){return curSrc}};
 if(vidEl)vidEl.addEventListener('error',function(){useVid=false;vidEl.hidden=true;imgEl.hidden=false;imgEl.src=curSrc});
+var AI=false,CH={hello:{de:'Hi, ich bin Flamo! Sag mir, worauf du Lust hast, und ich stelle dir was zusammen.',en:"Hi, I'm Flamo! Tell me what you feel like and I'll put something together.",ar:'أهلا، أنا فلامو! قلّي شو نفسك تاكل وأنا بركّبلك طلب.'},
+ ph:{de:'Was hast du Lust zu essen?',en:'What are you in the mood for?',ar:'شو نفسك تاكل؟'},send:{de:'Senden',en:'Send',ar:'إرسال'},
+ add:{de:'In den Warenkorb',en:'Add to cart',ar:'ضيف للسلة'},total:{de:'Summe',en:'Total',ar:'المجموع'},fee:{de:'zzgl. Lieferkosten',en:'plus delivery fee',ar:'ما عدا التوصيل'},
+ done:{de:'Ist im Warenkorb! Noch etwas dazu?',en:"It's in your cart! Anything else?",ar:'صار بالسلة! بدك شي كمان؟'},
+ busy:{de:'Gleich wieder da, einen Moment bitte.',en:'One moment please, I am a bit busy.',ar:'لحظة بس، عم شتغل على كتير طلبات.'},
+ off:{de:'Ich bin gerade nicht erreichbar. Schau gern direkt ins Menü!',en:"I'm not available right now. Feel free to browse the menu!",ar:'ما قدرت جاوبك هلق. تفضل شوف المنيو!'},
+ title:{de:'Mit Flamo bestellen',en:'Order with Flamo',ar:'اطلب مع فلامو'},close:{de:'Schließen',en:'Close',ar:'سكّر'}};
 var timer=0,typing=0,talkT=0,voice=false,lastPick={};
 try{voice=localStorage.getItem('flamoVoice')==='1'}catch(e){}
 function L(){return document.documentElement.lang||'de'}
@@ -838,6 +874,39 @@ if(route()!=='home'){dock();pose(route());g.classList.toggle('away',route()==='b
 window.addEventListener('resize',function(){clearTimeout(perchT);perchT=setTimeout(perch,120)});
 (function(){var app=document.getElementById('app');if(app&&window.MutationObserver)new MutationObserver(function(){clearTimeout(perchT);perchT=setTimeout(perch,40)}).observe(app,{childList:true})})();
 document.addEventListener('mouseover',function(e){if(!matchMedia('(pointer:fine)').matches||!g.classList.contains('perch'))return;var t=e.target.closest&&e.target.closest('#app .sec');if(!t)return;var k=(t.className.match(/sec-([a-z]+)/)||[])[1];clearTimeout(hovT);if(k)hovT=setTimeout(function(){perchTo(k)},420)});
+/* ── KI-Verkäufer: Chat mit Flamo (Server prüft Menü und Preise, Warenkorb ändert nur der Kunde per Klick) ── */
+(function(){
+ fetch('/api/flamo/status',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.ai)initChat()}).catch(function(){});
+ function initChat(){
+  if(AI)return;AI=true;
+  var cb=document.createElement('button');cb.type='button';cb.className='g-chatbtn';cb.id='gChatBtn';cb.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
+  var row=g.querySelector('.g-row');row.insertBefore(cb,row.firstChild);
+  var p=document.createElement('div');p.id='gChat';p.className='g-chat';p.hidden=true;p.setAttribute('role','dialog');
+  p.innerHTML='<div class="gc-head"><b id="gcT"></b><button type="button" class="gc-x" id="gcX">×</button></div><div class="gc-list" id="gcList" aria-live="polite"></div><div class="gc-draft" id="gcDraft" hidden></div><form class="gc-form" id="gcF" autocomplete="off"><input id="gcIn" maxlength="200" enterkeyhint="send"><button type="submit" id="gcS"></button></form>';
+  document.body.appendChild(p);
+  var list=p.querySelector('#gcList'),dr=p.querySelector('#gcDraft'),inp=p.querySelector('#gcIn'),sendB=p.querySelector('#gcS'),hist=[],draft=null,busy=false,greeted=false;
+  function labels(){cb.setAttribute('aria-label',tr(CH.title));cb.title=tr(CH.title);p.setAttribute('aria-label',tr(CH.title));p.querySelector('#gcT').textContent='🔥 '+tr(CH.title);p.querySelector('#gcX').setAttribute('aria-label',tr(CH.close));inp.placeholder=tr(CH.ph);sendB.textContent=tr(CH.send)}
+  labels();document.addEventListener('click',function(e){if(e.target.closest('[data-lang]'))setTimeout(labels,60)});
+  function msg(role,text){var d=document.createElement('div');d.className='gc-m '+role;d.textContent=text;list.appendChild(d);list.scrollTop=list.scrollHeight;return d}
+  function cartNow(){var c=W.cart(),out=[];for(var k in c){var l=c[k],pr=W.byId[l.id];if(pr)out.push({name:pr.n,qty:l.q})}return out}
+  function showDraft(d){draft=d;dr.hidden=false;dr.innerHTML='';var ul=document.createElement('ul');d.items.forEach(function(i){var li=document.createElement('li');li.textContent=i.qty+'× '+i.name+(i.options&&i.options.length?' ('+i.options.join(', ')+')':'');var sp=document.createElement('span');sp.textContent=W.eur(i.totalCents);li.appendChild(sp);ul.appendChild(li)});dr.appendChild(ul);
+   var t=document.createElement('div');t.className='gc-total';t.innerHTML='<span></span><b></b>';t.firstChild.textContent=tr(CH.total)+' · '+tr(CH.fee);t.lastChild.textContent=W.eur(d.totalCents);dr.appendChild(t);
+   var b=document.createElement('button');b.type='button';b.className='gc-add';b.textContent=tr(CH.add);b.onclick=function(){if(!draft)return;var n=W.addLines(draft.lines);dr.hidden=true;draft=null;if(n){var m=tr(CH.done);msg('bot',m);hist.push({role:'assistant',text:m});speak(m)}};dr.appendChild(b);list.scrollTop=list.scrollHeight}
+  function open(){p.hidden=false;bub.hidden=true;if(!greeted){greeted=true;msg('bot',tr(CH.hello))}setTimeout(function(){inp.focus()},50)}
+  function close(){p.hidden=true}
+  cb.addEventListener('click',function(){p.hidden?open():close()});p.querySelector('#gcX').addEventListener('click',close);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!p.hidden)close()});
+  p.querySelector('#gcF').addEventListener('submit',function(e){e.preventDefault();if(busy)return;var text=inp.value.trim();if(!text)return;inp.value='';msg('user',text);dr.hidden=true;draft=null;busy=true;sendB.disabled=true;var typ=msg('bot','…');typ.classList.add('typing');
+   fetch('/api/flamo/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:L(),history:hist.slice(-6),cart:cartNow()})})
+    .then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})})
+    .then(function(x){typ.remove();
+     if(x.s===200&&x.j&&x.j.reply){msg('bot',x.j.reply);hist.push({role:'user',text:text},{role:'assistant',text:x.j.reply});speak(x.j.reply);if(x.j.draft&&x.j.draft.lines&&x.j.draft.lines.length)showDraft(x.j.draft)}
+     else if(x.s===429)msg('bot',tr(CH.busy));
+     else{msg('bot',tr(CH.off));if(x.j&&(x.j.code==='CAP'||x.j.code==='AI_OFF')){cb.remove();AI=false}}})
+    .catch(function(){typ.remove();msg('bot',tr(CH.off))})
+    .then(function(){busy=false;sendB.disabled=false;inp.focus()})});
+ }
+})();
 setTimeout(perch,300);
 })();
 </script>

@@ -36,6 +36,13 @@ img={get src(){return curSrc},set src(v){curSrc=v;var m=/c\/(flamo-[a-z-]+)\.web
  if(useVid&&m&&HDV[m[1]]){var w='c/'+m[1]+'.webm';if(vidEl.getAttribute('src')!==w){vidEl.src=w}vidEl.hidden=false;imgEl.hidden=true;var p=vidEl.play();if(p&&p.catch)p.catch(function(){vidEl.hidden=true;imgEl.hidden=false;imgEl.src=v})}
  else{if(!vidEl.hidden){vidEl.pause();vidEl.hidden=true}imgEl.hidden=false;imgEl.src=v}},getAttribute:function(){return curSrc}};
 if(vidEl)vidEl.addEventListener('error',function(){useVid=false;vidEl.hidden=true;imgEl.hidden=false;imgEl.src=curSrc});
+var AI=false,CH={hello:{de:'Hi, ich bin Flamo! Sag mir, worauf du Lust hast, und ich stelle dir was zusammen.',en:"Hi, I'm Flamo! Tell me what you feel like and I'll put something together.",ar:'أهلا، أنا فلامو! قلّي شو نفسك تاكل وأنا بركّبلك طلب.'},
+ ph:{de:'Was hast du Lust zu essen?',en:'What are you in the mood for?',ar:'شو نفسك تاكل؟'},send:{de:'Senden',en:'Send',ar:'إرسال'},
+ add:{de:'In den Warenkorb',en:'Add to cart',ar:'ضيف للسلة'},total:{de:'Summe',en:'Total',ar:'المجموع'},fee:{de:'zzgl. Lieferkosten',en:'plus delivery fee',ar:'ما عدا التوصيل'},
+ done:{de:'Ist im Warenkorb! Noch etwas dazu?',en:"It's in your cart! Anything else?",ar:'صار بالسلة! بدك شي كمان؟'},
+ busy:{de:'Gleich wieder da, einen Moment bitte.',en:'One moment please, I am a bit busy.',ar:'لحظة بس، عم شتغل على كتير طلبات.'},
+ off:{de:'Ich bin gerade nicht erreichbar. Schau gern direkt ins Menü!',en:"I'm not available right now. Feel free to browse the menu!",ar:'ما قدرت جاوبك هلق. تفضل شوف المنيو!'},
+ title:{de:'Mit Flamo bestellen',en:'Order with Flamo',ar:'اطلب مع فلامو'},close:{de:'Schließen',en:'Close',ar:'سكّر'}};
 var timer=0,typing=0,talkT=0,voice=false,lastPick={};
 try{voice=localStorage.getItem('flamoVoice')==='1'}catch(e){}
 function L(){return document.documentElement.lang||'de'}
@@ -185,5 +192,38 @@ if(route()!=='home'){dock();pose(route());g.classList.toggle('away',route()==='b
 window.addEventListener('resize',function(){clearTimeout(perchT);perchT=setTimeout(perch,120)});
 (function(){var app=document.getElementById('app');if(app&&window.MutationObserver)new MutationObserver(function(){clearTimeout(perchT);perchT=setTimeout(perch,40)}).observe(app,{childList:true})})();
 document.addEventListener('mouseover',function(e){if(!matchMedia('(pointer:fine)').matches||!g.classList.contains('perch'))return;var t=e.target.closest&&e.target.closest('#app .sec');if(!t)return;var k=(t.className.match(/sec-([a-z]+)/)||[])[1];clearTimeout(hovT);if(k)hovT=setTimeout(function(){perchTo(k)},420)});
+/* ── KI-Verkäufer: Chat mit Flamo (Server prüft Menü und Preise, Warenkorb ändert nur der Kunde per Klick) ── */
+(function(){
+ fetch('/api/flamo/status',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.ai)initChat()}).catch(function(){});
+ function initChat(){
+  if(AI)return;AI=true;
+  var cb=document.createElement('button');cb.type='button';cb.className='g-chatbtn';cb.id='gChatBtn';cb.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>';
+  var row=g.querySelector('.g-row');row.insertBefore(cb,row.firstChild);
+  var p=document.createElement('div');p.id='gChat';p.className='g-chat';p.hidden=true;p.setAttribute('role','dialog');
+  p.innerHTML='<div class="gc-head"><b id="gcT"></b><button type="button" class="gc-x" id="gcX">×</button></div><div class="gc-list" id="gcList" aria-live="polite"></div><div class="gc-draft" id="gcDraft" hidden></div><form class="gc-form" id="gcF" autocomplete="off"><input id="gcIn" maxlength="200" enterkeyhint="send"><button type="submit" id="gcS"></button></form>';
+  document.body.appendChild(p);
+  var list=p.querySelector('#gcList'),dr=p.querySelector('#gcDraft'),inp=p.querySelector('#gcIn'),sendB=p.querySelector('#gcS'),hist=[],draft=null,busy=false,greeted=false;
+  function labels(){cb.setAttribute('aria-label',tr(CH.title));cb.title=tr(CH.title);p.setAttribute('aria-label',tr(CH.title));p.querySelector('#gcT').textContent='🔥 '+tr(CH.title);p.querySelector('#gcX').setAttribute('aria-label',tr(CH.close));inp.placeholder=tr(CH.ph);sendB.textContent=tr(CH.send)}
+  labels();document.addEventListener('click',function(e){if(e.target.closest('[data-lang]'))setTimeout(labels,60)});
+  function msg(role,text){var d=document.createElement('div');d.className='gc-m '+role;d.textContent=text;list.appendChild(d);list.scrollTop=list.scrollHeight;return d}
+  function cartNow(){var c=W.cart(),out=[];for(var k in c){var l=c[k],pr=W.byId[l.id];if(pr)out.push({name:pr.n,qty:l.q})}return out}
+  function showDraft(d){draft=d;dr.hidden=false;dr.innerHTML='';var ul=document.createElement('ul');d.items.forEach(function(i){var li=document.createElement('li');li.textContent=i.qty+'× '+i.name+(i.options&&i.options.length?' ('+i.options.join(', ')+')':'');var sp=document.createElement('span');sp.textContent=W.eur(i.totalCents);li.appendChild(sp);ul.appendChild(li)});dr.appendChild(ul);
+   var t=document.createElement('div');t.className='gc-total';t.innerHTML='<span></span><b></b>';t.firstChild.textContent=tr(CH.total)+' · '+tr(CH.fee);t.lastChild.textContent=W.eur(d.totalCents);dr.appendChild(t);
+   var b=document.createElement('button');b.type='button';b.className='gc-add';b.textContent=tr(CH.add);b.onclick=function(){if(!draft)return;var n=W.addLines(draft.lines);dr.hidden=true;draft=null;if(n){var m=tr(CH.done);msg('bot',m);hist.push({role:'assistant',text:m});speak(m)}};dr.appendChild(b);list.scrollTop=list.scrollHeight}
+  function open(){p.hidden=false;bub.hidden=true;if(!greeted){greeted=true;msg('bot',tr(CH.hello))}setTimeout(function(){inp.focus()},50)}
+  function close(){p.hidden=true}
+  cb.addEventListener('click',function(){p.hidden?open():close()});p.querySelector('#gcX').addEventListener('click',close);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!p.hidden)close()});
+  p.querySelector('#gcF').addEventListener('submit',function(e){e.preventDefault();if(busy)return;var text=inp.value.trim();if(!text)return;inp.value='';msg('user',text);dr.hidden=true;draft=null;busy=true;sendB.disabled=true;var typ=msg('bot','…');typ.classList.add('typing');
+   fetch('/api/flamo/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:L(),history:hist.slice(-6),cart:cartNow()})})
+    .then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})})
+    .then(function(x){typ.remove();
+     if(x.s===200&&x.j&&x.j.reply){msg('bot',x.j.reply);hist.push({role:'user',text:text},{role:'assistant',text:x.j.reply});speak(x.j.reply);if(x.j.draft&&x.j.draft.lines&&x.j.draft.lines.length)showDraft(x.j.draft)}
+     else if(x.s===429)msg('bot',tr(CH.busy));
+     else{msg('bot',tr(CH.off));if(x.j&&(x.j.code==='CAP'||x.j.code==='AI_OFF')){cb.remove();AI=false}}})
+    .catch(function(){typ.remove();msg('bot',tr(CH.off))})
+    .then(function(){busy=false;sendB.disabled=false;inp.focus()})});
+ }
+})();
 setTimeout(perch,300);
 })();
