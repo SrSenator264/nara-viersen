@@ -655,12 +655,14 @@ html[dir=rtl] .guide.perch .g-voice{right:auto;left:-4px}
 .guide.perch .g-btn video{animation:none!important}
 
 /* ── KI-Chat mit Flamo ── */
-.g-chatbtn{width:36px;height:36px;border-radius:50%;border:0;background:#fff;color:#111;box-shadow:0 4px 14px rgba(0,0,0,.25);display:grid;place-items:center;cursor:pointer;margin-inline-end:6px}
-.guide.welcome .g-chatbtn,.guide.intro .g-chatbtn{position:fixed;bottom:22px;right:22px;left:auto;margin:0;width:52px;height:52px;z-index:39;background:#ff7a1a;color:#fff;box-shadow:0 6px 20px rgba(255,122,26,.45)}
+.g-chatbtn{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;background:#fff;color:#111;box-shadow:0 4px 14px rgba(0,0,0,.25);display:grid;place-items:center;cursor:pointer;margin-inline-end:6px}
+.guide.welcome .g-chatbtn,.guide.intro .g-chatbtn{position:fixed;bottom:22px;right:22px;left:auto;margin:0;width:auto;min-width:52px;height:52px;padding:0 20px;border-radius:26px;grid-auto-flow:column;gap:8px;pointer-events:auto;z-index:5;font:700 15px var(--body,inherit);background:#ff7a1a;color:#fff;box-shadow:0 6px 20px rgba(255,122,26,.45)}
+.guide.welcome .g-chatbtn::after,.guide.intro .g-chatbtn::after{content:attr(data-l)}
+.guide.welcome,.guide.intro{z-index:45}
 html[dir=rtl] .guide.welcome .g-chatbtn,html[dir=rtl] .guide.intro .g-chatbtn{right:auto;left:22px}
 .guide.perch .g-chatbtn{position:absolute;top:-4px;left:-4px;right:auto;margin:0}
 html[dir=rtl] .guide.perch .g-chatbtn{left:auto;right:-4px}
-.g-chat{position:fixed;z-index:40;right:16px;bottom:16px;width:min(380px,calc(100vw - 32px));height:min(540px,calc(100vh - 32px));display:flex;flex-direction:column;background:#fff;color:#111;border-radius:22px;box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden;font-family:inherit}
+.g-chat{position:fixed;z-index:50;right:16px;bottom:16px;width:min(380px,calc(100vw - 32px));height:min(540px,calc(100vh - 32px));display:flex;flex-direction:column;background:#fff;color:#111;border-radius:22px;box-shadow:0 18px 60px rgba(0,0,0,.4);overflow:hidden;font-family:inherit}
 html[dir=rtl] .g-chat{right:auto;left:16px}
 .g-chat[hidden]{display:none}
 .gc-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#111;color:#fff;font-size:16px}
@@ -886,7 +888,7 @@ document.addEventListener('mouseover',function(e){if(!matchMedia('(pointer:fine)
   p.innerHTML='<div class="gc-head"><b id="gcT"></b><button type="button" class="gc-x" id="gcX">×</button></div><div class="gc-list" id="gcList" aria-live="polite"></div><div class="gc-draft" id="gcDraft" hidden></div><form class="gc-form" id="gcF" autocomplete="off"><input id="gcIn" maxlength="200" enterkeyhint="send"><button type="submit" id="gcS"></button></form>';
   document.body.appendChild(p);
   var list=p.querySelector('#gcList'),dr=p.querySelector('#gcDraft'),inp=p.querySelector('#gcIn'),sendB=p.querySelector('#gcS'),hist=[],draft=null,busy=false,greeted=false;
-  function labels(){cb.setAttribute('aria-label',tr(CH.title));cb.title=tr(CH.title);p.setAttribute('aria-label',tr(CH.title));p.querySelector('#gcT').textContent='🔥 '+tr(CH.title);p.querySelector('#gcX').setAttribute('aria-label',tr(CH.close));inp.placeholder=tr(CH.ph);sendB.textContent=tr(CH.send)}
+  function labels(){cb.setAttribute('aria-label',tr(CH.title));cb.title=tr(CH.title);cb.setAttribute('data-l',tr(CH.title));p.setAttribute('aria-label',tr(CH.title));p.querySelector('#gcT').textContent='🔥 '+tr(CH.title);p.querySelector('#gcX').setAttribute('aria-label',tr(CH.close));inp.placeholder=tr(CH.ph);sendB.textContent=tr(CH.send)}
   labels();document.addEventListener('click',function(e){if(e.target.closest('[data-lang]'))setTimeout(labels,60)});
   function msg(role,text){var d=document.createElement('div');d.className='gc-m '+role;d.textContent=text;list.appendChild(d);list.scrollTop=list.scrollHeight;return d}
   function cartNow(){var c=W.cart(),out=[];for(var k in c){var l=c[k],pr=W.byId[l.id];if(pr)out.push({name:pr.n,qty:l.q})}return out}

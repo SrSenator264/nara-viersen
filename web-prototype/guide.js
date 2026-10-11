@@ -203,7 +203,7 @@ document.addEventListener('mouseover',function(e){if(!matchMedia('(pointer:fine)
   p.innerHTML='<div class="gc-head"><b id="gcT"></b><button type="button" class="gc-x" id="gcX">×</button></div><div class="gc-list" id="gcList" aria-live="polite"></div><div class="gc-draft" id="gcDraft" hidden></div><form class="gc-form" id="gcF" autocomplete="off"><input id="gcIn" maxlength="200" enterkeyhint="send"><button type="submit" id="gcS"></button></form>';
   document.body.appendChild(p);
   var list=p.querySelector('#gcList'),dr=p.querySelector('#gcDraft'),inp=p.querySelector('#gcIn'),sendB=p.querySelector('#gcS'),hist=[],draft=null,busy=false,greeted=false;
-  function labels(){cb.setAttribute('aria-label',tr(CH.title));cb.title=tr(CH.title);p.setAttribute('aria-label',tr(CH.title));p.querySelector('#gcT').textContent='🔥 '+tr(CH.title);p.querySelector('#gcX').setAttribute('aria-label',tr(CH.close));inp.placeholder=tr(CH.ph);sendB.textContent=tr(CH.send)}
+  function labels(){cb.setAttribute('aria-label',tr(CH.title));cb.title=tr(CH.title);cb.setAttribute('data-l',tr(CH.title));p.setAttribute('aria-label',tr(CH.title));p.querySelector('#gcT').textContent='🔥 '+tr(CH.title);p.querySelector('#gcX').setAttribute('aria-label',tr(CH.close));inp.placeholder=tr(CH.ph);sendB.textContent=tr(CH.send)}
   labels();document.addEventListener('click',function(e){if(e.target.closest('[data-lang]'))setTimeout(labels,60)});
   function msg(role,text){var d=document.createElement('div');d.className='gc-m '+role;d.textContent=text;list.appendChild(d);list.scrollTop=list.scrollHeight;return d}
   function cartNow(){var c=W.cart(),out=[];for(var k in c){var l=c[k],pr=W.byId[l.id];if(pr)out.push({name:pr.n,qty:l.q})}return out}
