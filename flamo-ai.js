@@ -257,7 +257,7 @@ async function chat(input, { adapter, menu, W, catalog, products, popular, maxRo
   if (!done) return { ok: false, code: 'LOOP', usage, rounds, ms };
   const j = extractJson(text); let reply = clean(j && typeof j.reply === 'string' ? j.reply : (/^\s*[{`]/.test(text) ? '' : text));
   const mentionsBtn = /(button|knopf|warenkorb|zum korb|add to cart|الزر|زر|السلة|سلة)/i.test(reply);
-  const d = j && (j.show_draft === true || mentionsBtn) ? ex.getDraft() : null;
+  const d = ((j && j.show_draft === true) || mentionsBtn) ? ex.getDraft() : null;
   // restore canonical menu names inside **bold** (small models sometimes glue words together)
   const canon = new Map(menu.map(m => [String(m.n).toLowerCase().replace(/\s+/g, ''), m.n]));
   reply = reply.replace(/\*\*([^*]+)\*\*/g, (all, t) => { const c = canon.get(t.toLowerCase().replace(/\s+/g, '')); return c ? '**' + c + '**' : all; });

@@ -141,3 +141,9 @@ test('chat: a reply that points at a button without any priced draft gets one co
   const r = await F.chat({ message: 'x' }, { adapter: a, menu, W, catalog: [], products: [] });
   assert.equal(nudged, 1); assert.equal(r.ok, true); assert.ok(r.draft && r.draft.totalCents === 1199);
 });
+
+test('chat: plain-text (non-JSON) reply that points at the button still returns the priced draft', async () => {
+  const a = fake([{ calls: [{ id: 'a', name: 'price_order', args: { lines: [{ id: 2, qty: 1 }] } }] }, { text: 'Alles klar, tippe unten auf den Button.' }]);
+  const r = await F.chat({ message: 'x' }, { adapter: a, menu, W, catalog: [], products: [] });
+  assert.ok(r.draft && r.draft.totalCents === 1199);
+});
