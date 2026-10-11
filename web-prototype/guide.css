@@ -144,3 +144,5 @@ html[dir=rtl] .g-chat{right:auto;left:16px}
 @media (min-width:1100px){.guide{width:230px}.guide.perch{width:320px}}
 @media (min-width:1600px){.guide{width:260px}.guide.perch{width:380px}}
 .gc-m b{font-weight:800}
+
+.gc-no{width:100%;margin-top:6px;min-height:38px;border:1px solid rgba(0,0,0,.18);border-radius:12px;background:transparent;color:#444;font-weight:700;font-size:14px;cursor:pointer}
