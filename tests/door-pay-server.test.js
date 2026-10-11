@@ -67,3 +67,13 @@ test('door pay: needs login; transfer off → 503', async () => {
   const o2 = path.join(tmp, 'data', 'nara-admin.json'); const j = JSON.parse(fs.readFileSync(o2, 'utf8')); j.orders.push({ ...j.orders[0], id: 'ord-2', displayCode: 'W3333', paymentStatus: 'UNPAID', paymentMethod: 'CASH', cashDueCents: 900, totalCents: 900, payment: undefined, doorPay: undefined }); fs.writeFileSync(o2, JSON.stringify(j));
   assert.equal((await call('POST', '/api/driver/door-pay', { orderId: 'ord-2', action: 'start' })).status, 503);
 });
+
+test('static WebM clips: served as video/webm with Range support (Flamo HD clips)', async () => {
+  const u = '/web-prototype/c/flamo-cheer.webm';
+  const full = await fetch(base + u); assert.equal(full.status, 200); assert.equal(full.headers.get('content-type'), 'video/webm');
+  const len = Number(full.headers.get('content-length')); assert.ok(len > 1000);
+  const part = await fetch(base + u, { headers: { range: 'bytes=0-99' } });
+  assert.equal(part.status, 206); assert.equal((await part.arrayBuffer()).byteLength, 100);
+  assert.match(part.headers.get('content-range'), new RegExp('^bytes 0-99/' + len + '$'));
+  assert.equal((await fetch(base + u, { headers: { range: 'bytes=999999999-' } })).status, 416);
+});

@@ -208,6 +208,7 @@ var trackT=0,trackTok=null;
 var STEPS=['received','cooking','onTheWay','done'],STEP_IMG={received:'flamo-cheer',cooking:'m-burger',onTheWay:'m-street',ready:'flamo-wave',done:'flamo-party',cancelled:'mascot'};
 /* HD-Clip (WebM mit Transparenz) für Zahlung/Status, sonst animiertes WebP (Safari, reduzierte Bewegung) */
 var HDM={'flamo-bank':1,'flamo-cheer':1,'flamo-party':1},HDOK=!!(document.createElement('video').canPlayType&&document.createElement('video').canPlayType('video/webm; codecs="vp9"'))&&!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+document.addEventListener('error',function(e){var v=e.target;if(v&&v.tagName==='VIDEO'&&v.classList&&v.classList.contains('tr-hd')){var n=(/c\/([a-z-]+)\.webm/.exec(v.getAttribute('src')||'')||[])[1];if(n){HDOK=false;v.outerHTML=fm(n)}}},true);
 function fm(n){return HDM[n]&&HDOK?'<video class="tr-m tr-hd" src="c/'+n+'.webm" autoplay loop muted playsinline aria-hidden="true"></video>':'<img class="tr-m'+(HDM[n]?' tr-hd':'')+'" src="c/'+n+'.webp" alt="">'}
 function openTrack(tok,o){if(o&&o.step==='awaitingPayment'){startPay(tok);return}trackTok=tok;drawTrack(o);clearInterval(trackT);trackT=setInterval(pollTrack,15000)}
 function pollTrack(){if(!trackTok)return;fetch('/api/web-orders/status?t='+encodeURIComponent(trackTok)).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.order){drawTrack(j.order);if(j.order.step==='done'||j.order.step==='cancelled')clearInterval(trackT)}}).catch(function(){})}
