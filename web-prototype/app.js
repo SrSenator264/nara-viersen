@@ -45,8 +45,10 @@ var GEMO={__drink:'🥤',__sauce:'🫙',Dips:'🥣','Ihre Extras':'✨'};
 function gName(g){var x=ON[g];return (GEMO[g]?GEMO[g]+' ':'')+(x?(x[lang]||x.de):g.replace(/^__/,''))}
 function oName(n){var x=ON[n],e=window.NARA_EMOJI?NARA_EMOJI.ing(n):'';return (e?e+' ':'')+(x?(x[lang]||x.de):n)}
 /* Entwurf von Flamo (vom Server geprüft) in den Warenkorb legen: Optionsnamen/-preise aus dem Menü ergänzen */
+function mkLine(l){var p=byId[l&&l.id];if(!p||!(l.q>=1))return null;var o=[];(l.o||[]).forEach(function(x){((p.o||[]).forEach(function(g){if(g.g!==x.g)return;(g.x||[]).forEach(function(it){if(it.i===x.i)o.push({g:g.g,i:it.i,n:it.n,c:it.c||0})})}))});return{id:p.id,q:Math.min(20,l.q|0),m:l.m&&p.mc?1:0,o:o,nt:'',u:l.u>0?l.u:(l.m&&p.mc?p.mc:p.p)}}
+function removeLines(ls){(ls||[]).forEach(function(l){var line=mkLine(l);if(!line)return;var k=lineKey(line);if(cart[k]){cart[k].q-=line.q;if(cart[k].q<=0)delete cart[k]}});save();render()}
 function addLines(ls){var n=0;(ls||[]).forEach(function(l){var p=byId[l&&l.id];if(!p||!(l.q>=1))return;var o=[];(l.o||[]).forEach(function(x){((p.o||[]).forEach(function(g){if(g.g!==x.g)return;(g.x||[]).forEach(function(it){if(it.i===x.i)o.push({g:g.g,i:it.i,n:it.n,c:it.c||0})})}))});var line={id:p.id,q:Math.min(20,l.q|0),m:l.m&&p.mc?1:0,o:o,nt:'',u:l.u>0?l.u:(l.m&&p.mc?p.mc:p.p)};var k=lineKey(line);if(cart[k])cart[k].q+=line.q;else cart[k]=line;n+=line.q});if(n){save();render();try{window.dispatchEvent(new CustomEvent('nara-added',{detail:{id:0}}))}catch(e){}}return n}
-window.NARA_WEB={addLines:addLines,cart:function(){return cart},setCart:function(o){cart=normCart(o||{});save();render()},openCart:function(){drawerOpen=true;render()},add:addSimple,menu:MENU,byId:byId,eur:function(c){return eur(c)}};
+window.NARA_WEB={addLines:addLines,removeLines:removeLines,cart:function(){return cart},setCart:function(o){cart=normCart(o||{});save();render()},openCart:function(){drawerOpen=true;render()},add:addSimple,menu:MENU,byId:byId,eur:function(c){return eur(c)}};
 var MS={burger:1,crispy:1,street:1,orient:1,drinks:1,sweet:1,sides:1};
 function mascot(size,k){return '<img class="mascot" src="c/'+(k&&MS[k]?'m-'+k:'mascot')+'.webp" alt="" width="'+size+'" height="'+Math.round(size*1.18)+'">'}
 
