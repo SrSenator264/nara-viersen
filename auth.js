@@ -67,6 +67,8 @@ const RULES = [
   ['GET', /^\/api\/web-orders\/status$/, 'public'],
   ['GET', /^\/api\/pay\/enabled$/, 'public'],
   ['GET', /^\/api\/pay\/door$/, 'public'],
+  ['GET', /^\/api\/flamo\/status$/, 'public'],
+  ['POST', /^\/api\/flamo\/chat$/, 'public'],
   ['GET', /^\/api\/permissions$/, 'public'],
   ['POST', /^\/api\/nara-guide$/, 'public'],
   ['*', /^\/api\/auth\/(login|logout|me|employees|bootstrap)$/, 'public'],
@@ -115,7 +117,7 @@ const allowed = (access, role) => Array.isArray(access) && access.includes(role)
 
 // ───────── ملفات ثابتة مسموحة ─────────
 const BLOCKED_DIRS = new Set(['data', 'logs', 'node_modules', 'tests', 'scripts', 'checkpoint', 'local-ocr-output']);
-const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'customer-db.js', 'platform-trips.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'bank-pay.js', 'qonto-sync.js', 'sides-login-save.ps1']);
+const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'customer-db.js', 'platform-trips.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'bank-pay.js', 'qonto-sync.js', 'flamo-ai.js', 'sides-login-save.ps1']);
 const STATIC_EXT = new Set(['.html', '.js', '.mjs', '.css', '.png', '.jpg', '.jpeg', '.webp', '.webm', '.avif', '.gif', '.svg', '.ico', '.woff', '.woff2', '.webmanifest', '.mp3', '.wav', '.ogg']);
 function staticAllowed(rel) {
   const parts = String(rel || '').split(/[\\/]+/).filter(Boolean);
