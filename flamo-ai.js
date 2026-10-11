@@ -247,8 +247,12 @@ async function chat(input, { adapter, menu, W, catalog, products, popular, maxRo
     try { const r = await adapter.finalNoTools(st, 'Now answer the customer. Do not call any tool. If a required choice is still missing, ask the customer for it (list the options). Reply ONLY with the JSON object.'); usage.in += r.usage.in; usage.out += r.usage.out; if (r.text) { text = r.text; done = true; } } catch { /* fall through */ }
   }
   if (!done) return { ok: false, code: 'LOOP', usage, rounds, ms };
-  const j = extractJson(text), reply = clean(j && typeof j.reply === 'string' ? j.reply : (/^\s*[{`]/.test(text) ? '' : text));
-  const d = j && j.show_draft === true ? ex.getDraft() : null;
+  const j = extractJson(text); let reply = clean(j && typeof j.reply === 'string' ? j.reply : (/^\s*[{`]/.test(text) ? '' : text));
+  const mentionsBtn = /(button|knopf|warenkorb|zum korb|add to cart|الزر|زر|السلة|سلة)/i.test(reply);
+  const d = j && (j.show_draft === true || mentionsBtn) ? ex.getDraft() : null;
+  // restore canonical menu names inside **bold** (small models sometimes glue words together)
+  const canon = new Map(menu.map(m => [String(m.n).toLowerCase().replace(/\s+/g, ''), m.n]));
+  reply = reply.replace(/\*\*([^*]+)\*\*/g, (all, t) => { const c = canon.get(t.toLowerCase().replace(/\s+/g, '')); return c ? '**' + c + '**' : all; });
   if (!reply) return { ok: false, code: 'EMPTY', usage, rounds };
   return { ok: true, reply, draft: d ? { lines: d.lines, items: d.items, totalCents: d.totalCents } : null, usage, rounds, ms };
 }

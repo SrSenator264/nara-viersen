@@ -127,3 +127,10 @@ test('price_order: missing choice returns options + stop instruction; exhausted 
   const r = await F.chat({ message: 'x' }, { adapter: loop, menu, W, catalog: [], products: [] });
   assert.equal(r.ok, true); assert.equal(r.reply, 'Welches Getränk?');
 });
+
+test('chat: glued bold names are restored to the menu name; draft shown when the reply points at the button', async () => {
+  const ex = [{ calls: [{ id: 'a', name: 'price_order', args: { lines: [{ id: 2, qty: 1 }] } }] }, { text: '{"reply":"Hier: **KoreanWings** ist bereit, tippe auf den Button.","show_draft":false}' }];
+  const r = await F.chat({ message: 'x' }, { adapter: fake(ex), menu, W, catalog: [], products: [] });
+  assert.equal(r.reply, 'Hier: **Korean Wings** ist bereit, tippe auf den Button.');
+  assert.ok(r.draft && r.draft.totalCents === 1199);
+});

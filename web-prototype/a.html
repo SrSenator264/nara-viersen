@@ -909,11 +909,11 @@ document.addEventListener('mouseover',function(e){if(!matchMedia('(pointer:fine)
   function close(){p.hidden=true}
   cb.addEventListener('click',function(){p.hidden?open():close()});p.querySelector('#gcX').addEventListener('click',close);
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!p.hidden)close()});
-  p.querySelector('#gcF').addEventListener('submit',function(e){e.preventDefault();if(busy)return;var text=inp.value.trim();if(!text)return;inp.value='';msg('user',text);dr.hidden=true;draft=null;busy=true;sendB.disabled=true;var typ=msg('bot','…');typ.classList.add('typing');
+  p.querySelector('#gcF').addEventListener('submit',function(e){e.preventDefault();if(busy)return;var text=inp.value.trim();if(!text)return;inp.value='';msg('user',text);busy=true;sendB.disabled=true;var typ=msg('bot','…');typ.classList.add('typing');
    fetch('/api/flamo/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,lang:L(),history:hist.slice(-6),cart:cartNow(),who:who(),last:lastNames()})})
     .then(function(r){return r.json().then(function(j){return{s:r.status,j:j}})})
     .then(function(x){typ.remove();
-     if(x.s===200&&x.j&&x.j.reply){var clean=x.j.reply.replace(/\*\*/g,'');hist.push({role:'user',text:text},{role:'assistant',text:clean});speak(clean);typed(x.j.reply,function(){if(x.j.draft&&x.j.draft.lines&&x.j.draft.lines.length)showDraft(x.j.draft)})}
+     if(x.s===200&&x.j&&x.j.reply){var clean=x.j.reply.replace(/\*\*/g,'');hist.push({role:'user',text:text},{role:'assistant',text:clean});speak(clean);var hasD=!!(x.j.draft&&x.j.draft.lines&&x.j.draft.lines.length);if(!hasD){dr.hidden=true;draft=null}typed(x.j.reply,function(){if(x.j.draft&&x.j.draft.lines&&x.j.draft.lines.length)showDraft(x.j.draft)})}
      else if(x.s===429)msg('bot',tr(CH.busy));
      else{msg('bot',tr(CH.off));if(x.j&&(x.j.code==='CAP'||x.j.code==='AI_OFF')){cb.remove();AI=false}}})
     .catch(function(){typ.remove();msg('bot',tr(CH.off))})
