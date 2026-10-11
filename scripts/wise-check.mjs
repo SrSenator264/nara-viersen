@@ -5,7 +5,7 @@ const root=path.join(path.dirname(fileURLToPath(import.meta.url)),'..');
 try{for(const l of fs.readFileSync(path.join(root,'.env'),'utf8').split(/\r?\n/)){const m=l.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);if(m&&!(m[1] in process.env))process.env[m[1]]=m[2].replace(/^["']|["']$/g,'')}}catch{}
 const T=process.env.WISE_API_TOKEN,KEYF=process.env.WISE_PRIVATE_KEY_FILE,BASE=process.env.WISE_BASE||'https://api.wise.com';
 if(!T){console.log('WISE_API_TOKEN fehlt in .env');process.exit(1)}
-const call=async(p,extra={})=>{const r=await fetch(BASE+p,{headers:{Authorization:'Bearer '+T,...extra}});let b=null;try{b=await r.json()}catch{}return{status:r.status,headers:r.headers,body:b}};
+const call=async(p,extra={})=>{const r=await fetch(BASE+p,{headers:{Authorization:'Bearer '+T,...extra}});let b=null;try{b=await r.text();try{b=JSON.parse(b)}catch{}}catch{}return{status:r.status,headers:r.headers,body:b}};
 const out=(...a)=>console.log(...a);
 const pr=await call('/v2/profiles');out('profiles:',pr.status);
 if(pr.status!==200){out(JSON.stringify(pr.body).slice(0,300));process.exit(1)}
@@ -25,4 +25,4 @@ if(st.status===403&&st.headers.get('x-2fa-approval')){
 if(st.status===200){const tx=st.body.transactions||[];out('Buchungen letzte 7 Tage:',tx.length);
   for(const t of tx.filter(t=>t.type==='CREDIT').slice(0,5))out(' ',t.date,t.amount&&t.amount.value,t.amount&&t.amount.currency,'ref:',t.referenceNumber,'|',(t.details&&t.details.paymentReference)||'(keine paymentReference)','|',(t.details&&t.details.senderName)||'(kein senderName)');
   out('Felder in details:',tx[0]?Object.keys(tx[0].details||{}).join(','):'-')}
-else out(JSON.stringify(st.body).slice(0,400));
+else{out(JSON.stringify(st.body).slice(0,400));for(const [k,v] of st.headers)if(!/^(set-cookie|authorization)$/i.test(k)&&!/^x-2fa-approval$/i.test(k))out('  hdr',k+':',String(v).slice(0,120))}
