@@ -14,7 +14,8 @@ const accs=(org.body.organization&&org.body.organization.bank_accounts)||[];
 out('Konten:',accs.length);
 for(const a of accs)out(' ',a.name,'|',a.status,'|',a.currency,'| Saldo(ct):',a.balance_cents,'| IBAN',mask(a.iban));
 const acc=accs.find(a=>a.main)||accs[0];if(!acc){out('kein Konto gefunden');process.exit(1)}
-const tx=await call('/v2/transactions?iban='+encodeURIComponent(acc.iban)+'&per_page=10&sort_by=settled_at:desc');
+let tx=await call('/v2/transactions?bank_account_id='+encodeURIComponent(acc.id)+'&per_page=10&sort_by=settled_at:desc');
+if(tx.status===404||tx.status===400){out('mit bank_account_id:',tx.status,JSON.stringify(tx.body).slice(0,200));tx=await call('/v2/transactions?slug='+encodeURIComponent(acc.slug||'')+'&iban='+encodeURIComponent(acc.iban)+'&per_page=10&sort_by=settled_at:desc')}
 out('transactions:',tx.status);
 if(tx.status!==200){out(JSON.stringify(tx.body).slice(0,400));process.exit(1)}
 const list=tx.body.transactions||[];out('Buchungen (letzte bis 10):',list.length);
