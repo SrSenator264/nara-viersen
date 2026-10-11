@@ -150,7 +150,7 @@ function anthropicAdapter({ key, model, base, fetchImpl = fetch }) {
 function geminiAdapter({ key, model, base, fetchImpl = fetch }) {
   const url = (base || 'https://generativelanguage.googleapis.com').replace(/\/$/, '') + '/v1beta/models/' + encodeURIComponent(model) + ':generateContent';
   const decl = [{ functionDeclarations: TOOLS.map(t => ({ name: t.name, description: t.description, parameters: t.parameters })) }];
-  let think = /gemini-2\.5-flash/.test(model) ? { thinkingBudget: 0 } : /gemini-3.*flash/.test(model) ? { thinkingLevel: 'minimal' } : null;
+  let think = /gemini-2\.5-flash/.test(model) ? { thinkingBudget: 0 } : /(gemini-3.*flash|flash-latest)/.test(model) && !/lite/.test(model) ? { thinkingLevel: 'minimal' } : null;
   return {
     name: 'gemini:' + model,
     init: (system, history, user) => ({ system, contents: [...history.map(h => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: h.content }] })), { role: 'user', parts: [{ text: user }] }] }),
