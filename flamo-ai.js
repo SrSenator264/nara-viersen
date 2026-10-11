@@ -155,7 +155,8 @@ function geminiAdapter({ key, model, base, fetchImpl = fetch }) {
       const r = await fetchImpl(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
         body: JSON.stringify({ systemInstruction: { parts: [{ text: st.system }] }, contents: st.contents, tools: decl, toolConfig: { functionCallingConfig: { mode: 'AUTO' } }, generationConfig: { temperature: 0.3, maxOutputTokens: 1500, ...(think ? { thinkingConfig: think } : {}) } }) });
       if (r.status === 400 && think) { think = null; return this.call(st); }
-      if (!r.ok) throw new Error('AI provider ' + r.status);
+      if ((r.status === 429 || r.status === 500 || r.status === 503) && !st.retried) { st.retried = true; await new Promise(z => setTimeout(z, 1800)); return this.call(st); }
+      if (!r.ok) { let m = ''; try { const e = await r.json(); m = (e.error && (e.error.message || e.error.status)) || ''; } catch { /* no body */ } throw new Error('AI provider ' + r.status + ' ' + String(m).slice(0, 220)); }
       const j = await r.json(), cand = (j.candidates && j.candidates[0]) || {}, parts = (cand.content && cand.content.parts) || [];
       if (parts.length) st.contents.push({ role: 'model', parts });
       const u = j.usageMetadata || {};
