@@ -65,7 +65,10 @@ function makeExec({ menu, W, catalog, products }) {
     const lines = raw.map(l => ({ id: Number(l.id), q: Math.trunc(Number(l.qty)) || 1, m: l.menu ? 1 : 0, o: (Array.isArray(l.options) ? l.options : []).map(o => ({ g: str(o.group), i: str(o.option_id) })), nt: '' }));
     let priced;
     try { priced = lines.map(l => W.priceLine(l, catalog, products)); }
-    catch (e) { return { error: e.message, code: e.code || 'INVALID', ...(e.group ? { missing_group: e.group } : {}), ...(e.id ? { item_id: e.id } : {}) }; }
+    catch (e) {
+      let opts; if (e.group) { const mi = byId.get(Number(e.id || (lines.find(l => l.id) || {}).id)); const g = mi && (mi.o || []).find(x => x.g === e.group); if (g) opts = g.x.slice(0, 8).map(x => ({ option_id: x.i, name: x.n, extra_eur: eur(x.c || 0) })); }
+      return { error: e.message, code: e.code || 'INVALID', ...(e.group ? { missing_group: e.group, options: opts, instruction: 'STOP calling tools. The customer has not chosen this yet. Ask the customer to choose (list the options) and wait for the answer. Never choose for them.' } : {}), ...(e.id ? { item_id: e.id } : {}) };
+    }
     const total = priced.reduce((s, p) => s + p.totalCents, 0);
     lastPriced = {
       lines: lines.map((l, i) => ({ ...l, u: priced[i].unitCents })),
@@ -151,11 +154,12 @@ function geminiAdapter({ key, model, base, fetchImpl = fetch }) {
   return {
     name: 'gemini:' + model,
     init: (system, history, user) => ({ system, contents: [...history.map(h => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: h.content }] })), { role: 'user', parts: [{ text: user }] }] }),
-    async call(st) {
+    async finalNoTools(st, nudge) { const last = st.contents[st.contents.length - 1]; if (last && last.role === 'user') last.parts.push({ text: nudge }); else st.contents.push({ role: 'user', parts: [{ text: nudge }] }); return this.call(st, true); },
+    async call(st, noTools) {
       const r = await fetchImpl(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({ systemInstruction: { parts: [{ text: st.system }] }, contents: st.contents, tools: decl, toolConfig: { functionCallingConfig: { mode: 'AUTO' } }, generationConfig: { temperature: 0.3, maxOutputTokens: 1500, ...(think ? { thinkingConfig: think } : {}) } }) });
-      if (r.status === 400 && think) { think = null; return this.call(st); }
-      if ((r.status === 429 || r.status === 500 || r.status === 503) && !st.retried) { st.retried = true; await new Promise(z => setTimeout(z, 1800)); return this.call(st); }
+        body: JSON.stringify({ systemInstruction: { parts: [{ text: st.system }] }, contents: st.contents, tools: decl, toolConfig: { functionCallingConfig: { mode: noTools ? 'NONE' : 'AUTO' } }, generationConfig: { temperature: 0.3, maxOutputTokens: 1500, ...(think ? { thinkingConfig: think } : {}) } }) });
+      if (r.status === 400 && think) { think = null; return this.call(st, noTools); }
+      if ((r.status === 429 || r.status === 500 || r.status === 503) && !st.retried) { st.retried = true; await new Promise(z => setTimeout(z, 1800)); return this.call(st, noTools); }
       if (!r.ok) { let m = ''; try { const e = await r.json(); m = (e.error && (e.error.message || e.error.status)) || ''; } catch { /* no body */ } throw new Error('AI provider ' + r.status + ' ' + String(m).slice(0, 220)); }
       const j = await r.json(), cand = (j.candidates && j.candidates[0]) || {}, parts = (cand.content && cand.content.parts) || [];
       if (parts.length) st.contents.push({ role: 'model', parts });
@@ -214,7 +218,7 @@ function extractJson(text) {
 }
 const clean = t => str(t).replace(/[_`#]+/g, '').replace(/\*{3,}/g, '**').replace(/\s+\n/g, '\n').slice(0, 700);
 
-async function chat(input, { adapter, menu, W, catalog, products, popular, maxRounds = 4 }) {
+async function chat(input, { adapter, menu, W, catalog, products, popular, maxRounds = 6 }) {
   const lang = ['de', 'en', 'ar'].includes(input.lang) ? input.lang : 'de';
   const history = (Array.isArray(input.history) ? input.history : []).slice(-6)
     .filter(t => t && (t.role === 'user' || t.role === 'assistant') && typeof t.text === 'string' && t.text.trim())
@@ -231,6 +235,9 @@ async function chat(input, { adapter, menu, W, catalog, products, popular, maxRo
     usage.in += r.usage.in; usage.out += r.usage.out;
     if (!r.calls.length) { text = r.text; done = true; break; }
     adapter.addResults(st, r.calls, r.calls.map(c => ex.run(c.name, c.args)));
+  }
+  if (!done && adapter.finalNoTools) {
+    try { const r = await adapter.finalNoTools(st, 'Now answer the customer. Do not call any tool. If a required choice is still missing, ask the customer for it (list the options). Reply ONLY with the JSON object.'); usage.in += r.usage.in; usage.out += r.usage.out; if (r.text) { text = r.text; done = true; } } catch { /* fall through */ }
   }
   if (!done) return { ok: false, code: 'LOOP', usage, rounds, ms };
   const j = extractJson(text), reply = clean(j && typeof j.reply === 'string' ? j.reply : (/^\s*[{`]/.test(text) ? '' : text));

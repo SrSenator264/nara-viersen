@@ -117,3 +117,13 @@ test('server: AI off without any key', async () => {
   assert.equal((await fetch(base + '/api/flamo/status').then(r => r.json())).ai, false);
   const r = await post('/api/flamo/chat', { message: 'hallo' }); assert.equal(r.status, 503); assert.equal(r.json.code, 'AI_OFF');
 });
+
+test('price_order: missing choice returns options + stop instruction; exhausted loop gets a final tool-less answer', async () => {
+  const ex = F.makeExec({ menu, W, catalog: [], products: [] });
+  const e = ex.run('price_order', { lines: [{ id: 1, qty: 1, menu: true }] });
+  assert.equal(e.missing_group, '__drink'); assert.match(e.instruction, /Ask the customer/); assert.ok(e.options.length >= 1);
+  const loop = fake(Array.from({ length: 10 }, () => ({ calls: [{ id: 'x', name: 'search_menu', args: {} }] })));
+  loop.finalNoTools = async () => ({ text: '{"reply":"Welches Getränk?","show_draft":false}', calls: [], usage: { in: 1, out: 1 } });
+  const r = await F.chat({ message: 'x' }, { adapter: loop, menu, W, catalog: [], products: [] });
+  assert.equal(r.ok, true); assert.equal(r.reply, 'Welches Getränk?');
+});
