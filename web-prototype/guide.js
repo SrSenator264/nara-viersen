@@ -30,7 +30,7 @@ document.body.appendChild(g);
 var bub=g.querySelector('#gBubble'),txtEl=g.querySelector('#gText'),act=g.querySelector('#gAct'),img=g.querySelector('#gImg'),vidEl=g.querySelector('#gVid'),vbtn=g.querySelector('#gVoice');
 /* HD-Clips als WebM (VP9 mit Transparenz): schärfer, Wolle sichtbar, kleiner als animiertes WebP.
    Safari/iOS kann das nicht → dort bleibt das animierte WebP. */
-var imgEl=img,curSrc=imgEl.getAttribute('src'),HDV={'flamo-talk':1,'flamo-wave-hd':1,'flamo-dance':1,'flamo-happy':1,'flamo-present':1,'flamo-spin':1,'flamo-step':1,'flamo-point':1,'flamo-check':1,'flamo-paid':1};
+var imgEl=img,curSrc=imgEl.getAttribute('src'),HDV={'flamo-talk':1,'flamo-wave-hd':1,'flamo-dance':1,'flamo-happy':1,'flamo-present':1,'flamo-spin':1,'flamo-step':1,'flamo-point':1,'flamo-check':1,'flamo-paid':1,'flamo-sit':1};
 var useVid=!!(vidEl&&vidEl.canPlayType&&vidEl.canPlayType('video/webm; codecs="vp9"'))&&!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
 img={get src(){return curSrc},set src(v){curSrc=v;var m=/c\/(flamo-[a-z-]+)\.webp$/.exec(v||'');
  if(useVid&&m&&HDV[m[1]]){var w='c/'+m[1]+'.webm';if(vidEl.getAttribute('src')!==w){vidEl.src=w}vidEl.hidden=false;imgEl.hidden=true;var p=vidEl.play();if(p&&p.catch)p.catch(function(){vidEl.hidden=true;imgEl.hidden=false;imgEl.src=v})}
@@ -82,13 +82,13 @@ function poseSrc(){var r=route();return r==='home'?(g.classList.contains('perch'
 function clip(name,ms){if(intro||g.classList.contains('perch'))return;clearTimeout(clipT);clipOn=name;img.src='c/flamo-'+name+'.webp';clipT=setTimeout(function(){clipOn='';img.src=poseSrc()},ms)}
 function dock(){g.classList.remove('welcome');setTimeout(perch,0)}
 /* Flamo sitzt auf einer Kachel (Startseite): Po auf der Oberkante, Beine hängen über die Kachel */
-var SEAT=.698,perchKey='burger',perchT=0,walking=false,WALK='c/flamo-step.webp',WALK_R=370/269,SPIN_R=381/367;
+var SEAT=.71,SIT_R=590/554,perchKey='burger',perchT=0,walking=false,WALK='c/flamo-step.webp',WALK_R=370/269,SPIN_R=381/367;
 /* echte Lauf-Animation, sobald es sie gibt (c/flamo-walk.webp), sonst stehender Flamo mit Watschel-Schritten */
 (function(){var t=new Image();t.onload=function(){WALK='c/flamo-walk.webp';WALK_R=t.naturalHeight/t.naturalWidth};t.src='c/flamo-walk.webp'})();
 function perchSpot(tile,standing){var ratio=standing===true?WALK_R:standing;
  var r=tile.getBoundingClientRect(),w=g.offsetWidth,rtl=document.documentElement.dir==='rtl';
  var x=rtl?r.left+Math.min(28,r.width*.06):r.right-w-Math.min(28,r.width*.06);
- var y=standing?r.top-w*ratio:r.top-w*338/246*SEAT;
+ var y=standing?r.top-w*ratio:r.top-w*SIT_R*SEAT;
  return {x:Math.round(x+window.scrollX),y:Math.round(y+window.scrollY)};
 }
 function perch(){

@@ -79,7 +79,7 @@ html[dir=rtl] .guide.intro{right:auto;left:4vw}
 }
 
 /* Flamo auf der Kachel */
-.guide.perch{position:absolute;right:auto;bottom:auto;width:170px;transition:opacity .25s,transform .25s;z-index:6}
+.guide.perch{position:absolute;right:auto;bottom:auto;width:215px;transition:opacity .25s,transform .25s;z-index:6}
 html[dir=rtl] .guide.perch{left:auto}
 .guide.perch .g-btn :is(img,video){filter:drop-shadow(0 10px 10px rgba(0,0,0,.28));animation:none}
 .guide.perch .g-bubble{position:absolute;bottom:auto;top:8%;right:calc(100% - 26px);border-radius:18px 4px 18px 18px}
@@ -108,3 +108,5 @@ html[dir=rtl] .guide.perch .g-voice{right:auto;left:-4px}
 }
 
 .g-btn video{width:100%;height:auto;display:block;background:transparent}
+
+.guide.perch .g-btn video{animation:none!important}
