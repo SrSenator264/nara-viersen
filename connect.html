@@ -35,13 +35,13 @@ a.back{color:var(--brand);font-weight:700;text-decoration:none}
   const T={
     de:{title:'Tablets verbinden · NARA',back:'← Kasse',h1:'📱 Tablet oder Handy verbinden',sub:'Das Tablet muss im selben WLAN wie der Laden sein. QR-Code mit der Tablet-Kamera scannen, dann öffnet sich die Seite. Jeder Mitarbeiter meldet sich mit Namen und PIN an.',
       lan:'⚠️ Der Server ist noch nur auf diesem Computer erreichbar. Einmal <code>NARA-Tablet-Freigabe.cmd</code> starten und dann diese Seite neu öffnen.',noip:'Kein Netzwerk gefunden. Prüfe, ob der Computer per WLAN oder Kabel verbunden ist.',
-      kitchen:'🍳 Küchenbildschirm',kitchenW:'Für das Tablet in der Küche',driver:'🛵 Fahrer-App',driverW:'Für das Handy jedes Fahrers',live:'📋 Live Orders',liveW:'Für den Bestell-Bildschirm',kasse:'💶 Kasse',kasseW:'Für ein zweites Kassen-Tablet'},
+      kitchen:'🍳 Küchenbildschirm',kitchenW:'Für das Tablet in der Küche',driver:'🛵 Fahrer-App',driverW:'Für das Handy jedes Fahrers',live:'📋 Live Orders',liveW:'Für den Bestell-Bildschirm',kasse:'💶 Kasse',kasseW:'Für ein zweites Kassen-Tablet',cust:'🛍️ Kundenseite',custW:'Zum Testen mit Flamo, Warenkorb und Zahlung'},
     ar:{title:'وصّل تابلت · NARA',back:'رجوع للكاشير',h1:'📱 وصّل تابلت أو جوال',sub:'التابلت لازم يكون على نفس Wi-Fi تبع المحل. صوّر الـ QR بكاميرا التابلت، وبتفتح الصفحة. كل موظف بيفوت باسمه والـ PIN تبعه.',
       lan:'⚠️ السيرفر لسا مسكّر على هالكمبيوتر بس. شغّل <code>NARA-Tablet-Freigabe.cmd</code> مرة وحدة، وبعدها ارجع لهالصفحة.',noip:'ما لقيت الكمبيوتر على الشبكة. تأكد إنه موصول بالـ Wi-Fi أو بالكابل.',
-      kitchen:'🍳 شاشة المطبخ',kitchenW:'لتابلت المطبخ',driver:'🛵 تطبيق السواق',driverW:'لجوال كل سواق',live:'📋 Live Orders',liveW:'لشاشة الطلبات',kasse:'💶 الكاشير',kasseW:'لتابلت كاشير تاني'},
+      kitchen:'🍳 شاشة المطبخ',kitchenW:'لتابلت المطبخ',driver:'🛵 تطبيق السواق',driverW:'لجوال كل سواق',live:'📋 Live Orders',liveW:'لشاشة الطلبات',kasse:'💶 الكاشير',kasseW:'لتابلت كاشير تاني',cust:'🛍️ موقع الزبون',custW:'لتجربة فلامو والسلة والدفع'},
     en:{title:'Connect tablets · NARA',back:'← Till',h1:'📱 Connect a tablet or phone',sub:'The tablet must be on the same Wi-Fi as the shop. Scan the QR code with the tablet camera and the page opens. Every staff member logs in with their name and PIN.',
       lan:'⚠️ The server is still only reachable from this computer. Run <code>NARA-Tablet-Freigabe.cmd</code> once, then come back to this page.',noip:'No network found. Make sure the computer is connected via Wi-Fi or cable.',
-      kitchen:'🍳 Kitchen screen',kitchenW:'For the kitchen tablet',driver:'🛵 Driver app',driverW:'For each driver\'s phone',live:'📋 Live Orders',liveW:'For the orders screen',kasse:'💶 Till',kasseW:'For a second till tablet'}
+      kitchen:'🍳 Kitchen screen',kitchenW:'For the kitchen tablet',driver:'🛵 Driver app',driverW:'For each driver\'s phone',live:'📋 Live Orders',liveW:'For the orders screen',kasse:'💶 Till',kasseW:'For a second till tablet',cust:'🛍️ Customer site',custW:'To test Flamo, cart and payment'}
   };
   const lang=window.NARA_LANG?NARA_LANG.get():'de',t=k=>(T[lang]||T.de)[k]||T.de[k]||k;
   document.title=t('title');document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
@@ -52,7 +52,7 @@ a.back{color:var(--brand);font-weight:700;text-decoration:none}
   if(!j.lanOpen){$('#warn').hidden=false;$('#warn').innerHTML=t('lan')}
   if(!ip){$('#grid').innerHTML='<p>'+esc(t('noip'))+'</p>';return}
   const base='http://'+ip.address+':'+(j.port||4185)+'/';
-  const pages=[[t('kitchen'),t('kitchenW'),'kitchen.html'],[t('driver'),t('driverW'),'driver.html'],[t('live'),t('liveW'),'live-orders.html'],[t('kasse'),t('kasseW'),'kasse.html']];
+  const pages=[[t('kitchen'),t('kitchenW'),'kitchen.html'],[t('driver'),t('driverW'),'driver.html'],[t('live'),t('liveW'),'live-orders.html'],[t('kasse'),t('kasseW'),'kasse.html'],[t('cust')+' B',t('custW'),'web-prototype/b.html'],[t('cust')+' C',t('custW'),'web-prototype/c.html'],[t('cust')+' A',t('custW'),'web-prototype/a.html']];
   $('#grid').innerHTML=pages.map(([ti,w,p])=>'<div class="card"><h2>'+esc(ti)+'</h2><p class="who">'+esc(w)+'</p>'+NARA_QR.svg(base+p,{level:'M',quiet:2})+'<div class="url">'+esc(base+p)+'</div></div>').join('');
   $('#ips').textContent='IP: '+(j.ips||[]).map(x=>x.address+' ('+x.name+')').join(' · ');
 })();
