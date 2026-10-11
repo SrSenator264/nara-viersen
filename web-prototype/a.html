@@ -731,7 +731,7 @@ function hop(){g.classList.remove('hop');void g.offsetWidth;g.classList.add('hop
 function pose(r){if(intro&&!intro.classList.contains('out'))return;var src=r==='home'&&g.classList.contains('perch')?'c/flamo-sit.webp':'c/'+(IMG[r]?'m-'+r:'mascot')+'.webp';if(img.getAttribute('src')!==src){g.classList.add('swap');setTimeout(function(){if(intro&&!intro.classList.contains('out')){g.classList.remove('swap');return}img.src=src;g.classList.remove('swap')},180)}}
 var clipT=0,danceUntil=0,clipOn='',busyUntil=0;
 function poseSrc(){var r=route();return r==='home'?(g.classList.contains('perch')?'c/flamo-sit.webp':'c/mascot.webp'):'c/'+(IMG[r]?'m-'+r:'mascot')+'.webp'}
-function clip(name,ms){if(intro||g.classList.contains('perch'))return;clearTimeout(clipT);clipOn=name;img.src='c/flamo-'+name+'.webp';clipT=setTimeout(function(){clipOn='';img.src=poseSrc()},ms)}
+function clip(name,ms){if(intro||g.classList.contains('perch'))return;if(IMG[route()]&&name!=='dance')return;/* im Bereich trägt Flamo sein Outfit, die Clips zeigen ihn im Standard-Look */clearTimeout(clipT);clipOn=name;img.src='c/flamo-'+name+'.webp';clipT=setTimeout(function(){clipOn='';img.src=poseSrc()},ms)}
 function dock(){g.classList.remove('welcome');setTimeout(perch,0)}
 /* Flamo sitzt auf einer Kachel (Startseite): Po auf der Oberkante, Beine hängen über die Kachel */
 var SEAT=.71,SIT_R=590/554,perchKey='burger',perchT=0,walking=false,WALK='c/flamo-step.webp',WALK_R=370/269,SPIN_R=381/367;
@@ -751,9 +751,11 @@ function perch(){
  var p=perchSpot(tile,false);g.style.left=p.x+'px';g.style.top=p.y+'px';
 }
 /* aufstehen → zur neuen Kachel laufen → wieder hinsetzen */
-function perchTo(k){
+function perchTo(k,dress){
  var tile=document.querySelector('#app .sec-'+k),old=document.querySelector('#app .sec-'+perchKey);
- if(k===perchKey||!tile||walking||!g.classList.contains('perch'))return;
+ if(!tile||walking||!g.classList.contains('perch')||(k===perchKey&&!dress))return;
+ if(k===perchKey){walking=true;bub.hidden=true;var s0=perchSpot(tile,SPIN_R);g.style.top=s0.y+'px';img.src='c/flamo-spin.webp';
+  setTimeout(function(){img.src='c/m-'+k+'.webp'},650);setTimeout(function(){walking=false;dress()},1500);return}
  perchKey=k;walking=true;bub.hidden=true;
  var a=old?perchSpot(old,true):null,b=perchSpot(tile,true),fromX=parseFloat(g.style.left)||b.x;
  var dist=Math.hypot(b.x-fromX,b.y-(a?a.y:b.y)),dur=Math.max(.7,Math.min(1.8,dist/420));
@@ -763,9 +765,21 @@ function perchTo(k){
  if(a){g.style.top=a.y+'px'}
  setTimeout(function(){g.classList.remove('standup');g.classList.add('walking');g.style.left=b.x+'px';g.style.top=b.y+'px'},220);
  setTimeout(function(){g.classList.remove('walking','face-left');var sp=perchSpot(tile,SPIN_R);g.style.top=sp.y+'px';img.src='c/flamo-spin.webp';
-  setTimeout(function(){walking=false;img.src='c/flamo-sit.webp';perch();hop()},1500)},220+dur*1000+60);
+  if(dress){setTimeout(function(){img.src='c/m-'+k+'.webp'},650);setTimeout(function(){walking=false;dress()},1500)}
+  else setTimeout(function(){walking=false;img.src='c/flamo-sit.webp';perch();hop()},1500)},220+dur*1000+60);
 }
-function onRoute(){var r=route();setTimeout(perch,60);if(r!=='home'&&IMG[r]){busyUntil=Date.now()+1700;setTimeout(function(){clip('point',1400)},260)}g.classList.toggle('away',r==='burger');if(r!=='home')dock();pose(r);hop();
+/* Klick auf eine Kachel: Flamo läuft hin, dreht sich und zieht das Outfit des Bereichs an, erst dann geht es los */
+var dressed=false,navBusy=false,hovT=0;
+document.addEventListener('click',function(e){
+ if(e.defaultPrevented||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button||navBusy||intro||walking||!g.classList.contains('perch'))return;
+ if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ var a=e.target.closest&&e.target.closest('#app a.sec');if(!a)return;
+ var k=(a.className.match(/sec-([a-z]+)/)||[])[1];if(!k||!IMG[k])return;
+ e.preventDefault();navBusy=true;clearTimeout(hovT);
+ var go=function(){navBusy=false;dressed=true;location.hash=k};
+ perchTo(k,go);if(!walking){navBusy=false;location.hash=k}
+},true);
+function onRoute(){var wasDressed=dressed;dressed=false;var r=route();setTimeout(perch,60);if(r!=='home'&&IMG[r]&&!wasDressed){busyUntil=Date.now()+1700;setTimeout(function(){clip('point',1400)},260)}g.classList.toggle('away',r==='burger');if(r!=='home')dock();pose(r);hop();
  if(r==='home'){say(g.classList.contains('welcome')?'home':timeTip());return}
  var s=Math.random()<.6?suggestion():null; if(s)show(s.t,false,s.id); else say(r);
 }
@@ -822,7 +836,7 @@ window.addEventListener('nara-product',function(){bub.hidden=true});
 if(route()!=='home'){dock();pose(route());g.classList.toggle('away',route()==='burger')}
 window.addEventListener('resize',function(){clearTimeout(perchT);perchT=setTimeout(perch,120)});
 (function(){var app=document.getElementById('app');if(app&&window.MutationObserver)new MutationObserver(function(){clearTimeout(perchT);perchT=setTimeout(perch,40)}).observe(app,{childList:true})})();
-var hovT=0;document.addEventListener('mouseover',function(e){if(!matchMedia('(pointer:fine)').matches||!g.classList.contains('perch'))return;var t=e.target.closest&&e.target.closest('#app .sec');if(!t)return;var k=(t.className.match(/sec-([a-z]+)/)||[])[1];clearTimeout(hovT);if(k)hovT=setTimeout(function(){perchTo(k)},420)});
+document.addEventListener('mouseover',function(e){if(!matchMedia('(pointer:fine)').matches||!g.classList.contains('perch'))return;var t=e.target.closest&&e.target.closest('#app .sec');if(!t)return;var k=(t.className.match(/sec-([a-z]+)/)||[])[1];clearTimeout(hovT);if(k)hovT=setTimeout(function(){perchTo(k)},420)});
 setTimeout(perch,300);
 })();
 </script>
