@@ -83,7 +83,8 @@ const naraManagerOnly=(req,res)=>{if(req.naraUser&&['OWNER','MANAGER'].includes(
 const naraDeliveryConfig=data=>{const R=require('./delivery-rules.js');return data.deliveryConfig&&R.validateConfig(data.deliveryConfig).ok?data.deliveryConfig:R.defaultConfig()};
 const webOrderHits=new Map();
 function payCfg(){const BP=require('./bank-pay.js'),e=process.env,iban=BP.normalizeIban(e.NARA_PAY_IBAN),payee=String(e.NARA_PAY_PAYEE||'').trim();return BP.isValidIban(iban)&&payee?{iban,bic:String(e.NARA_PAY_BIC||'').trim(),payee}:null}
-function runTransferReconcile(data){const r=require('./bank-pay.js').reconcile(data);if(r.changed)writeAdminData(data);r.paidIds.forEach(id=>setImmediate(()=>autoPrintPlatform(id)));return r}
+function runTransferReconcile(data,force){const r=require('./bank-pay.js').reconcile(data);if(r.changed||force)writeAdminData(data);r.paidIds.forEach(id=>setImmediate(()=>autoPrintPlatform(id)));return r}
+setInterval(async()=>{try{const Q=require('./qonto-sync.js');if(!Q.configured())return;if(!(readAdminData().pendingTransfers||[]).length)return;const rows=await Q.fetchRecent();const d=readAdminData();runTransferReconcile(d,Q.merge(d,rows)>0)}catch(e){console.log('[qonto]',e.message)}},20000).unref();
 setInterval(()=>{try{const d=readAdminData();if((d.pendingTransfers||[]).length||(d.bankTransactions||[]).some(x=>x.status==='UNMATCHED'&&!x.reviewReason))runTransferReconcile(d)}catch(e){}},20000).unref();
 const naraJsonBody=(req,res,limit,handler)=>{let body='';req.on('data',chunk=>{body+=chunk;if(body.length>limit)req.destroy()});req.on('end',()=>{try{handler(JSON.parse(body||'{}'))}catch(error){reply(res,400,{error:error.message||'Bad request.'})}})};
 function orderDay(value){const s=String(value||'');const d=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);return d?`${d[3]}-${d[2]}-${d[1]}`:s.slice(0,10);}

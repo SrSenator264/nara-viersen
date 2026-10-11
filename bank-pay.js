@@ -98,4 +98,37 @@ function expireUnpaid(orders, now = new Date()) {
   return { orders: next, expiredIds };
 }
 
-module.exports = { PAY_WINDOW_MIN, normalizeIban, isValidIban, transferRef, girocode, payInfo, markAwaitingTransfer, findCode, matchTransaction, applyPaid, expireUnpaid };
+// Gesamtabgleich über die Admin-Daten (mutiert `data`). Reihenfolge: erst abgelaufene aussortieren, dann Buchungen abgleichen.
+// Bezahlte Bestellungen wandern von pendingTransfers nach orders (erst dann sehen Küche/Kasse/Live-Orders sie).
+function reconcile(data, now = new Date()) {
+  data.pendingTransfers ??= []; data.expiredTransfers ??= []; data.bankTransactions ??= []; data.orders ??= []; data.auditEvents ??= [];
+  let changed = false; const paidIds = [];
+  const audit = (type, details) => data.auditEvents.push({ id: 'audit-' + now.getTime() + '-' + data.auditEvents.length, type, createdAt: now.toISOString(), details });
+  const ex = expireUnpaid(data.pendingTransfers, now);
+  if (ex.expiredIds.length) {
+    changed = true;
+    data.expiredTransfers.push(...ex.orders.filter(o => ex.expiredIds.includes(o.id)));
+    data.pendingTransfers = ex.orders.filter(o => !ex.expiredIds.includes(o.id));
+    for (const id of ex.expiredIds) audit('TRANSFER_ORDER_EXPIRED', { orderId: id });
+  }
+  const keep = data.expiredTransfers.filter(o => now - new Date(o.updatedAt || now) < 7 * 864e5);
+  if (keep.length !== data.expiredTransfers.length) { data.expiredTransfers = keep; changed = true; }
+  for (const tx of data.bankTransactions) {
+    if (tx.status !== 'UNMATCHED' || tx.reviewReason) continue;
+    const m = matchTransaction(tx, [...data.pendingTransfers, ...data.expiredTransfers], now);
+    if (m.result === 'MATCHED') {
+      const o = data.pendingTransfers.find(x => x.id === m.orderId);
+      data.pendingTransfers = data.pendingTransfers.filter(x => x !== o);
+      const paid = applyPaid(o, tx, now); data.orders.push(paid);
+      Object.assign(tx, { status: 'MATCHED', matchedEntityType: 'ORDER', matchedEntityId: paid.id, matchedAt: now.toISOString(), matchedBy: 'AUTO' });
+      audit('TRANSFER_ORDER_PAID', { orderId: paid.id, bankTransactionId: tx.id, amountCents: tx.amountCents });
+      paidIds.push(paid.id); changed = true;
+    } else if (['LATE_PAID', 'AMOUNT_MISMATCH', 'AMBIGUOUS'].includes(m.result)) {
+      tx.reviewReason = m.result; tx.reviewOrderId = m.orderId || null; changed = true;
+      audit('TRANSFER_NEEDS_REVIEW', { bankTransactionId: tx.id, reason: m.result, orderId: m.orderId || null });
+    }
+  }
+  return { changed, paidIds };
+}
+
+module.exports = { reconcile, PAY_WINDOW_MIN, normalizeIban, isValidIban, transferRef, girocode, payInfo, markAwaitingTransfer, findCode, matchTransaction, applyPaid, expireUnpaid };

@@ -53,3 +53,20 @@ test('applyPaid: goes to kitchen, records bank transaction', () => {
   const p = B.applyPaid(wait(), { id: 'bank1' }, now);
   assert.equal(p.status, 'OPEN'); assert.equal(p.payment.paid, true); assert.equal(p.payment.bankTransactionId, 'bank1'); assert.equal(p.liveStage, 'PREPARE');
 });
+
+test('reconcile: pays matching order (moves to orders), flags late/mismatch for review, expires old', () => {
+  const a = { ...wait(), id: 'a', displayCode: 'WAAAA', totalCents: 1000 }, b = { ...wait(), id: 'b', displayCode: 'WBBBB', totalCents: 2000 }, c = { ...wait(), id: 'c', displayCode: 'WCCCC', totalCents: 500 };
+  const data = { pendingTransfers: [a, b, c], orders: [], bankTransactions: [
+    { id: 't1', status: 'UNMATCHED', amountCents: 1000, reference: 'WAAAA' },
+    { id: 't2', status: 'UNMATCHED', amountCents: 1999, reference: 'WBBBB' },
+    { id: 't3', status: 'UNMATCHED', amountCents: 77, reference: 'Lieferando Auszahlung' }] };
+  const r = B.reconcile(data, new Date(now.getTime() + 60000));
+  assert.deepEqual(r.paidIds, ['a']); assert.equal(data.orders[0].paymentStatus, 'PAID'); assert.equal(data.pendingTransfers.length, 2);
+  assert.equal(data.bankTransactions[0].status, 'MATCHED'); assert.equal(data.bankTransactions[1].reviewReason, 'AMOUNT_MISMATCH'); assert.equal(data.bankTransactions[2].status, 'UNMATCHED');
+  const later = new Date(now.getTime() + 20 * 60000);
+  data.bankTransactions.push({ id: 't4', status: 'UNMATCHED', amountCents: 500, reference: 'WCCCC' });
+  const r2 = B.reconcile(data, later);
+  assert.equal(data.pendingTransfers.length, 0); assert.equal(data.expiredTransfers.length, 2); assert.equal(data.orders.length, 1);
+  assert.equal(data.bankTransactions[3].reviewReason, 'LATE_PAID'); assert.deepEqual(r2.paidIds, []);
+  assert.equal(B.reconcile(data, later).changed, false);
+});
