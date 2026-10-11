@@ -231,7 +231,7 @@ function driverRoutes(data, driverId) {
     const stops = (r.orderIds || []).map(id => (data.orders || []).find(o => String(o.id) === String(id))).filter(Boolean).map(o => {
       const d = o.delivery || {}, kv = kitchen.kitchenView(o);
       const cash = !paidOnline(o);
-      return { orderId: o.id, code: kv.displayCode, source: kv.source, name: kv.customerName, phone: kv.phone, address: kv.address, city: kv.city, floor: kv.floor, canProof: paidOnline(o), proof: !!o.deliveryProof,
+      return { orderId: o.id, code: kv.displayCode, source: kv.source, name: kv.customerName, phone: kv.phone, address: kv.address, city: kv.city, floor: kv.floor, canProof: paidOnline(o), proof: !!o.deliveryProof, doorState: o.doorPay ? o.doorPay.status : null,
         notes: kv.notes, itemsCount: kv.items.reduce((s, i) => s + i.quantity, 0), cash, delivered: !!o.deliveredAt, etaAt: o.assignment && o.assignment.etaAt || null, ...(pointOf(o, cache) || {}) };
     });
     return { routeId: r.id, roundId: r.id.slice(-4).toUpperCase(), status: r.status, startedAt: r.startedAt, allDelivered: stops.every(s => s.delivered), stops,

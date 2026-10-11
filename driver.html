@@ -41,6 +41,10 @@ main{padding:12px 12px 90px}
 .deliver{background:var(--ok);color:#fff}.nav{background:#e9edf1;color:var(--ink)}
 .photo{display:block;width:100%;margin-top:8px;min-height:50px;border:2px dashed #94a3b8;border-radius:11px;background:#fff;font-size:16px;font-weight:800;color:var(--ink);cursor:pointer}
 .proofok{margin-top:6px;color:var(--ok);font-weight:800}
+.doorb{display:block;width:100%;margin-top:8px;min-height:54px;border:0;border-radius:11px;background:#2563eb;color:#fff;font-size:17px;font-weight:900;cursor:pointer}
+.door{position:fixed;inset:0;z-index:20;background:#fff;color:#16202a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px;text-align:center}
+.door.ok{background:#16a34a;color:#fff}.door .q{width:min(76vw,52vh,360px);aspect-ratio:1}.door .q svg{width:100%;height:100%;border:1px solid #e2e6ea;border-radius:12px}
+.door .amt{font-size:36px}.door .cd{font-size:22px;font-weight:900;direction:ltr}.door .st{font-weight:800;color:#6b7580}.door .big{width:min(360px,100%);margin:4px 0 0}
 #msg{position:fixed;bottom:16px;left:16px;right:16px;background:#101820;color:#fff;padding:12px 14px;border-radius:12px;display:none;text-align:center;z-index:9}
 </style>
 </head>
@@ -51,12 +55,12 @@ main{padding:12px 12px 90px}
 <input type="file" id="cam" accept="image/*" capture="environment" hidden>
 <script>
 (function(){
-  const T={"de": {"noGeo": "📍 Handy kann keinen Standort", "needHttps": "📍 Standort braucht https", "gpsOn": "📍 Standort aktiv", "welcome": "Willkommen zurück ✅", "allowGps": "📍 Standort im Browser erlauben", "noSignal": "📍 Kein Signal", "none": "Gerade keine Aufträge für dich 👌", "auto": "Die Seite aktualisiert sich selbst", "round": "Tour", "leftOf": " offen von ", "start": "▶️ Tour starten", "back": "🏠 Zurück im Laden", "route": "🗺️ Route in Google Maps", "floor": "Etage", "cash": "💶 Bar · Betrag steht auf dem Beleg", "paid": "✓ Bezahlt – kein Geld nehmen", "navi": "🧭 Navi", "delivered": "✅ Zugestellt", "photo": "📷 Niemand da? Bestellung an der Tür fotografieren", "proofSaved": "📷 Foto-Nachweis gespeichert", "login": "Bitte anmelden", "offline": "Keine Verbindung zum Server", "imgFail": "Foto konnte nicht geöffnet werden", "sending": "📤 Foto wird gesendet…", "proofDone": "📷 Nachweis gespeichert, Auftrag zugestellt ✅", "done": "Erledigt ✅", "title": "🛵 Meine Aufträge", "doc": "NARA · Fahrer"}, "ar": {"noGeo": "📍 الجوال ما بيدعم الموقع", "needHttps": "📍 الموقع بيحتاج رابط https", "gpsOn": "📍 الموقع شغّال", "welcome": "أهلاً بالرجعة ✅", "allowGps": "📍 اسمح للموقع من إعدادات المتصفح", "noSignal": "📍 ما في إشارة", "none": "ما في طلبات إلك هلق 👌", "auto": "الصفحة بتتحدث لحالها", "round": "جولة", "leftOf": " باقي من ", "start": "▶️ بلّش الجولة", "back": "🏠 رجعت للمحل", "route": "🗺️ افتح الطريق بـ Google Maps", "floor": "طابق", "cash": "💶 كاش · المبلغ مكتوب على الفاتورة", "paid": "✓ مدفوع، لا تاخد مصاري", "navi": "🧭 الطريق", "delivered": "✅ سلّمت الطلب", "photo": "📷 ما حدا فتح؟ صوّر الطلب عند الباب", "proofSaved": "📷 انحفظت صورة الإثبات", "login": "سجّل دخول", "offline": "ما في اتصال بالسيرفر", "imgFail": "الصورة ما انفتحت", "sending": "📤 عم تنبعت الصورة…", "proofDone": "📷 انحفظ الإثبات وانسلّم الطلب ✅", "done": "تمام ✅", "title": "🛵 طلباتي", "doc": "NARA · السواق"}, "en": {"noGeo": "📍 Phone has no location", "needHttps": "📍 Location needs https", "gpsOn": "📍 Location on", "welcome": "Welcome back ✅", "allowGps": "📍 Allow location in browser settings", "noSignal": "📍 No signal", "none": "No orders for you right now 👌", "auto": "This page updates by itself", "round": "Round", "leftOf": " left of ", "start": "▶️ Start round", "back": "🏠 Back at the shop", "route": "🗺️ Open route in Google Maps", "floor": "Floor", "cash": "💶 Cash · amount is on the receipt", "paid": "✓ Paid – take no money", "navi": "🧭 Navigate", "delivered": "✅ Delivered", "photo": "📷 Nobody home? Photo the order at the door", "proofSaved": "📷 Photo proof saved", "login": "Please log in", "offline": "No connection to the server", "imgFail": "Photo could not be opened", "sending": "📤 Sending photo…", "proofDone": "📷 Proof saved, order delivered ✅", "done": "Done ✅", "title": "🛵 My orders", "doc": "NARA · Driver"}};
+  const T={"de": {"noGeo": "📍 Handy kann keinen Standort", "needHttps": "📍 Standort braucht https", "gpsOn": "📍 Standort aktiv", "welcome": "Willkommen zurück ✅", "allowGps": "📍 Standort im Browser erlauben", "noSignal": "📍 Kein Signal", "none": "Gerade keine Aufträge für dich 👌", "auto": "Die Seite aktualisiert sich selbst", "round": "Tour", "leftOf": " offen von ", "start": "▶️ Tour starten", "back": "🏠 Zurück im Laden", "route": "🗺️ Route in Google Maps", "floor": "Etage", "cash": "💶 Bar · Betrag steht auf dem Beleg", "paid": "✓ Bezahlt – kein Geld nehmen", "navi": "🧭 Navi", "delivered": "✅ Zugestellt", "photo": "📷 Niemand da? Bestellung an der Tür fotografieren", "proofSaved": "📷 Foto-Nachweis gespeichert", "login": "Bitte anmelden", "offline": "Keine Verbindung zum Server", "imgFail": "Foto konnte nicht geöffnet werden", "sending": "📤 Foto wird gesendet…", "proofDone": "📷 Nachweis gespeichert, Auftrag zugestellt ✅", "done": "Erledigt ✅", "title": "🛵 Meine Aufträge", "doc": "NARA · Fahrer", "door": "💳 Angekommen · per Überweisung zahlen", "doorScan": "Kunde scannt den Code und überweist", "doorWait": "Warte auf Zahlung …", "doorPaid": "Bezahlt", "doorCash": "💶 Stattdessen Bar kassieren", "doorClose": "Schließen", "doorOff": "Überweisung nicht verfügbar"}, "ar": {"noGeo": "📍 الجوال ما بيدعم الموقع", "needHttps": "📍 الموقع بيحتاج رابط https", "gpsOn": "📍 الموقع شغّال", "welcome": "أهلاً بالرجعة ✅", "allowGps": "📍 اسمح للموقع من إعدادات المتصفح", "noSignal": "📍 ما في إشارة", "none": "ما في طلبات إلك هلق 👌", "auto": "الصفحة بتتحدث لحالها", "round": "جولة", "leftOf": " باقي من ", "start": "▶️ بلّش الجولة", "back": "🏠 رجعت للمحل", "route": "🗺️ افتح الطريق بـ Google Maps", "floor": "طابق", "cash": "💶 كاش · المبلغ مكتوب على الفاتورة", "paid": "✓ مدفوع، لا تاخد مصاري", "navi": "🧭 الطريق", "delivered": "✅ سلّمت الطلب", "photo": "📷 ما حدا فتح؟ صوّر الطلب عند الباب", "proofSaved": "📷 انحفظت صورة الإثبات", "login": "سجّل دخول", "offline": "ما في اتصال بالسيرفر", "imgFail": "الصورة ما انفتحت", "sending": "📤 عم تنبعت الصورة…", "proofDone": "📷 انحفظ الإثبات وانسلّم الطلب ✅", "done": "تمام ✅", "title": "🛵 طلباتي", "doc": "NARA · السواق", "door": "💳 وصلت · الدفع بالحوالة", "doorScan": "الزبون بيمسح الكود وبيحوّل", "doorWait": "عم نستنى الدفع …", "doorPaid": "اندفع", "doorCash": "💶 كاش بدل الحوالة", "doorClose": "سكّر", "doorOff": "الحوالة غير متوفرة"}, "en": {"noGeo": "📍 Phone has no location", "needHttps": "📍 Location needs https", "gpsOn": "📍 Location on", "welcome": "Welcome back ✅", "allowGps": "📍 Allow location in browser settings", "noSignal": "📍 No signal", "none": "No orders for you right now 👌", "auto": "This page updates by itself", "round": "Round", "leftOf": " left of ", "start": "▶️ Start round", "back": "🏠 Back at the shop", "route": "🗺️ Open route in Google Maps", "floor": "Floor", "cash": "💶 Cash · amount is on the receipt", "paid": "✓ Paid – take no money", "navi": "🧭 Navigate", "delivered": "✅ Delivered", "photo": "📷 Nobody home? Photo the order at the door", "proofSaved": "📷 Photo proof saved", "login": "Please log in", "offline": "No connection to the server", "imgFail": "Photo could not be opened", "sending": "📤 Sending photo…", "proofDone": "📷 Proof saved, order delivered ✅", "done": "Done ✅", "title": "🛵 My orders", "doc": "NARA · Driver", "door": "💳 Arrived · pay by transfer", "doorScan": "Customer scans the code and transfers", "doorWait": "Waiting for payment …", "doorPaid": "Paid", "doorCash": "💶 Collect cash instead", "doorClose": "Close", "doorOff": "Transfer not available"}};
   const NL=window.NARA_LANG;const L=NL?NL.get():'de';const t=k=>(T[L]||T.de)[k]||T.de[k]||k;
   const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const hm=v=>{const d=new Date(v);return isNaN(d)?'':String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
   const $=s=>document.querySelector(s);
-  let routes=[],last=null,lastSent=0,wake=null,busy=false;
+  let doorOk=false,doorT=null,routes=[],last=null,lastSent=0,wake=null,busy=false;
   function toast(t){const m=$('#msg');m.textContent=t;m.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>m.style.display='none',3000)}
   async function api(method,url,body){const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||r.status);return j}
 
@@ -91,6 +95,7 @@ main{padding:12px 12px 90px}
           +(s.phone?'<div><a class="tel" href="tel:'+esc(String(s.phone).replace(/\s/g,''))+'">☎ <bdi dir="ltr">'+esc(s.phone)+'</bdi></a></div>':'')
           +(s.notes?'<div class="note"><bdi>'+esc(s.notes)+'</bdi></div>':'')
           +'<div class="pay '+(s.cash?'cash':'paid')+'">'+(s.cash?t('cash'):t('paid'))+'</div>'
+          +(s.cash&&doorOk&&!s.delivered&&r.startedAt?'<button class="doorb" data-door="'+esc(s.orderId)+'">'+t('door')+'</button>':'')
           +(!s.delivered&&r.startedAt?'<div class="acts"><a class="nav" href="'+esc(nav)+'" target="_blank" rel="noopener">'+t('navi')+'</a><button class="deliver" data-deliver="'+esc(s.orderId)+'">'+t('delivered')+'</button></div>'
             +(s.canProof?'<button class="photo" data-proof="'+esc(s.orderId)+'">'+t('photo')+'</button>':''):'')
           +(s.proof?'<div class="proofok">'+t('proofSaved')+'</div>':'')+'</div>';
@@ -100,7 +105,7 @@ main{padding:12px 12px 90px}
   }
   async function load(){
     if(busy)return;busy=true;
-    try{const j=await api('GET','/api/driver/routes');const before=routes.length;routes=j.routes||[];if(routes.length>before&&before===0&&navigator.vibrate)navigator.vibrate([200,100,200]);render()}
+    try{const j=await api('GET','/api/driver/routes');const before=routes.length;routes=j.routes||[];doorOk=!!j.doorOk;if(routes.length>before&&before===0&&navigator.vibrate)navigator.vibrate([200,100,200]);render()}
     catch(e){$('#main').innerHTML='<div class="empty">'+esc(e.message==='401'?t('login'):t('offline'))+'</div>'}
     finally{busy=false}
   }
@@ -114,7 +119,25 @@ main{padding:12px 12px 90px}
     catch(err){toast(err.message)}
     proofFor=null;await load();
   });
+  function ensureQR(cb){if(window.NARA_QR)return cb();const sc=document.createElement('script');sc.src='/vendor/qrcode.bundle.js?v=20261008';sc.onload=cb;document.head.appendChild(sc)}
+  const eur=c=>(c/100).toFixed(2).replace('.',',')+' €';
+  function closeDoor(){clearInterval(doorT);const d=$('#door');if(d)d.remove();load()}
+  async function openDoor(id){
+    let j;try{j=await api('POST','/api/driver/door-pay',{orderId:id,action:'start'})}catch(e){toast(e.message==='TRANSFER_OFF'?t('doorOff'):e.message);return}
+    const d=document.createElement('div');d.id='door';d.className='door';d.dataset.oid=id;
+    d.innerHTML='<div class="q" id="doorQ"></div><b class="amt">'+eur(j.amountCents)+'</b><div class="cd">'+esc(j.code)+'</div><div class="st" id="doorSt">'+esc(t('doorWait'))+'</div><small>'+esc(t('doorScan'))+'</small><button class="big sec" data-dcash>'+t('doorCash')+'</button><button class="big sec" data-dclose>'+t('doorClose')+'</button>';
+    document.body.appendChild(d);keepAwake();
+    ensureQR(()=>{const q=$('#doorQ');if(q&&window.NARA_QR)q.innerHTML=NARA_QR.svg(location.origin+'/pay.html?d='+j.token,{level:'M',quiet:2})});
+    clearInterval(doorT);
+    doorT=setInterval(async()=>{try{const s=await api('POST','/api/driver/door-pay',{orderId:id,action:'status'});
+      if(s.state==='PAID'){clearInterval(doorT);d.className='door ok';d.innerHTML='<div style="font-size:96px;line-height:1">✅</div><b class="amt">'+esc(t('doorPaid'))+'</b><div class="cd">'+esc(j.code)+' · '+eur(s.amountCents)+'</div>';if(navigator.vibrate)navigator.vibrate([150,80,150]);setTimeout(closeDoor,2500)}}catch(e){}},3000);
+  }
+  document.addEventListener('click',async e=>{
+    if(e.target.closest('[data-dclose]')){closeDoor();return}
+    if(e.target.closest('[data-dcash]')){const id=($('#door')||{dataset:{}}).dataset.oid;try{await api('POST','/api/driver/door-pay',{orderId:id,action:'cash'})}catch(err){toast(err.message)}closeDoor()}
+  });
   $('#main').addEventListener('click',async e=>{
+    const dr=e.target.closest('[data-door]');if(dr){openDoor(dr.dataset.door);return}
     const pf=e.target.closest('[data-proof]');if(pf){proofFor=pf.dataset.proof;$('#cam').click();return}
     const st=e.target.closest('[data-start]'),dl=e.target.closest('[data-deliver]'),fn=e.target.closest('[data-finish]');
     if(!st&&!dl&&!fn)return;const b=st||dl||fn;b.disabled=true;

@@ -70,3 +70,40 @@ test('reconcile: pays matching order (moves to orders), flags late/mismatch for 
   assert.equal(data.bankTransactions[3].reviewReason, 'LATE_PAID'); assert.deepEqual(r2.paidIds, []);
   assert.equal(B.reconcile(data, later).changed, false);
 });
+
+// ── Türzahlung ──
+const cashOrder = () => ({ id: 'c1', displayCode: 'W9Z8Y', totalCents: 2400, cashDueCents: 2400, paymentMethod: 'CASH', paymentStatus: 'UNPAID', status: 'OPEN', deliveryRouteId: 'r1' });
+const dbank = (o = {}) => ({ id: 'bt1', status: 'UNMATCHED', amountCents: 2400, reference: 'W9Z8Y', description: '', ...o });
+
+test('door pay: start is idempotent, keeps token and amount', () => {
+  const o = cashOrder(); const d1 = B.startDoorPay(o, 'tok1', now); const d2 = B.startDoorPay(o, 'tok2', now);
+  assert.equal(d1.token, 'tok1'); assert.equal(d2.token, 'tok1'); assert.equal(o.doorPay.amountCents, 2400);
+  assert.equal(B.doorState(o), 'WAITING');
+});
+test('door pay: matching transfer marks the existing order paid, in place', () => {
+  const o = cashOrder(); B.startDoorPay(o, 'tok1', now);
+  const data = { orders: [o], bankTransactions: [dbank()] };
+  const r = B.reconcile(data, now);
+  assert.deepEqual(r.doorPaidIds, ['c1']); assert.deepEqual(r.paidIds, []);
+  assert.equal(data.orders.length, 1); assert.equal(o.paymentStatus, 'PAID'); assert.equal(o.cashDueCents, 0);
+  assert.equal(o.payment.paid, true); assert.equal(B.doorState(o), 'PAID'); assert.equal(data.bankTransactions[0].status, 'MATCHED');
+});
+test('door pay: wrong amount goes to review, order stays unpaid', () => {
+  const o = cashOrder(); B.startDoorPay(o, 'tok1', now);
+  const data = { orders: [o], bankTransactions: [dbank({ amountCents: 2300 })] };
+  B.reconcile(data, now);
+  assert.equal(data.bankTransactions[0].reviewReason, 'AMOUNT_MISMATCH'); assert.equal(B.doorState(o), 'WAITING');
+});
+test('door pay: cancelled (cash taken) never matches; no door started never matches', () => {
+  const a = cashOrder(); B.startDoorPay(a, 't', now); B.cancelDoorPay(a, now);
+  const b = { ...cashOrder(), id: 'c2', displayCode: 'W1111' };
+  const data = { orders: [a, b], bankTransactions: [dbank(), dbank({ id: 'bt2', reference: 'W1111' })] };
+  const r = B.reconcile(data, now);
+  assert.deepEqual(r.doorPaidIds, []); assert.equal(a.paymentStatus, 'UNPAID'); assert.equal(b.paymentStatus, 'UNPAID');
+});
+test('door pay: already paid order cannot start; info exposes giro code', () => {
+  const o = cashOrder(); B.startDoorPay(o, 't', now);
+  const info = B.doorInfo(o, cfg); assert.equal(info.state, 'WAITING'); assert.match(info.giro, /EUR24\.00/); assert.equal(info.reference, 'W9Z8Y');
+  B.applyDoorPaid(o, dbank(), now);
+  assert.throws(() => B.startDoorPay(o, 'x', now), /ALREADY_PAID/);
+});

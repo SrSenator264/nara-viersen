@@ -98,11 +98,51 @@ function expireUnpaid(orders, now = new Date()) {
   return { orders: next, expiredIds };
 }
 
+// ── Türzahlung: bestehende Bar-Bestellung (liegt schon in orders) wird an der Tür per Überweisung bezahlt ──
+const doorAmount = o => Number(o.cashDueCents) || Number(o.totalCents) || 0;
+function isPaidOrder(o) { return o.paymentStatus === 'PAID' || !!(o.payment && o.payment.paid === true); }
+function doorState(o) {
+  if (isPaidOrder(o)) return 'PAID';
+  return o.doorPay && o.doorPay.status === 'WAITING' ? 'WAITING' : 'CANCELLED';
+}
+function startDoorPay(o, token, now = new Date()) {
+  if (isPaidOrder(o)) { const e = new Error('ALREADY_PAID'); e.status = 409; throw e; }
+  if (!(o.doorPay && o.doorPay.status === 'WAITING' && o.doorPay.token)) {
+    o.doorPay = { token, status: 'WAITING', startedAt: now.toISOString(), amountCents: doorAmount(o) };
+  }
+  o.updatedAt = now.toISOString();
+  return o.doorPay;
+}
+function cancelDoorPay(o, now = new Date()) {
+  if (o.doorPay && o.doorPay.status === 'WAITING') { o.doorPay.status = 'CANCELLED'; o.doorPay.cancelledAt = now.toISOString(); o.updatedAt = now.toISOString(); }
+}
+function doorInfo(o, cfg) {
+  const ref = transferRef(o), c = cfg || {}, amount = (o.doorPay && o.doorPay.amountCents) || doorAmount(o);
+  return { state: doorState(o), code: ref, amountCents: amount, payee: c.payee || '', iban: normalizeIban(c.iban), bic: str(c.bic), reference: ref,
+    giro: cfg ? girocode({ payee: c.payee, iban: c.iban, bic: c.bic, amountCents: amount, ref }) : '' };
+}
+function matchDoor(tx, orders, now = new Date()) {
+  if (!(Number(tx.amountCents) > 0)) return { result: 'NOT_INCOMING' };
+  const cand = orders.filter(o => o.doorPay && o.doorPay.status === 'WAITING' && !isPaidOrder(o) && !(o.deliveredAt && now - new Date(o.deliveredAt) > 36e5));
+  const o = findCode(str(tx.reference) + ' ' + str(tx.description), cand);
+  if (!o) return { result: 'NO_ORDER' };
+  if (o === 'AMBIGUOUS') return { result: 'AMBIGUOUS' };
+  if (Number(tx.amountCents) !== Number(o.doorPay.amountCents)) return { result: 'AMOUNT_MISMATCH', orderId: o.id };
+  return { result: 'MATCHED', orderId: o.id };
+}
+function applyDoorPaid(o, tx, now = new Date()) {
+  o.doorPay = { ...o.doorPay, status: 'PAID', paidAt: now.toISOString() };
+  o.paymentMethod = 'TRANSFER'; o.paymentStatus = 'PAID'; o.externalPaymentStatus = 'TRANSFER_PAID'; o.cashDueCents = 0;
+  o.payment = { ...(o.payment || {}), method: 'TRANSFER', paid: true, paidAt: now.toISOString(), bankTransactionId: tx.id || null, atDoor: true };
+  o.paidAt = now.toISOString(); o.updatedAt = now.toISOString();
+  return o;
+}
+
 // Gesamtabgleich über die Admin-Daten (mutiert `data`). Reihenfolge: erst abgelaufene aussortieren, dann Buchungen abgleichen.
 // Bezahlte Bestellungen wandern von pendingTransfers nach orders (erst dann sehen Küche/Kasse/Live-Orders sie).
 function reconcile(data, now = new Date()) {
   data.pendingTransfers ??= []; data.expiredTransfers ??= []; data.bankTransactions ??= []; data.orders ??= []; data.auditEvents ??= [];
-  let changed = false; const paidIds = [];
+  let changed = false; const paidIds = [], doorPaidIds = [];
   const audit = (type, details) => data.auditEvents.push({ id: 'audit-' + now.getTime() + '-' + data.auditEvents.length, type, createdAt: now.toISOString(), details });
   const ex = expireUnpaid(data.pendingTransfers, now);
   if (ex.expiredIds.length) {
@@ -115,7 +155,17 @@ function reconcile(data, now = new Date()) {
   if (keep.length !== data.expiredTransfers.length) { data.expiredTransfers = keep; changed = true; }
   for (const tx of data.bankTransactions) {
     if (tx.status !== 'UNMATCHED' || tx.reviewReason) continue;
-    const m = matchTransaction(tx, [...data.pendingTransfers, ...data.expiredTransfers], now);
+    let m = matchTransaction(tx, [...data.pendingTransfers, ...data.expiredTransfers], now);
+    if (m.result === 'NO_ORDER' && !m.note) {
+      const dm = matchDoor(tx, data.orders, now);
+      if (dm.result === 'MATCHED') {
+        const o = data.orders.find(x => x.id === dm.orderId); applyDoorPaid(o, tx, now);
+        Object.assign(tx, { status: 'MATCHED', matchedEntityType: 'ORDER', matchedEntityId: o.id, matchedAt: now.toISOString(), matchedBy: 'AUTO' });
+        audit('DOOR_ORDER_PAID', { orderId: o.id, bankTransactionId: tx.id, amountCents: tx.amountCents });
+        doorPaidIds.push(o.id); changed = true; continue;
+      }
+      if (dm.result === 'AMOUNT_MISMATCH' || dm.result === 'AMBIGUOUS') m = dm;
+    }
     if (m.result === 'MATCHED') {
       const o = data.pendingTransfers.find(x => x.id === m.orderId);
       data.pendingTransfers = data.pendingTransfers.filter(x => x !== o);
@@ -128,7 +178,7 @@ function reconcile(data, now = new Date()) {
       audit('TRANSFER_NEEDS_REVIEW', { bankTransactionId: tx.id, reason: m.result, orderId: m.orderId || null });
     }
   }
-  return { changed, paidIds };
+  return { changed, paidIds, doorPaidIds };
 }
 
-module.exports = { reconcile, PAY_WINDOW_MIN, normalizeIban, isValidIban, transferRef, girocode, payInfo, markAwaitingTransfer, findCode, matchTransaction, applyPaid, expireUnpaid };
+module.exports = { doorAmount, doorState, startDoorPay, cancelDoorPay, doorInfo, matchDoor, applyDoorPaid, reconcile, PAY_WINDOW_MIN, normalizeIban, isValidIban, transferRef, girocode, payInfo, markAwaitingTransfer, findCode, matchTransaction, applyPaid, expireUnpaid };
