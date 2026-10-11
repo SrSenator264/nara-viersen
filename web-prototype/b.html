@@ -174,6 +174,16 @@ html.pd-on,html.pd-on body{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.tr-m{animation:none}}
 .hero-art img{-webkit-mask-image:linear-gradient(#000 78%,transparent 97%);mask-image:linear-gradient(#000 78%,transparent 97%)}
 
+.pay-box{display:flex;flex-direction:column;gap:6px;text-align:start;border:1.5px solid var(--line2);border-radius:16px;padding:10px 12px}
+.pay-box>div{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.pay-box span{opacity:.7;font-size:13px;flex:0 0 auto}
+.pay-box b{flex:1;text-align:end;word-break:break-all}
+.pay-iban{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.pay-copy{flex:0 0 auto;border:1.5px solid var(--line2);background:transparent;color:inherit;border-radius:999px;padding:6px 12px;font-weight:800;min-height:36px}
+.pay-qr{width:176px;height:176px;align-self:center;background:#fff;border-radius:12px;padding:4px}
+.pay-qr svg{width:100%;height:100%;display:block}
+.pay-hint{margin:0;font-size:13px;opacity:.75}
+
 /* B · Farbfelder: every section is a full-bleed colour field with huge type; mascot leads */
 :root{--bg:#FFF4E2;--fg:#111;--topbg:#111;--topfg:#fff;--line:#555;--line2:#E8DCC8;--card:#fff;--cardfg:#111;--cta:#111;--ctaink:#fff;--focus:#2563EB;
 --display:'Bricolage Grotesque',system-ui,sans-serif;--body:'Bricolage Grotesque',system-ui,sans-serif;--ar:'Cairo',system-ui,sans-serif;--dw:800;--r:22px;--brandls:-1px;--cardborder:0}
@@ -442,7 +452,7 @@ function checkoutView(){
  if(mode==='delivery')h+='<div class="co-row">'+field('street',t('street'),cust.street,'autocomplete="address-line1" required maxlength="80"')+field('house',t('house'),cust.house,'required maxlength="10" class="short"')+'</div><div class="co-row">'+field('postalCode',t('postal'),cust.postalCode,'inputmode="numeric" autocomplete="postal-code" required maxlength="5" class="short"')+field('city',t('city'),cust.city||'Viersen','autocomplete="address-level2" maxlength="40"')+'</div>'+field('floor',t('floor'),cust.floor,'maxlength="40"');
  h+=field('note',t('remark'),'','maxlength="200"');
  h+='<input type="text" name="website" id="co_hp" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">';
- h+='<h3>'+esc(t('pay'))+'</h3><div class="modes"><button type="button" data-pay="CASH" class="'+(payM==='CASH'?'on':'')+'">'+esc(t('cash'))+'</button><button type="button" data-pay="CARD" class="'+(payM==='CARD'?'on':'')+'">'+esc(mode==='delivery'?t('cardDoor'):t('cardShop'))+'</button></div>';
+ h+='<h3>'+esc(t('pay'))+'</h3><div class="modes"><button type="button" data-pay="CASH" class="'+(payM==='CASH'?'on':'')+'">'+esc(t('cash'))+'</button><button type="button" data-pay="CARD" class="'+(payM==='CARD'?'on':'')+'">'+esc(mode==='delivery'?t('cardDoor'):t('cardShop'))+'</button>'+(transferOk?'<button type="button" data-pay="TRANSFER" class="'+(payM==='TRANSFER'?'on':'')+'">'+esc(tx3('Überweisung','Bank transfer','حوالة بنكية'))+'</button>':'')+'</div>'+(payM==='TRANSFER'?'<p class="co-legal">'+esc(tx3('Du bekommst gleich IBAN und QR-Code. Die Bestellung geht erst nach Zahlungseingang an die Küche (15 Minuten Zeit, Echtzeit-Überweisung empfohlen).','You get the IBAN and a QR code next. The kitchen starts after the payment arrives (15 minutes, instant transfer recommended).','رح يطلعلك IBAN ورمز QR. الطلب بيوصل للمطبخ بس لما توصل الحوالة (عندك 15 دقيقة، الأفضل حوالة فورية).'))+'</p>':'');
  h+='<div class="co-sum"><div><span>'+esc(t('total'))+' ('+esc(t('items'))+')</span><b>'+eur(sum())+'</b></div>'+(mode==='delivery'?'<div><span>'+esc(t('fee'))+'</span><b>'+(fi.unknown?'–':eur(fi.fee||0))+'</b></div>':'')+'<div class="big"><span>'+esc(t('total'))+'</span><b>'+eur(tot)+'</b></div></div>';
  if(!fi.ok)h+='<p class="co-err">'+esc(fi.msg)+'</p>';
  if(coErr)h+='<p class="co-err">'+esc(coErr)+'</p>';
@@ -458,10 +468,39 @@ function submitOrder(){
   cart={};save();drawerOpen=false;view='cart';render();openTrack(x.j.token,x.j.order);
  }).catch(function(){sending=false;coErr=t('offline');render()});
 }
+// ── Überweisung (Pay-first): Zahlungsdaten zeigen, auf Zahlungseingang warten ──
+var transferOk=false,payT=0,payTick=0,payLast=null;
+function tx3(de,en,ar){return lang==='ar'?ar:lang==='en'?en:de}
+try{fetch('/api/pay/enabled').then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.transfer){transferOk=true;if(view==='checkout')render()}}).catch(function(){})}catch(e){}
+function ensureQR(cb){if(window.NARA_QR)return cb();var s=document.createElement('script');s.src='/vendor/qrcode.bundle.js?v=20261008';s.onload=cb;document.head.appendChild(s)}
+function fmtCd(sec){sec=Math.max(0,sec|0);return Math.floor(sec/60)+':'+('0'+(sec%60)).slice(-2)}
+function stopPay(){clearInterval(payT);clearInterval(payTick)}
+function startPay(tok){stopPay();pollPay(tok);payT=setInterval(function(){pollPay(tok)},5000)}
+function pollPay(tok){fetch('/api/web-orders/status?t='+encodeURIComponent(tok)).then(function(r){return r.ok?r.json():null}).then(function(j){if(!j||!j.order)return;if(j.pay&&j.pay.state!=='PAID'){drawPay(tok,j.order,j.pay)}else{stopPay();openTrack(tok,j.order)}}).catch(function(){})}
+function copyBtn(v,label){return '<button type="button" class="pay-copy" data-copy="'+esc(v)+'">'+esc(label)+'</button>'}
+function drawPay(tok,o,p){
+ trackTok=tok;var el=document.getElementById('track');if(!el){el=document.createElement('div');el.id='track';document.body.appendChild(el)}
+ var prev=payLast;payLast={tok:tok,o:o,p:p,at:Date.now()};
+ if(prev&&prev.p.state===p.state&&document.getElementById('payCd'))return;
+ if(p.state==='EXPIRED'){stopPay();el.innerHTML='<div class="tr-in" role="dialog"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button><img class="tr-m" src="c/mascot.webp" alt=""><p class="tr-say">'+esc(tx3('Die Zahlungsfrist ist abgelaufen.','The payment time is over.','انتهت مهلة الدفع.'))+'</p><p class="tr-code">'+esc(tx3('Bitte bestelle neu. Wenn du schon bezahlt hast, melde dich bei uns mit dem Code','Please order again. If you already paid, contact us with code','اطلب من جديد. إذا دفعت، تواصل معنا مع الكود'))+' <b>'+esc(p.code)+'</b></p><button type="button" class="orderbtn" data-tr="close">'+esc(t('newOrder'))+'</button></div>';return}
+ var iban=String(p.iban||'').replace(/(.{4})/g,'$1 ').trim();
+ el.innerHTML='<div class="tr-in" role="dialog" aria-label="'+esc(tx3('Zahlung','Payment','الدفع'))+'"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button><img class="tr-m" src="c/flamo-point.webp" alt="">'
+ +'<p class="tr-say">'+esc(tx3('Fast geschafft! Bitte jetzt überweisen.','Almost there! Please transfer now.','قربنا! حوّل المبلغ هلأ.'))+'</p>'
+ +'<p class="tr-code">'+esc(t('code'))+' <b>'+esc(p.code)+'</b> · '+esc(tx3('noch','left','باقي'))+' <b id="payCd">'+fmtCd(p.remainingSec)+'</b></p>'
+ +'<div class="pay-box"><div><span>'+esc(tx3('Betrag','Amount','المبلغ'))+'</span><b>'+eur(p.amountCents)+'</b></div>'
+ +'<div><span>'+esc(tx3('Empfänger','Payee','المستفيد'))+'</span><b>'+esc(p.payee)+'</b></div>'
+ +'<div><span>IBAN</span><b class="pay-iban">'+esc(iban)+'</b>'+copyBtn(p.iban,tx3('Kopieren','Copy','نسخ'))+'</div>'
+ +'<div><span>'+esc(tx3('Verwendungszweck','Reference','البيان'))+'</span><b>'+esc(p.reference)+'</b>'+copyBtn(p.reference,tx3('Kopieren','Copy','نسخ'))+'</div></div>'
+ +'<div class="pay-qr" id="payQr"></div><p class="pay-hint">'+esc(tx3('Oder QR-Code mit der Banking-App scannen.','Or scan the QR code with your banking app.','أو امسح رمز QR بتطبيق البنك.'))+'</p>'
+ +'<p class="pay-hint">'+esc(tx3('Verwendungszweck genau so eintragen und den Betrag nicht ändern. Die Küche startet, sobald das Geld da ist (Echtzeit-Überweisung geht am schnellsten).','Enter the reference exactly and do not change the amount. The kitchen starts as soon as the money arrives (instant transfer is fastest).','اكتب البيان متل ما هو ولا تغيّر المبلغ. المطبخ بيبلّش أول ما توصل الحوالة (الحوالة الفورية الأسرع).'))+'</p></div>';
+ ensureQR(function(){var q=document.getElementById('payQr');if(q&&window.NARA_QR&&p.giro)q.innerHTML=NARA_QR.svg(p.giro,{level:'M',quiet:2})});
+ clearInterval(payTick);payTick=setInterval(function(){var c=document.getElementById('payCd');if(!c||!payLast){clearInterval(payTick);return}var left=payLast.p.remainingSec-Math.round((Date.now()-payLast.at)/1000);c.textContent=fmtCd(left)},1000);
+}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-copy]');if(!b)return;var v=b.getAttribute('data-copy'),done=function(){var o=b.textContent;b.textContent='✓';setTimeout(function(){b.textContent=o},1200)};try{navigator.clipboard.writeText(v).then(done,done)}catch(x){var ta=document.createElement('textarea');ta.value=v;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(y){}ta.remove();done()}});
 // شاشة متابعة الطلب
 var trackT=0,trackTok=null;
 var STEPS=['received','cooking','onTheWay','done'],STEP_IMG={received:'flamo-happy',cooking:'m-burger',onTheWay:'m-street',ready:'flamo-wave',done:'flamo-dance',cancelled:'mascot'};
-function openTrack(tok,o){trackTok=tok;drawTrack(o);clearInterval(trackT);trackT=setInterval(pollTrack,15000)}
+function openTrack(tok,o){if(o&&o.step==='awaitingPayment'){startPay(tok);return}trackTok=tok;drawTrack(o);clearInterval(trackT);trackT=setInterval(pollTrack,15000)}
 function pollTrack(){if(!trackTok)return;fetch('/api/web-orders/status?t='+encodeURIComponent(trackTok)).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.order){drawTrack(j.order);if(j.order.step==='done'||j.order.step==='cancelled')clearInterval(trackT)}}).catch(function(){})}
 function drawTrack(o){
  var el=document.getElementById('track');if(!el){el=document.createElement('div');el.id='track';document.body.appendChild(el)}
@@ -469,7 +508,7 @@ function drawTrack(o){
  var eta=o.promisedDueAt?new Date(o.promisedDueAt).toLocaleTimeString(lang==='ar'?'ar':'de-DE',{hour:'2-digit',minute:'2-digit'}):'';
  el.innerHTML='<div class="tr-in" role="dialog" aria-label="'+esc(t('track'))+'"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button><img class="tr-m" src="c/'+(STEP_IMG[o.step]||'mascot')+'.webp" alt=""><p class="tr-say">'+esc(t('flamo_'+o.step))+'</p><p class="tr-code">'+esc(t('code'))+' <b>'+esc(o.code)+'</b>'+(eta&&o.step!=='done'?' · '+esc(t('eta'))+' <b>'+eta+'</b>':'')+'</p><ol class="tr-steps">'+steps.map(function(s,i){return '<li class="'+(i<cur?'done':i===cur?'now':'')+'">'+esc(t('st_'+s))+'</li>'}).join('')+'</ol><button type="button" class="orderbtn" data-tr="close">'+esc(t('newOrder'))+'</button></div>';
 }
-document.addEventListener('click',function(e){var b=e.target.closest('#track [data-tr]');if(b){var el=document.getElementById('track');if(el)el.remove();clearInterval(trackT)}});
+document.addEventListener('click',function(e){var b=e.target.closest('#track [data-tr]');if(b){var el=document.getElementById('track');if(el)el.remove();clearInterval(trackT);stopPay()}});
 
 var drawerOpen=false;
 function render(){

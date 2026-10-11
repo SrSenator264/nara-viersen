@@ -141,6 +141,7 @@ function publicStatus(o) {
   if (o.kitchenPrintedAt || o.autoKitchenPrintedAt || kitchen === 'COOKING' || kitchen === 'PREPARING') step = 'cooking';
   if (kitchen === 'READY' || stage === 'HANDOVER') step = o.type === 'pickup' ? 'ready' : 'onTheWay';
   if (stage === 'DONE' || st === 'COMPLETED' || o.deliveredAt) step = 'done';
+  if (o.paymentStatus === 'AWAITING_TRANSFER') step = 'awaitingPayment';
   if (st === 'CANCELLED') step = 'cancelled';
   return { code: o.displayCode, type: o.type, step, promisedDueAt: o.promisedDueAt || o.dueAt || null, totalCents: o.totalCents };
 }
