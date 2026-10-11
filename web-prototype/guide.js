@@ -30,7 +30,7 @@ document.body.appendChild(g);
 var bub=g.querySelector('#gBubble'),txtEl=g.querySelector('#gText'),act=g.querySelector('#gAct'),img=g.querySelector('#gImg'),vidEl=g.querySelector('#gVid'),vbtn=g.querySelector('#gVoice');
 /* HD-Clips als WebM (VP9 mit Transparenz): schärfer, Wolle sichtbar, kleiner als animiertes WebP.
    Safari/iOS kann das nicht → dort bleibt das animierte WebP. */
-var imgEl=img,curSrc=imgEl.getAttribute('src'),HDV={'flamo-talk':1,'flamo-wave-hd':1,'flamo-dance':1,'flamo-happy':1,'flamo-present':1,'flamo-spin':1,'flamo-step':1,'flamo-point':1,'flamo-check':1,'flamo-paid':1,'flamo-sit':1};
+var imgEl=img,curSrc=imgEl.getAttribute('src'),HDV={'flamo-talk':1,'flamo-wave-hd':1,'flamo-dance':1,'flamo-happy':1,'flamo-present':1,'flamo-spin':1,'flamo-step':1,'flamo-point':1,'flamo-check':1,'flamo-paid':1,'flamo-sit':1,'flamo-guide':1,'flamo-idle':1,'flamo-bank':1,'flamo-party':1,'flamo-cheer':1};
 var useVid=!!(vidEl&&vidEl.canPlayType&&vidEl.canPlayType('video/webm; codecs="vp9"'))&&!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
 img={get src(){return curSrc},set src(v){curSrc=v;var m=/c\/(flamo-[a-z-]+)\.webp$/.exec(v||'');
  if(useVid&&m&&HDV[m[1]]){var w='c/'+m[1]+'.webm';if(vidEl.getAttribute('src')!==w){vidEl.src=w}vidEl.hidden=false;imgEl.hidden=true;var p=vidEl.play();if(p&&p.catch)p.catch(function(){vidEl.hidden=true;imgEl.hidden=false;imgEl.src=v})}
@@ -66,7 +66,7 @@ function speak(t){
   var vs=speechSynthesis.getVoices().filter(function(v){return v.lang&&v.lang.toLowerCase().indexOf(code)===0});
   if(vs.length)u.voice=vs[0];u.lang=code==='ar'?'ar-SA':code==='en'?'en-US':'de-DE';u.rate=1.05;u.pitch=1.35;speechSynthesis.speak(u)}catch(e){}
 }
-function talk(ms){if(intro&&!intro.classList.contains('out'))return;if(route()!=='home'){if(g.classList.contains('away'))return;var wait=Math.max(0,busyUntil-Date.now(),danceUntil-Date.now());if(wait){setTimeout(function(){if(!clipOn||clipOn==='talk')clip('talk',Math.max(1500,ms-wait))},wait+50)}else if(!clipOn)clip('talk',ms);return}clearTimeout(talkT);if(g.classList.contains('perch')){g.classList.add('talking');talkT=setTimeout(function(){g.classList.remove('talking')},ms);return}setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/flamo-talk.webp'},220);talkT=setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/mascot.webp'},ms)}
+function talk(ms){if(intro&&!intro.classList.contains('out'))return;if(route()!=='home'){if(g.classList.contains('away'))return;var wait=Math.max(0,busyUntil-Date.now(),danceUntil-Date.now());var nm=ms>5400?'guide':'talk';if(wait){setTimeout(function(){if(!clipOn||clipOn==='talk'||clipOn==='guide')clip(nm,Math.max(1500,ms-wait))},wait+50)}else if(!clipOn)clip(nm,ms);return}clearTimeout(talkT);if(g.classList.contains('perch')){g.classList.add('talking');talkT=setTimeout(function(){g.classList.remove('talking')},ms);return}setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/flamo-talk.webp'},220);talkT=setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/mascot.webp'},ms)}
 function show(text,keep,pid){
  clearTimeout(timer);clearInterval(typing);bub.hidden=false;txtEl.textContent='';
  act.hidden=!pid;if(pid)setTimeout(function(){clip('present',6500)},Math.max(0,danceUntil-Date.now(),busyUntil-Date.now())+60);if(pid){act.textContent=tr(TPL.addBtn);act.setAttribute('data-add',pid)}else act.removeAttribute('data-add');
@@ -163,6 +163,9 @@ document.addEventListener('click',function(e){
  if(e.target.closest('[data-lang]'))setTimeout(function(){setVoice(voice);say(route()==='home'?timeTip():route())},40);
 });
 window.addEventListener('nara-added',function(){hop();clip('dance',3800);danceUntil=Date.now()+3800;setTimeout(function(){var s=suggestion();if(s)show(tr(TIPS.added)+' '+s.t,false,s.id);else show(tr(TIPS.added),false)},120)});
+/* Flamo wird unruhig, wenn 30 s nichts passiert: steht auf und gestikuliert (nur wenn er nicht auf einer Kachel sitzt) */
+var idleT=0;function armIdle(){clearTimeout(idleT);idleT=setTimeout(function(){if(!intro&&!document.hidden&&!clipOn&&!g.classList.contains('perch')&&!g.classList.contains('away'))clip('idle',10000);armIdle()},30000)}
+['pointerdown','keydown','scroll','touchstart'].forEach(function(ev){window.addEventListener(ev,armIdle,{passive:true})});armIdle();
 window.addEventListener('nara-product',function(){bub.hidden=true});
 if(route()!=='home'){dock();pose(route());g.classList.toggle('away',route()==='burger')}
 window.addEventListener('resize',function(){clearTimeout(perchT);perchT=setTimeout(perch,120)});

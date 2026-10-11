@@ -162,6 +162,7 @@ html.pd-on,html.pd-on body{overflow:hidden}
 .tr-in{position:relative;background:var(--card);color:var(--cardfg);border-radius:28px;width:min(440px,100%);max-height:94vh;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:10px;text-align:center}
 .tr-x{position:absolute;top:10px;inset-inline-end:12px;border:0;background:transparent;color:inherit;font-size:30px;width:44px;height:44px}
 .tr-m{width:150px;height:150px;object-fit:contain;align-self:center;animation:trbob 2.4s ease-in-out infinite}
+.tr-m.tr-hd{width:auto;max-width:70%;height:200px;animation:none}
 @keyframes trbob{50%{transform:translateY(-8px)}}
 .tr-say{margin:0;font-size:19px;font-weight:800}
 .tr-code{margin:0;opacity:.8}
@@ -474,7 +475,7 @@ function drawPay(tok,o,p){
  if(prev&&prev.p.state===p.state&&document.getElementById('payCd'))return;
  if(p.state==='EXPIRED'){stopPay();el.innerHTML='<div class="tr-in" role="dialog"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button><img class="tr-m" src="c/mascot.webp" alt=""><p class="tr-say">'+esc(tx3('Die Zahlungsfrist ist abgelaufen.','The payment time is over.','انتهت مهلة الدفع.'))+'</p><p class="tr-code">'+esc(tx3('Bitte bestelle neu. Wenn du schon bezahlt hast, melde dich bei uns mit dem Code','Please order again. If you already paid, contact us with code','اطلب من جديد. إذا دفعت، تواصل معنا مع الكود'))+' <b>'+esc(p.code)+'</b></p><button type="button" class="orderbtn" data-tr="close">'+esc(t('newOrder'))+'</button></div>';return}
  var iban=String(p.iban||'').replace(/(.{4})/g,'$1 ').trim();
- el.innerHTML='<div class="tr-in" role="dialog" aria-label="'+esc(tx3('Zahlung','Payment','الدفع'))+'"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button><img class="tr-m" src="c/flamo-point.webp" alt="">'
+ el.innerHTML='<div class="tr-in" role="dialog" aria-label="'+esc(tx3('Zahlung','Payment','الدفع'))+'"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button>'+fm('flamo-bank')
  +'<p class="tr-say">'+esc(tx3('Fast geschafft! Bitte jetzt überweisen.','Almost there! Please transfer now.','قربنا! حوّل المبلغ هلأ.'))+'</p>'
  +'<p class="tr-code">'+esc(t('code'))+' <b>'+esc(p.code)+'</b> · '+esc(tx3('noch','left','باقي'))+' <b id="payCd">'+fmtCd(p.remainingSec)+'</b></p>'
  +'<div class="pay-box"><div><span>'+esc(tx3('Betrag','Amount','المبلغ'))+'</span><b>'+eur(p.amountCents)+'</b></div>'
@@ -489,14 +490,17 @@ function drawPay(tok,o,p){
 document.addEventListener('click',function(e){var b=e.target.closest('[data-copy]');if(!b)return;var v=b.getAttribute('data-copy'),done=function(){var o=b.textContent;b.textContent='✓';setTimeout(function(){b.textContent=o},1200)};try{navigator.clipboard.writeText(v).then(done,done)}catch(x){var ta=document.createElement('textarea');ta.value=v;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(y){}ta.remove();done()}});
 // شاشة متابعة الطلب
 var trackT=0,trackTok=null;
-var STEPS=['received','cooking','onTheWay','done'],STEP_IMG={received:'flamo-happy',cooking:'m-burger',onTheWay:'m-street',ready:'flamo-wave',done:'flamo-dance',cancelled:'mascot'};
+var STEPS=['received','cooking','onTheWay','done'],STEP_IMG={received:'flamo-cheer',cooking:'m-burger',onTheWay:'m-street',ready:'flamo-wave',done:'flamo-party',cancelled:'mascot'};
+/* HD-Clip (WebM mit Transparenz) für Zahlung/Status, sonst animiertes WebP (Safari, reduzierte Bewegung) */
+var HDM={'flamo-bank':1,'flamo-cheer':1,'flamo-party':1},HDOK=!!(document.createElement('video').canPlayType&&document.createElement('video').canPlayType('video/webm; codecs="vp9"'))&&!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+function fm(n){return HDM[n]&&HDOK?'<video class="tr-m tr-hd" src="c/'+n+'.webm" autoplay loop muted playsinline aria-hidden="true"></video>':'<img class="tr-m'+(HDM[n]?' tr-hd':'')+'" src="c/'+n+'.webp" alt="">'}
 function openTrack(tok,o){if(o&&o.step==='awaitingPayment'){startPay(tok);return}trackTok=tok;drawTrack(o);clearInterval(trackT);trackT=setInterval(pollTrack,15000)}
 function pollTrack(){if(!trackTok)return;fetch('/api/web-orders/status?t='+encodeURIComponent(trackTok)).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.order){drawTrack(j.order);if(j.order.step==='done'||j.order.step==='cancelled')clearInterval(trackT)}}).catch(function(){})}
 function drawTrack(o){
  var el=document.getElementById('track');if(!el){el=document.createElement('div');el.id='track';document.body.appendChild(el)}
  var steps=o.type==='pickup'?['received','cooking','ready','done']:STEPS,cur=steps.indexOf(o.step);
  var eta=o.promisedDueAt?new Date(o.promisedDueAt).toLocaleTimeString(lang==='ar'?'ar':'de-DE',{hour:'2-digit',minute:'2-digit'}):'';
- el.innerHTML='<div class="tr-in" role="dialog" aria-label="'+esc(t('track'))+'"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button><img class="tr-m" src="c/'+(STEP_IMG[o.step]||'mascot')+'.webp" alt=""><p class="tr-say">'+esc(t('flamo_'+o.step))+'</p><p class="tr-code">'+esc(t('code'))+' <b>'+esc(o.code)+'</b>'+(eta&&o.step!=='done'?' · '+esc(t('eta'))+' <b>'+eta+'</b>':'')+'</p><ol class="tr-steps">'+steps.map(function(s,i){return '<li class="'+(i<cur?'done':i===cur?'now':'')+'">'+esc(t('st_'+s))+'</li>'}).join('')+'</ol><button type="button" class="orderbtn" data-tr="close">'+esc(t('newOrder'))+'</button></div>';
+ el.innerHTML='<div class="tr-in" role="dialog" aria-label="'+esc(t('track'))+'"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button>'+fm(STEP_IMG[o.step]||'mascot')+'<p class="tr-say">'+esc(t('flamo_'+o.step))+'</p><p class="tr-code">'+esc(t('code'))+' <b>'+esc(o.code)+'</b>'+(eta&&o.step!=='done'?' · '+esc(t('eta'))+' <b>'+eta+'</b>':'')+'</p><ol class="tr-steps">'+steps.map(function(s,i){return '<li class="'+(i<cur?'done':i===cur?'now':'')+'">'+esc(t('st_'+s))+'</li>'}).join('')+'</ol><button type="button" class="orderbtn" data-tr="close">'+esc(t('newOrder'))+'</button></div>';
 }
 document.addEventListener('click',function(e){var b=e.target.closest('#track [data-tr]');if(b){var el=document.getElementById('track');if(el)el.remove();clearInterval(trackT);stopPay()}});
 
@@ -678,7 +682,7 @@ document.body.appendChild(g);
 var bub=g.querySelector('#gBubble'),txtEl=g.querySelector('#gText'),act=g.querySelector('#gAct'),img=g.querySelector('#gImg'),vidEl=g.querySelector('#gVid'),vbtn=g.querySelector('#gVoice');
 /* HD-Clips als WebM (VP9 mit Transparenz): schärfer, Wolle sichtbar, kleiner als animiertes WebP.
    Safari/iOS kann das nicht → dort bleibt das animierte WebP. */
-var imgEl=img,curSrc=imgEl.getAttribute('src'),HDV={'flamo-talk':1,'flamo-wave-hd':1,'flamo-dance':1,'flamo-happy':1,'flamo-present':1,'flamo-spin':1,'flamo-step':1,'flamo-point':1,'flamo-check':1,'flamo-paid':1,'flamo-sit':1};
+var imgEl=img,curSrc=imgEl.getAttribute('src'),HDV={'flamo-talk':1,'flamo-wave-hd':1,'flamo-dance':1,'flamo-happy':1,'flamo-present':1,'flamo-spin':1,'flamo-step':1,'flamo-point':1,'flamo-check':1,'flamo-paid':1,'flamo-sit':1,'flamo-guide':1,'flamo-idle':1,'flamo-bank':1,'flamo-party':1,'flamo-cheer':1};
 var useVid=!!(vidEl&&vidEl.canPlayType&&vidEl.canPlayType('video/webm; codecs="vp9"'))&&!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
 img={get src(){return curSrc},set src(v){curSrc=v;var m=/c\/(flamo-[a-z-]+)\.webp$/.exec(v||'');
  if(useVid&&m&&HDV[m[1]]){var w='c/'+m[1]+'.webm';if(vidEl.getAttribute('src')!==w){vidEl.src=w}vidEl.hidden=false;imgEl.hidden=true;var p=vidEl.play();if(p&&p.catch)p.catch(function(){vidEl.hidden=true;imgEl.hidden=false;imgEl.src=v})}
@@ -714,7 +718,7 @@ function speak(t){
   var vs=speechSynthesis.getVoices().filter(function(v){return v.lang&&v.lang.toLowerCase().indexOf(code)===0});
   if(vs.length)u.voice=vs[0];u.lang=code==='ar'?'ar-SA':code==='en'?'en-US':'de-DE';u.rate=1.05;u.pitch=1.35;speechSynthesis.speak(u)}catch(e){}
 }
-function talk(ms){if(intro&&!intro.classList.contains('out'))return;if(route()!=='home'){if(g.classList.contains('away'))return;var wait=Math.max(0,busyUntil-Date.now(),danceUntil-Date.now());if(wait){setTimeout(function(){if(!clipOn||clipOn==='talk')clip('talk',Math.max(1500,ms-wait))},wait+50)}else if(!clipOn)clip('talk',ms);return}clearTimeout(talkT);if(g.classList.contains('perch')){g.classList.add('talking');talkT=setTimeout(function(){g.classList.remove('talking')},ms);return}setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/flamo-talk.webp'},220);talkT=setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/mascot.webp'},ms)}
+function talk(ms){if(intro&&!intro.classList.contains('out'))return;if(route()!=='home'){if(g.classList.contains('away'))return;var wait=Math.max(0,busyUntil-Date.now(),danceUntil-Date.now());var nm=ms>5400?'guide':'talk';if(wait){setTimeout(function(){if(!clipOn||clipOn==='talk'||clipOn==='guide')clip(nm,Math.max(1500,ms-wait))},wait+50)}else if(!clipOn)clip(nm,ms);return}clearTimeout(talkT);if(g.classList.contains('perch')){g.classList.add('talking');talkT=setTimeout(function(){g.classList.remove('talking')},ms);return}setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/flamo-talk.webp'},220);talkT=setTimeout(function(){if(route()==='home'&&!intro&&!g.classList.contains('perch'))img.src='c/mascot.webp'},ms)}
 function show(text,keep,pid){
  clearTimeout(timer);clearInterval(typing);bub.hidden=false;txtEl.textContent='';
  act.hidden=!pid;if(pid)setTimeout(function(){clip('present',6500)},Math.max(0,danceUntil-Date.now(),busyUntil-Date.now())+60);if(pid){act.textContent=tr(TPL.addBtn);act.setAttribute('data-add',pid)}else act.removeAttribute('data-add');
@@ -811,6 +815,9 @@ document.addEventListener('click',function(e){
  if(e.target.closest('[data-lang]'))setTimeout(function(){setVoice(voice);say(route()==='home'?timeTip():route())},40);
 });
 window.addEventListener('nara-added',function(){hop();clip('dance',3800);danceUntil=Date.now()+3800;setTimeout(function(){var s=suggestion();if(s)show(tr(TIPS.added)+' '+s.t,false,s.id);else show(tr(TIPS.added),false)},120)});
+/* Flamo wird unruhig, wenn 30 s nichts passiert: steht auf und gestikuliert (nur wenn er nicht auf einer Kachel sitzt) */
+var idleT=0;function armIdle(){clearTimeout(idleT);idleT=setTimeout(function(){if(!intro&&!document.hidden&&!clipOn&&!g.classList.contains('perch')&&!g.classList.contains('away'))clip('idle',10000);armIdle()},30000)}
+['pointerdown','keydown','scroll','touchstart'].forEach(function(ev){window.addEventListener(ev,armIdle,{passive:true})});armIdle();
 window.addEventListener('nara-product',function(){bub.hidden=true});
 if(route()!=='home'){dock();pose(route());g.classList.toggle('away',route()==='burger')}
 window.addEventListener('resize',function(){clearTimeout(perchT);perchT=setTimeout(perch,120)});

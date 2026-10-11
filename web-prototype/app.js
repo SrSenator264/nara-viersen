@@ -190,7 +190,7 @@ function drawPay(tok,o,p){
  if(prev&&prev.p.state===p.state&&document.getElementById('payCd'))return;
  if(p.state==='EXPIRED'){stopPay();el.innerHTML='<div class="tr-in" role="dialog"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button><img class="tr-m" src="c/mascot.webp" alt=""><p class="tr-say">'+esc(tx3('Die Zahlungsfrist ist abgelaufen.','The payment time is over.','انتهت مهلة الدفع.'))+'</p><p class="tr-code">'+esc(tx3('Bitte bestelle neu. Wenn du schon bezahlt hast, melde dich bei uns mit dem Code','Please order again. If you already paid, contact us with code','اطلب من جديد. إذا دفعت، تواصل معنا مع الكود'))+' <b>'+esc(p.code)+'</b></p><button type="button" class="orderbtn" data-tr="close">'+esc(t('newOrder'))+'</button></div>';return}
  var iban=String(p.iban||'').replace(/(.{4})/g,'$1 ').trim();
- el.innerHTML='<div class="tr-in" role="dialog" aria-label="'+esc(tx3('Zahlung','Payment','الدفع'))+'"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button><img class="tr-m" src="c/flamo-point.webp" alt="">'
+ el.innerHTML='<div class="tr-in" role="dialog" aria-label="'+esc(tx3('Zahlung','Payment','الدفع'))+'"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button>'+fm('flamo-bank')
  +'<p class="tr-say">'+esc(tx3('Fast geschafft! Bitte jetzt überweisen.','Almost there! Please transfer now.','قربنا! حوّل المبلغ هلأ.'))+'</p>'
  +'<p class="tr-code">'+esc(t('code'))+' <b>'+esc(p.code)+'</b> · '+esc(tx3('noch','left','باقي'))+' <b id="payCd">'+fmtCd(p.remainingSec)+'</b></p>'
  +'<div class="pay-box"><div><span>'+esc(tx3('Betrag','Amount','المبلغ'))+'</span><b>'+eur(p.amountCents)+'</b></div>'
@@ -205,14 +205,17 @@ function drawPay(tok,o,p){
 document.addEventListener('click',function(e){var b=e.target.closest('[data-copy]');if(!b)return;var v=b.getAttribute('data-copy'),done=function(){var o=b.textContent;b.textContent='✓';setTimeout(function(){b.textContent=o},1200)};try{navigator.clipboard.writeText(v).then(done,done)}catch(x){var ta=document.createElement('textarea');ta.value=v;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(y){}ta.remove();done()}});
 // شاشة متابعة الطلب
 var trackT=0,trackTok=null;
-var STEPS=['received','cooking','onTheWay','done'],STEP_IMG={received:'flamo-happy',cooking:'m-burger',onTheWay:'m-street',ready:'flamo-wave',done:'flamo-dance',cancelled:'mascot'};
+var STEPS=['received','cooking','onTheWay','done'],STEP_IMG={received:'flamo-cheer',cooking:'m-burger',onTheWay:'m-street',ready:'flamo-wave',done:'flamo-party',cancelled:'mascot'};
+/* HD-Clip (WebM mit Transparenz) für Zahlung/Status, sonst animiertes WebP (Safari, reduzierte Bewegung) */
+var HDM={'flamo-bank':1,'flamo-cheer':1,'flamo-party':1},HDOK=!!(document.createElement('video').canPlayType&&document.createElement('video').canPlayType('video/webm; codecs="vp9"'))&&!/^((?!chrome|android).)*safari/i.test(navigator.userAgent)&&!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+function fm(n){return HDM[n]&&HDOK?'<video class="tr-m tr-hd" src="c/'+n+'.webm" autoplay loop muted playsinline aria-hidden="true"></video>':'<img class="tr-m'+(HDM[n]?' tr-hd':'')+'" src="c/'+n+'.webp" alt="">'}
 function openTrack(tok,o){if(o&&o.step==='awaitingPayment'){startPay(tok);return}trackTok=tok;drawTrack(o);clearInterval(trackT);trackT=setInterval(pollTrack,15000)}
 function pollTrack(){if(!trackTok)return;fetch('/api/web-orders/status?t='+encodeURIComponent(trackTok)).then(function(r){return r.ok?r.json():null}).then(function(j){if(j&&j.order){drawTrack(j.order);if(j.order.step==='done'||j.order.step==='cancelled')clearInterval(trackT)}}).catch(function(){})}
 function drawTrack(o){
  var el=document.getElementById('track');if(!el){el=document.createElement('div');el.id='track';document.body.appendChild(el)}
  var steps=o.type==='pickup'?['received','cooking','ready','done']:STEPS,cur=steps.indexOf(o.step);
  var eta=o.promisedDueAt?new Date(o.promisedDueAt).toLocaleTimeString(lang==='ar'?'ar':'de-DE',{hour:'2-digit',minute:'2-digit'}):'';
- el.innerHTML='<div class="tr-in" role="dialog" aria-label="'+esc(t('track'))+'"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button><img class="tr-m" src="c/'+(STEP_IMG[o.step]||'mascot')+'.webp" alt=""><p class="tr-say">'+esc(t('flamo_'+o.step))+'</p><p class="tr-code">'+esc(t('code'))+' <b>'+esc(o.code)+'</b>'+(eta&&o.step!=='done'?' · '+esc(t('eta'))+' <b>'+eta+'</b>':'')+'</p><ol class="tr-steps">'+steps.map(function(s,i){return '<li class="'+(i<cur?'done':i===cur?'now':'')+'">'+esc(t('st_'+s))+'</li>'}).join('')+'</ol><button type="button" class="orderbtn" data-tr="close">'+esc(t('newOrder'))+'</button></div>';
+ el.innerHTML='<div class="tr-in" role="dialog" aria-label="'+esc(t('track'))+'"><button type="button" class="tr-x" data-tr="close" aria-label="'+esc(t('close'))+'">×</button>'+fm(STEP_IMG[o.step]||'mascot')+'<p class="tr-say">'+esc(t('flamo_'+o.step))+'</p><p class="tr-code">'+esc(t('code'))+' <b>'+esc(o.code)+'</b>'+(eta&&o.step!=='done'?' · '+esc(t('eta'))+' <b>'+eta+'</b>':'')+'</p><ol class="tr-steps">'+steps.map(function(s,i){return '<li class="'+(i<cur?'done':i===cur?'now':'')+'">'+esc(t('st_'+s))+'</li>'}).join('')+'</ol><button type="button" class="orderbtn" data-tr="close">'+esc(t('newOrder'))+'</button></div>';
 }
 document.addEventListener('click',function(e){var b=e.target.closest('#track [data-tr]');if(b){var el=document.getElementById('track');if(el)el.remove();clearInterval(trackT);stopPay()}});
 
