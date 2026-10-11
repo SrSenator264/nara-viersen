@@ -153,7 +153,7 @@ function geminiAdapter({ key, model, base, fetchImpl = fetch }) {
     init: (system, history, user) => ({ system, contents: [...history.map(h => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: h.content }] })), { role: 'user', parts: [{ text: user }] }] }),
     async call(st) {
       const r = await fetchImpl(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({ systemInstruction: { parts: [{ text: st.system }] }, contents: st.contents, tools: decl, toolConfig: { functionCallingConfig: { mode: 'AUTO' } }, generationConfig: { temperature: 0.3, maxOutputTokens: 700, ...(think ? { thinkingConfig: think } : {}) } }) });
+        body: JSON.stringify({ systemInstruction: { parts: [{ text: st.system }] }, contents: st.contents, tools: decl, toolConfig: { functionCallingConfig: { mode: 'AUTO' } }, generationConfig: { temperature: 0.3, maxOutputTokens: 1500, ...(think ? { thinkingConfig: think } : {}) } }) });
       if (r.status === 400 && think) { think = null; return this.call(st); }
       if (!r.ok) throw new Error('AI provider ' + r.status);
       const j = await r.json(), cand = (j.candidates && j.candidates[0]) || {}, parts = (cand.content && cand.content.parts) || [];
@@ -196,8 +196,22 @@ function usageStore(file, now = () => new Date()) {
 }
 
 // ───────── Ein Gesprächsschritt ─────────
-function extractJson(text) { const m = str(text).match(/\{[\s\S]*\}/); if (!m) return null; try { return JSON.parse(m[0]); } catch { return null; } }
-const clean = t => str(t).replace(/[*_`#]+/g, '').replace(/\s+\n/g, '\n').slice(0, 420);
+function extractJson(text) {
+  let t = str(text).replace(/```(?:json)?/gi, '').trim();
+  const m = t.match(/\{[\s\S]*\}/);
+  if (m) {
+    try { return JSON.parse(m[0]); } catch { /* try repair */ }
+    try { return JSON.parse(m[0].replace(/[\u0000-\u001f]+/g, ' ')); } catch { /* fall through */ }
+  }
+  // truncated or malformed: pull the reply string out by hand
+  const r = t.match(/"reply"\s*:\s*"((?:[^"\\]|\\[\s\S])*)("|$)/);
+  if (r) {
+    let v = r[1]; try { v = JSON.parse('"' + v.replace(/[\u0000-\u001f]+/g, ' ') + '"'); } catch { v = v.replace(/\\n/g, ' ').replace(/\\"/g, '"'); }
+    return { reply: v, show_draft: /"show_draft"\s*:\s*true/.test(t) };
+  }
+  return null;
+}
+const clean = t => str(t).replace(/[_`#]+/g, '').replace(/\*{3,}/g, '**').replace(/\s+\n/g, '\n').slice(0, 700);
 
 async function chat(input, { adapter, menu, W, catalog, products, popular, maxRounds = 4 }) {
   const lang = ['de', 'en', 'ar'].includes(input.lang) ? input.lang : 'de';
@@ -209,19 +223,19 @@ async function chat(input, { adapter, menu, W, catalog, products, popular, maxRo
   const last = (Array.isArray(input.last) ? input.last : []).slice(0, 6).filter(x => typeof x === 'string').map(x => x.replace(/[\r\n*]/g, ' ').slice(0, 60));
   const ex = makeExec({ menu, W, catalog, products });
   const st = adapter.init(systemPrompt({ lang, cart, who, last, index: ex.index(popular), hasTop: !!(popular && popular.length && menu.some(m => popular.map(x => String(x).trim().toLowerCase()).includes(String(m.n).trim().toLowerCase()))) }), history, str(input.message).slice(0, 200));
-  const usage = { in: 0, out: 0 }; let text = '', done = false, rounds = 0;
+  const usage = { in: 0, out: 0 }; let text = '', done = false, rounds = 0; const ms = [];
   while (rounds < maxRounds) {
     rounds++;
-    const r = await adapter.call(st);
+    const t0 = Date.now(), r = await adapter.call(st); ms.push(Date.now() - t0 + (r.calls.length ? 'ms+' + r.calls.map(c => c.name).join(',') : 'ms'));
     usage.in += r.usage.in; usage.out += r.usage.out;
     if (!r.calls.length) { text = r.text; done = true; break; }
     adapter.addResults(st, r.calls, r.calls.map(c => ex.run(c.name, c.args)));
   }
-  if (!done) return { ok: false, code: 'LOOP', usage, rounds };
-  const j = extractJson(text), reply = clean(j && typeof j.reply === 'string' ? j.reply : text);
+  if (!done) return { ok: false, code: 'LOOP', usage, rounds, ms };
+  const j = extractJson(text), reply = clean(j && typeof j.reply === 'string' ? j.reply : (/^\s*[{`]/.test(text) ? '' : text));
   const d = j && j.show_draft === true ? ex.getDraft() : null;
   if (!reply) return { ok: false, code: 'EMPTY', usage, rounds };
-  return { ok: true, reply, draft: d ? { lines: d.lines, items: d.items, totalCents: d.totalCents } : null, usage, rounds };
+  return { ok: true, reply, draft: d ? { lines: d.lines, items: d.items, totalCents: d.totalCents } : null, usage, rounds, ms };
 }
 
 module.exports = { TOOLS, CATS, loadMenu, makeExec, systemPrompt, openaiAdapter, anthropicAdapter, geminiAdapter, providerFromEnv, usageStore, chat, extractJson };

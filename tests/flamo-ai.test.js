@@ -46,9 +46,9 @@ test('chat loop: tool call → priced draft; model cannot invent a draft', async
   assert.equal(r2.ok, true); assert.equal(r2.draft, null);
 });
 
-test('chat: plain text answers are tolerated, markdown stripped, endless tool loops stopped', async () => {
+test('chat: plain text answers are tolerated, bold kept, endless tool loops stopped', async () => {
   const r = await F.chat({ message: 'x' }, { adapter: fake([{ text: '**Hallo** da!' }]), menu, W, catalog: [], products: [] });
-  assert.equal(r.reply, 'Hallo da!');
+  assert.equal(r.reply, '**Hallo** da!');
   const loop = fake(Array.from({ length: 10 }, () => ({ calls: [{ id: 'x', name: 'search_menu', args: {} }] })));
   const l = await F.chat({ message: 'x' }, { adapter: loop, menu, W, catalog: [], products: [] });
   assert.equal(l.ok, false); assert.equal(l.code, 'LOOP');
