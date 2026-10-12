@@ -3,12 +3,6 @@
    Der Schalter schickt bei jedem Kassen-Event training:true; der Server markiert die Bestellung isTest. */
 (function () {
   const KEY = 'nara-kasse-training';
-  const lang = (() => { try { const l = (window.NARA_LANG && NARA_LANG.get()) || localStorage.getItem('nara-kasse-language') || 'de'; return ['de', 'ar', 'en'].includes(l) ? l : 'de'; } catch (e) { return 'de'; } })();
-  const T = {
-    de: { on: 'ÜBUNGSMODUS AN — nichts davon zählt, keine TSE', off: 'Übungsmodus', ask: 'Übungsmodus beenden?', btn: '🎓 Übung' },
-    ar: { on: 'وضع التدريب شغّال — ولا شي منو بينحسب، بدون TSE', off: 'وضع التدريب', ask: 'بدك تنهي وضع التدريب؟', btn: '🎓 تدريب' },
-    en: { on: 'TRAINING MODE ON — nothing counts, no TSE', off: 'Training mode', ask: 'End training mode?', btn: '🎓 Training' }
-  }[lang];
   const get = () => { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return false; } };
   const set = v => { try { v ? localStorage.setItem(KEY, '1') : localStorage.removeItem(KEY); } catch (e) { /* ignore */ } };
   window.NARA_TRAINING = get();
@@ -25,13 +19,19 @@
     return of(input, init);
   };
 
+  // رمز صغير بدون كتابة تحت كلمة "Kasse" بالهيدر. بس المالك/المدير بيقدر يبدّل، والموظف ما بيقدر.
   const css = document.createElement('style');
-  css.textContent = '#nara-train-bar{position:fixed;left:0;right:0;top:0;z-index:99999;background:#f59e0b;color:#111;font:700 14px system-ui,sans-serif;text-align:center;padding:5px 8px;display:none}#nara-train-btn{position:fixed;left:270px;bottom:10px;z-index:99998;border:0;border-radius:999px;padding:8px 14px;background:#1f2937;color:#fff;font:600 13px system-ui,sans-serif;opacity:.8;cursor:pointer}body.nara-training{padding-top:30px}body.nara-training #nara-train-bar{display:block}body.nara-training #nara-train-btn{background:#f59e0b;color:#111;opacity:1}';
+  css.textContent = '#nara-train-wrap{display:inline-flex;flex-direction:column;align-items:center;line-height:1}#nara-train-btn{border:0;background:none;padding:0;margin-top:2px;font-size:15px;line-height:1;opacity:.28;filter:grayscale(1);cursor:default}#nara-train-btn.can{cursor:pointer}body.nara-training #nara-train-btn{opacity:1;filter:none;background:#f59e0b;border-radius:999px;padding:2px 6px}';
   document.head.appendChild(css);
-  const bar = document.createElement('div'); bar.id = 'nara-train-bar'; bar.textContent = T.on;
-  const btn = document.createElement('button'); btn.id = 'nara-train-btn'; btn.type = 'button'; btn.textContent = T.btn;
-  function paint() { document.body.classList.toggle('nara-training', window.NARA_TRAINING); }
-  btn.onclick = () => { if (window.NARA_TRAINING && !confirm(T.ask)) return; window.NARA_TRAINING = !window.NARA_TRAINING; set(window.NARA_TRAINING); paint(); };
-  function init() { document.body.appendChild(bar); document.body.appendChild(btn); paint(); }
+  const canToggle = () => { try { const u = window.NARA_AUTH && NARA_AUTH.user && NARA_AUTH.user(); return !!u && (u.role === 'OWNER' || u.role === 'MANAGER'); } catch (e) { return false; } };
+  function paint() { document.body.classList.toggle('nara-training', window.NARA_TRAINING); const b = document.getElementById('nara-train-btn'); if (b) b.classList.toggle('can', canToggle()); }
+  function init() {
+    const label = document.querySelector('header strong[data-i18n="cashier"]') || document.querySelector('header strong');
+    const btn = document.createElement('button'); btn.id = 'nara-train-btn'; btn.type = 'button'; btn.textContent = '🎓';
+    btn.onclick = () => { if (!canToggle()) return; window.NARA_TRAINING = !window.NARA_TRAINING; set(window.NARA_TRAINING); paint(); };
+    if (label && label.parentNode) { const w = document.createElement('span'); w.id = 'nara-train-wrap'; label.parentNode.insertBefore(w, label); w.appendChild(label); w.appendChild(btn); }
+    else { btn.style.cssText = 'position:fixed;left:270px;bottom:10px;z-index:99998'; document.body.appendChild(btn); }
+    paint(); setInterval(paint, 2000);
+  }
   document.body ? init() : document.addEventListener('DOMContentLoaded', init);
 })();
