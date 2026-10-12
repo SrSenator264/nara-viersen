@@ -229,3 +229,11 @@ test('training mode: order is test, payment gets no TSE and stays out of reports
   const ft = st.json.fiscalTransactions.find(f => f.orderId === id), rc = st.json.receipts.find(r => r.orderId === id), py = st.json.payments.find(p => p.orderId === id);
   assert.equal(ft.status, 'TRAINING_NOT_SIGNED'); assert.match(rc.receiptNumber, /^UEB-/); assert.equal(py.isTest, true);
 });
+
+test('customer history: owner only (or granted), hints for kitchen, notes need cashier', async () => {
+  assert.equal((await call('GET', '/api/customer-db', null, S.owner)).status, 200);
+  assert.equal((await call('GET', '/api/customer-db', null, S.cashier)).status, 403);
+  assert.equal((await call('GET', '/api/customer-hint', null, S.kitchen)).status, 200);
+  assert.equal((await call('POST', '/api/customer-note', { orderId: 'nope', note: 'x' }, S.kitchen)).status, 403);
+  assert.equal((await call('POST', '/api/customer-note', { orderId: 'nope', note: 'x' }, S.cashier)).status, 404);
+});

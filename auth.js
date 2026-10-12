@@ -86,6 +86,8 @@ const RULES = [
   ['GET', /^\/api\/kasse-state$/, KITCH],
   ['GET', /^\/api\/kasse\/open-orders$/, KITCH],
   ['*', /^\/api\/customers(\/sync)?$/, CASH],
+  ['GET', /^\/api\/customer-hint$/, KITCH],
+  ['POST', /^\/api\/customer-note$/, CASH],
   ['GET', /^\/api\/customer-db$/, KITCH], // الصلاحية الفعلية (مالك أو ممنوحة) بتنفحص بالـhandler
   ['GET', /^\/api\/cashier\/employee-lookup$/, CASH],
   ['*', /^\/api\/kitchen\/orders$/, KITCH],

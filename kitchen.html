@@ -210,7 +210,7 @@ button:disabled{opacity:.5}
       +(exp?'<div class="lwarn">⚠ '+t('expect')+' '+exp+'</div>':'')
       +(cust?'<div class="cust"><bdi>'+esc(cust)+'</bdi></div>':'')
       +'<div class="brief">'+brief+'</div>'
-      +'<div class="more">'+(info?'<div class="info">'+info+'</div>':'')+(o.notes?'<div class="note">'+esc(t('note'))+': <bdi>'+esc(o.notes)+'</bdi></div>':'')+'<div class="items">'+items+'</div></div>'
+      +'<div class="more">'+(info?'<div class="info">'+info+'</div>':'')+(o.notes?'<div class="note">'+esc(t('note'))+': <bdi>'+esc(o.notes)+'</bdi></div>':'')+custHintHtml(o)+'<div class="items">'+items+'</div></div>'
       +'<div class="acts">'+(prev?'<button class="sm" data-act="set" data-to="'+prev+'" title="'+t('back')+'">↩</button>':'')
       +'<button class="sm" data-act="print" title="'+t('print')+'">🖨️</button>'
       +(next?'<button class="go '+o.kitchenStatus+'" data-act="set" data-to="'+next+'">'+t(BTN[o.kitchenStatus])+'</button>':'')+'</div></article>';
@@ -259,6 +259,10 @@ button:disabled{opacity:.5}
     summary();
   }
   function show(v){view=v;$$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('.view').forEach(s=>s.classList.toggle('on',s.dataset.v===v));store.set('nara-kitchen-view',v)}
+  let hints={};
+  function custHintHtml(o){const h=hints[o.id];if(!h)return '';return '<div class="note" style="background:#eaf4ff;border-color:#9cc8f5">'+(h.n>1?'🔁 '+h.n+'× ':'')+(h.note?'⭐ <bdi>'+esc(h.note)+'</bdi>':'')+'</div>'}
+  async function loadHints(){try{const r=await fetch('/api/customer-hint',{cache:'no-store'});if(r.ok){hints=(await r.json()).hints||{}}}catch(e){}}
+  loadHints();setInterval(loadHints,20000);
   function setStatus(msg,err){const s=$('#status');s.textContent=msg;s.className=err?'err':''}
   async function load(){
     try{
