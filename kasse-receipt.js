@@ -52,6 +52,7 @@
   function stamp(v){const d=new Date(v);if(isNaN(d))return '';return pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+' · '+pad(d.getHours())+':'+pad(d.getMinutes())}
   function hhmm(v){const d=new Date(v);return isNaN(d)?'':pad(d.getHours())+':'+pad(d.getMinutes())}
 
+  function brandOf(o){o=o||{};const b=String(o.brand||o.brandName||'');if(/loco/i.test(b)||/^LOCO$/i.test(String(o.station||''))||/^SIDES/i.test(String(o.source||'')))return 'LOCO CHICKEN';if(/smash/i.test(b))return 'JUST SMASHED';return 'IU GENE'}
   function html(o,kind){
     const r=toReceiptOrder(o,kind),t=TX[lang()]||TX.de,d=r.delivery||{},isDel=r.orderType==='DELIVERY',pm=r.payment.method;
     // خصم على الأصناف (عرض المنصة): السعر الأصلي مشطوب + السعر الجديد؛ والباقي من الخصم بسطر "Rabatt"
@@ -61,7 +62,7 @@
     const type=r.orderType==='PICKUP'?t.pickup:r.orderType==='DINE_IN'?(t.dine+(r.table?' · '+t.table+' '+esc(r.table):'')):t.delivery;
     const rows=[];
     // الترويسة
-    rows.push('<div class="rc-brand">IU GENE</div><div class="rc-small rc-c">Gereonstraße 1 · 41747 Viersen</div><div class="rc-small rc-c">'+t.tel+' 02162 5013538</div>');
+    rows.push('<div class="rc-brand">'+esc(brandOf(o))+'</div><div class="rc-small rc-c">Gereonstraße 1 · 41747 Viersen</div><div class="rc-small rc-c">'+t.tel+' 02162 5013538</div>');
     // رقم الطلب + المنصة + الوقت
     const pb=platBox(r.platform);if(pb)rows.push(pb);
     rows.push('<div class="rc-code">'+esc(r.displayCode)+'</div>');
@@ -135,6 +136,7 @@
     const k=toKitchen(o),t=KT[lang()]||KT.de;
     const type=k.type==='pickup'?t.pickup:k.type==='local'?(t.dine+(k.table?' · '+t.table+' '+esc(k.table):'')):t.delivery;
     const rows=['<div class="rc-brand">'+t.kitchen+'</div>'];
+    if(brandOf(o)!=='IU GENE')rows.push('<div class="rc-type">'+esc(brandOf(o))+'</div>');
     const pb=platBox(k.source);if(pb)rows.push(pb);
     rows.push('<div class="rc-code">'+esc(k.displayCode)+'</div>');
     rows.push('<div class="rc-type">'+esc(type)+'</div>');
