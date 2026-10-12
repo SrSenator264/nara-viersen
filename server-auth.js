@@ -62,7 +62,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     const tok = A.newToken();
     store.sessions[A.tokenHash(tok)] = { employeeId, name, exp: Date.now() + SESSION_MS };
     save();
-    replyC(res, 200, { ok: true, user: { id: employeeId, name, role } }, cookieHeader(req, tok, SESSION_MS / 1000));
+    replyC(res, 200, { ok: true, user: { id: employeeId, name, role, customers: role === 'OWNER' || store.accounts[employeeId]?.customers === true } }, cookieHeader(req, tok, SESSION_MS / 1000));
   }
 
   // يرجع true إذا الطلب انتهى (مرفوض أو endpoint دخول)
