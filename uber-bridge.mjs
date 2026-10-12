@@ -122,6 +122,8 @@ ctx.on('response', async r => {
     if (!/ubereats\.com$/i.test(u.hostname) || !/\/graphql$/.test(u.pathname)) return;
     const j = await r.json().catch(() => null);
     const d = j && j.data; if (!d) return;
+    // التقاط ردود "Order history" (للتعلّم فقط): افتح merchants-beta.ubereats.com/order-history بنافذة الجسر مرة وحدة
+    try { const keys = Object.keys(d || {}); if (keys.some(k => /histor|complet|past|order/i.test(k) && !/getActiveOrders/.test(k))) fs.appendFileSync(P('history-capture.jsonl'), JSON.stringify({ at: new Date().toISOString(), keys, data: JSON.stringify(d).slice(0, 60000) }) + '\n'); } catch { /* تجاهل */ }
     if (d.getStoreDetails && d.getStoreDetails.result && d.getStoreDetails.result.store) {
       const s = d.getStoreDetails.result.store;
       if (s.id && (!state.stores[s.id] || state.stores[s.id].name !== s.name)) { state.stores[s.id] = { id: s.id, name: s.name }; saveState(); log(`store ${s.name}`); }
