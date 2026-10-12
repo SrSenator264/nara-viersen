@@ -37,7 +37,10 @@
       // الكاشير بيستنى الطباعة قبل ما يعيد تحميل الصفحة بعد الدفع (حد أقصى 10 ثواني)
       const job=window.NARA_RECEIPT.print(o,kind);
       window.NARA_PRINT_PENDING=Promise.race([job.catch(()=>null),new Promise(r=>setTimeout(r,10000))]);
-      const r=await job;$('#message').textContent=r&&r.error?'⚠ '+r.error:t('sent');return}
+      const r=await job;
+      // طلب بالمحل: ورقة للطاولة (نسخة الزبون بدون دفع) أول ما ينبعت للمطبخ
+      if(kind==='kitchen'&&(o.type==='local'||o.orderType==='DINE_IN')&&window.NARA_PRINT_TABLE_SLIP!==false&&!(r&&r.error)){try{await window.NARA_RECEIPT.print(o,'customer')}catch(e){}}
+      $('#message').textContent=r&&r.error?'⚠ '+r.error:t('sent');return}
     showSheet(o,kind);$('#message').textContent=t('sent')}
   function mount(){
     const cart=$('#cart');if(!cart||document.getElementById('nara-print-tools'))return;
