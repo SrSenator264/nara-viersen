@@ -217,3 +217,15 @@ test('website order: public, server-priced, status by token only', async () => {
   assert.equal((await call('GET', '/api/web-orders/status?t=' + r.json.token)).json.order.step, 'cancelled');
   assert.equal((await call('GET', '/api/kasse-state')).status, 401);
 });
+
+test('training mode: order is test, payment gets no TSE and stays out of reports', async () => {
+  const id = 'train-' + Date.now();
+  const base = { id, type: 'local', cart: [{ name: 'Burger', unitCents: 1000, quantity: 1, options: [] }] };
+  const s = await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', clientId: 'A', training: true, order: base }, S.cashier);
+  assert.equal(s.status, 200); assert.equal(s.json.order.isTest, true); assert.equal(s.json.order.training, true);
+  const pay = await call('POST', '/api/kasse/events', { action: 'FINALIZE_PAYMENT', order: { ...base, rev: s.json.rev }, paymentLines: [{ method: 'CASH', amountCents: 1000 }] }, S.cashier);
+  assert.equal(pay.status, 200, JSON.stringify(pay.json));
+  const st = await call('GET', '/api/kasse-state', null, S.cashier);
+  const ft = st.json.fiscalTransactions.find(f => f.orderId === id), rc = st.json.receipts.find(r => r.orderId === id), py = st.json.payments.find(p => p.orderId === id);
+  assert.equal(ft.status, 'TRAINING_NOT_SIGNED'); assert.match(rc.receiptNumber, /^UEB-/); assert.equal(py.isTest, true);
+});

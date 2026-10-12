@@ -62,6 +62,7 @@
     const type=r.orderType==='PICKUP'?t.pickup:r.orderType==='DINE_IN'?(t.dine+(r.table?' · '+t.table+' '+esc(r.table):'')):t.delivery;
     const rows=[];
     // الترويسة
+    if(o&&(o.training||window.NARA_TRAINING))rows.push('<div class="rc-type">*** ÜBUNG · KEIN BELEG ***</div>');
     rows.push('<div class="rc-brand">'+esc(brandOf(o))+'</div><div class="rc-small rc-c">Gereonstraße 1 · 41747 Viersen</div><div class="rc-small rc-c">'+t.tel+' 02162 5013538</div>');
     // رقم الطلب + المنصة + الوقت
     const pb=platBox(r.platform);if(pb)rows.push(pb);
