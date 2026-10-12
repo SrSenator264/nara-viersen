@@ -260,7 +260,8 @@ button:disabled{opacity:.5}
   }
   function show(v){view=v;$$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('.view').forEach(s=>s.classList.toggle('on',s.dataset.v===v));store.set('nara-kitchen-view',v)}
   let hints={};
-  function custHintHtml(o){const h=hints[o.id];if(!h)return '';return '<div class="note" style="background:#eaf4ff;border-color:#9cc8f5">'+(h.n>1?'🔁 '+h.n+'× ':'')+(h.note?'⭐ <bdi>'+esc(h.note)+'</bdi>':'')+'</div>'}
+  const HT={ar:{nw:'زبون جديد',rg:'زبون دائم',x:'مرات',fav:'بيطلب غالباً'},de:{nw:'Neukunde',rg:'Stammkunde',x:'Bestellungen',fav:'Bestellt oft'},en:{nw:'New customer',rg:'Regular',x:'orders',fav:'Often orders'}};
+  function custHintHtml(o){const h=hints[o.id];if(!h)return '';const L=HT[lang]||HT.de,n=h.n||1;const head=n>1?'🔁 <b>'+L.rg+'</b> · <bdi>'+n+' '+L.x+'</bdi>':'🆕 <b>'+L.nw+'</b>';const fav=n>1&&h.fav&&h.fav.length?'<div>🍽 '+L.fav+': <bdi>'+esc(h.fav.join('، '))+'</bdi></div>':'';return '<div class="note" style="background:#eaf4ff;border-color:#9cc8f5"><div>'+head+'</div>'+fav+(h.note?'<div>⭐ <bdi>'+esc(h.note)+'</bdi></div>':'')+'</div>'}
   async function loadHints(){try{const r=await fetch('/api/customer-hint',{cache:'no-store'});if(r.ok){hints=(await r.json()).hints||{}}}catch(e){}}
   loadHints();setInterval(loadHints,20000);
   function setStatus(msg,err){const s=$('#status');s.textContent=msg;s.className=err?'err':''}
