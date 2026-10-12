@@ -53,6 +53,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
   <span class="chip" id="learn">…</span>
   <span class="sp"></span>
   <label class="tog" data-tt="autoT"><input type="checkbox" id="auto"> <span data-t="auto"></span></label>
+  <label class="tog" id="custTog" hidden><input type="checkbox" id="showCust"> <span id="custTxt"></span></label>
   <span class="chip" id="upd"></span>
   <span id="langsw"></span>
 </header>
@@ -115,11 +116,25 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
   function toast(t){const m=$('#msg');m.textContent=t;m.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>m.style.display='none',3500)}
   function color(id){if(!colorOf[id])colorOf[id]=COLORS[Object.keys(colorOf).length%COLORS.length];return colorOf[id]}
 
+  const CT={ar:'🧑‍🤝‍🧑 الزباين على الخريطة',de:'🧑‍🤝‍🧑 Kunden auf Karte',en:'🧑‍🤝‍🧑 Show customers'},CSEG={REGULAR:'#16a34a',RETURNING:'#d97706',NEW:'#0891b2',SLEEPING:'#9ca3af',CANCELLED_ONLY:'#dc2626'};
+  let custLayer=null,custDb=null;
+  async function showCustomers(on){
+    if(!map)return;
+    if(!on){if(custLayer){map.removeLayer(custLayer);custLayer=null}return}
+    if(!custDb){try{const r=await fetch('/api/customer-db',{credentials:'same-origin',cache:'no-store'});if(!r.ok){$('#custTog').hidden=true;return}custDb=(await r.json()).customers||[]}catch(e){return}}
+    custLayer=L.layerGroup().addTo(map);
+    for(const c of custDb)if(Number.isFinite(c.lat)&&Number.isFinite(c.lng)){const r=Math.min(18,8+(c.orders||1)*2);L.marker([c.lat,c.lng],{zIndexOffset:-500,icon:L.divIcon({className:'',html:'<div style="width:'+r+'px;height:'+r+'px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 3px #0008;background:'+(CSEG[c.segment]||'#999')+'"></div>',iconSize:[r,r],iconAnchor:[r/2,r/2]})}).addTo(custLayer).bindTooltip(esc(c.name)+' · '+(c.orders||0)+'× · '+esc([c.street,c.house].filter(Boolean).join(' ')))}
+  }
+  $('#custTxt').textContent=CT[lang]||CT.de;
+  $('#custTog').hidden=false;
+  $('#showCust').checked=store.get('nara-dispatch-cust','0')==='1';
+  $('#showCust').onchange=()=>{store.set('nara-dispatch-cust',$('#showCust').checked?'1':'0');showCustomers($('#showCust').checked)};
   function initMap(){
     if(!window.L){$('#map').innerHTML='<div class="box warn" style="margin:12px">'+esc(t('noMap'))+'</div>';return}
     map=L.map('map',{zoomControl:true}).setView([51.2556,6.3936],13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
     layer=L.layerGroup().addTo(map);
+    if($('#showCust').checked)showCustomers(true);
   }
   const pin=(n,c)=>L.divIcon({className:'',html:'<div class="pin" style="background:'+c+'">'+esc(n)+'</div>',iconSize:[26,26],iconAnchor:[13,13]});
 
