@@ -173,7 +173,7 @@ let orders=[],stage='PREPARE',selId=null,lastOk=0,arcSel=null;
 const isLoco=o=>/loco/i.test(S(o.brand||o.brandName))||/^SIDES/i.test(S(o.source));
 function plat(o){if(isLoco(o))return 'LOCO';const p=S(o.platform||o.source).toUpperCase();if(/LIEFERANDO/.test(p))return 'LIEFERANDO';if(/UBER/.test(p))return 'UBER_EATS';if(/WOLT/.test(p))return 'WOLT';if(/LANCH/.test(p))return 'LANCH';if(/^WEB/.test(p))return 'WEB';return 'NARA'}
 const PC={WEB:'#E3262F',LIEFERANDO:'#ff8000',UBER_EATS:'#06c167',WOLT:'#009de0',LANCH:'#7b4ddb',LOCO:'#d62828',NARA:'#37474f'};
-let all=[],pays={};
+let all=[],pays={};const autoDone=new Set(),AUTO_DONE_MIN=120;
 const PL={WEB:'Website',LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',LOCO:'Loco Chicken',NARA:'NARA'};
 function badge(o){const p=plat(o);let t=PL[p];if(p==='LOCO'&&o.channel&&o.channel!=='SIDES')t+=' · '+(PL[o.channel]||o.portalName||'');return '<span class="badge b-'+p+'">'+esc(t)+'</span>'}
 function stageOf(o){const st=S(o.status).toUpperCase();if(st==='CANCELLED')return 'DONE';const s=S(o.liveStage).toUpperCase();if(s==='DONE'||st==='COMPLETED')return 'DONE';if(s==='HANDOVER')return 'HANDOVER';return 'PREPARE'}
@@ -207,6 +207,8 @@ async function load(){
     if(!r.ok)throw Error(r.status);
     const j=await r.json(),today=localDay(Date.now());
     all=j.orders||[];pays={};for(const p of j.payments||[])pays[p.id]=p;
+    // تسكير تلقائي: طلب منصة مدفوع أونلاين (مو كاش) وفات 120 دقيقة عن موعد تسليمه وما حدا حرّكه → Erledigt
+    for(const o of all){if(autoDone.has(o.id)||plat(o)==='NARA'||plat(o)==='WEB'||o.isTest||cancelled(o)||stageOf(o)==='DONE')continue;if(S(o.payment&&o.payment.method).toUpperCase()==='CASH')continue;const due=Date.parse(o.dueAt||'')||when(o)+60*60000;if(Date.now()-due<AUTO_DONE_MIN*60000)continue;autoDone.add(o.id);fetch('/api/live-orders/stage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:o.id,stage:'DONE'})}).then(r=>{if(r.ok){o.liveStage='DONE';o.status='COMPLETED'}}).catch(()=>{})}
     // طلبات التجربة اللي انلغت (NARA-Demo-Loeschen) ما بتطلع أبداً
     orders=all.filter(o=>plat(o)!=='NARA'&&!o.liveArchivedAt&&!(o.isTest&&cancelled(o))&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<3*3600000));
     // بعد تسكيرة اليوم (5 الصبح) كل طلبات امبارح بتروح عالأرشيف، حتى لو المنصة ما سكّرتها. بس طلب عمرو أقل من 3 ساعات بيضل.
