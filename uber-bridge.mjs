@@ -110,6 +110,27 @@ async function handleActive(result, storeId) {
   finally { busy = false; }
 }
 
+// فجوة الجسر (واقف/مطفي): الطلبات اللي خلصت بالتاريخ ولسا ما انبعتت منسجّلها كـ "خلص"
+async function handleHistory(result, storeId) {
+  try {
+    const store = state.stores[storeId] || { id: storeId, name: '' };
+    if (/loco/i.test(store.name || '')) return;
+    const list = [...((result && result.completedOrders) || []), ...((result && result.outForDeliveryOrders) || [])];
+    for (const entry of list) {
+      const o = entry && entry.value; if (!o || !o.id || o.isTestOrder) continue;
+      const order = normalizeUber(o, store);
+      if (state.sent[order.externalOrderCode]) continue;
+      const done = o.terminalStateTimestamp || new Date().toISOString();
+      order.placedAt = order.createdAt = order.acceptedAt = state.seen[String(o.id)] || done;
+      if (!/CANCEL/.test(order.liveStage)) { order.liveStage = 'DONE'; order.status = 'DONE'; }
+      order.platformStatus = 'FROM_HISTORY';
+      try { fs.writeFileSync(P(`raw/${o.id}.json`), JSON.stringify(o)); } catch { /* تجاهل */ }
+      log(`history: fehlende Bestellung ${order.displayCode}`);
+      await sendOrder(order, 'history');
+    }
+  } catch (e) { log('history failed: ' + e.message); }
+}
+
 const { chromium } = await import('playwright');
 const ctx = await chromium.launchPersistentContext(CFG.profile, { headless: false, viewport: null });
 const page = ctx.pages()[0] || await ctx.newPage();
@@ -127,6 +148,10 @@ ctx.on('response', async r => {
     if (d.getStoreDetails && d.getStoreDetails.result && d.getStoreDetails.result.store) {
       const s = d.getStoreDetails.result.store;
       if (s.id && (!state.stores[s.id] || state.stores[s.id].name !== s.name)) { state.stores[s.id] = { id: s.id, name: s.name }; saveState(); log(`store ${s.name}`); }
+    }
+    if (d.getOrderHistory && d.getOrderHistory.result) {
+      const m = String(d.getOrderHistory.message || '').match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+      await handleHistory(d.getOrderHistory.result, m ? m[0] : 'default');
     }
     if (d.getActiveOrders && d.getActiveOrders.result) {
       const m = String(d.getActiveOrders.message || '').match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
@@ -163,6 +188,19 @@ await page.goto(CFG.url, { waitUntil: 'domcontentloaded' });
 log('Uber-Bridge bereit. Falls nötig: einmal selbst einloggen und dieses Fenster offen lassen. Nichts anklicken.');
 log(`NARA: ${CFG.base} | Profil: ${CFG.profile}`);
 setInterval(() => watchdog().catch(() => {}), 60000);
+// مزامنة التاريخ: تاب ثاني بيفتح "Order history" ويسكّر (عند البدء + كل ساعة) ليتعبّى أي طلب فات
+async function syncHistory() {
+  if (loggedOut) return;
+  let pg = null;
+  try {
+    pg = await ctx.newPage();
+    await pg.goto(env('UBER_HISTORY_URL', 'https://merchants-beta.ubereats.com/order-history'), { waitUntil: 'domcontentloaded' });
+    await pg.waitForTimeout(12000);
+  } catch (e) { log('history tab: ' + e.message); }
+  finally { if (pg) await pg.close().catch(() => {}); }
+}
+setTimeout(() => syncHistory().catch(() => {}), 25000);
+setInterval(() => syncHistory().catch(() => {}), 3600000);
 setInterval(() => beat().catch(() => {}), 60000);
 setTimeout(() => beat().catch(() => {}), 8000);
 await new Promise(() => {});
