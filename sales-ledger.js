@@ -66,6 +66,35 @@ function build(data, from, to) {
   };
 }
 
+
+// ملخص شامل لكل المبيعات (محلي + منصات) للتقرير
+function summary(data, l) {
+  const days = {};
+  const slot = d => (days[d] ||= { day: d, ownCents: 0, platformCents: 0, ownCount: 0, platformCount: 0 });
+  for (const r of l.own.rows) { const x = slot(r.businessDay); x.ownCents += r.grossCents; x.ownCount++; }
+  for (const r of l.platform.rows) if (r.status === 'OK') { const x = slot(r.businessDay); x.platformCents += r.grossCents; x.platformCount++; }
+  const byDay = Object.values(days).sort((a, b) => a.day.localeCompare(b.day)).map(x => ({ ...x, totalCents: x.ownCents + x.platformCents, count: x.ownCount + x.platformCount }));
+  const ownCents = l.own.totals.grossCents, platCents = l.platform.totals.grossCents;
+  const brand = {}; brand['IU GENE (Kasse/Web)'] = ownCents; for (const [k, v] of Object.entries(l.platform.totals.byBrand)) brand[k + ' (Plattformen)'] = v;
+  const online = l.platform.rows.filter(r => r.status === 'OK' && r.paidOnPlatform).reduce((s, r) => s + r.grossCents, 0);
+  const platCash = l.platform.rows.filter(r => r.status === 'OK').reduce((s, r) => s + r.cashDueCents, 0);
+  // أكتر الأصناف مبيعاً (كل القنوات، بدون ملغي/تجربة)
+  const ids = new Set([...l.own.rows.map(r => r.orderId)]); const items = {};
+  const okPlat = new Set(l.platform.rows.filter(r => r.status === 'OK').map(r => r.orderCode));
+  for (const o of data.orders || []) {
+    if (o.isTest || up(o.status) === 'CANCELLED') continue;
+    if (!(ids.has(String(o.id)) || okPlat.has(o.displayCode))) continue;
+    for (const i of o.cart || []) { if (/FEE|TIP/.test(up(i.kind))) continue; const n = String(i.name || '').trim(); if (!n) continue; const q = Number(i.quantity) || 1; if (q > 50 || n.length > 70 || /^(lieferando |uber |wolt )?order\b|accepted at/i.test(n)) continue; (items[n] ||= { name: n, qty: 0, cents: 0 }); items[n].qty += q; items[n].cents += Number(i.totalCents) || (Number(i.unitCents) || 0) * q; }
+  }
+  const topItems = Object.values(items).sort((a, b) => b.qty - a.qty).slice(0, 20);
+  const orders = l.own.totals.count + l.platform.totals.count, gross = ownCents + platCents;
+  return {
+    totals: { grossCents: gross, orders, avgCents: orders ? Math.round(gross / orders) : 0, ownCents, platformCents: platCents, cancelled: l.platform.totals.cancelled, ownTseMissing: l.own.totals.tseMissing },
+    payment: { ownCashCents: l.own.totals.cashCents, ownCardCents: l.own.totals.cardCents, platformOnlineCents: online, platformCashCents: platCash },
+    byPlatform: l.platform.totals.byPlatform, byBrand: brand, byDay, topItems,
+  };
+}
+
 const q = v => { const s = String(v == null ? '' : v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
 const toCsv = (head, rows) => '﻿' + [head.join(';')].concat(rows.map(r => r.map(q).join(';'))).join('\r\n') + '\r\n';
 function csvOwn(l) {
@@ -76,4 +105,4 @@ function csvPlatform(l) {
   return toCsv(['Datum', 'Geschäftstag', 'Plattform', 'Marke', 'Plattform-Bestellnr.', 'Bestellcode', 'Status', 'Brutto EUR', 'Lieferkosten EUR', 'Rabatt EUR', 'Servicegebühr EUR', 'Trinkgeld EUR', 'Zahlung', 'Bar zu kassieren EUR', 'Online bezahlt'],
     l.platform.rows.map(r => [r.date, r.businessDay, r.platform, r.brand, r.platformCode, r.orderCode, r.status, eur(r.grossCents), eur(r.deliveryFeeCents), eur(r.discountCents), eur(r.serviceFeeCents), eur(r.tipCents), r.payment, eur(r.cashDueCents), r.paidOnPlatform ? 'ja' : 'nein']));
 }
-module.exports = { build, csvOwn, csvPlatform, platformOf, brandOf };
+module.exports = { build, summary, csvOwn, csvPlatform, platformOf, brandOf };

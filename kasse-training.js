@@ -26,7 +26,7 @@
   };
 
   const css = document.createElement('style');
-  css.textContent = '#nara-train-bar{position:fixed;left:0;right:0;top:0;z-index:99999;background:#f59e0b;color:#111;font:700 14px system-ui,sans-serif;text-align:center;padding:5px 8px;display:none}#nara-train-btn{position:fixed;left:10px;bottom:10px;z-index:99998;border:0;border-radius:999px;padding:8px 14px;background:#1f2937;color:#fff;font:600 13px system-ui,sans-serif;opacity:.8;cursor:pointer}body.nara-training{padding-top:30px}body.nara-training #nara-train-bar{display:block}body.nara-training #nara-train-btn{background:#f59e0b;color:#111;opacity:1}';
+  css.textContent = '#nara-train-bar{position:fixed;left:0;right:0;top:0;z-index:99999;background:#f59e0b;color:#111;font:700 14px system-ui,sans-serif;text-align:center;padding:5px 8px;display:none}#nara-train-btn{position:fixed;left:270px;bottom:10px;z-index:99998;border:0;border-radius:999px;padding:8px 14px;background:#1f2937;color:#fff;font:600 13px system-ui,sans-serif;opacity:.8;cursor:pointer}body.nara-training{padding-top:30px}body.nara-training #nara-train-bar{display:block}body.nara-training #nara-train-btn{background:#f59e0b;color:#111;opacity:1}';
   document.head.appendChild(css);
   const bar = document.createElement('div'); bar.id = 'nara-train-bar'; bar.textContent = T.on;
   const btn = document.createElement('button'); btn.id = 'nara-train-btn'; btn.type = 'button'; btn.textContent = T.btn;
