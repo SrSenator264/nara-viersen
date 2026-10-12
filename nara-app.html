@@ -38,12 +38,12 @@ a.tile[hidden]{display:none}
     en:{web:['Website','Designs & preview'],kasse:['Till','Orders & payment'],live:['Live Orders','Platforms & daily report'],kitchen:['Kitchen','Kitchen screen'],dispatch:['Dispatch','Tours & map'],driver:['Driver app','My tours'],close:['Daily closing','Cash & settlement'],admin:['Admin','Menu, team, settings'],staff:['Staff','Shifts & wages'],customers:['Customers','Regulars & orders']}};
   const L=window.NARA_LANG?NARA_LANG.get():'de',t=T[L]||T.de;
   const M=['OWNER','MANAGER'],C=M.concat('CASHIER'),K=C.concat('KITCHEN'),S=K.concat('DRIVER'),A=M.concat('ACCOUNTANT');
-  const items=[['kasse','🧾','/kasse.html',C],['live','📋','/live-orders.html',K],['kitchen','👨‍🍳','/kitchen.html',K],['dispatch','🛵','/dispatch.html',C],['driver','📍','/driver.html',S],['close','📊','/kasse-settlement.html',A],['web','🔥','/web-prototype/index.html',M],['staff','👥','/staff.html',M],['customers','🧑‍🤝‍🧑','/customers.html',M],['admin','⚙️','/admin.html',M]];
+  const items=[['kasse','🧾','/kasse.html',C],['live','📋','/live-orders.html',K],['kitchen','👨‍🍳','/kitchen.html',K],['dispatch','🛵','/dispatch.html',C],['driver','📍','/driver.html',S],['close','📊','/kasse-settlement.html',A],['web','🔥','/web-prototype/index.html',M],['staff','👥','/staff.html',M],['customers','🧑‍🤝‍🧑','/customers.html',K],['admin','⚙️','/admin.html',M]];
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function draw(){
     const u=window.NARA_AUTH&&NARA_AUTH.user&&NARA_AUTH.user(),role=u&&u.role;
     document.getElementById('who').textContent=u?u.name:'';
-    document.getElementById('grid').innerHTML=items.map(([k,ic,href,roles])=>'<a class="tile" href="'+href+'"'+(role&&!roles.includes(role)?' hidden':'')+'><i>'+ic+'</i><b>'+esc(t[k][0])+'</b><span>'+esc(t[k][1])+'</span></a>').join('');
+    document.getElementById('grid').innerHTML=items.map(([k,ic,href,roles])=>'<a class="tile" href="'+href+'"'+(role&&(!roles.includes(role)||(k==='customers'&&!(u&&u.customers)))?' hidden':'')+'><i>'+ic+'</i><b>'+esc(t[k][0])+'</b><span>'+esc(t[k][1])+'</span></a>').join('');
   }
   if(window.NARA_LANG)NARA_LANG.mountSwitcher(document.getElementById('langsw'));
   draw();let n=0;const iv=setInterval(()=>{draw();if(++n>20||(window.NARA_AUTH&&NARA_AUTH.user&&NARA_AUTH.user()))clearInterval(iv)},500);

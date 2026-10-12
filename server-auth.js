@@ -37,7 +37,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     if (!s || s.exp < Date.now()) return null;
     const acc = store.accounts[s.employeeId];
     if (!acc || acc.active === false) return null;
-    return { id: s.employeeId, name: s.name, role: acc.role };
+    return { id: s.employeeId, name: s.name, role: acc.role, customers: acc.role === 'OWNER' || acc.customers === true };
   }
   function serviceOk(req) {
     const key = process.env.NARA_SERVICE_KEY;
@@ -137,7 +137,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     if (p === '/api/auth/team' && m === 'GET') {
       const data = readAdminData();
       const ids = new Set([...(data.employees || []).map(e => e.id), ...Object.keys(store.accounts)]);
-      const team = [...ids].map(id => { const a = store.accounts[id]; const e = (data.employees || []).find(x => x.id === id); return { id, name: nameOf(data, id), role: a?.role || null, active: a ? a.active !== false : false, hasPin: !!a?.pin, employeeActive: e ? e.active !== false : false }; });
+      const team = [...ids].map(id => { const a = store.accounts[id]; const e = (data.employees || []).find(x => x.id === id); return { id, name: nameOf(data, id), role: a?.role || null, active: a ? a.active !== false : false, hasPin: !!a?.pin, customers: a?.role === 'OWNER' || a?.customers === true, employeeActive: e ? e.active !== false : false }; });
       replyC(res, 200, { ok: true, team, roles: A.ROLES }); return true;
     }
     if (p === '/api/auth/set-pin' && m === 'POST') {
@@ -168,7 +168,8 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
         if (!emp) { id = adminId('employee'); emp = { id, name, role, active, permissions: [], qrToken: adminId('qr'), hourlyRateCents: null, monthlySalaryCents: null, contractType: 'HOURLY', internalProfileEnabled: true, officialProfileEnabled: false, workforceType: 'INTERNAL', breakMinutes: 0, overtimeMultiplier: 1.25, dailyDeductionCents: 0, currency: 'EUR', createdAt: now, updatedAt: now }; data.employees.push(emp); }
         else { emp.name = name; emp.role = role; emp.active = active; emp.updatedAt = now; }
         writeAdminData(data);
-        store.accounts[id] = { role, active, pin: b.pin ? A.hashPin(b.pin) : prev?.pin };
+        const custGrant = req.naraUser.role === 'OWNER' && b.customers !== undefined ? b.customers === true : prev?.customers === true;
+        store.accounts[id] = { role, active, pin: b.pin ? A.hashPin(b.pin) : prev?.pin, ...(custGrant ? { customers: true } : {}) };
         if (b.pin || !active || (prev && prev.role !== role)) revoke(id);
         save();
         replyC(res, 200, { ok: true, id });
