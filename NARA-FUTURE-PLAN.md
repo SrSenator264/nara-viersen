@@ -40,3 +40,8 @@
 ## Flamo als Chef-Agent / Außenbereich (Ideen)
 
 - Außenfarme (externe Schiene) und Ideen für drinnen im Laden zum Thema Flamo sammeln.
+
+## Vor dem Launch (zurückgestellt, 13.10.)
+- Trainingsmodus: Server lehnt `training:true` von Nicht-OWNER/MANAGER ab (403) + Test `auth-server.test.js` anpassen.
+- Trainingsmodus: deutlicher Hinweis (Balken/Farbe) nur für den Owner, damit keine Verwechslung mit echten Verkäufen.
+- Später: Schalter nur für OWNER (MANAGER raus).
