@@ -33,7 +33,7 @@
       orderType:type,table:o.table||'',customerName:d.name||'',customerPhone:d.phone||'',
       delivery:{address:[d.street,d.house].filter(Boolean).join(' '),floor:d.floor||'',postalCode:d.postal||'',city:d.city||'',notes:noteParts.join(' · ')},
       cart:items.map(i=>({quantity:Number(i.quantity)||1,name:i.name,totalCents:(Number(i.unitCents)||0)*(Number(i.quantity)||0),discountCents:Number(i.discountCents)||0,
-        options:(i.options||[]).map(x=>({name:String(x.name||'').split(' / ')[0].trim(),quantity:x.quantity||1,totalCents:isPlat?(Number(x.totalCents)||0):0})).filter(x=>x.name&&!/^einzel$/i.test(x.name)),notes:i.note||'',category:''})),
+        options:(i.options||[]).map(x=>({name:String(x.name||'').split(' / ')[0].trim(),quantity:x.quantity||1,totalCents:isPlat?(Number(x.totalCents)||0):0})).filter(x=>x.name&&!/^einzel$/i.test(x.name)),notes:i.note||'',category:isPlat?String(i.category||''):''})),
       subtotalCents:isPlat&&Number(o.subtotalCents)>0?Number(o.subtotalCents):null,fees:{delivery:feeCents||(isPlat?Number(o.fees&&o.fees.delivery)||0:0),service:Number(o.fees&&o.fees.service)||0,small:Number(o.fees&&o.fees.small)||0},verificationCode:o.verificationCode||'',discountsCents:discount,totalCents:total,cashDueCents:Number(o.cashDueCents)||total,
       payment:{method},assignment:o.assignment||null,remarks:''
     };
@@ -84,8 +84,10 @@
     if(cust.length)rows.push('<div class="rc-box">'+cust.join('')+'</div>');
     if(isDel&&d.notes)rows.push('<div class="rc-note"><b>'+esc(t.note)+':</b> '+esc(d.notes)+'</div>');
     // الأصناف
+    let lastCat='';
     const items=r.cart.map(i=>{
-      let h='<div class="rc-item"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span><span class="rc-price">'+(i.discountCents?'<s class="rc-old">'+eur(i.totalCents)+'</s> '+eur(i.totalCents-i.discountCents):eur(i.totalCents))+'</span></div>';
+      let h='';if(i.category&&i.category!==lastCat){lastCat=i.category;h+='<div class="rc-cat">'+esc(i.category)+'</div>'}
+      h+='<div class="rc-item"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span><span class="rc-price">'+(i.discountCents?'<s class="rc-old">'+eur(i.totalCents)+'</s> '+eur(i.totalCents-i.discountCents):eur(i.totalCents))+'</span></div>';
       (i.options||[]).forEach(op=>{h+='<div class="rc-opt"><span>+ '+(op.quantity>1?esc(op.quantity)+'× ':'')+esc(op.name)+'</span>'+(op.totalCents>0?'<span class="rc-op">+'+eur(op.totalCents)+'</span>':'')+'</div>'});
       if(i.notes)h+='<div class="rc-inote">👉 '+esc(i.notes)+'</div>';
       return h});
