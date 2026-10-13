@@ -19,15 +19,16 @@
     return of(input, init);
   };
 
-  // كلمة "Kasse/الكاشير" نفسها هي زر التدريب (بدون أيقونة). بس المالك/المدير بيقدر يبدّل. الموظف: كلمة عادية.
+  // 3 ضغطات سريعة على لوغو Flamo = تدريب (مالك/مدير فقط). حلقة برتقالية وقت التدريب. الكلمة مخفية.
   const css = document.createElement('style');
-  css.textContent = 'header strong[data-i18n="cashier"].can{cursor:pointer}body.nara-training header strong[data-i18n="cashier"]{background:#f59e0b;color:#111;border-radius:999px;padding:2px 10px}#nara-menu-edit{display:none}#nara-menu-edit.can{display:inline}';
+  css.textContent = 'header>strong[data-i18n="cashier"]{display:none}body.nara-training header .brand img{outline:4px solid #f59e0b;outline-offset:2px;border-radius:10px}#nara-menu-edit{display:none}#nara-menu-edit.can{display:inline}';
   document.head.appendChild(css);
   const canToggle = () => { try { const u = window.NARA_AUTH && NARA_AUTH.user && NARA_AUTH.user(); return !!u && (u.role === 'OWNER' || u.role === 'MANAGER'); } catch (e) { return false; } };
-  function paint() { document.body.classList.toggle('nara-training', window.NARA_TRAINING); const c = canToggle(); const l = document.querySelector('header strong'); if (l) l.classList.toggle('can', c); const m = document.getElementById('nara-menu-edit'); if (m) m.classList.toggle('can', c); }
+  function paint() { document.body.classList.toggle('nara-training', window.NARA_TRAINING); const c = canToggle(); const m = document.getElementById('nara-menu-edit'); if (m) m.classList.toggle('can', c); }
   function init() {
-    const label = document.querySelector('header strong[data-i18n="cashier"]') || document.querySelector('header strong');
-    if (label) label.addEventListener('click', () => { if (!canToggle()) return; window.NARA_TRAINING = !window.NARA_TRAINING; set(window.NARA_TRAINING); paint(); });
+    // 3 schnelle Klicks auf das Flamo-Logo = Übungsmodus (nur OWNER/MANAGER); 1 Klick = normal zur Website.
+    const brand = document.querySelector('header .brand');
+    if (brand) { let n = 0, t; brand.addEventListener('click', e => { e.preventDefault(); n++; clearTimeout(t); t = setTimeout(() => { const c = n; n = 0; if (c >= 3 && canToggle()) { window.NARA_TRAINING = !window.NARA_TRAINING; set(window.NARA_TRAINING); paint(); } else location.href = brand.getAttribute('href'); }, 450); }); }
     const acts = document.querySelector('header .header-actions');
     if (acts && !document.getElementById('nara-menu-edit')) { const a = document.createElement('a'); a.id = 'nara-menu-edit'; a.href = 'admin-foundation.html'; a.textContent = 'Menü ✎'; acts.insertBefore(a, acts.firstChild); }
     paint(); setInterval(paint, 2000);
