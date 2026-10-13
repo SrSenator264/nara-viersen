@@ -132,7 +132,7 @@ export function renderLines(o, opt = {}) {
   }
   if (o.customerPhone) add(`${t.tel}: ${o.customerPhone}`);
   if (o.verificationCode) add(`${t.code}: ${o.verificationCode}`);
-  if (d.notes) for (const s of wrap(`${t.notes}: ${d.notes}`, W)) add(s, { bold: true });
+  if (d.notes) for (const s of wrap(`>> ${t.notes}: ${d.notes}`, Math.floor(W / 2))) add(s, { size: 2, bold: true });
   sep();
 
   // ── الأصناف مجمّعة حسب الفئة
@@ -150,7 +150,7 @@ export function renderLines(o, opt = {}) {
         const lab = `+ ${op.quantity > 1 ? op.quantity + 'x ' : ''}${op.name}`;
         for (const s of row(lab, op.totalCents > 0 ? `${eur(op.totalCents)} EUR` : '', W, '  ')) add(s);
       }
-      if (it.notes) for (const s of wrap(`! ${it.notes}`, W - 2)) add('  ' + s, { bold: true });
+      if (it.notes) for (const s of wrap(`>> ${it.notes}`, Math.floor(W / 2))) add(s, { size: 2, bold: true });
     }
   }
   sep();
@@ -231,12 +231,12 @@ export function renderKitchenLines(o, opt = {}) {
   else add(t.asap, { align: 'center' });
   if (o.customerName) add(o.customerName, { align: 'center' });
   const notes = [o.delivery && o.delivery.notes, o.remarks].filter(Boolean).join(' · ');
-  if (notes) { sep(); for (const s of wrap(`${t.notes}: ${notes}`, W)) add(s, { bold: true }); }
+  if (notes) { sep(); for (const s of wrap(`>> ${t.notes}: ${notes}`, Math.floor(W / 2))) add(s, { size: 2, bold: true }); }
   sep();
   for (const it of o.cart || []) {
     for (const s of wrap(`${it.quantity}x ${it.name}`, Math.floor(W / 2))) add(s, { size: 2, bold: true });
     for (const op of it.options || []) for (const s of wrap(`+ ${op.quantity > 1 ? op.quantity + 'x ' : ''}${op.name}`, W - 2)) add('  ' + s);
-    if (it.notes) for (const s of wrap(`! ${it.notes}`, W - 2)) add('  ' + s, { bold: true });
+    if (it.notes) for (const s of wrap(`>> ${it.notes}`, Math.floor(W / 2))) add(s, { size: 2, bold: true });
     add('');
   }
   sep();

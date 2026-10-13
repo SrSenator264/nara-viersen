@@ -18,12 +18,12 @@
 .nara-rc .rc-name{font-size:17px;font-weight:900;line-height:1.2}
 .nara-rc .rc-addr{font-size:15px;font-weight:600;line-height:1.3}
 .nara-rc .rc-phone{margin-top:3px;font-size:15px;font-weight:800}
-.nara-rc .rc-note{margin:6px 0;padding:6px 9px;border:2px dashed #000;border-radius:7px;font-size:14px}
+.nara-rc .rc-note{margin:6px 0;padding:7px 9px;border:3px solid #000;border-radius:7px;font-size:19px;font-weight:900;line-height:1.25}
 .nara-rc .rc-items{margin:8px 0 4px;border-top:2px solid #000}
 .nara-rc .rc-item{display:grid;grid-template-columns:auto 1fr auto;gap:6px;align-items:baseline;padding:6px 0 2px;font-size:15px;font-weight:800}
 .nara-rc .rc-qty{min-width:2.2em}.nara-rc .rc-price{white-space:nowrap}.nara-rc .rc-old{font-weight:400;opacity:.75}
 .nara-rc .rc-opt{padding:0 0 0 2.2em;font-size:12.5px;font-weight:500}
-.nara-rc .rc-inote{padding:1px 0 0 2.2em;font-size:12.5px;font-weight:800}
+.nara-rc .rc-inote{margin:3px 0 4px 1.4em;padding:3px 8px;background:#000;color:#fff;border-radius:5px;font-size:19px;font-weight:900;line-height:1.25}
 .nara-rc .rc-item+.rc-item,.nara-rc .rc-opt+.rc-item,.nara-rc .rc-inote+.rc-item{border-top:1px dotted #000}
 .nara-rc .rc-totals{margin-top:6px;padding-top:6px;border-top:2px solid #000}
 .nara-rc .rc-line2{display:flex;justify-content:space-between;font-size:13px}
@@ -37,7 +37,7 @@
 .nara-rc .rc-nb{margin-top:2px;font-weight:700}.nara-rc .rc-thanks{margin-top:6px;text-align:center;font-size:14px;font-weight:800}
 
 /* تذكرة المطبخ: الأصناف أكبر، بدون أسعار */
-.nara-rc-kitchen .rc-kitem{font-size:19px;grid-template-columns:auto 1fr}.nara-rc-kitchen .rc-kopt{font-size:15px;font-weight:700}.nara-rc-kitchen .rc-inote{font-size:15px}.nara-rc-kitchen .rc-name{font-size:15px}
+.nara-rc-kitchen .rc-kitem{font-size:19px;grid-template-columns:auto 1fr}.nara-rc-kitchen .rc-kopt{font-size:15px;font-weight:700}.nara-rc-kitchen .rc-inote{font-size:19px}.nara-rc-kitchen .rc-name{font-size:15px}
 
 /* ورقة العرض (تحت الفاتورة) */
 .nara-promo{text-align:center}

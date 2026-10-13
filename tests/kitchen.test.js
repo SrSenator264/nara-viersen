@@ -103,7 +103,7 @@ test('kitchen ticket (receipt core) has no prices or payment', async () => {
     cart: [{ quantity: 1, name: 'Crispy Chicken', totalCents: 1199, options: [{ name: 'Pommes', quantity: 1, totalCents: 250 }] }],
   }, { lang: 'de' });
   const text = core.toText(lines);
-  assert.match(text, /KÜCHE/); assert.match(text, /1x Crispy Chicken/); assert.match(text, /\+ Pommes/); assert.match(text, /Extra scharf/);
+  assert.match(text, /KÜCHE/); assert.match(text, /1x Crispy Chicken/); assert.match(text, /\+ Pommes/); assert.match(text.replace(/\s+/g, ' '), /Extra scharf/);
   assert.ok(!/EUR|€|11\.99|25\.90|BAR|Gesamt/i.test(text), text);
 });
 

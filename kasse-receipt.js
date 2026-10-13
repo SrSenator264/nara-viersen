@@ -86,7 +86,7 @@
     const items=r.cart.map(i=>{
       let h='<div class="rc-item"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span><span class="rc-price">'+(i.discountCents?'<s class="rc-old">'+eur(i.totalCents)+'</s> '+eur(i.totalCents-i.discountCents):eur(i.totalCents))+'</span></div>';
       (i.options||[]).forEach(op=>{h+='<div class="rc-opt">+ '+(op.quantity>1?esc(op.quantity)+'× ':'')+esc(op.name)+'</div>'});
-      if(i.notes)h+='<div class="rc-inote">! '+esc(i.notes)+'</div>';
+      if(i.notes)h+='<div class="rc-inote">👉 '+esc(i.notes)+'</div>';
       return h});
     rows.push('<div class="rc-items">'+items.join('')+'</div>');
     // المجاميع
@@ -150,7 +150,7 @@
     rows.push('<div class="rc-items">'+k.items.map(i=>{
       let h='<div class="rc-item rc-kitem"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span></div>';
       (i.options||[]).forEach(op=>{h+='<div class="rc-opt rc-kopt">+ '+(op.quantity>1?esc(op.quantity)+'× ':'')+esc(op.name)+'</div>'});
-      if(i.note)h+='<div class="rc-inote">! '+esc(i.note)+'</div>';
+      if(i.note)h+='<div class="rc-inote">👉 '+esc(i.note)+'</div>';
       return h}).join('')+'</div>');
     return '<div class="nara-rc nara-rc-kitchen">'+rows.join('')+'</div>';
   }
