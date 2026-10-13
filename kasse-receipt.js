@@ -86,7 +86,7 @@
     // الأصناف
     const items=r.cart.map(i=>{
       let h='<div class="rc-item"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span><span class="rc-price">'+(i.discountCents?'<s class="rc-old">'+eur(i.totalCents)+'</s> '+eur(i.totalCents-i.discountCents):eur(i.totalCents))+'</span></div>';
-      (i.options||[]).forEach(op=>{h+='<div class="rc-opt">+ '+(op.quantity>1?esc(op.quantity)+'× ':'')+esc(op.name)+(op.totalCents>0?' <span style="float:right">'+eur(op.totalCents)+'</span>':'')+'</div>'});
+      (i.options||[]).forEach(op=>{h+='<div class="rc-opt"><span>+ '+(op.quantity>1?esc(op.quantity)+'× ':'')+esc(op.name)+'</span>'+(op.totalCents>0?'<span class="rc-op">+'+eur(op.totalCents)+'</span>':'')+'</div>'});
       if(i.notes)h+='<div class="rc-inote">👉 '+esc(i.notes)+'</div>';
       return h});
     rows.push('<div class="rc-items">'+items.join('')+'</div>');
