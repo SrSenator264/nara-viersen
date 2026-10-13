@@ -177,6 +177,12 @@
     let k=document.getElementById('nara-kitchen-link');
     if(!k){k=document.createElement('a');k.id='nara-kitchen-link';k.href='kitchen.html';k.style.cssText='font-weight:800;color:#e85f12;text-decoration:none;margin-inline:8px';h.insertBefore(k,a)}
     k.textContent=tr('kitchenLink');
+    const au=window.NARA_AUTH&&NARA_AUTH.user&&NARA_AUTH.user();
+    let cu=document.getElementById('nara-custlog-link');
+    if(au&&(au.role==='OWNER'||au.customers===true)){
+      if(!cu){cu=document.createElement('a');cu.id='nara-custlog-link';cu.href='customers.html';cu.style.cssText='font-weight:800;color:#e85f12;text-decoration:none;margin-inline:8px';h.insertBefore(cu,k)}
+      cu.textContent=({de:'🧑‍🤝‍🧑 Kundenverlauf',ar:'🧑‍🤝‍🧑 سجل الزباين',en:'🧑‍🤝‍🧑 Customer history'})[lang()]||'🧑‍🤝‍🧑 Kundenverlauf';
+    }else if(cu)cu.remove();
     if(!document.getElementById('nara-connect-link')){const c=document.createElement('a');c.id='nara-connect-link';c.href='connect.html';c.textContent='📱';c.style.cssText='font-size:1.2rem;text-decoration:none;margin-inline:6px';h.appendChild(c)}
     const cl=document.getElementById('nara-connect-link');if(cl)cl.title=tr('connect');
     if(!document.getElementById('nara-platform-status'))drawPlatforms();
