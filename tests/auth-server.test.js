@@ -237,3 +237,13 @@ test('customer history: owner only (or granted), hints for kitchen, notes need c
   assert.equal((await call('POST', '/api/customer-note', { orderId: 'nope', note: 'x' }, S.kitchen)).status, 403);
   assert.equal((await call('POST', '/api/customer-note', { orderId: 'nope', note: 'x' }, S.cashier)).status, 404);
 });
+
+test('kaputtes Cookie legt den Server nicht lahm', async () => {
+  for (const c of ['a=%', 'nara_session=%E0%A4%A', 'x=%%; y=1'])
+    for (const u of ['/api/menu', '/api/auth/me', '/api/kasse-state']) {
+      const r = await call('GET', u, null, c);
+      assert.ok(r.status < 500, c + ' ' + u + ' -> ' + r.status);
+    }
+  const ok = await call('GET', '/api/auth/me');
+  assert.equal(ok.status, 200);
+});

@@ -58,3 +58,10 @@ test('every page that is gated has a role list', () => {
   assert.ok(A.PAGE_ROLES['kasse.html'].includes('CASHIER')); assert.equal(A.PAGE_ROLES['kasse.html'].includes('KITCHEN'), false);
   assert.equal(A.PAGE_ROLES['staff.html'].includes('CASHIER'), false);
 });
+
+test('parseCookies: ungueltige Prozent-Codierung wirft nicht', () => {
+  for (const h of ['a=%', 'a=%E0%A4%A', 'a=%%', 'a=', '', 'a=%; b=2', undefined])
+    assert.doesNotThrow(() => A.parseCookies(h), String(h));
+  assert.deepEqual(A.parseCookies('a=%; b=2'), { a: '%', b: '2' });
+  assert.deepEqual(A.parseCookies('big=' + 'x'.repeat(5000)).big.length, 5000);
+});
