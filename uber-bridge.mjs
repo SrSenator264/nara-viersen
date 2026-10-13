@@ -46,7 +46,7 @@ async function post(pathname, body) {
   } catch (e) { log('NARA server unreachable: ' + e.message); return 'retry'; }
 }
 
-let lastOkAt = null, loggedOut = false, alertAt = 0;
+let lastOkAt = null, loggedOut = false, alertAt = 0, lastReloadAt = 0;
 async function alertServer(type) {
   if (Date.now() - alertAt < 300000) return;
   alertAt = Date.now();
@@ -176,8 +176,12 @@ ctx.on('request', req => {
 async function watchdog() {
   const url = page.url();
   if (/auth\.uber\.com|\/login/i.test(url)) { loggedOut = true; await alertServer('SESSION_EXPIRED'); return; }
-  if (!lastOkAt || Date.now() - lastOkAt > CFG.staleMs) {
-    // الصفحة ما عم تسأل أوبر: منعيد تحميلها
+  // بدون طلبات فعّالة أوبر ما بيبعت بيانات جديدة، فما في داعي نعيد التحميل كل دقيقة:
+  // reload مرة كل staleMs (أو كل 20 دقيقة إذا ما في طلبات فعّالة) بدل كل دقيقة
+  const idle = !Object.keys(state.active || {}).length;
+  const every = idle ? Math.max(CFG.staleMs, 20 * 60000) : CFG.staleMs;
+  if ((!lastOkAt || Date.now() - lastOkAt > every) && Date.now() - lastReloadAt > every) {
+    lastReloadAt = Date.now();
     log('keine Daten seit ' + (lastOkAt ? Math.round((Date.now() - lastOkAt) / 1000) + 's' : 'Start') + ' → reload');
     if (!/\/orders/.test(url)) await page.goto(CFG.url, { waitUntil: 'domcontentloaded' }).catch(() => {});
     else await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => {});
