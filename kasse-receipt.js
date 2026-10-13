@@ -195,8 +195,16 @@
   api.promoHtml=promoHtml;api.promoCode=promoCode;
   // الطباعة: السيرفر بيقرر أي طابعة (حسب إعدادات 🖨️). إذا الطابعة على "نافذة المتصفح" بنطبع هون.
   // o: طلب (أو {id}) · kind: customer | kitchen | driver
+  // Rückmeldung für den Druckknopf: sofort "druckt…", dann Ergebnis; doppelte Klicks auf dieselbe Bestellung werden 2 s lang ignoriert
+  const PM={de:{go:'🖨 Druckt …',ok:'✓ Gedruckt',browser:'🖨 Druckfenster geöffnet',fail:'⚠ Drucken fehlgeschlagen'},ar:{go:'🖨 عم يطبع …',ok:'✓ انطبع',browser:'🖨 انفتحت نافذة الطباعة',fail:'⚠ فشلت الطباعة'},en:{go:'🖨 Printing …',ok:'✓ Printed',browser:'🖨 Print dialog opened',fail:'⚠ Printing failed'}};
+  const pl=()=>{try{const l=(window.NARA_LANG&&NARA_LANG.get&&NARA_LANG.get())||localStorage.getItem('nara-kasse-language')||'de';return PM[l]?l:'de'}catch(e){return 'de'}};
+  function toast(msg,bad){let el=document.getElementById('nara-print-toast');if(!el){el=document.createElement('div');el.id='nara-print-toast';el.style.cssText='position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:100000;padding:12px 20px;border-radius:12px;font:700 16px Arial,sans-serif;color:#fff;box-shadow:0 6px 24px #0005;pointer-events:none';document.body.appendChild(el)}el.textContent=msg;el.style.background=bad?'#b91c1c':'#1f7a3a';el.style.display='block';clearTimeout(el._t);el._t=setTimeout(()=>{el.style.display='none'},bad?5000:2200)}
+  const recent={};
   api.print=async function(o,kind){
     kind=kind||'customer';
+    const key=String(o&&o.id||'')+'|'+kind,now=Date.now(),M=PM[pl()];
+    if(recent[key]&&now-recent[key]<2000)return null;
+    recent[key]=now;toast(M.go);
     let r=null;
     try{
       const body=o&&o.id&&!o.cart?{orderId:o.id,kind}:{orderId:o&&o.id,order:o,kind};
@@ -207,6 +215,7 @@
       // السيرفر ما قدر يطبع (طابعة مطفية…): منطبع من المتصفح كي ما يضيع الطلب
       console.warn('[NARA][PRINT]',e.message);r={mode:'browser',error:e.message,promo:false};
     }
+    if(r.error)toast(M.fail+' · '+M.browser,true);else toast(r.mode==='browser'?M.browser:M.ok,false);
     if(r.mode==='browser'){
       let sheet=document.getElementById('nara-print-sheet');
       if(!sheet){sheet=document.createElement('section');sheet.id='nara-print-sheet';document.body.appendChild(sheet)}
