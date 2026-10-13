@@ -50,3 +50,5 @@
 .nara-promo .pr-code{margin:6px auto;padding:4px 8px;border:2px dashed #000;display:inline-block;font-size:14px;letter-spacing:.04em}
 .nara-promo .pr-same{font-size:13px;margin:4px 0}
 .nara-promo .pr-brand{font-size:15px;margin-top:6px}
+
+.nara-rc .rc-logo{display:block;margin:0 auto 2px;width:120px;height:auto;image-rendering:pixelated}
