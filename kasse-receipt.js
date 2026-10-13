@@ -18,6 +18,7 @@
     // طلب منصة: المجموع الرسمي من المنصة نفسها (إذا موجود) أدق من حسابنا
     const official=Number(o.externalTotalCents)||(/LIEFERANDO|UBER|WOLT|LANCH|SIDES|^WEB$/i.test(String(o.platform||o.source||''))?Number(o.totalCents)||0:0);
     const total=official||Math.max(0,gross-discount);
+    const isPlat=/LIEFERANDO|UBER|WOLT|LANCH|SIDES/.test(String(o.platform||o.source||'').toUpperCase());
     const type=o.type==='delivery'?'DELIVERY':o.type==='pickup'?'PICKUP':'DINE_IN';
     const code=o.displayCode||o.externalOrderCode||('NARA-'+String(o.id||'').replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase());
     const platform=String(o.platform||o.source||'').toUpperCase();
@@ -32,8 +33,8 @@
       orderType:type,table:o.table||'',customerName:d.name||'',customerPhone:d.phone||'',
       delivery:{address:[d.street,d.house].filter(Boolean).join(' '),floor:d.floor||'',postalCode:d.postal||'',city:d.city||'',notes:noteParts.join(' · ')},
       cart:items.map(i=>({quantity:Number(i.quantity)||1,name:i.name,totalCents:(Number(i.unitCents)||0)*(Number(i.quantity)||0),discountCents:Number(i.discountCents)||0,
-        options:(i.options||[]).map(x=>({name:String(x.name||'').split(' / ')[0].trim(),quantity:x.quantity||1,totalCents:0})).filter(x=>x.name&&!/^einzel$/i.test(x.name)),notes:i.note||'',category:''})),
-      fees:{delivery:feeCents,service:Number(o.fees&&o.fees.service)||0,small:Number(o.fees&&o.fees.small)||0},verificationCode:o.verificationCode||'',discountsCents:discount,totalCents:total,cashDueCents:Number(o.cashDueCents)||total,
+        options:(i.options||[]).map(x=>({name:String(x.name||'').split(' / ')[0].trim(),quantity:x.quantity||1,totalCents:isPlat?(Number(x.totalCents)||0):0})).filter(x=>x.name&&!/^einzel$/i.test(x.name)),notes:i.note||'',category:''})),
+      subtotalCents:isPlat&&Number(o.subtotalCents)>0?Number(o.subtotalCents):null,fees:{delivery:feeCents||(isPlat?Number(o.fees&&o.fees.delivery)||0:0),service:Number(o.fees&&o.fees.service)||0,small:Number(o.fees&&o.fees.small)||0},verificationCode:o.verificationCode||'',discountsCents:discount,totalCents:total,cashDueCents:Number(o.cashDueCents)||total,
       payment:{method},assignment:o.assignment||null,remarks:''
     };
   }
@@ -57,7 +58,7 @@
     const r=toReceiptOrder(o,kind),t=TX[lang()]||TX.de,d=r.delivery||{},isDel=r.orderType==='DELIVERY',pm=r.payment.method;
     // خصم على الأصناف (عرض المنصة): السعر الأصلي مشطوب + السعر الجديد؛ والباقي من الخصم بسطر "Rabatt"
     const itemDisc=r.cart.reduce((s,i)=>s+(i.discountCents||0),0);
-    const subtotal=r.cart.reduce((s,i)=>s+i.totalCents-(i.discountCents||0),0);
+    const subtotal=r.subtotalCents!=null?r.subtotalCents:r.cart.reduce((s,i)=>s+i.totalCents-(i.discountCents||0),0);
     const restDisc=Math.max(0,(r.discountsCents||0)-itemDisc);
     const type=r.orderType==='PICKUP'?t.pickup:r.orderType==='DINE_IN'?(t.dine+(r.table?' · '+t.table+' '+esc(r.table):'')):t.delivery;
     const rows=[];
@@ -85,7 +86,7 @@
     // الأصناف
     const items=r.cart.map(i=>{
       let h='<div class="rc-item"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span><span class="rc-price">'+(i.discountCents?'<s class="rc-old">'+eur(i.totalCents)+'</s> '+eur(i.totalCents-i.discountCents):eur(i.totalCents))+'</span></div>';
-      (i.options||[]).forEach(op=>{h+='<div class="rc-opt">+ '+(op.quantity>1?esc(op.quantity)+'× ':'')+esc(op.name)+'</div>'});
+      (i.options||[]).forEach(op=>{h+='<div class="rc-opt">+ '+(op.quantity>1?esc(op.quantity)+'× ':'')+esc(op.name)+(op.totalCents>0?' <span style="float:right">'+eur(op.totalCents)+'</span>':'')+'</div>'});
       if(i.notes)h+='<div class="rc-inote">👉 '+esc(i.notes)+'</div>';
       return h});
     rows.push('<div class="rc-items">'+items.join('')+'</div>');
