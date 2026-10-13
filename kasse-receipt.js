@@ -21,19 +21,19 @@
     const type=o.type==='delivery'?'DELIVERY':o.type==='pickup'?'PICKUP':'DINE_IN';
     const code=o.displayCode||o.externalOrderCode||('NARA-'+String(o.id||'').replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase());
     const platform=String(o.platform||o.source||'').toUpperCase();
-    const plat=/LIEFERANDO|UBER|WOLT|LANCH/.test(platform)?platform.replace('_',' '):'NARA';
+    const plat=/LIEFERANDO|UBER|WOLT|LANCH/.test(platform)?platform.replace('_',' '):'FLAMO';
     let method='OPEN';
     if(o.payment&&o.payment.method)method=o.payment.method;            // لو الطلب جاي ومعه طريقة دفع جاهزة (منصة)
     else if(o.status==='COMPLETED')method='PAID_CASH';
     else if(type==='DELIVERY')method='CASH';                              // طلب توصيل مباشر: بيتحصّل عند الزبون
-    const noteParts=[d.bell&&('Klingel: '+d.bell),d.extra,d.notes].filter(Boolean);
+    const noteParts=[d.bell&&('Klingel: '+d.bell),d.extra,d.notes,o.remarks].filter((x,i,a)=>x&&a.indexOf(x)===i);
     return {
-      deliveryQrUrl:o.deliveryQrUrl||'',displayCode:code,externalOrderCode:code,placedAt:o.createdAt||o.placedAt||new Date().toISOString(),platform:plat,
+      deliveryQrUrl:o.ownDeliveryQrUrl||o.deliveryQrUrl||'',displayCode:code,externalOrderCode:code,placedAt:o.createdAt||o.placedAt||new Date().toISOString(),platform:plat,
       orderType:type,table:o.table||'',customerName:d.name||'',customerPhone:d.phone||'',
       delivery:{address:[d.street,d.house].filter(Boolean).join(' '),floor:d.floor||'',postalCode:d.postal||'',city:d.city||'',notes:noteParts.join(' · ')},
       cart:items.map(i=>({quantity:Number(i.quantity)||1,name:i.name,totalCents:(Number(i.unitCents)||0)*(Number(i.quantity)||0),discountCents:Number(i.discountCents)||0,
         options:(i.options||[]).map(x=>({name:String(x.name||'').split(' / ')[0].trim(),quantity:x.quantity||1,totalCents:0})).filter(x=>x.name&&!/^einzel$/i.test(x.name)),notes:i.note||'',category:''})),
-      fees:{delivery:feeCents},discountsCents:discount,totalCents:total,cashDueCents:Number(o.cashDueCents)||total,
+      fees:{delivery:feeCents,service:Number(o.fees&&o.fees.service)||0,small:Number(o.fees&&o.fees.small)||0},verificationCode:o.verificationCode||'',discountsCents:discount,totalCents:total,cashDueCents:Number(o.cashDueCents)||total,
       payment:{method},assignment:o.assignment||null,remarks:''
     };
   }
@@ -41,10 +41,10 @@
   // ───────── الفاتورة المطبوعة (HTML لورق 80mm): مرتّبة وواضحة، أسود/أبيض فقط (طابعة حرارية) ─────────
   const TX={
     de:{delivery:'LIEFERUNG',pickup:'ABHOLUNG',dine:'VOR ORT',table:'TISCH',asap:'So bald wie möglich',tel:'Tel.',floor:'Etage',note:'Hinweis',
-      sub:'Zwischensumme',deliv:'Lieferkosten',disc:'Rabatt',total:'GESAMT',cash:'BARZAHLUNG',collect:'Beim Kunden kassieren',open:'ZAHLUNG OFFEN',
+      sub:'Zwischensumme',deliv:'Lieferkosten',serv:'Servicegebühr',small:'Mindermengenzuschlag',vcode:'Bestätigungscode',disc:'Rabatt',total:'GESAMT',cash:'BARZAHLUNG',collect:'Beim Kunden kassieren',open:'ZAHLUNG OFFEN',
       paidCard:'BEZAHLT · KARTE',paidCash:'BEZAHLT · BAR',paidOnline:'BEZAHLT · ONLINE',driver:'Fahrer',round:'Tour',eta:'Ankunft',notBill:'Das ist keine Rechnung',scan:'QR-Code scannen, um die Bestellung zu öffnen',scanDeliver:'Zum Liefern scannen',thanks:'Guten Appetit!'},
     en:{delivery:'DELIVERY',pickup:'PICKUP',dine:'DINE-IN',table:'TABLE',asap:'As soon as possible',tel:'Tel.',floor:'Floor',note:'Note',
-      sub:'Subtotal',deliv:'Delivery',disc:'Discount',total:'TOTAL',cash:'CASH',collect:'Collect from customer',open:'PAYMENT OPEN',
+      sub:'Subtotal',deliv:'Delivery',serv:'Service fee',small:'Small order fee',vcode:'Verification code',disc:'Discount',total:'TOTAL',cash:'CASH',collect:'Collect from customer',open:'PAYMENT OPEN',
       paidCard:'PAID · CARD',paidCash:'PAID · CASH',paidOnline:'PAID · ONLINE',driver:'Driver',round:'Round',eta:'ETA',notBill:'This is not a bill',scan:'Scan the QR code to open the order',scanDeliver:'Scan to deliver',thanks:'Enjoy your meal!'}
   };
   const eur=c=>(Math.round(Number(c)||0)/100).toFixed(2).replace('.',',')+' €';
@@ -91,6 +91,8 @@
     rows.push('<div class="rc-items">'+items.join('')+'</div>');
     // المجاميع
     let tot='<div class="rc-line2"><span>'+t.sub+'</span><span>'+eur(subtotal)+'</span></div>';
+    if(r.fees&&r.fees.service)tot+='<div class="rc-line2"><span>'+t.serv+'</span><span>'+eur(r.fees.service)+'</span></div>';
+    if(r.fees&&r.fees.small)tot+='<div class="rc-line2"><span>'+t.small+'</span><span>'+eur(r.fees.small)+'</span></div>';
     if(r.fees&&r.fees.delivery)tot+='<div class="rc-line2"><span>'+t.deliv+'</span><span>'+eur(r.fees.delivery)+'</span></div>';
     if(restDisc)tot+='<div class="rc-line2"><span>'+t.disc+'</span><span>−'+eur(restDisc)+'</span></div>';
     tot+='<div class="rc-total"><span>'+t.total+'</span><span>'+eur(r.totalCents)+'</span></div>';
@@ -103,6 +105,7 @@
     else if(pm==='ONLINE')pay='<div class="rc-pay rc-paid"><div class="rc-pay-l">✓ '+t.paidOnline+'</div></div>';
     else pay='<div class="rc-pay"><div class="rc-pay-l">'+t.open+'</div><div class="rc-pay-amt">'+eur(r.totalCents)+'</div></div>';
     rows.push(pay);
+    if(r.verificationCode)rows.push('<div class="rc-small rc-c">'+esc(t.vcode)+': '+esc(r.verificationCode)+'</div>');
     // السائق
     const a=r.assignment;
     if(a&&(a.driverName||a.roundId))rows.push('<div class="rc-driver">'+(a.driverName?'<div><b>'+esc(t.driver)+':</b> '+esc(a.driverName)+'</div>':'')+(a.roundId?'<div><b>'+esc(t.round)+':</b> '+esc(a.roundId)+'</div>':'')+(a.etaAt?'<div><b>'+esc(t.eta)+':</b> '+esc(hhmm(a.etaAt))+'</div>':'')+'</div>');
