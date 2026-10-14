@@ -147,4 +147,19 @@ const PAGE_ROLES = {
   'accounting.html': ACCT, 'banking.html': ACCT, 'ledger.html': ACCT, 'reports.html': ACCT, 'sales.html': ACCT, 'kasse-settlement.html': ACCT, 'sales-report.html': ACCT,
 };
 
-module.exports = { ROLES, MANAGERS, CASH, KITCH, STAFF, ACCT, normalizeRole, validatePin, hashPin, verifyPin, newToken, tokenHash, parseCookies, Limiter, policyFor, allowed, staticAllowed, PAGE_ROLES };
+
+// ───────── Tunnel-/Proxy-sicher: echte Client-IP, "nur lokal", zeitkonstanter Vergleich ─────────
+const LOOPBACK_ADDRS = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
+const crypto_ = require('node:crypto');
+const viaProxy = req => !!(req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || req.headers['forwarded'] || req.headers['x-real-ip']);
+// Nur echte lokale Zugriffe (Geschäfts-PC): Loopback-Socket UND kein Proxy-/Tunnel-Header (cloudflared verbindet von 127.0.0.1!)
+const isLocalOnly = req => LOOPBACK_ADDRS.has(String(req.socket && req.socket.remoteAddress || '')) && !viaProxy(req);
+// Client-IP: Proxy-Header nur vertrauen, wenn die Verbindung vom eigenen Rechner (Tunnel) kommt
+const clientIp = req => {
+  const sock = String(req.socket && req.socket.remoteAddress || '');
+  if (LOOPBACK_ADDRS.has(sock)) { const h = String(req.headers['cf-connecting-ip'] || String(req.headers['x-forwarded-for'] || '').split(',')[0] || '').trim(); if (h) return h.slice(0, 64); }
+  return sock;
+};
+const safeEq = (a, b) => { const x = crypto_.createHash('sha256').update(String(a)).digest(), y = crypto_.createHash('sha256').update(String(b)).digest(); return crypto_.timingSafeEqual(x, y); };
+
+module.exports = { isLocalOnly, clientIp, safeEq, ROLES, MANAGERS, CASH, KITCH, STAFF, ACCT, normalizeRole, validatePin, hashPin, verifyPin, newToken, tokenHash, parseCookies, Limiter, policyFor, allowed, staticAllowed, PAGE_ROLES };

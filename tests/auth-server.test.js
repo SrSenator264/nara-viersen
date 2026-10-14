@@ -247,3 +247,25 @@ test('kaputtes Cookie legt den Server nicht lahm', async () => {
   const ok = await call('GET', '/api/auth/me');
   assert.equal(ok.status, 200);
 });
+
+// ───── Tunnel-Sicherheit (Cloudflare Tunnel verbindet von 127.0.0.1 und setzt cf-connecting-ip / x-forwarded-for) ─────
+test('Tunnel: Dienst-Endpunkt ohne Schlüssel nur lokal, nicht über den Tunnel', async () => {
+  const body = { source: 'XXX', order: {} };
+  const local = await call('POST', '/api/platform-orders/import', body);
+  assert.notEqual(local.status, 401, 'lokal (ohne Proxy-Header) bleibt erlaubt');
+  const viaTunnel = await call('POST', '/api/platform-orders/import', body, null, { 'cf-connecting-ip': '203.0.113.9', 'x-forwarded-for': '203.0.113.9' });
+  assert.equal(viaTunnel.status, 401, 'über den Tunnel ohne Anmeldung/Schlüssel gesperrt');
+});
+
+test('Tunnel: Login-Sperre gilt pro (IP+Konto); fremde IP wird nicht mit ausgesperrt', async () => {
+  const bad = ip => call('POST', '/api/auth/login', { employeeId: S.cashierId, pin: '0000' }, null, { 'cf-connecting-ip': ip, 'x-forwarded-for': ip });
+  let last; for (let i = 0; i < 6; i++) last = await bad('198.51.100.7');
+  assert.equal(last.status, 429, 'Angreifer-IP wird gesperrt');
+  const ok = await call('POST', '/api/auth/login', { employeeId: S.cashierId, pin: '4821' }, null, { 'cf-connecting-ip': '192.0.2.55', 'x-forwarded-for': '192.0.2.55' });
+  assert.equal(ok.status, 200, 'Mitarbeiter von anderer IP kann sich weiter anmelden');
+});
+
+test('Tunnel: Ersteinrichtung/Manager-only nicht über den Tunnel', async () => {
+  const r = await call('GET', '/api/delivery/config', null, null, { 'cf-connecting-ip': '203.0.113.9', 'x-forwarded-for': '203.0.113.9' });
+  assert.ok([401, 403].includes(r.status), 'got ' + r.status);
+});

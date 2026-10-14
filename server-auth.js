@@ -19,9 +19,11 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     fs.writeFileSync(tmp, JSON.stringify(store), { mode: 0o600 });
     fs.renameSync(tmp, file);
   };
-  const acctLimiter = new A.Limiter(), ipLimiter = new A.Limiter({ max: 20, lockMs: 5 * 60000 });
-  const ipOf = req => String(req.socket.remoteAddress || '');
-  const isLoopback = req => LOOPBACK.has(ipOf(req));
+  // Sperren: pro (IP+Konto) 5 Fehlversuche → 5 min; pro Konto gesamt (verteilte Angriffe) 25 → 15 min; pro IP 20 → 5 min.
+  // So kann ein Angreifer nicht das Konto eines Mitarbeiters für alle sperren, und Tunnel-Besucher teilen sich keine IP.
+  const acctIpLimiter = new A.Limiter(), acctLimiter = new A.Limiter({ max: 25, windowMs: 30 * 60000, lockMs: 15 * 60000 }), ipLimiter = new A.Limiter({ max: 20, lockMs: 5 * 60000 });
+  const ipOf = req => A.clientIp(req);
+  const isLocal = req => A.isLocalOnly(req);
   const secureReq = req => String(req.headers['x-forwarded-proto'] || '').toLowerCase() === 'https';
 
   function pruneSessions() { const now = Date.now(); let ch = false; for (const [k, v] of Object.entries(store.sessions)) if (v.exp < now) { delete store.sessions[k]; ch = true; } if (ch) save(); }
@@ -30,7 +32,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
 
   function userFrom(req) {
     const keyHdr = process.env.NARA_MANAGER_KEY;
-    if (keyHdr && String(req.headers['x-nara-manager-key'] || '') === keyHdr) return { id: 'manager-key', name: 'Manager key', role: 'OWNER' };
+    if (keyHdr && A.safeEq(req.headers['x-nara-manager-key'] || '', keyHdr)) return { id: 'manager-key', name: 'Manager key', role: 'OWNER' };
     const tok = A.parseCookies(req.headers.cookie)[COOKIE];
     if (!tok) return null;
     const s = store.sessions[A.tokenHash(tok)];
@@ -41,8 +43,8 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
   }
   function serviceOk(req) {
     const key = process.env.NARA_SERVICE_KEY;
-    if (key) return String(req.headers['x-nara-service-key'] || '') === key;
-    return isLoopback(req) && !req.headers['x-forwarded-for'];
+    if (key) return A.safeEq(req.headers['x-nara-service-key'] || '', key);
+    return isLocal(req);
   }
   const cookieHeader = (req, value, maxAge) => `${COOKIE}=${value}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secureReq(req) ? '; Secure' : ''}`;
   function replyC(res, status, data, cookie) {
@@ -101,13 +103,13 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     }
     if (p === '/api/auth/login' && m === 'POST') {
       readJson(req, res, 2000, b => {
-        const id = String(b.employeeId || ''), ip = 'ip:' + ipOf(req), ak = 'acct:' + id;
-        const c1 = acctLimiter.check(ak), c2 = ipLimiter.check(ip);
-        if (!c1.ok || !c2.ok) { const s = Math.ceil(Math.max(c1.retryMs, c2.retryMs) / 1000); return replyC(res, 429, { error: `Zu viele Versuche. Bitte in ${s} s erneut.`, code: 'LOCKED', retrySeconds: s }); }
+        const id = String(b.employeeId || ''), ip = 'ip:' + ipOf(req), ak = 'acct:' + id, aik = 'acctip:' + id + '|' + ipOf(req);
+        const c1 = acctLimiter.check(ak), c2 = ipLimiter.check(ip), c3 = acctIpLimiter.check(aik);
+        if (!c1.ok || !c2.ok || !c3.ok) { const s = Math.ceil(Math.max(c1.retryMs || 0, c2.retryMs || 0, c3.retryMs || 0) / 1000); return replyC(res, 429, { error: `Zu viele Versuche. Bitte in ${s} s erneut.`, code: 'LOCKED', retrySeconds: s }); }
         const acc = store.accounts[id];
         const ok = acc && acc.active !== false && acc.pin && A.verifyPin(b.pin, acc.pin);
-        if (!ok) { if (!acc) A.verifyPin('0', { salt: 'ab', hash: 'cd' }); acctLimiter.fail(ak); ipLimiter.fail(ip); return replyC(res, 401, { error: 'PIN falsch.', code: 'BAD_PIN' }); }
-        acctLimiter.success(ak); ipLimiter.success(ip);
+        if (!ok) { if (!acc) A.verifyPin('0', { salt: 'ab', hash: 'cd' }); acctLimiter.fail(ak); ipLimiter.fail(ip); acctIpLimiter.fail(aik); return replyC(res, 401, { error: 'PIN falsch.', code: 'BAD_PIN' }); }
+        acctLimiter.success(ak); ipLimiter.success(ip); acctIpLimiter.success(aik);
         startSession(req, res, id, nameOf(readAdminData(), id), acc.role);
       });
       return true;
@@ -115,8 +117,8 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     if (p === '/api/auth/bootstrap' && m === 'POST') {
       readJson(req, res, 2000, b => {
         if (activeManagers().length) return reply(res, 409, { error: 'Es gibt bereits einen Manager.', code: 'ALREADY_SETUP' });
-        const keyOk = process.env.NARA_MANAGER_KEY && String(req.headers['x-nara-manager-key'] || '') === process.env.NARA_MANAGER_KEY;
-        if (!keyOk && !(isLoopback(req) && !req.headers['x-forwarded-for'])) return reply(res, 403, { error: 'Ersteinrichtung nur am Geschäfts-PC.', code: 'FORBIDDEN' });
+        const keyOk = process.env.NARA_MANAGER_KEY && A.safeEq(req.headers['x-nara-manager-key'] || '', process.env.NARA_MANAGER_KEY);
+        if (!keyOk && !isLocal(req)) return reply(res, 403, { error: 'Ersteinrichtung nur am Geschäfts-PC.', code: 'FORBIDDEN' });
         const name = String(b.name || '').trim(), err = !name ? 'Name fehlt.' : A.validatePin('OWNER', b.pin);
         if (err) return reply(res, 422, { error: err });
         const data = readAdminData(), id = adminId('employee'), now = new Date().toISOString();
