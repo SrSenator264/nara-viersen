@@ -15,7 +15,7 @@ test('Tunnel-Config: letzte Regel ist 404 (Catch-all) und hostname gesetzt', () 
 });
 
 test('Tunnel-Config: erlaubte Pfade (Fahrer + Kunde) sind offen', () => {
-  for (const p of ['/driver.html', '/delivery.html', '/nara-lang.js', '/nara-shell.css', '/nara.webmanifest', '/sw.js', '/icons/icon-192.png',
+  for (const p of ['/driver.html', '/delivery.html', '/nara-lang.js', '/nara-auth.js', '/vendor/qrcode.bundle.js', '/nara-shell.css', '/nara.webmanifest', '/sw.js', '/icons/icon-192.png',
     '/web-prototype/b.html', '/web-prototype/c/mascot.webp', '/web-prototype/app.js', '/web-prototype/menu.json',
     '/api/auth/login', '/api/auth/logout', '/api/auth/me', '/api/auth/employees', '/api/attendance', '/api/menu', '/api/web-orders', '/api/web-orders/status',
     '/api/pay/enabled', '/api/pay/door', '/api/flamo/chat', '/api/flamo/status', '/api/delivery/scan', '/api/delivery/route-link', '/api/delivery/quote', '/api/delivery/zones',
@@ -26,7 +26,7 @@ test('Tunnel-Config: erlaubte Pfade (Fahrer + Kunde) sind offen', () => {
 test('Tunnel-Config: Kasse/Admin/Buchhaltung/Küche/Live Orders/Dispatch/Geheimes -> gesperrt (404)', () => {
   for (const p of ['/', '/index.html', '/kasse.html', '/kasse.js', '/kasse-settlement.html', '/admin.html', '/admin-foundation.html', '/admin.js', '/accounting.html', '/live-orders.html', '/kitchen.html',
     '/dispatch.html', '/team.html', '/staff.html', '/banking.html', '/reports.html', '/customers.html', '/pay.html', '/driver-app.html', '/driver-app-v2.html', '/delivery-print.html',
-    '/server.js', '/auth.js', '/package.json', '/.env', '/data/nara-auth.json', '/data/nara-admin.json', '/tests/auth-server.test.js', '/tunnel/config.example.yml',
+    '/vendor/', '/vendor/other.js', '/vendor/qrcode.bundle.js.map', '/vendor/../server.js', '/server.js', '/auth.js', '/package.json', '/.env', '/data/nara-auth.json', '/data/nara-admin.json', '/tests/auth-server.test.js', '/tunnel/config.example.yml',
     '/api/auth/bootstrap', '/api/auth/staff', '/api/auth/set-pin', '/api/admin-data', '/api/kasse-state', '/api/customers', '/api/kitchen/orders', '/api/live-orders/stage',
     '/api/accounting/accounts', '/api/accounting/bank-transactions', '/api/delivery/config', '/api/delivery/assign', '/api/delivery/driver-pay', '/api/delivery/auto-plan',
     '/api/platform-orders/import', '/api/print', '/api/printing/config', '/api/manager-execute', '/api/project-chat', '/api/ai-orchestrate', '/api/nara-guide', '/api/permissions',
