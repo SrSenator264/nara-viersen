@@ -39,3 +39,12 @@ test('Tunnel-Config: Pfad-Tricks (Traversal, %-Kodierung, Groß/Klein, Anhängse
     '/web-prototype/.env', '/web-prototype/a.html/../../auth.js', '/driver.html/../kasse.html', '/api/menu/../admin-data', '/API/admin-data', '/api/menu/extra', '/driver.htmlx', '/xdriver.html', '/web-prototype/', '/icons/'])
     assert.ok(!open(p), 'MUSS gesperrt sein: ' + p);
 });
+
+test('Menü: Team & PINs ist in der Seitenleiste; Login-Skript hat Versions-Parameter', () => {
+  const fs = require('node:fs'), path = require('node:path');
+  const shell = fs.readFileSync(path.join(__dirname, '..', 'nara-shell.js'), 'utf8');
+  assert.ok(/'team\.html','team'\]/.test(shell));
+  assert.ok(/endsWith\('team\.html'\)\)return'team'/.test(shell));
+  const srv = fs.readFileSync(path.join(__dirname, '..', 'server-auth.js'), 'utf8');
+  assert.ok(srv.includes('/nara-auth.js?v=${v}'));
+});

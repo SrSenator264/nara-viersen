@@ -188,7 +188,8 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     const name = pathname.replace(/^\//, '');
     const roles = A.PAGE_ROLES[name];
     if (!roles) return html;
-    const tag = `<script src="/nara-auth.js" data-roles="${roles.join(',')}"></script>`;
+    let v = '0'; try { v = String(Math.floor(fs.statSync(path.join(__dirname, 'nara-auth.js')).mtimeMs)); } catch {}
+    const tag = `<script src="/nara-auth.js?v=${v}" data-roles="${roles.join(',')}"></script>`;
     return /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, m => m + tag) : tag + html;
   }
 
