@@ -162,4 +162,4 @@ const clientIp = req => {
 };
 const safeEq = (a, b) => { const x = crypto_.createHash('sha256').update(String(a)).digest(), y = crypto_.createHash('sha256').update(String(b)).digest(); return crypto_.timingSafeEqual(x, y); };
 
-module.exports = { isLocalOnly, clientIp, safeEq, ROLES, MANAGERS, CASH, KITCH, STAFF, ACCT, normalizeRole, validatePin, hashPin, verifyPin, newToken, tokenHash, parseCookies, Limiter, policyFor, allowed, staticAllowed, PAGE_ROLES };
+module.exports = { viaProxy, isLocalOnly, clientIp, safeEq, ROLES, MANAGERS, CASH, KITCH, STAFF, ACCT, normalizeRole, validatePin, hashPin, verifyPin, newToken, tokenHash, parseCookies, Limiter, policyFor, allowed, staticAllowed, PAGE_ROLES };

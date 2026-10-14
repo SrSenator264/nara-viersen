@@ -93,8 +93,10 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     if (p === '/api/auth/me' && m === 'GET') { replyC(res, 200, { ok: true, user: req.naraUser || null, setupNeeded: activeManagers().length === 0 }); return true; }
     if (p === '/api/auth/employees' && m === 'GET') {
       const data = readAdminData();
-      const list = Object.entries(store.accounts).filter(([, a]) => a.active !== false && a.pin).map(([id, a]) => ({ id, name: nameOf(data, id), role: a.role }));
-      replyC(res, 200, { ok: true, employees: list, setupNeeded: activeManagers().length === 0 }); return true;
+      // Über den Tunnel (Proxy-Header) nur Fahrer zeigen und nie "setupNeeded" verraten; Geschäfts-PC/WLAN sehen alle wie bisher.
+      const tunnel = A.viaProxy(req);
+      const list = Object.entries(store.accounts).filter(([, a]) => a.active !== false && a.pin && (!tunnel || A.normalizeRole(a.role) === 'DRIVER')).map(([id, a]) => ({ id, name: nameOf(data, id), role: a.role }));
+      replyC(res, 200, { ok: true, employees: list, setupNeeded: tunnel ? false : activeManagers().length === 0 }); return true;
     }
     if (p === '/api/auth/logout' && m === 'POST') {
       const tok = A.parseCookies(req.headers.cookie)[COOKIE];

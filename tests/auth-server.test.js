@@ -269,3 +269,17 @@ test('Tunnel: Ersteinrichtung/Manager-only nicht über den Tunnel', async () => 
   const r = await call('GET', '/api/delivery/config', null, null, { 'cf-connecting-ip': '203.0.113.9', 'x-forwarded-for': '203.0.113.9' });
   assert.ok([401, 403].includes(r.status), 'got ' + r.status);
 });
+
+test('Tunnel: Mitarbeiterliste über den Tunnel nur Fahrer, setupNeeded nie; lokal/WLAN weiter alle', async () => {
+  const tun = { 'cf-connecting-ip': '203.0.113.9', 'x-forwarded-for': '203.0.113.9' };
+  const t = await call('GET', '/api/auth/employees', null, null, tun);
+  assert.equal(t.status, 200);
+  assert.ok(t.json.employees.length >= 1, 'mindestens ein Fahrer sichtbar');
+  assert.ok(t.json.employees.every(e => e.role === 'DRIVER'), 'nur Fahrer: ' + JSON.stringify(t.json.employees));
+  assert.equal(t.json.setupNeeded, false);
+  const txt = JSON.stringify(t.json);
+  assert.ok(!txt.includes(S.ownerId) && !txt.includes('Chef') && !txt.includes('OWNER'), 'Chef/Inhaber nicht sichtbar');
+  const local = await call('GET', '/api/auth/employees');
+  assert.equal(local.json.employees.length, 5, 'lokal weiterhin alle');
+  assert.ok(local.json.employees.some(e => e.role === 'OWNER'));
+});

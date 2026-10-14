@@ -1,0 +1,21 @@
+# Cloudflare Tunnel – NARA (öffentlich: nur Fahrer + Kundenseite). Alles andere -> 404.
+# Kopieren nach: C:\Users\droma\.cloudflared\config.yml   (die .json-Schlüsseldatei NIE ins Projekt/Git!)
+# Regeln gelten der Reihe nach (erste passende gewinnt); path = Regex auf den URL-Pfad (ohne ?query).
+tunnel: cb7cd52a-c59b-4c72-86da-e3f26310b92f
+credentials-file: C:\Users\droma\.cloudflared\cb7cd52a-c59b-4c72-86da-e3f26310b92f.json
+
+ingress:
+  # Fahrer-App + Lieferseite + gemeinsame Dateien
+  - hostname: app.flamo.co.de
+    path: ^/(driver\.html|delivery\.html|nara-lang\.js|nara-shell\.css|nara\.webmanifest|sw\.js)$
+    service: http://127.0.0.1:4185
+  # Bilder/Icons + Kundenseite (Bestellseite). Strenges Muster: keine '..' und keine %-Kodierung im Pfad
+  - hostname: app.flamo.co.de
+    path: ^/(icons|web-prototype)/([A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.[A-Za-z0-9]+$
+    service: http://127.0.0.1:4185
+  # Nur diese API-Endpunkte (Rechte pro Rolle prüft NARA zusätzlich selbst)
+  - hostname: app.flamo.co.de
+    path: ^/api/(auth/(login|logout|me|employees)|attendance|menu|web-orders(/status)?|pay/(enabled|door)|flamo/(chat|status)|delivery/(scan|route-link|quote|zones)|driver/(position|start|delivered|finish|proof|door-pay|routes))$
+    service: http://127.0.0.1:4185
+  # Alles andere (Kasse, Admin, Buchhaltung, Küche, Live Orders, Dispatch, bootstrap ...) -> 404
+  - service: http_status:404
