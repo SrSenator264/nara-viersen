@@ -76,7 +76,7 @@ var $=function(i){return document.getElementById(i)};
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 if(window.NARA_LANG)NARA_LANG.mountSwitcher($('lang-switch'));
 $('title').textContent='🛵 '+D.title;$('load').textContent=D.load;$('nh').textContent=D.notes;$('ntext').placeholder=D.nph;$('nsend').textContent=D.send;$('slideTx').textContent=D.slide;
-var token=new URLSearchParams(location.search).get('token')||'',O=null;
+var qs=new URLSearchParams(location.search),token=qs.get('token')||'',oid=qs.get('orderId')||'',O=null,KEY=token?'token='+encodeURIComponent(token):'orderId='+encodeURIComponent(oid);
 function money(c){return c==null?'':(Number(c)/100).toFixed(2).replace('.',',')+' €'}
 function stepIdx(s){s=String(s||'').toUpperCase();if(/DELIVERED|COMPLETED|DONE/.test(s))return 2;if(/ROUTE|OUT|START|TRANSIT|DELIVERING/.test(s))return 1;return 0}
 function api(m,u,b){return fetch(u,{method:m,credentials:'same-origin',headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined}).then(function(r){return r.json().catch(function(){return{}}).then(function(j){j.__ok=r.ok;return j})})}
@@ -105,14 +105,14 @@ function render(){
 }
 function renderNotes(){var n=(O.driverNotes||[]).slice().reverse();$('notes').innerHTML=n.length?n.map(function(x){return'<div class="n"><div>'+esc(x.text)+'</div><div class="m">'+esc(x.by||'')+' · '+new Date(x.at).toLocaleString(LANG==='ar'?'ar':LANG)+'</div></div>'}).join(''):'<div class="m" style="color:var(--mut)">'+D.none+'</div>'}
 function load(){
-  api('GET','/api/delivery/scan?token='+encodeURIComponent(token)).then(function(j){
+  api('GET','/api/delivery/scan?'+KEY).then(function(j){
     if(!j.__ok){if(j.code==='AUTH_REQUIRED')return;throw Error(j.error||D.bad)}
     O=j.order;$('load').hidden=true;$('view').hidden=false;render()
   }).catch(function(e){$('load').hidden=true;$('err').hidden=false;$('err').textContent=e.message||D.bad});
 }
 load();
 $('nsend').onclick=function(){var t=$('ntext').value.trim();if(!t)return;$('nsend').disabled=true;
-  api('POST','/api/driver/note',{token:token,text:t}).then(function(j){$('nsend').disabled=false;var m=$('nmsg');if(j.ok){O.driverNotes=j.notes;$('ntext').value='';renderNotes();m.className='msg ok';m.textContent=D.saved}else{m.className='msg';m.textContent=j.error||D.fail}})};
+  api('POST','/api/driver/note',token?{token:token,text:t}:{orderId:oid,text:t}).then(function(j){$('nsend').disabled=false;var m=$('nmsg');if(j.ok){O.driverNotes=j.notes;$('ntext').value='';renderNotes();m.className='msg ok';m.textContent=D.saved}else{m.className='msg';m.textContent=j.error||D.fail}})};
 // 🎤 Spracheingabe (Browser-Diktat; Audio geht an den Browser-Anbieter)
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,mic=$('mic');
 if(!SR){mic.onclick=function(){$('nmsg').className='msg';$('nmsg').textContent=D.nomic}}

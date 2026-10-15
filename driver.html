@@ -98,7 +98,7 @@ main{padding:12px 12px 90px}
           +(s.cash&&doorOk&&!s.delivered&&r.startedAt?'<button class="doorb" data-door="'+esc(s.orderId)+'">'+t('door')+'</button>':'')
           +(!s.delivered&&r.startedAt?'<div class="acts"><a class="nav" href="'+esc(nav)+'" target="_blank" rel="noopener">'+t('navi')+'</a><button class="deliver" data-deliver="'+esc(s.orderId)+'">'+t('delivered')+'</button></div>'
             +(s.canProof?'<button class="photo" data-proof="'+esc(s.orderId)+'">'+t('photo')+'</button>':''):'')
-          +(s.proof?'<div class="proofok">'+t('proofSaved')+'</div>':'')+'</div>';
+          +(s.proof?'<div class="proofok">'+t('proofSaved')+'</div>':'')+'<div class="acts"><a class="nav" href="delivery.html?orderId='+encodeURIComponent(s.orderId)+'">📋 '+({de:'Details & Notizen',ar:'تفاصيل وملاحظات',en:'Details & notes'}[L]||'Details')+'</a></div></div>';
       }).join('');
       return '<section class="route">'+head+action+stops+'</section>';
     }).join('');

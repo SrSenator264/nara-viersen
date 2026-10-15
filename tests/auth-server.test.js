@@ -310,3 +310,10 @@ test('Fahrer-Notizen: nur eingeloggt, gespeichert mit Autor, Scan liefert sie', 
   assert.equal((await call('POST', '/api/driver/note', { token: 'nope', text: 'hi' }, S.driver)).status, 404);
   assert.equal((await call('POST', '/api/driver/note', { token: '', text: '' }, S.driver)).status, 422);
 });
+
+test('Lieferdetails per orderId: nur eingeloggt, fremde/unbekannte Bestellung = 404', async () => {
+  assert.equal((await call('GET', '/api/delivery/scan?orderId=abc', null, null, { 'cf-connecting-ip': '203.0.113.31', 'x-forwarded-for': '203.0.113.31' })).status, 401);
+  assert.equal((await call('GET', '/api/delivery/scan?orderId=abc', null, S.driver)).status, 404);
+  assert.equal((await call('POST', '/api/driver/note', { orderId: 'abc', text: 'x' }, S.driver)).status, 404);
+  assert.equal((await call('GET', '/api/driver/notes?orderId=abc', null, S.driver)).status, 404);
+});

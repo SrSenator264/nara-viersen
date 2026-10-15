@@ -61,3 +61,8 @@ test('delivery.html: Notizen, Spracheingabe, Wischen, Zahlungs-Karte vorhanden',
   const h = fs.readFileSync(path.join(__dirname, '..', 'delivery.html'), 'utf8');
   for (const k of ['/api/driver/note', 'SpeechRecognition', '/api/driver/delivered', 'class="pay', 'id="slide"']) assert.ok(h.includes(k), k);
 });
+
+test('driver.html verlinkt die Detailseite per orderId', () => {
+  const h = fs.readFileSync(path.join(__dirname, '..', 'driver.html'), 'utf8');
+  assert.ok(h.includes('delivery.html?orderId='));
+});
