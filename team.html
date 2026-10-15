@@ -61,6 +61,16 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
   }
   function renderTeam(){
     var box=$('team');box.innerHTML='';
+    var NA=({de:['Noch kein Zugang','Zugang erstellen','PIN (mind. 4 Ziffern)'],ar:['بلا حساب دخول','إنشاء حساب دخول','PIN (4 أرقام على الأقل)'],en:['No login yet','Create login','PIN (min. 4 digits)']})[LANG]||['Noch kein Zugang','Zugang erstellen','PIN'];
+    team.filter(function(t){return !t.role&&t.employeeActive}).forEach(function(t){
+      var r=document.createElement('div');r.className='row';
+      var n=document.createElement('div');n.innerHTML='<div class="nm"></div><div class="tag"></div>';n.firstChild.textContent=t.name;n.lastChild.textContent=NA[0];
+      var s=document.createElement('select');opt(s,t.empRole||'DRIVER');
+      var pin=document.createElement('input');pin.type='password';pin.inputMode='numeric';pin.autocomplete='new-password';pin.placeholder=NA[2];
+      var go=document.createElement('button');go.className='pri';go.textContent=NA[1];
+      go.onclick=function(){api('POST','/api/auth/staff',{id:t.id,name:t.name,role:s.value,pin:pin.value}).then(function(j){say('tmsg',j.ok?tt('created'):j.error,j.ok);if(j.ok)load()})};
+      [n,s,pin,go].forEach(function(x){r.appendChild(x)});box.appendChild(r)
+    });
     team.filter(function(t){return t.role}).forEach(function(t){
       var r=document.createElement('div');r.className='row'+(t.active?'':' off');
       var n=document.createElement('div');n.innerHTML='<div class="nm"></div><div class="tag"></div>';n.firstChild.textContent=t.name;n.lastChild.textContent=t.hasPin?tt('pinSet'):tt('noPin');

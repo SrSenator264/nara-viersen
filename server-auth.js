@@ -175,7 +175,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     if (p === '/api/auth/team' && m === 'GET') {
       const data = readAdminData();
       const ids = new Set([...(data.employees || []).map(e => e.id), ...Object.keys(store.accounts)]);
-      const team = [...ids].map(id => { const a = store.accounts[id]; const e = (data.employees || []).find(x => x.id === id); return { id, name: nameOf(data, id), role: a?.role || null, active: a ? a.active !== false : false, hasPin: !!a?.pin, customers: a?.role === 'OWNER' || a?.customers === true, employeeActive: e ? e.active !== false : false }; });
+      const team = [...ids].map(id => { const a = store.accounts[id]; const e = (data.employees || []).find(x => x.id === id); return { id, name: nameOf(data, id), role: a?.role || null, active: a ? a.active !== false : false, hasPin: !!a?.pin, customers: a?.role === 'OWNER' || a?.customers === true, employeeActive: e ? e.active !== false : false, empRole: e ? A.normalizeRole(e.role) : null }; });
       replyC(res, 200, { ok: true, team, roles: A.ROLES }); return true;
     }
     if (p === '/api/auth/set-pin' && m === 'POST') {

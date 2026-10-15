@@ -93,3 +93,9 @@ test('Tür-Zahlung: pay.html über den Tunnel erreichbar, Detailseite hat den Kn
   assert.ok(fs.readFileSync(path.join(__dirname, '..', 'delivery.html'), 'utf8').includes('/api/driver/door-pay'));
   assert.ok(fs.readFileSync(path.join(__dirname, '..', 'team.html'), 'utf8').includes('function sendApp'));
 });
+
+test('Team-Seite zeigt Mitarbeiter ohne Zugang mit "Zugang erstellen" (PIN setzen)', () => {
+  const h = fs.readFileSync(path.join(__dirname, '..', 'team.html'), 'utf8');
+  assert.ok(h.includes('!t.role&&t.employeeActive') && h.includes('empRole'));
+  assert.ok(fs.readFileSync(path.join(__dirname, '..', 'server-auth.js'), 'utf8').includes('empRole'));
+});
