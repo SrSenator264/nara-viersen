@@ -66,3 +66,12 @@ test('driver.html verlinkt die Detailseite per orderId', () => {
   const h = fs.readFileSync(path.join(__dirname, '..', 'driver.html'), 'utf8');
   assert.ok(h.includes('delivery.html?orderId='));
 });
+
+test('driver.html: Flamo-Popup bei neuem Auftrag (Ton, Vibration, Benachrichtigung) und Flamo-Datei über den Tunnel erreichbar', () => {
+  const h = fs.readFileSync(path.join(__dirname, '..', 'driver.html'), 'utf8');
+  for (const k of ['flamo-pop', 'naraNewOrderCheck', 'navigator.vibrate', 'showNotification', 'flamo-present.webm']) assert.ok(h.includes(k), k);
+  const y = fs.readFileSync(path.join(__dirname, '..', 'tunnel', 'config.example.yml'), 'utf8');
+  const res = [...y.matchAll(/path:\s*(\^\S+)/g)].map(m => new RegExp(m[1]));
+  for (const p of ['/web-prototype/c/flamo-present.webm', '/web-prototype/c/flamo-present.webp', '/sw.js']) assert.ok(res.some(r => r.test(p)), p);
+  assert.ok(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8').includes('notificationclick'));
+});
