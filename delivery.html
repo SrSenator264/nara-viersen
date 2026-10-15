@@ -1,1 +1,143 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NARA · تفاصيل التوصيل</title><link rel="stylesheet" href="nara-shell.css"><style>body{font-family:Arial;background:#f4f6f8;padding:24px}.card{max-width:560px;margin:40px auto;background:#fff;border-radius:18px;padding:24px;box-shadow:0 8px 30px #0001}.row{display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:12px 0}.status{padding:10px;border-radius:10px;background:#fff3d6;color:#835d00}</style></head><body><main class="card"><h1>تفاصيل طلب التوصيل</h1><p id="status" class="status">جاري تحميل الطلب...</p><section id="details"></section><button id="map" hidden>فتح المسار في الخريطة</button></main><script>const q=new URLSearchParams(location.search),token=q.get('token'),status=document.getElementById('status'),details=document.getElementById('details'),map=document.getElementById('map');const money=x=>x==null?'غير محدد':(Number(x)/100).toFixed(2)+' €';fetch('/api/delivery/scan?token='+encodeURIComponent(token||'')).then(r=>r.json().then(j=>({ok:r.ok,j}))).then(({ok,j})=>{if(!ok)throw Error(j.error||'تعذر قراءة QR');const o=j.order,d=o.customer||{};status.textContent=o.paymentStatus==='PAID'?'مدفوع مسبقاً':o.paymentStatus==='CASH'?'كاش عند التسليم':'طريقة الدفع تحتاج تأكيد';details.innerHTML='<div class="row"><b>رقم الطلب</b><span>'+String(o.displayCode)+'</span></div><div class="row"><b>العميل</b><span>'+String(d.name||'غير مسجل')+'</span></div><div class="row"><b>الهاتف</b><span>'+String(d.phone||'غير مسجل')+'</span></div><div class="row"><b>العنوان</b><span>'+String(d.address||'غير مسجل')+'</span></div><div class="row"><b>المبلغ</b><span>'+money(o.amountCents)+'</span></div>';if(d.address){map.hidden=false;map.onclick=()=>location.href='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(d.address)}}).catch(e=>{status.textContent=e.message;status.style.background='#ffe5e5';status.style.color='#9b1c1c'});</script></body></html>
+<!doctype html>
+<html lang="de" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0f1419">
+<title>Flamo · Lieferung</title>
+<link rel="manifest" href="nara.webmanifest">
+<script src="nara-lang.js?v=20261009b" data-section="app"></script>
+<style>
+:root{--bg:#0f1419;--panel:#171e26;--line:#26313c;--tx:#f3f5f7;--mut:#9aa6b2;--ac:#ff7a1a;--ok:#2fbf7a;--bad:#ff5c4d;--warn:#f5b73b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% -10%,#2a1b10,var(--bg) 55%);color:var(--tx);font:17px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding:14px 14px 110px}
+main{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.top h1{margin:0;font-size:22px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:16px;animation:in .35s ease both}
+.card:nth-child(2){animation-delay:.05s}.card:nth-child(3){animation-delay:.1s}.card:nth-child(4){animation-delay:.15s}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.code{font-size:13px;color:var(--mut);letter-spacing:.04em}
+.steps{display:flex;align-items:center;gap:6px}
+.st{flex:1;text-align:center;font-size:12px;color:var(--mut)}
+.st i{display:block;height:6px;border-radius:6px;background:var(--line);margin-bottom:6px;transition:background .4s}
+.st.on i{background:var(--ac)}.st.on{color:var(--tx)}.st.done i{background:var(--ok)}
+.pay{border-radius:18px;padding:16px;text-align:center;font-weight:700;font-size:20px;animation:in .35s ease both}
+.pay small{display:block;font-weight:500;font-size:14px;opacity:.85;margin-top:2px}
+.pay.paid{background:#123a28;color:#6df0b0;border:1px solid #1f6b48}
+.pay.cash{background:#3d1613;color:#ffb0a8;border:1px solid #84322b;animation:pulse 2s ease-in-out infinite}
+.pay.unk{background:#3a2d0f;color:#ffd98a;border:1px solid #7a5d1c}
+@keyframes pulse{50%{box-shadow:0 0 0 6px #ff5c4d22}}
+.k{color:var(--mut);font-size:13px;margin-top:10px}.v{font-size:19px;font-weight:600;word-break:break-word}.k:first-child{margin-top:0}
+.note{background:#2b2110;border:1px solid #6b5420;border-radius:14px;padding:12px;color:#ffd98a;margin-top:12px}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.act{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:16px;background:#1f2a35;border:1px solid var(--line);color:var(--tx);text-decoration:none;font:inherit;font-size:13px;cursor:pointer;transition:transform .1s,background .15s}
+.act:active{transform:scale(.94);background:#2b3a49}.act b{font-size:24px;line-height:1}
+.act[hidden]{display:none}
+textarea{width:100%;min-height:84px;resize:vertical;font:inherit;color:var(--tx);background:#10161d;border:2px solid var(--line);border-radius:14px;padding:12px}
+textarea:focus{border-color:var(--ac);outline:none}
+.nrow{display:flex;gap:10px;margin-top:10px}
+.btn{flex:1;min-height:50px;border-radius:14px;border:0;font:inherit;font-weight:700;cursor:pointer;background:var(--ac);color:#1a0d02;transition:transform .1s}
+.btn:active{transform:scale(.97)}.btn.sec{background:#1f2a35;color:var(--tx);border:1px solid var(--line);flex:0 0 56px;font-size:22px}
+.btn.rec{background:var(--bad);color:#fff;animation:pulse 1s infinite}
+.n{border-top:1px solid var(--line);padding:10px 0}.n:first-child{border-top:0}.n .m{color:var(--mut);font-size:12px}
+.msg{min-height:20px;font-size:14px;color:var(--bad);margin-top:6px}.msg.ok{color:var(--ok)}
+.slide{position:fixed;left:14px;right:14px;bottom:16px;max-width:492px;margin:0 auto;height:64px;border-radius:32px;background:#1d2a22;border:1px solid #2c5a42;overflow:hidden;touch-action:none;user-select:none}
+.slide span{position:absolute;inset:0;display:grid;place-items:center;color:#8fe8bb;font-weight:700;letter-spacing:.02em;padding:0 70px;text-align:center}
+.knob{position:absolute;top:6px;inset-inline-start:6px;width:52px;height:52px;border-radius:50%;background:var(--ok);display:grid;place-items:center;font-size:24px;color:#06210f;box-shadow:0 4px 14px #0006}
+.slide.done{background:#1f5a3a}.slide[hidden]{display:none}
+.party{position:fixed;inset:0;display:grid;place-items:center;font-size:90px;pointer-events:none;animation:pop 1.4s ease both;z-index:9}
+@keyframes pop{0%{transform:scale(.2);opacity:0}30%{transform:scale(1.2);opacity:1}100%{transform:scale(1) translateY(-40px);opacity:0}}
+.err{background:#3d1613;border:1px solid #84322b;color:#ffb0a8;border-radius:16px;padding:16px}
+</style></head>
+<body><main>
+<div class="top"><h1 id="title"></h1><span id="lang-switch"></span></div>
+<div id="err" class="err" hidden></div>
+<div id="load" class="card" style="color:var(--mut)"></div>
+<div id="view" hidden>
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="card"><div class="code" id="code"></div><div class="steps" id="steps" style="margin-top:12px"></div></div>
+    <div class="pay" id="pay"></div>
+    <div class="card" id="info"></div>
+    <div class="actions" id="actions"></div>
+    <div class="card"><div class="k" id="nh" style="margin:0 0 8px"></div><div id="notes"></div>
+      <textarea id="ntext"></textarea>
+      <div class="nrow"><button class="btn sec" id="mic" type="button" aria-label="mic">🎤</button><button class="btn" id="nsend" type="button"></button></div>
+      <div class="msg" id="nmsg"></div></div>
+  </div>
+</div>
+</main>
+<div class="slide" id="slide" hidden><span id="slideTx"></span><div class="knob" id="knob">➜</div></div>
+<script>
+(function(){
+var TT={
+de:{title:'Lieferung',load:'Bestellung wird geladen…',bad:'QR ungültig oder nicht gefunden',order:'Bestellung',s1:'Angenommen',s2:'Unterwegs',s3:'Zugestellt',paid:'Bezahlt',paidS:'Nichts kassieren',cash:'Kassiere ',cashS:'Barzahlung bei Übergabe',unk:'Zahlart prüfen',unkS:'Bitte Zahlart bestätigen',cust:'Kunde',addr:'Adresse',phone:'Telefon',area:'Gebiet',call:'Anrufen',wa:'WhatsApp',map:'Karte',copy:'Adresse',copied:'Kopiert',notes:'Fahrer-Notizen',nph:'Notiz zur Bestellung (z. B. niemand zu Hause)…',send:'Speichern',saved:'Gespeichert',none:'Noch keine Notizen',slide:'Zum Zustellen wischen',done:'Zugestellt!',mic:'Sprechen…',nomic:'Spracheingabe nicht verfügbar – bitte tippen.',door:'Hinweis',fail:'Fehler'},
+ar:{title:'التوصيل',load:'جاري تحميل الطلب…',bad:'QR غير صالح أو غير موجود',order:'الطلب',s1:'مقبول',s2:'بالطريق',s3:'تم التسليم',paid:'مدفوع',paidS:'لا تحصّل شي',cash:'حصّل ',cashS:'كاش عند التسليم',unk:'تأكد من الدفع',unkS:'تأكد من طريقة الدفع',cust:'الزبون',addr:'العنوان',phone:'الهاتف',area:'المنطقة',call:'اتصال',wa:'واتساب',map:'خريطة',copy:'العنوان',copied:'اننسخ',notes:'ملاحظات السائق',nph:'ملاحظة عن الطلب (مثلاً: ما في حدا بالبيت)…',send:'حفظ',saved:'انحفظ',none:'ما في ملاحظات بعد',slide:'اسحب للتسليم',done:'تم التسليم!',mic:'احكي…',nomic:'الإملاء الصوتي مو متوفر – اكتب.',door:'ملاحظة',fail:'خطأ'},
+en:{title:'Delivery',load:'Loading order…',bad:'QR invalid or not found',order:'Order',s1:'Accepted',s2:'On the way',s3:'Delivered',paid:'Paid',paidS:'Collect nothing',cash:'Collect ',cashS:'Cash on delivery',unk:'Check payment',unkS:'Please confirm payment method',cust:'Customer',addr:'Address',phone:'Phone',area:'Area',call:'Call',wa:'WhatsApp',map:'Map',copy:'Address',copied:'Copied',notes:'Driver notes',nph:'Note about this order (e.g. nobody home)…',send:'Save',saved:'Saved',none:'No notes yet',slide:'Slide to deliver',done:'Delivered!',mic:'Speak…',nomic:'Voice input not available – please type.',door:'Note',fail:'Error'}};
+var LANG=(window.NARA_LANG&&NARA_LANG.get())||'de',D=TT[LANG]||TT.de;
+document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+if(window.NARA_LANG)NARA_LANG.mountSwitcher($('lang-switch'));
+$('title').textContent='🛵 '+D.title;$('load').textContent=D.load;$('nh').textContent=D.notes;$('ntext').placeholder=D.nph;$('nsend').textContent=D.send;$('slideTx').textContent=D.slide;
+var token=new URLSearchParams(location.search).get('token')||'',O=null;
+function money(c){return c==null?'':(Number(c)/100).toFixed(2).replace('.',',')+' €'}
+function stepIdx(s){s=String(s||'').toUpperCase();if(/DELIVERED|COMPLETED|DONE/.test(s))return 2;if(/ROUTE|OUT|START|TRANSIT|DELIVERING/.test(s))return 1;return 0}
+function api(m,u,b){return fetch(u,{method:m,credentials:'same-origin',headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined}).then(function(r){return r.json().catch(function(){return{}}).then(function(j){j.__ok=r.ok;return j})})}
+function render(){
+  var o=O,c=o.customer||{},d=o.delivery||{},i=stepIdx(o.status);
+  $('code').textContent=D.order+' · '+(o.displayCode||o.id);
+  $('steps').innerHTML=[D.s1,D.s2,D.s3].map(function(t,n){return'<div class="st '+(n<i?'done':n===i?'on':'')+(i===2?' done':'')+'"><i></i>'+esc(t)+'</div>'}).join('');
+  var p=$('pay'),ps=o.paymentStatus;
+  if(ps==='PAID'){p.className='pay paid';p.innerHTML='✅ '+D.paid+'<small>'+D.paidS+'</small>'}
+  else if(ps==='CASH'){p.className='pay cash';p.innerHTML='💶 '+D.cash+money(o.amountCents)+'<small>'+D.cashS+'</small>'}
+  else{p.className='pay unk';p.innerHTML='⚠️ '+D.unk+'<small>'+D.unkS+' · '+money(o.amountCents)+'</small>'}
+  var h='<div class="k">'+D.cust+'</div><div class="v">'+esc(c.name||'—')+'</div><div class="k">'+D.addr+'</div><div class="v">'+esc(c.address||'—')+'</div>';
+  if(d.floor)h+='<div class="k">🏢</div><div class="v">'+esc(d.floor)+'</div>';
+  if(d.area)h+='<div class="k">'+D.area+'</div><div class="v">'+esc(d.area)+'</div>';
+  if(d.notes)h+='<div class="note">📝 '+esc(d.notes)+'</div>';
+  $('info').innerHTML=h;
+  var ph=String(c.phone||'').replace(/[^\d+]/g,''),wa=ph.replace(/\D/g,''),a='';
+  if(wa.length>=8&&ph.startsWith('+')===false&&wa.startsWith('0'))wa='49'+wa.slice(1);
+  if(ph)a+='<a class="act" href="tel:'+esc(ph)+'"><b>📞</b>'+D.call+'</a>';
+  if(wa.length>=8)a+='<a class="act" href="https://wa.me/'+esc(wa)+'" target="_blank" rel="noopener"><b>💬</b>'+D.wa+'</a>';
+  if(c.address)a+='<a class="act" href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(c.address)+'" target="_blank" rel="noopener"><b>🗺️</b>'+D.map+'</a><button class="act" id="cp" type="button"><b>📋</b>'+D.copy+'</button>';
+  $('actions').innerHTML=a;
+  var cp=$('cp');if(cp)cp.onclick=function(){var t=c.address;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){cp.lastChild.textContent=D.copied},function(){})};
+  renderNotes();
+  $('slide').hidden=i===2;
+}
+function renderNotes(){var n=(O.driverNotes||[]).slice().reverse();$('notes').innerHTML=n.length?n.map(function(x){return'<div class="n"><div>'+esc(x.text)+'</div><div class="m">'+esc(x.by||'')+' · '+new Date(x.at).toLocaleString(LANG==='ar'?'ar':LANG)+'</div></div>'}).join(''):'<div class="m" style="color:var(--mut)">'+D.none+'</div>'}
+function load(){
+  api('GET','/api/delivery/scan?token='+encodeURIComponent(token)).then(function(j){
+    if(!j.__ok){if(j.code==='AUTH_REQUIRED')return;throw Error(j.error||D.bad)}
+    O=j.order;$('load').hidden=true;$('view').hidden=false;render()
+  }).catch(function(e){$('load').hidden=true;$('err').hidden=false;$('err').textContent=e.message||D.bad});
+}
+load();
+$('nsend').onclick=function(){var t=$('ntext').value.trim();if(!t)return;$('nsend').disabled=true;
+  api('POST','/api/driver/note',{token:token,text:t}).then(function(j){$('nsend').disabled=false;var m=$('nmsg');if(j.ok){O.driverNotes=j.notes;$('ntext').value='';renderNotes();m.className='msg ok';m.textContent=D.saved}else{m.className='msg';m.textContent=j.error||D.fail}})};
+// 🎤 Spracheingabe (Browser-Diktat; Audio geht an den Browser-Anbieter)
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,mic=$('mic');
+if(!SR){mic.onclick=function(){$('nmsg').className='msg';$('nmsg').textContent=D.nomic}}
+else mic.onclick=function(){
+  if(rec){rec.stop();return}
+  rec=new SR();rec.lang=LANG==='ar'?'ar-SA':LANG==='en'?'en-GB':'de-DE';rec.interimResults=true;rec.continuous=false;
+  var base=$('ntext').value?$('ntext').value.replace(/\s*$/,' '):'';
+  mic.classList.add('rec');$('nmsg').className='msg ok';$('nmsg').textContent=D.mic;
+  rec.onresult=function(e){var t='';for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;$('ntext').value=base+t};
+  rec.onerror=function(){$('nmsg').className='msg';$('nmsg').textContent=D.nomic};
+  rec.onend=function(){mic.classList.remove('rec');rec=null;if($('nmsg').textContent===D.mic)$('nmsg').textContent=''};
+  try{rec.start()}catch(x){rec=null;mic.classList.remove('rec')}
+};
+// Wischen zum Zustellen
+(function(){var s=$('slide'),k=$('knob'),dragging=false,sx=0,max=0,rtl=function(){return document.documentElement.dir==='rtl'};
+  function pos(e){return(e.touches?e.touches[0]:e).clientX}
+  function down(e){if(!O)return;dragging=true;sx=pos(e);max=s.clientWidth-64;k.style.transition='none'}
+  function move(e){if(!dragging)return;var dx=(pos(e)-sx)*(rtl()?-1:1);dx=Math.max(0,Math.min(max,dx));k.style.transform='translateX('+(rtl()?-dx:dx)+'px)';k.dataset.dx=dx}
+  function up(){if(!dragging)return;dragging=false;var dx=+k.dataset.dx||0;k.style.transition='transform .25s';
+    if(dx>max*.85){k.style.transform='translateX('+(rtl()?-max:max)+'px)';finish()}else{k.style.transform='none'}k.dataset.dx=0}
+  k.addEventListener('touchstart',down,{passive:true});window.addEventListener('touchmove',move,{passive:true});window.addEventListener('touchend',up);
+  k.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+  function finish(){api('POST','/api/driver/delivered',{orderId:O.id}).then(function(j){
+    if(j.__ok){s.classList.add('done');$('slideTx').textContent=D.done;if(navigator.vibrate)navigator.vibrate([60,40,120]);var p=document.createElement('div');p.className='party';p.textContent='🎉';document.body.appendChild(p);setTimeout(function(){p.remove();load()},1400)}
+    else{k.style.transform='none';var m=$('nmsg');m.className='msg';m.textContent=j.error||D.fail;window.scrollTo(0,document.body.scrollHeight)}})}
+})();
+})();
+</script></body></html>

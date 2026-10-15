@@ -11,8 +11,8 @@ const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 
 function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
   const file = path.join(dir, 'nara-auth.json');
-  let store = { accounts: {}, sessions: {} };
-  try { const j = JSON.parse(fs.readFileSync(file, 'utf8')); if (j && typeof j === 'object') store = { accounts: j.accounts || {}, sessions: j.sessions || {} }; } catch { /* first run */ }
+  let store = { accounts: {}, sessions: {}, invites: {} };
+  try { const j = JSON.parse(fs.readFileSync(file, 'utf8')); if (j && typeof j === 'object') store = { accounts: j.accounts || {}, sessions: j.sessions || {}, invites: j.invites || {} }; } catch { /* first run */ }
   const save = () => {
     fs.mkdirSync(dir, { recursive: true });
     const tmp = file + '.tmp-' + process.pid;
@@ -133,10 +133,44 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
       return true;
     }
     // ───── إدارة الفريق (المدير فقط — policyFor بتفرضها لكن نتحقق هون كمان) ─────
+    // ───── دعوة سائق: رابط لمرة وحدة 24 ساعة، الدور سائق فقط ─────
+    const inviteKey = t => 'inv:' + A.tokenHash(String(t || ''));
+    const liveInvite = t => { const v = store.invites[A.tokenHash(String(t || ''))]; return v && !v.used && v.exp > Date.now() ? v : null; };
+    if (p === '/api/auth/invite-check' && m === 'GET') {
+      const ip = 'ipj:' + ipOf(req), c = ipLimiter.check(ip); if (!c.ok) { replyC(res, 429, { error: 'Zu viele Versuche.', code: 'LOCKED' }); return true; }
+      const ok = !!liveInvite(url.searchParams.get('t')); if (!ok) ipLimiter.fail(ip);
+      replyC(res, ok ? 200 : 410, ok ? { ok: true } : { error: 'Einladung ungültig oder abgelaufen.', code: 'INVITE_INVALID' }); return true;
+    }
+    if (p === '/api/auth/join' && m === 'POST') {
+      readJson(req, res, 2000, b => {
+        const ip = 'ipj:' + ipOf(req), c = ipLimiter.check(ip); if (!c.ok) return replyC(res, 429, { error: 'Zu viele Versuche.', code: 'LOCKED' });
+        const inv = liveInvite(b.token); if (!inv) { ipLimiter.fail(ip); return replyC(res, 410, { error: 'Einladung ungültig oder abgelaufen.', code: 'INVITE_INVALID' }); }
+        const name = String(b.name || '').trim().slice(0, 60); if (!name) return reply(res, 422, { error: 'Name fehlt.' });
+        const err = A.validatePin('DRIVER', b.pin); if (err) return reply(res, 422, { error: err });
+        const data = readAdminData(), now = new Date().toISOString();
+        if ((data.employees || []).some(e => String(e.name || '').trim().toLowerCase() === name.toLowerCase())) return reply(res, 409, { error: 'Dieser Name existiert schon. Bitte Nachnamen/Zusatz ergänzen.' });
+        const id = adminId('employee');
+        data.employees.push({ id, name, role: 'DRIVER', active: true, permissions: [], qrToken: adminId('qr'), hourlyRateCents: null, monthlySalaryCents: null, contractType: 'HOURLY', internalProfileEnabled: true, officialProfileEnabled: false, workforceType: 'INTERNAL', breakMinutes: 0, overtimeMultiplier: 1.25, dailyDeductionCents: 0, currency: 'EUR', createdAt: now, updatedAt: now });
+        writeAdminData(data);
+        inv.used = true; inv.usedBy = id; inv.usedAt = now;
+        store.accounts[id] = { role: 'DRIVER', active: true, pin: A.hashPin(b.pin) };
+        save();
+        startSession(req, res, id, name, 'DRIVER');
+      });
+      return true;
+    }
     const isMgr = req.naraUser && A.MANAGERS.includes(req.naraUser.role);
-    if (/^\/api\/auth\/(team|set-pin|staff)$/.test(p)) {
+    if (/^\/api\/auth\/(team|set-pin|staff|invite)$/.test(p)) {
       if (!req.naraUser) { reply(res, 401, { error: 'Anmeldung erforderlich.', code: 'AUTH_REQUIRED' }); return true; }
       if (!isMgr) { reply(res, 403, { error: 'Keine Berechtigung.', code: 'FORBIDDEN' }); return true; }
+    }
+    if (p === '/api/auth/invite' && m === 'POST') {
+      const tok = A.newToken(), exp = Date.now() + 24 * 3600 * 1000;
+      for (const [k, v] of Object.entries(store.invites)) if (v.exp < Date.now() - 86400000) delete store.invites[k];
+      store.invites[A.tokenHash(tok)] = { exp, by: req.naraUser.id, used: false };
+      save();
+      const base = String(process.env.NARA_PUBLIC_URL || '').replace(/\/+$/, '') || (secureReq(req) ? 'https://' : 'http://') + String(req.headers.host || '');
+      replyC(res, 200, { ok: true, url: base + '/join.html?t=' + encodeURIComponent(tok), expiresAt: new Date(exp).toISOString() }); return true;
     }
     if (p === '/api/auth/team' && m === 'GET') {
       const data = readAdminData();

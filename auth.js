@@ -71,7 +71,7 @@ const RULES = [
   ['POST', /^\/api\/flamo\/chat$/, 'public'],
   ['GET', /^\/api\/permissions$/, 'public'],
   ['POST', /^\/api\/nara-guide$/, 'public'],
-  ['*', /^\/api\/auth\/(login|logout|me|employees|bootstrap)$/, 'public'],
+  ['*', /^\/api\/auth\/(login|logout|me|employees|bootstrap|join|invite-check)$/, 'public'],
   ['POST', /^\/api\/platform-orders\/import$/, 'service'],
   ['POST', /^\/api\/platform-orders\/(heartbeat|alert)$/, 'service'],
   ['GET', /^\/api\/platform-orders\/status$/, KITCH],
@@ -109,7 +109,9 @@ const RULES = [
   ['POST', /^\/api\/(attendance(\/qr)?|employee\/qr|shifts\/open)$/, STAFF],
   ['*', /^\/api\/(accounting|invoices|reports)(\/|$)/, ACCT],
   ['POST', /^\/api\/(documents|invoice-extract)$/, ACCT],
-  ['*', /^\/api\/auth\/(team|set-pin|staff)(\/|$)/, MANAGERS],
+  ['*', /^\/api\/auth\/(team|set-pin|staff|invite)(\/|$)/, MANAGERS],
+  ['POST', /^\/api\/driver\/note$/, STAFF],
+  ['GET', /^\/api\/driver\/notes$/, STAFF],
 ];
 function policyFor(method, pathname) {
   const m = String(method || 'GET').toUpperCase();

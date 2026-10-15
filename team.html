@@ -27,6 +27,10 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
 <main>
   <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h1 data-t="title"></h1><p class="sub" data-t="sub"></p></div><span id="lang-switch"></span></div>
   <section><h2 data-t="staff"></h2><div id="team"></div><div class="msg" id="tmsg"></div></section>
+  <section><h2 id="inv-h"></h2><p class="sub" id="inv-sub"></p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="pri" id="inv-go"></button><button id="inv-wa" hidden></button><button id="inv-cp" hidden></button></div>
+    <p class="tag" id="inv-url" style="word-break:break-all"></p><div class="msg" id="inv-msg"></div>
+  </section>
   <section><h2 data-t="newAcc"></h2>
     <div class="add"><input id="n-name" data-tp="namePh"><select id="n-role"></select><input id="n-pin" type="password" inputmode="numeric" autocomplete="new-password" placeholder="PIN"><button class="pri" id="n-go" data-t="create"></button></div>
     <div class="msg" id="nmsg"></div>
@@ -70,6 +74,12 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
   }
   function save(t,patch){api('POST','/api/auth/staff',Object.assign({id:t.id,name:t.name,role:t.role,active:t.active},patch)).then(function(j){say('tmsg',j.ok?tt('saved'):j.error,j.ok);load()})}
   $('n-go').onclick=function(){api('POST','/api/auth/staff',{name:$('n-name').value,role:$('n-role').value,pin:$('n-pin').value}).then(function(j){say('nmsg',j.ok?tt('created'):j.error,j.ok);if(j.ok){$('n-name').value='';$('n-pin').value='';load()}})};
+  var INV={de:['Fahrer einladen','Einmal-Link, 24 Stunden gültig. Der Fahrer wählt Namen und PIN selbst (nur Rolle Fahrer).','Einladungslink erstellen','Per WhatsApp senden','Link kopieren','Link kopiert.','Hallo! Hier kannst du dein Fahrer-Konto anlegen (24 h gültig): '],ar:['دعوة سائق','رابط لمرة وحدة وصالح 24 ساعة. السائق بيختار اسمه وPIN بنفسه (بدور سائق فقط).','إنشاء رابط دعوة','إرسال بالواتساب','نسخ الرابط','اننسخ الرابط.','أهلاً! من هون بتعمل حساب السائق تبعك (صالح 24 ساعة): '],en:['Invite a driver','One-time link, valid 24 hours. The driver picks name and PIN (driver role only).','Create invite link','Send via WhatsApp','Copy link','Link copied.','Hi! Create your driver account here (valid 24 h): ']};
+  var IV=INV[LANG]||INV.de,lastInv='';
+  $('inv-h').textContent=IV[0];$('inv-sub').textContent=IV[1];$('inv-go').textContent=IV[2];$('inv-wa').textContent=IV[3];$('inv-cp').textContent=IV[4];
+  $('inv-go').onclick=function(){api('POST','/api/auth/invite',{}).then(function(j){if(!j.ok){say('inv-msg',j.error||'Fehler');return}lastInv=j.url;$('inv-url').textContent=j.url;$('inv-wa').hidden=false;$('inv-cp').hidden=false;say('inv-msg','',true)})};
+  $('inv-wa').onclick=function(){window.open('https://wa.me/?text='+encodeURIComponent(IV[6]+lastInv),'_blank')};
+  $('inv-cp').onclick=function(){(navigator.clipboard?navigator.clipboard.writeText(lastInv):Promise.reject()).then(function(){say('inv-msg',IV[5],true)},function(){say('inv-msg',lastInv)})};
   function eur(c){return c==null?'':(c/100).toFixed(2).replace('.',',')}
   function cents(v){v=String(v).trim().replace(',','.');if(v==='')return null;var n=Math.round(parseFloat(v)*100);return isFinite(n)&&n>=0?n:NaN}
   function renderPay(){

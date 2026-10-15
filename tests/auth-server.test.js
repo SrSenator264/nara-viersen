@@ -283,3 +283,30 @@ test('Tunnel: Mitarbeiterliste über den Tunnel nur Fahrer, setupNeeded nie; lok
   assert.equal(local.json.employees.length, 5, 'lokal weiterhin alle');
   assert.ok(local.json.employees.some(e => e.role === 'OWNER'));
 });
+
+test('Einladung: Manager erstellt, Fahrer tritt einmalig bei (nur Rolle Fahrer), Ablauf/Missbrauch', async () => {
+  const tun = { 'cf-connecting-ip': '203.0.113.20', 'x-forwarded-for': '203.0.113.20' };
+  assert.equal((await call('POST', '/api/auth/invite', {}, null, tun)).status, 401, 'ohne Login nicht');
+  assert.equal((await call('POST', '/api/auth/invite', {}, S.cashier)).status, 403, 'Kasse darf nicht');
+  const inv = await call('POST', '/api/auth/invite', {}, S.owner); assert.equal(inv.status, 200);
+  const tok = new URL(inv.json.url).searchParams.get('t'); assert.ok(tok && /\/join\.html\?t=/.test(inv.json.url));
+  assert.equal((await call('GET', '/api/auth/invite-check?t=' + tok, null, null, tun)).status, 200);
+  assert.equal((await call('GET', '/api/auth/invite-check?t=falsch', null, null, tun)).status, 410);
+  const bad = await call('POST', '/api/auth/join', { token: tok, name: 'Neuer Fahrer', pin: '12' }, null, tun); assert.equal(bad.status, 422);
+  const ok = await call('POST', '/api/auth/join', { token: tok, name: 'Neuer Fahrer', pin: '5927', role: 'OWNER' }, null, tun);
+  assert.equal(ok.status, 200); assert.equal(ok.json.user.role, 'DRIVER', 'Rolle nie aus dem Request');
+  assert.equal((await call('POST', '/api/auth/join', { token: tok, name: 'Zweiter', pin: '5927' }, null, tun)).status, 410, 'Link nur einmal');
+  assert.equal((await call('GET', '/api/auth/invite-check?t=' + tok, null, null, tun)).status, 410);
+  const inv2 = await call('POST', '/api/auth/invite', {}, S.owner), tok2 = new URL(inv2.json.url).searchParams.get('t');
+  assert.equal((await call('POST', '/api/auth/join', { token: tok2, name: 'neuer fahrer', pin: '5927' }, null, tun)).status, 409, 'Name doppelt');
+  assert.equal((await call('POST', '/api/delivery/config', {}, ok.cookie)).status, 403, 'Fahrer hat keine Manager-Rechte');
+});
+
+test('Fahrer-Notizen: nur eingeloggt, gespeichert mit Autor, Scan liefert sie', async () => {
+  const lg = await call('POST', '/api/auth/login', { employeeId: S.driverId, pin: '9283' }, null, { 'cf-connecting-ip': '192.0.2.77', 'x-forwarded-for': '192.0.2.77' }); assert.equal(lg.status, 200); S.driver = lg.cookie;
+  const D = await call('POST', '/api/delivery/order-qr', { orderId: 'does-not-exist' }, S.owner);
+  assert.equal(D.status, 404);
+  assert.equal((await call('POST', '/api/driver/note', { token: 'x', text: 'hi' })).status, 401);
+  assert.equal((await call('POST', '/api/driver/note', { token: 'nope', text: 'hi' }, S.driver)).status, 404);
+  assert.equal((await call('POST', '/api/driver/note', { token: '', text: '' }, S.driver)).status, 422);
+});

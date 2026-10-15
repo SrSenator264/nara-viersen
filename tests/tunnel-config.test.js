@@ -48,3 +48,16 @@ test('Menü: Team & PINs ist in der Seitenleiste; Login-Skript hat Versions-Para
   const srv = fs.readFileSync(path.join(__dirname, '..', 'server-auth.js'), 'utf8');
   assert.ok(srv.includes('/nara-auth.js?v=${v}'));
 });
+
+test('Tunnel: join.html + Einladungs-/Notiz-API offen, invite (Manager) bleibt zu', () => {
+  const y = fs.readFileSync(path.join(__dirname, '..', 'tunnel', 'config.example.yml'), 'utf8');
+  const res = [...y.matchAll(/path:\s*(\^\S+)/g)].map(m => new RegExp(m[1]));
+  const open = p => res.some(r => r.test(p));
+  for (const p of ['/join.html', '/api/auth/join', '/api/auth/invite-check', '/api/driver/note', '/api/driver/notes', '/delivery.html']) assert.ok(open(p), p + ' offen');
+  for (const p of ['/api/auth/invite', '/api/auth/team', '/api/auth/staff', '/team.html', '/api/auth/bootstrap']) assert.ok(!open(p), p + ' zu');
+});
+
+test('delivery.html: Notizen, Spracheingabe, Wischen, Zahlungs-Karte vorhanden', () => {
+  const h = fs.readFileSync(path.join(__dirname, '..', 'delivery.html'), 'utf8');
+  for (const k of ['/api/driver/note', 'SpeechRecognition', '/api/driver/delivered', 'class="pay', 'id="slide"']) assert.ok(h.includes(k), k);
+});
