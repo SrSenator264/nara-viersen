@@ -75,3 +75,13 @@ test('driver.html: Flamo-Popup bei neuem Auftrag (Ton, Vibration, Benachrichtigu
   for (const p of ['/web-prototype/c/flamo-present.webm', '/web-prototype/c/flamo-present.webp', '/sw.js']) assert.ok(res.some(r => r.test(p)), p);
   assert.ok(fs.readFileSync(path.join(__dirname, '..', 'sw.js'), 'utf8').includes('notificationclick'));
 });
+
+test('Fahrer-App installierbar: eigenes Manifest startet driver.html und ist über den Tunnel erreichbar', () => {
+  const m = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'icons', 'driver.webmanifest'), 'utf8'));
+  assert.equal(m.start_url, '/driver.html');
+  const y = fs.readFileSync(path.join(__dirname, '..', 'tunnel', 'config.example.yml'), 'utf8');
+  const res = [...y.matchAll(/path:\s*(\^\S+)/g)].map(x => new RegExp(x[1]));
+  for (const p of ['/icons/driver.webmanifest', m.start_url, ...m.icons.map(i => i.src)]) assert.ok(res.some(r => r.test(p)), p);
+  for (const f of ['driver.html', 'join.html', 'delivery.html']) assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').includes('icons/driver.webmanifest'), f);
+  assert.ok(fs.readFileSync(path.join(__dirname, '..', 'join.html'), 'utf8').includes('beforeinstallprompt'));
+});

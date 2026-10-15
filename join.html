@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="de" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Flamo · Fahrer-Konto</title>
-<link rel="manifest" href="nara.webmanifest"><meta name="theme-color" content="#0f1419">
+<link rel="manifest" href="icons/driver.webmanifest"><meta name="theme-color" content="#0f1419">
 <style>
 :root{--bg:#0f1419;--panel:#171e26;--line:#26313c;--tx:#f3f5f7;--mut:#9aa6b2;--ac:#ff7a1a;--ok:#4cc38a;--bad:#ff8a80}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 50% -10%,#2a1b10,var(--bg) 60%);color:var(--tx);font:17px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding:16px}
@@ -14,18 +14,27 @@ input:focus{border-color:var(--ac);outline:none}button{background:var(--ac);bord
 <div class="lang"><a href="#" data-l="de">DE</a><a href="#" data-l="ar">ع</a><a href="#" data-l="en">EN</a></div>
 <h1 id="h"></h1><p id="s"></p>
 <form id="f" hidden><input id="name" autocomplete="name"><input id="pin" type="password" inputmode="numeric" autocomplete="new-password"><button id="go"></button></form>
-<div class="msg" id="m"></div></div>
+<div class="msg" id="m"></div>
+<div id="done" hidden><button id="inst" type="button"></button><p id="instHelp" hidden style="font-size:14px"></p><button id="noti" type="button" style="background:#1f2a35;color:#f3f5f7;border-color:#26313c"></button><button id="open" type="button" style="background:#2fbf7a;border-color:#2fbf7a;color:#06210f"></button></div></div>
 <script>
 (function(){
-var T={de:{h:'Fahrer-Konto anlegen',s:'Wähle deinen Namen und eine PIN (mind. 4 Ziffern).',n:'Dein Name',p:'PIN',g:'Konto anlegen',nn:'Bitte Namen eingeben.',np:'PIN: mind. 4 Ziffern.',bad:'Dieser Link ist ungültig oder abgelaufen. Bitte neuen Link anfordern.',ok:'Fertig! Weiter…'},
-ar:{h:'إنشاء حساب سائق',s:'اختار اسمك ورمز PIN (4 أرقام أو أكثر).',n:'اسمك',p:'PIN',g:'إنشاء الحساب',nn:'اكتب اسمك.',np:'PIN: 4 أرقام على الأقل.',bad:'الرابط غير صالح أو منتهي. اطلب رابط جديد.',ok:'تمام! جاري الدخول…'},
-en:{h:'Create driver account',s:'Choose your name and a PIN (at least 4 digits).',n:'Your name',p:'PIN',g:'Create account',nn:'Please enter your name.',np:'PIN: at least 4 digits.',bad:'This link is invalid or expired. Please ask for a new one.',ok:'Done! Continuing…'}};
+var T={de:{h:'Fahrer-Konto anlegen',s:'Wähle deinen Namen und eine PIN (mind. 4 Ziffern).',n:'Dein Name',p:'PIN',g:'Konto anlegen',nn:'Bitte Namen eingeben.',np:'PIN: mind. 4 Ziffern.',bad:'Dieser Link ist ungültig oder abgelaufen. Bitte neuen Link anfordern.',ok:'Fertig! Weiter…',done:'Konto angelegt ✅',inst:'📲 App installieren',instHelp:'Chrome-Menü ⋮ → „Zum Startbildschirm hinzufügen“. iPhone: Teilen → „Zum Home-Bildschirm“.',noti:'🔔 Benachrichtigungen erlauben',notiOk:'Benachrichtigungen aktiv ✅',open:'Zur Fahrer-App →',doneS:'Installiere die App, damit du sie immer mit einem Tipp öffnest.'},
+ar:{h:'إنشاء حساب سائق',s:'اختار اسمك ورمز PIN (4 أرقام أو أكثر).',n:'اسمك',p:'PIN',g:'إنشاء الحساب',nn:'اكتب اسمك.',np:'PIN: 4 أرقام على الأقل.',bad:'الرابط غير صالح أو منتهي. اطلب رابط جديد.',ok:'تمام! جاري الدخول…',done:'انعمل حسابك ✅',inst:'📲 ثبّت التطبيق',instHelp:'من قائمة Chrome ⋮ ← „إضافة إلى الشاشة الرئيسية“. آيفون: مشاركة ← „إضافة إلى الشاشة الرئيسية“.',noti:'🔔 اسمح بالإشعارات',notiOk:'الإشعارات شغالة ✅',open:'افتح تطبيق السائق ←',doneS:'ثبّت التطبيق حتى تفتحه دايماً بكبسة وحدة.'},
+en:{h:'Create driver account',s:'Choose your name and a PIN (at least 4 digits).',n:'Your name',p:'PIN',g:'Create account',nn:'Please enter your name.',np:'PIN: at least 4 digits.',bad:'This link is invalid or expired. Please ask for a new one.',ok:'Done! Continuing…',done:'Account created ✅',inst:'📲 Install the app',instHelp:'Chrome menu ⋮ → “Add to Home screen”. iPhone: Share → “Add to Home Screen”.',noti:'🔔 Allow notifications',notiOk:'Notifications on ✅',open:'Open the driver app →',doneS:'Install the app so you can always open it with one tap.'}};
 var L=localStorage.getItem('nara_lang')||((navigator.language||'de').slice(0,2));if(!T[L])L='de';
 var $=function(i){return document.getElementById(i)},tok=new URLSearchParams(location.search).get('t')||'';
 function paint(){var d=T[L];document.documentElement.lang=L;document.documentElement.dir=L==='ar'?'rtl':'ltr';$('h').textContent=d.h;$('s').textContent=d.s;$('name').placeholder=d.n;$('pin').placeholder=d.p;$('go').textContent=d.g;document.querySelectorAll('.lang a').forEach(function(a){a.className=a.dataset.l===L?'on':''})}
 document.querySelectorAll('.lang a').forEach(function(a){a.onclick=function(e){e.preventDefault();L=a.dataset.l;try{localStorage.setItem('nara_lang',L)}catch(x){}paint()}});paint();
 fetch('/api/auth/invite-check?t='+encodeURIComponent(tok)).then(function(r){if(r.ok)$('f').hidden=false;else{$('m').textContent=T[L].bad;$('s').textContent=''}});
+var deferred=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e});
+if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}}
+function showDone(){var d=T[L];$('f').hidden=true;$('m').textContent='';$('h').textContent=d.done;$('s').textContent=d.doneS;$('done').hidden=false;$('inst').textContent=d.inst;$('instHelp').textContent=d.instHelp;$('noti').textContent=d.noti;$('open').textContent=d.open;
+ if(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)$('inst').hidden=true;
+ if(!('Notification' in window))$('noti').hidden=true;else if(Notification.permission==='granted')$('noti').textContent=d.notiOk;}
+$('inst').onclick=function(){if(deferred){deferred.prompt();deferred.userChoice.then(function(){deferred=null;$('inst').hidden=true})}else{$('instHelp').hidden=false}};
+$('noti').onclick=function(){try{Notification.requestPermission().then(function(p){if(p==='granted')$('noti').textContent=T[L].notiOk})}catch(e){}};
+$('open').onclick=function(){location.href='driver.html'};
 $('f').onsubmit=function(e){e.preventDefault();$('m').textContent='';if(!$('name').value.trim()){$('m').textContent=T[L].nn;$('name').focus();return}if(String($('pin').value).length<4){$('m').textContent=T[L].np;$('pin').focus();return}
-fetch('/api/auth/join',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,name:$('name').value,pin:$('pin').value})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})}).then(function(x){if(x.ok){$('m').style.color='#4cc38a';$('m').textContent=T[L].ok;setTimeout(function(){location.href='driver.html'},700)}else $('m').textContent=x.j.error||T[L].bad})};
+fetch('/api/auth/join',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,name:$('name').value,pin:$('pin').value})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})}).then(function(x){if(x.ok){showDone()}else $('m').textContent=x.j.error||T[L].bad})};
 })();
 </script></body></html>
