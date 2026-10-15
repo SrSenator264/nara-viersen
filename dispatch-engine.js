@@ -38,6 +38,11 @@ function permutations(arr) {
   return out;
 }
 
+// تفضيلات يدوية: pin = لهالسائق بس، avoid = مو لهالسائق، solo = لحاله بجولة، maxStops لكل سائق
+const allowed = (o, d) => (!o.pin || o.pin === d.id) && !(o.avoid || []).includes(d.id);
+const maxOf = (d, cfg) => d.maxStops || cfg.maxStops;
+const joinable = (t, o) => !o.solo && !t.some(x => x.solo);
+
 // أحسن ترتيب لمحطات جولة وحدة تبدأ من المحل بوقت depart
 function bestRoute(orders, depart, ctx) {
   const { shop, travel, cfg } = ctx;
@@ -92,7 +97,7 @@ function availability(d, ctx) {
 function improve(drivers, state, ctx) {
   const { cfg } = ctx;
   const total = () => drivers.reduce((s, d) => s + state.get(d.id).score, 0);
-  const okTour = t => t.length <= cfg.maxStops && Math.max(...t.map(x => x.ready)) - Math.min(...t.map(x => x.ready)) <= cfg.maxWaitMin * MIN;
+  const okTour = (t, d) => t.length <= maxOf(d, cfg) && (t.length < 2 || !t.some(x => x.solo)) && Math.max(...t.map(x => x.ready)) - Math.min(...t.map(x => x.ready)) <= cfg.maxWaitMin * MIN;
   const tryApply = (changes) => { // changes: [{d, tours}]
     const before = changes.reduce((s, c) => s + state.get(c.d.id).score, 0);
     const sims = changes.map(c => ({ c, sim: simulateDriver(c.d, c.tours, ctx) }));
@@ -110,11 +115,12 @@ function improve(drivers, state, ctx) {
         const targets = [...d.tours.map((_, i) => i), d.tours.length];
         for (const ti of targets) {
           if (d === a.d && ti === a.ti) continue;
+          if (!allowed(a.o, d)) continue;
           const srcTours = a.d.tours.map((t, i) => (i === a.ti ? t.filter(x => x !== a.o) : t));
           const base = d === a.d ? srcTours : d.tours;
           const tgt = base.map((t, i) => (i === ti ? [...t, a.o] : t));
           if (ti === base.length) tgt.push([a.o]);
-          if (!okTour(tgt[ti] || [a.o])) continue;
+          if (!okTour(tgt[ti] || [a.o], d)) continue;
           const changes = d === a.d ? [{ d, tours: clean(tgt) }] : [{ d: a.d, tours: clean(srcTours) }, { d, tours: clean(tgt) }];
           const r = tryApply(changes);
           if (r.gain > 0.01 && (!best || r.gain > best.gain)) best = r;
@@ -125,9 +131,10 @@ function improve(drivers, state, ctx) {
     for (let i = 0; i < slots.length; i++) for (let j = i + 1; j < slots.length; j++) {
       const a = slots[i], b = slots[j];
       if (a.d === b.d && a.ti === b.ti) continue;
+      if (!allowed(b.o, a.d) || !allowed(a.o, b.d)) continue;
       const swap = (tours, d) => tours.map((t, ti) => t.map(x => (d === a.d && ti === a.ti && x === a.o ? b.o : d === b.d && ti === b.ti && x === b.o ? a.o : x)));
       const ta = swap(a.d.tours, a.d), tb = a.d === b.d ? null : swap(b.d.tours, b.d);
-      if (!okTour(ta[a.ti]) || !(tb ? okTour(tb[b.ti]) : okTour(ta[b.ti]))) continue;
+      if (!okTour(ta[a.ti], a.d) || !(tb ? okTour(tb[b.ti], b.d) : okTour(ta[b.ti], a.d))) continue;
       const r = tryApply(tb ? [{ d: a.d, tours: ta }, { d: b.d, tours: tb }] : [{ d: a.d, tours: ta }]);
       if (r.gain > 0.01 && (!best || r.gain > best.gain)) best = r;
     }
@@ -153,11 +160,14 @@ function plan(input) {
       id: o.id, code: o.code || o.id, lat: o.lat, lng: o.lng, zone: o.zone || '',
       ready: Math.max(now, Number(new Date(o.readyAt || now))),
       due: o.dueAt ? Number(new Date(o.dueAt)) : created + cfg.defaultDueMin * MIN,
+      pin: o.pin || '', avoid: Array.isArray(o.avoid) ? o.avoid.map(String) : [], solo: !!o.solo,
     });
   }
-  const drivers = (input.drivers || []).filter(d => d && d.active !== false).map(d => ({ id: d.id, name: d.name, availableAt: availability(d, ctx), tours: [] }));
+  const drivers = (input.drivers || []).filter(d => d && d.active !== false).map(d => ({ id: d.id, name: d.name, availableAt: availability(d, ctx), maxStops: Number.isInteger(d.maxStops) && d.maxStops > 0 ? d.maxStops : 0, tours: [] }));
   if (!drivers.length) return { ok: false, reason: 'NO_DRIVERS', drivers: [], assignments: [], unplaced: [...unplaced, ...orders.map(o => ({ id: o.id, reason: 'NO_DRIVERS' }))] };
 
+  // طلب ما في أي سائق مسموح له (تثبيت لسائق مو موجود / استبعاد الكل)
+  for (let i = orders.length - 1; i >= 0; i--) if (!drivers.some(d => allowed(orders[i], d))) { unplaced.push({ id: orders[i].id, reason: orders[i].pin ? 'PIN_DRIVER_UNAVAILABLE' : 'NO_ALLOWED_DRIVER' }); orders.splice(i, 1); }
   // الأضيق وقتاً أولاً
   orders.sort((a, b) => a.due - b.due || a.ready - b.ready);
   const state = new Map(drivers.map(d => [d.id, simulateDriver(d, [], ctx)]));
@@ -165,11 +175,12 @@ function plan(input) {
   for (const o of orders) {
     let best = null;
     for (const d of drivers) {
+      if (!allowed(o, d)) continue;
       const base = state.get(d.id).score;
       const options = [];
       // ضمّه لجولة مخططة (نفس الاتجاه بيطلع أرخص لأن الالتفاف أقل)
       d.tours.forEach((t, i) => {
-        if (t.length >= cfg.maxStops) return;
+        if (t.length >= maxOf(d, cfg) || !joinable(t, o)) return;
         const tReady = Math.max(...t.map(x => x.ready));
         if (o.ready > tReady + cfg.maxWaitMin * MIN) return; // ما منخلّي جولة تستنى كتير
         options.push(d.tours.map((x, j) => (j === i ? [...x, o] : x)));

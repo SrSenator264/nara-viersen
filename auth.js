@@ -97,7 +97,7 @@ const RULES = [
   ['POST', /^\/api\/driver\/(position|start|delivered|finish|proof|door-pay)$/, STAFF],
   ['GET', /^\/api\/delivery\/proof$/, CASH],
   ['GET', /^\/api\/driver\/routes$/, STAFF],
-  ['POST', /^\/api\/delivery\/(assign|cancel)$/, CASH],
+  ['POST', /^\/api\/delivery\/(assign|cancel|move|swap|reorder|order-pref|driver-pref)$/, CASH],
   ['POST', /^\/api\/live-orders\/stage$/, KITCH],
   ['POST', /^\/api\/live-orders\/archive-day$/, CASH],
   ['POST', /^\/api\/tse-demo\/receipt$/, CASH],

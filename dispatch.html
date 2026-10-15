@@ -33,6 +33,19 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
 .stop.late .e{color:var(--late)}
 .stop.done{opacity:.45;text-decoration:line-through}
 .btns{display:flex;gap:6px;margin-top:6px}
+.mini{border:1px solid var(--line);background:#fff;border-radius:8px;min-width:30px;height:28px;font-size:14px;cursor:pointer;padding:0 6px;color:var(--ink)}
+.mini:disabled{opacity:.3}
+.bd{font-size:12px;margin-inline-start:2px}
+.dh{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0 12px 8px}
+.dh select{border:1px solid var(--line);border-radius:8px;padding:3px 6px;font-size:13px;background:#fff}
+#dlg{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:1000;padding:12px}
+#dlg.on{display:flex}
+#dlg .bx{background:#fff;border-radius:16px;max-width:460px;width:100%;max-height:90vh;overflow:auto;padding:14px 16px}
+#dlg h3{margin:0 0 4px;font-size:17px}#dlg h4{margin:12px 0 6px;font-size:14px;color:var(--muted)}
+#dlg .row{display:flex;flex-wrap:wrap;gap:6px}
+#dlg label{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:15px}
+#dlg label input{width:18px;height:18px}
+#dlg select{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:15px}
 .btn{border:0;border-radius:9px;padding:9px 12px;font-weight:800;font-size:14px;cursor:pointer;background:var(--blue);color:#fff}
 .btn.sec{background:#eef1f4;color:var(--ink)}.btn.red{background:#fee2e2;color:#991b1b}
 .btn:disabled{opacity:.5}
@@ -62,6 +75,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
   <div id="map"></div>
 </div>
 <div id="msg"></div>
+<div id="dlg"><div class="bx" id="dlgBox"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 (function(){
@@ -101,6 +115,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       unplaced:'Orders without a map position',unplacedHint:'Address missing or wrong, or still being looked up (takes up to a minute). Fix the address at the till.',
       noAddr:'No address',waiting:'Waiting for a driver',waitingHint:'These orders have a position, but there is no driver yet for the system to give them to.',noOpen:'No open delivery orders.',sentToast:'📤 Sent to {n}',updated:'Updated {t}',login:'Please log in first',loadErr:'Could not load the plan: ',cancelled:'Sending cancelled'}
   };
+  Object.assign(T.de,{menu:'Optionen',moveTo:'Zu anderem Fahrer verschieben',swapWith:'Mit Bestellung tauschen',prefs:'Einstellungen für diese Bestellung',pin:'🔒 Nur dieser Fahrer',pinNone:'— egal —',avoid:'🚫 Nicht diesen Fahrern geben',hold:'⏸ Zurückhalten (noch nicht verplanen)',urgent:'⚡ Dringend (zuerst)',solo:'1️⃣ Allein fahren (nicht mit anderen)',clearPrefs:'Alles zurücksetzen',pause:'⏸ Pause',resume:'▶ Weiter',maxS:'Max. Stopps',maxAuto:'Auto',held:'Zurückgehaltene Bestellungen',release:'Freigeben',close:'Schließen',paused:'Fahrer in Pause',moved:'Verschoben',swapped:'Getauscht',saved:'Gespeichert',noSwap:'Keine Bestellung zum Tauschen (nur Touren, die noch nicht losgefahren sind).',planNote:'Noch nicht gesendet: „Verschieben“ merkt sich den Fahrer für die Planung.',noMove:'Kein anderer Fahrer verfügbar.',up:'Nach oben',down:'Nach unten'});Object.assign(T.ar,{menu:'خيارات',moveTo:'نقل لسائق تاني',swapWith:'تبديل مع طلب',prefs:'تفضيلات هالطلب',pin:'🔒 لهالسائق بس',pinNone:'— أي سائق —',avoid:'🚫 لا تعطيه لهدول السواقين',hold:'⏸ استنى (لا تخطّطه هلق)',urgent:'⚡ مستعجل (قدّمه)',solo:'1️⃣ لحاله (مو مع طلبات تانية)',clearPrefs:'رجّع كل شي للافتراضي',pause:'⏸ استراحة',resume:'▶ كمّل',maxS:'أقصى محطات',maxAuto:'أوتو',held:'طلبات موقوفة',release:'فكّ',close:'سكّر',paused:'سواقين بالاستراحة',moved:'اننقل',swapped:'انبدلوا',saved:'انحفظ',noSwap:'ما في طلب للتبديل (بس الجولات اللي لسا ما طلعت).',planNote:'لسا ما انبعت: "نقل" بيثبّت السائق بالخطة.',noMove:'ما في سائق تاني متاح.',up:'فوق',down:'تحت'});Object.assign(T.en,{menu:'Options',moveTo:'Move to another driver',swapWith:'Swap with order',prefs:'Preferences for this order',pin:'🔒 Only this driver',pinNone:'— any —',avoid:'🚫 Never give to these drivers',hold:'⏸ Hold (do not plan yet)',urgent:'⚡ Urgent (first)',solo:'1️⃣ Ride alone (not with others)',clearPrefs:'Reset all',pause:'⏸ Break',resume:'▶ Resume',maxS:'Max stops',maxAuto:'Auto',held:'Held orders',release:'Release',close:'Close',paused:'Drivers on break',moved:'Moved',swapped:'Swapped',saved:'Saved',noSwap:'No order to swap with (only tours that have not left yet).',planNote:'Not sent yet: “Move” pins the driver for the plan.',noMove:'No other driver available.',up:'Up',down:'Down'});
   const lang=window.NARA_LANG?NARA_LANG.get():'de';
   const t=(k,v)=>String((T[lang]||T.de)[k]??T.de[k]??k).replace(/\{(\w+)\}/g,(m,x)=>v&&v[x]!=null?v[x]:m);
   const tr=t; // للأماكن اللي فيها متغير اسمه t (جولة)
@@ -157,6 +172,10 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
     if(!fitted&&pts.length>1){map.fitBounds(pts,{padding:[30,30]});fitted=true}
   }
 
+  const pf=id=>((plan&&plan.prefs&&plan.prefs.orders)||{})[String(id)]||{};
+  const badges=id=>{const p=pf(id);return '<span class="bd">'+(p.pin?'🔒':'')+(p.urgent?'⚡':'')+(p.solo?'1️⃣':'')+((p.avoid||[]).length?'🚫':'')+'</span>'};
+  const menuBtn=(id,sent)=>'<button class="mini" title="'+esc(t('menu'))+'" data-menu="'+esc(id)+'" data-sent="'+(sent?1:0)+'">⋯</button>';
+
   function render(){
     const side=$('#side');if(!plan){side.innerHTML='<div class="box">…</div>';return}
     const L_=plan.learning||{};$('#learn').textContent=L_.samples?t('learned',{n:L_.samples,f:(L_.global||1).toFixed(2)}):t('learning');
@@ -167,17 +186,18 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
     for(const d of plan.drivers||[]){
       const c=color(d.driverId),act=byDriver[d.driverId]||[],out=act.some(r=>r.startedAt);
       const st=out?t('out',{t:hm(d.freeAt)}):act.length?t('sentWait'):(Date.parse(d.freeAt)<=Date.now()+60000?t('freeNow'):t('freeAt',{t:hm(d.freeAt)}));
-      h+='<section class="drv" style="--c:'+c+'"><h2>'+esc(d.name||d.driverId)+'</h2><div class="st">'+st+'</div>';
+      const dp=((plan.prefs||{}).drivers||{})[d.driverId]||{};
+      h+='<section class="drv" style="--c:'+c+'"><h2>'+esc(d.name||d.driverId)+'</h2><div class="st">'+st+'</div><div class="dh"><button class="mini" data-pause="'+esc(d.driverId)+'">'+t('pause')+'</button><span class="muted">'+t('maxS')+'</span><select data-maxs="'+esc(d.driverId)+'"><option value="0">'+t('maxAuto')+'</option>'+[1,2,3,4,5,6,7,8].map(n=>'<option value="'+n+'"'+(dp.maxStops===n?' selected':'')+'>'+n+'</option>').join('')+'</select></div>';
       for(const r of act){
         const left=r.stops.filter(s=>!s.delivered).length;
         h+='<div class="tour"><div class="hd">'+(r.startedAt?t('onWay'):t('sent'))+' <span class="t">'+t('leftOf',{a:left,b:r.stops.length})+'</span></div>'
-          +r.stops.map((s,i)=>'<div class="stop'+(s.delivered?' done':'')+'"><span class="n">'+(i+1)+'</span><span class="c">'+esc(s.code)+'</span><span class="a">'+esc(s.address)+'</span></div>').join('')
+          +r.stops.map((s,i)=>'<div class="stop'+(s.delivered?' done':'')+'"><span class="n">'+(i+1)+'</span><span class="c">'+esc(s.code)+badges(s.orderId)+'</span><span class="a">'+esc(s.address)+'</span>'+(r.startedAt||r.canEdit===false||s.delivered?'':'<button class="mini" title="'+esc(t('up'))+'" data-up="'+esc(r.routeId)+'" data-i="'+i+'"'+(i?'':' disabled')+'>⬆️</button><button class="mini" title="'+esc(t('down'))+'" data-down="'+esc(r.routeId)+'" data-i="'+i+'"'+(i<r.stops.length-1?'':' disabled')+'>⬇️</button>'+menuBtn(s.orderId,true))+'</div>').join('')
           +(r.startedAt?'':'<div class="btns"><button class="btn red" data-cancel="'+esc(r.routeId)+'">'+t('cancelSend')+'</button></div>')+'</div>';
       }
       d.tours.forEach((t,i)=>{
         const late=t.stops.map(s=>plan.assignments.find(a=>a.orderId===s.orderId)).filter(a=>a&&a.lateMin);
         h+='<div class="tour"><div class="hd">'+(i===0&&!act.length?tr('next'):tr('after'))+' <span class="t">'+tr('depart',{a:hm(t.departAt),b:hm(t.backAt)})+'</span>'+(late.length?'<span class="late-b">'+tr('late',{n:late.length})+'</span>':'')+'</div>'
-          +t.stops.map((s,k)=>{const a=plan.assignments.find(x=>x.orderId===s.orderId)||{};return '<div class="stop'+(a.lateMin?' late':'')+'"><span class="n">'+(k+1)+'</span><span class="c">'+esc(s.code)+'</span><span class="a">'+esc(s.address||s.name||'')+'</span><span class="e">'+hm(s.etaAt)+(a.lateMin?' (+'+a.lateMin+')':'')+'</span></div>'}).join('')
+          +t.stops.map((s,k)=>{const a=plan.assignments.find(x=>x.orderId===s.orderId)||{};return '<div class="stop'+(a.lateMin?' late':'')+'"><span class="n">'+(k+1)+'</span><span class="c">'+esc(s.code)+badges(s.orderId)+'</span><span class="a">'+esc(s.address||s.name||'')+'</span><span class="e">'+hm(s.etaAt)+(a.lateMin?' (+'+a.lateMin+')':'')+'</span>'+menuBtn(s.orderId,false)+'</div>'}).join('')
           +(i===0?'<div class="btns"><button class="btn" data-send="'+esc(d.driverId)+'" data-tour="0">'+tr('sendTo',{n:esc(d.name||'')})+'</button>'+(t.googleMapsUrl?'<a class="btn sec" target="_blank" rel="noopener" href="'+esc(t.googleMapsUrl)+'">'+tr('route')+'</a>':'')+'</div>':'')+'</div>';
       });
       if(!d.tours.length&&!act.length)h+='<div class="tour muted">'+t('noOrders')+'</div>';
@@ -187,9 +207,56 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
     if(waiting.length)h+='<div class="box warn"><h3>'+t('waiting')+' ('+waiting.length+')</h3><div class="muted">'+t('waitingHint')+'</div>'+waiting.map(u=>'<div>• <b>'+esc(u.code||u.id)+'</b> '+esc(u.address||'')+'</div>').join('')+'</div>';
     if(noLoc.length)h+='<div class="box warn"><h3>'+t('unplaced')+'</h3><div class="muted">'+t('unplacedHint')+'</div>'+noLoc.map(u=>'<div>• <b>'+esc(u.code||u.id)+'</b> '+esc(u.address||t('noAddr'))+'</div>').join('')+'</div>';
     if(!(plan.drivers||[]).some(d=>d.tours.length)&&!(plan.active||[]).length&&!(plan.unplaced||[]).length)h+='<div class="box muted">'+t('noOpen')+'</div>';
+    if((plan.pausedDrivers||[]).length)h+='<div class="box"><h3>'+t('paused')+'</h3>'+plan.pausedDrivers.map(d=>'<div>'+esc(d.name)+' <button class="mini" data-resume="'+esc(d.id)+'">'+t('resume')+'</button></div>').join('')+'</div>';
+    if((plan.held||[]).length)h+='<div class="box warn"><h3>⏸ '+t('held')+' ('+plan.held.length+')</h3>'+plan.held.map(o=>'<div class="stop"><span class="c">'+esc(o.code)+'</span><span class="a">'+esc(o.address||o.name||'')+'</span><button class="mini" data-release="'+esc(o.orderId)+'">'+t('release')+'</button>'+menuBtn(o.orderId,false)+'</div>').join('')+'</div>';
     side.innerHTML=h;
   }
 
+
+  // ===== قائمة خيارات الطلب =====
+  function findStop(id){
+    for(const r of plan.active||[]){const s=r.stops.find(x=>String(x.orderId)===String(id));if(s)return{s,r,sent:true}}
+    for(const d of plan.drivers||[])for(const tt of d.tours){const s=tt.stops.find(x=>String(x.orderId)===String(id));if(s)return{s,d,sent:false}}
+    const h=(plan.held||[]).find(x=>String(x.orderId)===String(id));return h?{s:h,sent:false}:null;
+  }
+  function openMenu(id){
+    const f=findStop(id);if(!f)return closeDlg();
+    const p=pf(id),drivers=(plan.allDrivers||[]).filter(d=>!d.paused),code=f.s.code||id,curDriver=f.sent?f.r.driverId:null;
+    let h='<h3>'+esc(code)+' · '+t('menu')+'</h3><div class="muted">'+esc(f.s.address||'')+'</div>';
+    if(!f.sent)h+='<div class="muted">'+t('planNote')+'</div>';
+    const others=drivers.filter(d=>d.id!==curDriver);
+    h+='<h4>'+t('moveTo')+'</h4><div class="row">'+(others.length?others.map(d=>'<button class="btn" data-mv="'+esc(d.id)+'" style="background:'+color(d.id)+'">'+esc(d.name)+'</button>').join(''):'<span class="muted">'+t('noMove')+'</span>')+'</div>';
+    if(f.sent){
+      const cand=[];for(const r of plan.active||[])if(!r.startedAt&&r.canEdit!==false&&r.routeId!==f.r.routeId)for(const s of r.stops)if(!s.delivered)cand.push({s,r});
+      h+='<h4>'+t('swapWith')+'</h4>'+(cand.length?'<div class="row">'+cand.map(x=>'<button class="btn sec" data-sw="'+esc(x.s.orderId)+'">⇄ '+esc(x.s.code)+' · '+esc(x.r.driverName)+'</button>').join('')+'</div>':'<div class="muted">'+t('noSwap')+'</div>');
+    }else{
+      h+='<h4>'+t('prefs')+'</h4><div>'+t('pin')+'<select data-pin><option value="">'+t('pinNone')+'</option>'+drivers.map(d=>'<option value="'+esc(d.id)+'"'+(p.pin===d.id?' selected':'')+'>'+esc(d.name)+'</option>').join('')+'</select></div>'
+        +'<div style="margin-top:6px">'+t('avoid')+'</div>'+(plan.allDrivers||[]).map(d=>'<label><input type="checkbox" data-av="'+esc(d.id)+'"'+((p.avoid||[]).includes(d.id)?' checked':'')+'> '+esc(d.name)+'</label>').join('')
+        +'<label><input type="checkbox" data-flag="hold"'+(p.hold?' checked':'')+'> '+t('hold')+'</label><label><input type="checkbox" data-flag="urgent"'+(p.urgent?' checked':'')+'> '+t('urgent')+'</label><label><input type="checkbox" data-flag="solo"'+(p.solo?' checked':'')+'> '+t('solo')+'</label>'
+        +'<div class="btns"><button class="btn red" data-clear="1">'+t('clearPrefs')+'</button></div>';
+    }
+    h+='<div class="btns"><button class="btn sec" data-close="1">'+t('close')+'</button></div>';
+    $('#dlgBox').innerHTML=h;$('#dlg').dataset.id=id;$('#dlg').dataset.sent=f.sent?1:0;$('#dlg').classList.add('on');
+  }
+  function closeDlg(){$('#dlg').classList.remove('on');delete $('#dlg').dataset.id}
+  async function act(fn,msg,keep){
+    try{await fn();if(msg)toast(msg)}catch(err){toast(err.message)}
+    const id=$('#dlg').dataset.id;await load();if(keep&&id&&$('#dlg').classList.contains('on'))openMenu(id);else closeDlg();
+  }
+  $('#dlg').addEventListener('click',e=>{
+    const id=$('#dlg').dataset.id,sent=$('#dlg').dataset.sent==='1',tg=e.target;
+    if(tg.id==='dlg'||tg.closest('[data-close]'))return closeDlg();
+    const mv=tg.closest('[data-mv]'),sw=tg.closest('[data-sw]'),cl=tg.closest('[data-clear]');
+    if(mv)return act(()=>sent?api('POST','/api/delivery/move',{orderId:id,toDriverId:mv.dataset.mv}):api('POST','/api/delivery/order-pref',{orderId:id,pin:mv.dataset.mv}),t('moved'));
+    if(sw)return act(()=>api('POST','/api/delivery/swap',{orderA:id,orderB:sw.dataset.sw}),t('swapped'));
+    if(cl)return act(()=>api('POST','/api/delivery/order-pref',{orderId:id,clear:true}),t('saved'));
+  });
+  $('#dlg').addEventListener('change',e=>{
+    const id=$('#dlg').dataset.id,tg=e.target;
+    if(tg.matches('[data-pin]'))return act(()=>api('POST','/api/delivery/order-pref',{orderId:id,pin:tg.value}),t('saved'),true);
+    if(tg.matches('[data-av]')){const av=[...document.querySelectorAll('#dlg [data-av]')].filter(x=>x.checked).map(x=>x.dataset.av);return act(()=>api('POST','/api/delivery/order-pref',{orderId:id,avoid:av}),t('saved'),true)}
+    if(tg.matches('[data-flag]'))return act(()=>api('POST','/api/delivery/order-pref',{orderId:id,[tg.dataset.flag]:tg.checked}),t('saved'),tg.dataset.flag!=='hold');
+  });
   async function api(method,url,body){const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store'});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||r.status);return j}
   async function send(driverId){
     const d=plan.drivers.find(x=>x.driverId===driverId);if(!d||!d.tours[0])return;
@@ -212,11 +279,18 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
     finally{busy=false}
   }
   $('#side').addEventListener('click',async e=>{
+    const m=e.target.closest('[data-menu]');if(m)return openMenu(m.dataset.menu);
+    const up=e.target.closest('[data-up]'),dn=e.target.closest('[data-down]'),ps=e.target.closest('[data-pause]'),rs=e.target.closest('[data-resume]'),rl=e.target.closest('[data-release]');
+    if(up||dn){const b=up||dn,r=(plan.active||[]).find(x=>x.routeId===(up?b.dataset.up:b.dataset.down));if(!r)return;const i=Number(b.dataset.i),j=up?i-1:i+1,ids=r.stops.map(x=>x.orderId);[ids[i],ids[j]]=[ids[j],ids[i]];b.disabled=true;try{await api('POST','/api/delivery/reorder',{routeId:r.routeId,orderIds:ids})}catch(err){toast(err.message)}return load()}
+    if(ps){ps.disabled=true;try{await api('POST','/api/delivery/driver-pref',{driverId:ps.dataset.pause,paused:true})}catch(err){toast(err.message)}return load()}
+    if(rs){rs.disabled=true;try{await api('POST','/api/delivery/driver-pref',{driverId:rs.dataset.resume,paused:false})}catch(err){toast(err.message)}return load()}
+    if(rl){rl.disabled=true;try{await api('POST','/api/delivery/order-pref',{orderId:rl.dataset.release,hold:false})}catch(err){toast(err.message)}return load()}
     const s=e.target.closest('[data-send]'),c=e.target.closest('[data-cancel]');if(!s&&!c)return;
     const b=s||c;b.disabled=true;
     try{if(s)await send(s.dataset.send);else{await api('POST','/api/delivery/cancel',{routeId:c.dataset.cancel});toast(t('cancelled'))}}catch(err){toast(err.message)}
     await load();
   });
+  $('#side').addEventListener('change',async e=>{const m=e.target.closest('[data-maxs]');if(!m)return;try{await api('POST','/api/delivery/driver-pref',{driverId:m.dataset.maxs,maxStops:Number(m.value)||null});toast(t('saved'))}catch(err){toast(err.message)}load()});
   initMap();load();setInterval(load,10000);
 })();
 </script>
