@@ -17,9 +17,12 @@ if (-not $cred) { throw "Keine credentials-file-Zeile in $dst gefunden." }
 $new = (Get-Content $src -Raw) -replace '(?m)^\s*credentials-file\s*:.*$', $cred.Trim()
 Copy-Item $dst ($dst + '.bak-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 [System.IO.File]::WriteAllText($dst, $new, (New-Object System.Text.UTF8Encoding($false)))
-Write-Host "OK: Config aktualisiert (credentials-file: $($cred.Trim()))"
+Write-Host "OK: Config aktualisiert ($($cred.Trim()))"
 
-Restart-ScheduledTask -TaskName 'cloudflared-nara'
+Stop-ScheduledTask -TaskName 'cloudflared-nara' -ErrorAction SilentlyContinue
+Start-Sleep 2
+Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Start-ScheduledTask -TaskName 'cloudflared-nara'
 Start-Sleep 6
 Write-Host ("Oeffentlich /api/push/key (401 = erreichbar, Login noetig): " + (curl.exe -s -o NUL -w "%{http_code}" --max-time 10 https://app.flamo.co.de/api/push/key))
 Write-Host ("Oeffentlich driver.html (200 erwartet):                  " + (curl.exe -s -o NUL -w "%{http_code}" --max-time 10 https://app.flamo.co.de/driver.html))
