@@ -7,7 +7,7 @@ credentials-file: C:\Users\droma\.cloudflared\cb7cd52a-c59b-4c72-86da-e3f26310b9
 ingress:
   # Fahrer-App + Lieferseite + gemeinsame Dateien
   - hostname: app.flamo.co.de
-    path: ^/(driver\.html|delivery\.html|join\.html|nara-lang\.js|nara-auth\.js|nara-shell\.css|nara\.webmanifest|sw\.js)$
+    path: ^/(driver\.html|delivery\.html|join\.html|pay\.html|nara-lang\.js|nara-auth\.js|nara-shell\.css|nara\.webmanifest|sw\.js)$
     service: http://127.0.0.1:4185
   # QR-Bibliothek der Kundenseite (nur diese eine Datei aus vendor/)
   - hostname: app.flamo.co.de

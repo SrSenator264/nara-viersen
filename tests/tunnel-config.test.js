@@ -25,7 +25,7 @@ test('Tunnel-Config: erlaubte Pfade (Fahrer + Kunde) sind offen', () => {
 
 test('Tunnel-Config: Kasse/Admin/Buchhaltung/Küche/Live Orders/Dispatch/Geheimes -> gesperrt (404)', () => {
   for (const p of ['/', '/index.html', '/kasse.html', '/kasse.js', '/kasse-settlement.html', '/admin.html', '/admin-foundation.html', '/admin.js', '/accounting.html', '/live-orders.html', '/kitchen.html',
-    '/dispatch.html', '/team.html', '/staff.html', '/banking.html', '/reports.html', '/customers.html', '/pay.html', '/driver-app.html', '/driver-app-v2.html', '/delivery-print.html',
+    '/dispatch.html', '/team.html', '/staff.html', '/banking.html', '/reports.html', '/customers.html', '/driver-app.html', '/driver-app-v2.html', '/delivery-print.html',
     '/vendor/', '/vendor/other.js', '/vendor/qrcode.bundle.js.map', '/vendor/../server.js', '/server.js', '/auth.js', '/package.json', '/.env', '/data/nara-auth.json', '/data/nara-admin.json', '/tests/auth-server.test.js', '/tunnel/config.example.yml',
     '/api/auth/bootstrap', '/api/auth/staff', '/api/auth/set-pin', '/api/admin-data', '/api/kasse-state', '/api/customers', '/api/kitchen/orders', '/api/live-orders/stage',
     '/api/accounting/accounts', '/api/accounting/bank-transactions', '/api/delivery/config', '/api/delivery/assign', '/api/delivery/driver-pay', '/api/delivery/auto-plan',
@@ -84,4 +84,12 @@ test('Fahrer-App installierbar: eigenes Manifest startet driver.html und ist üb
   for (const p of ['/icons/driver.webmanifest', m.start_url, ...m.icons.map(i => i.src)]) assert.ok(res.some(r => r.test(p)), p);
   for (const f of ['driver.html', 'join.html', 'delivery.html']) assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').includes('icons/driver.webmanifest'), f);
   assert.ok(fs.readFileSync(path.join(__dirname, '..', 'join.html'), 'utf8').includes('beforeinstallprompt'));
+});
+
+test('Tür-Zahlung: pay.html über den Tunnel erreichbar, Detailseite hat den Knopf; Team-Seite schickt App-Link', () => {
+  const y = fs.readFileSync(path.join(__dirname, '..', 'tunnel', 'config.example.yml'), 'utf8');
+  const res = [...y.matchAll(/path:\s*(\^\S+)/g)].map(x => new RegExp(x[1]));
+  for (const p of ['/pay.html', '/api/pay/door', '/vendor/qrcode.bundle.js', '/api/driver/door-pay']) assert.ok(res.some(r => r.test(p)), p);
+  assert.ok(fs.readFileSync(path.join(__dirname, '..', 'delivery.html'), 'utf8').includes('/api/driver/door-pay'));
+  assert.ok(fs.readFileSync(path.join(__dirname, '..', 'team.html'), 'utf8').includes('function sendApp'));
 });
