@@ -188,6 +188,31 @@ main{padding:12px 12px 90px}
     persist();first=false;if(fresh.length)show(fresh);
   };
   if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}}
+  // ===== Web Push: Benachrichtigung auch bei geschlossener App =====
+  var PX={de:['🔔 Benachrichtigungen aktivieren','Tippe hier, damit du neue Aufträge auch bei geschlossener App bekommst.','Benachrichtigungen sind blockiert. Erlaube sie in den Browser-/Handy-Einstellungen.','Auf dem iPhone: in Safari „Zum Home-Bildschirm“ hinzufügen und von dort öffnen.','✅ Benachrichtigungen aktiv'],
+    ar:['🔔 فعّل الإشعارات','اضغط هون لحتى تجيك الطلبات الجديدة حتى والتطبيق مسكّر.','الإشعارات محظورة. اسمح فيها من إعدادات المتصفح/الجوال.','على الآيفون: من Safari اختار "إضافة إلى الشاشة الرئيسية" وافتح التطبيق منها.','✅ الإشعارات شغّالة'],
+    en:['🔔 Enable notifications','Tap here to get new orders even when the app is closed.','Notifications are blocked. Allow them in your browser/phone settings.','On iPhone: add to Home Screen from Safari and open it from there.','✅ Notifications on']}[L]||null;
+  function u8(s){s=s.replace(/-/g,'+').replace(/_/g,'/');var b=atob(s+'==='.slice((s.length+3)%4)),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+  function pushOk(){return 'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window}
+  function pushSub(){
+    if(!pushOk()||Notification.permission!=='granted')return Promise.resolve(false);
+    return navigator.serviceWorker.ready.then(function(reg){return reg.pushManager.getSubscription().then(function(sub){
+      if(sub)return sub;
+      return fetch('/api/push/key',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json()}).then(function(j){return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(j.key)})});
+    })}).then(function(sub){return fetch('/api/push/subscribe',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(sub.toJSON())})}).then(function(r){return r.ok}).catch(function(){return false});
+  }
+  window.naraPushSub=pushSub;
+  var bar=document.createElement('div');bar.id='pushbar';bar.style.cssText='position:fixed;left:10px;right:10px;bottom:10px;z-index:9000;background:#ff7a1a;color:#1a0d02;border-radius:16px;padding:12px 14px;font-weight:800;font-size:15px;display:none;box-shadow:0 6px 24px #0006;cursor:pointer;text-align:center';
+  document.body.appendChild(bar);
+  function paintBar(){
+    var P=PX;if(!P)return;
+    if(!pushOk()){bar.innerHTML=P[0]+'<div style="font-weight:600;font-size:13px;margin-top:4px">'+P[3]+'</div>';bar.style.display=/iphone|ipad/i.test(navigator.userAgent)&&!window.navigator.standalone?'block':'none';return}
+    if(Notification.permission==='granted'){pushSub().then(function(ok){if(ok){bar.style.display='none'}});return}
+    if(Notification.permission==='denied'){bar.innerHTML=P[0]+'<div style="font-weight:600;font-size:13px;margin-top:4px">'+P[2]+'</div>';bar.style.display='block';return}
+    bar.innerHTML=P[0]+'<div style="font-weight:600;font-size:13px;margin-top:4px">'+P[1]+'</div>';bar.style.display='block';
+  }
+  bar.onclick=function(){if(!pushOk()||Notification.permission==='denied')return;try{Notification.requestPermission().then(function(){paintBar()})}catch(e){Notification.requestPermission(paintBar)}};
+  setTimeout(paintBar,1200);
 })();
 </script>
 </body>

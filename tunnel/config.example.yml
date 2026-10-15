@@ -19,7 +19,7 @@ ingress:
     service: http://127.0.0.1:4185
   # Nur diese API-Endpunkte (Rechte pro Rolle prüft NARA zusätzlich selbst)
   - hostname: app.flamo.co.de
-    path: ^/api/(auth/(login|logout|me|employees|join|invite-check)|attendance|menu|web-orders(/status)?|pay/(enabled|door)|flamo/(chat|status)|delivery/(scan|route-link|quote|zones)|driver/(position|start|delivered|finish|proof|door-pay|routes|note|notes))$
+    path: ^/api/(auth/(login|logout|me|employees|join|invite-check)|attendance|menu|web-orders(/status)?|pay/(enabled|door)|flamo/(chat|status)|delivery/(scan|route-link|quote|zones)|driver/(position|start|delivered|finish|proof|door-pay|routes|note|notes)|push/(key|subscribe))$
     service: http://127.0.0.1:4185
   # Alles andere (Kasse, Admin, Buchhaltung, Küche, Live Orders, Dispatch, bootstrap ...) -> 404
   - service: http_status:404

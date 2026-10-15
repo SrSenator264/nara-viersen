@@ -278,6 +278,16 @@ function setDriverPref(data, { driverId, paused, maxStops }, user, now = new Dat
   return prefs.drivers[d.id] || {};
 }
 
+// مين لازم يوصله إشعار بعد عملية توزيع: [{driverId, codes}] (الرقم بس، بدون بيانات الزبون)
+function pushTargets(data, type, result, p = {}) {
+  const code = id => { const o = findOrder(data, id); return o ? kitchen.kitchenView(o).displayCode : String(id); };
+  const out = [];
+  if (type === 'DELIVERY_ROUTE_ASSIGNED' && result) out.push({ driverId: result.employeeId, codes: (result.orderIds || []).map(code) });
+  else if (type === 'DELIVERY_ORDER_MOVED' && result && result.to && result.from && result.to.id !== result.from.id) out.push({ driverId: result.to.employeeId, codes: [code(p.orderId)] });
+  else if (type === 'DELIVERY_ORDERS_SWAPPED' && result) { out.push({ driverId: result.a.employeeId, codes: [code(p.orderB)] }); out.push({ driverId: result.b.employeeId, codes: [code(p.orderA)] }); }
+  return out.filter(x => x.driverId && x.codes.length);
+}
+
 function routeFor(data, routeId, user) {
   const r = (data.deliveryRoutes || []).find(x => x.id === routeId);
   if (!r) throw err(404, 'الجولة غير موجودة');
@@ -392,4 +402,4 @@ async function geocode(address, fetchImpl = fetch) {
   return { lat: Number(j[0].lat), lng: Number(j[0].lon) };
 }
 
-module.exports = { DEFAULT_SHOP, shopOf, addressOf, addressKey, pointOf, buildInput, planFor, missingAddresses, geocode, activeDrivers, assignRoute, moveOrder, swapOrders, reorderStops, setOrderPref, setDriverPref, cancelRoute, startRoute, deliverStop, finishRoute, driverRoutes, travelModel, paidOnline, proofDelivery };
+module.exports = { DEFAULT_SHOP, shopOf, addressOf, addressKey, pointOf, buildInput, planFor, missingAddresses, geocode, activeDrivers, assignRoute, pushTargets, moveOrder, swapOrders, reorderStops, setOrderPref, setDriverPref, cancelRoute, startRoute, deliverStop, finishRoute, driverRoutes, travelModel, paidOnline, proofDelivery };
