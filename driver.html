@@ -202,7 +202,7 @@ main{padding:12px 12px 90px}
     })}).then(function(sub){return fetch('/api/push/subscribe',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(sub.toJSON())})}).then(function(r){return r.ok}).catch(function(){return false});
   }
   window.naraPushSub=pushSub;
-  var bar=document.createElement('div');bar.id='pushbar';bar.style.cssText='position:fixed;left:10px;right:10px;bottom:10px;z-index:9000;background:#ff7a1a;color:#1a0d02;border-radius:16px;padding:12px 14px;font-weight:800;font-size:15px;display:none;box-shadow:0 6px 24px #0006;cursor:pointer;text-align:center';
+  var bar=document.createElement('div');bar.id='pushbar';bar.style.cssText='position:fixed;left:10px;right:10px;bottom:58px;z-index:9000;background:#ff7a1a;color:#1a0d02;border-radius:16px;padding:12px 14px;font-weight:800;font-size:15px;display:none;box-shadow:0 6px 24px #0006;cursor:pointer;text-align:center';
   document.body.appendChild(bar);
   function paintBar(){
     var P=PX;if(!P)return;
