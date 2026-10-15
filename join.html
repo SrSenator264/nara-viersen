@@ -17,15 +17,15 @@ input:focus{border-color:var(--ac);outline:none}button{background:var(--ac);bord
 <div class="msg" id="m"></div></div>
 <script>
 (function(){
-var T={de:{h:'Fahrer-Konto anlegen',s:'Wähle deinen Namen und eine PIN (mind. 4 Ziffern).',n:'Dein Name',p:'PIN',g:'Konto anlegen',bad:'Dieser Link ist ungültig oder abgelaufen. Bitte neuen Link anfordern.',ok:'Fertig! Weiter…'},
-ar:{h:'إنشاء حساب سائق',s:'اختار اسمك ورمز PIN (4 أرقام أو أكثر).',n:'اسمك',p:'PIN',g:'إنشاء الحساب',bad:'الرابط غير صالح أو منتهي. اطلب رابط جديد.',ok:'تمام! جاري الدخول…'},
-en:{h:'Create driver account',s:'Choose your name and a PIN (at least 4 digits).',n:'Your name',p:'PIN',g:'Create account',bad:'This link is invalid or expired. Please ask for a new one.',ok:'Done! Continuing…'}};
+var T={de:{h:'Fahrer-Konto anlegen',s:'Wähle deinen Namen und eine PIN (mind. 4 Ziffern).',n:'Dein Name',p:'PIN',g:'Konto anlegen',nn:'Bitte Namen eingeben.',np:'PIN: mind. 4 Ziffern.',bad:'Dieser Link ist ungültig oder abgelaufen. Bitte neuen Link anfordern.',ok:'Fertig! Weiter…'},
+ar:{h:'إنشاء حساب سائق',s:'اختار اسمك ورمز PIN (4 أرقام أو أكثر).',n:'اسمك',p:'PIN',g:'إنشاء الحساب',nn:'اكتب اسمك.',np:'PIN: 4 أرقام على الأقل.',bad:'الرابط غير صالح أو منتهي. اطلب رابط جديد.',ok:'تمام! جاري الدخول…'},
+en:{h:'Create driver account',s:'Choose your name and a PIN (at least 4 digits).',n:'Your name',p:'PIN',g:'Create account',nn:'Please enter your name.',np:'PIN: at least 4 digits.',bad:'This link is invalid or expired. Please ask for a new one.',ok:'Done! Continuing…'}};
 var L=localStorage.getItem('nara_lang')||((navigator.language||'de').slice(0,2));if(!T[L])L='de';
 var $=function(i){return document.getElementById(i)},tok=new URLSearchParams(location.search).get('t')||'';
 function paint(){var d=T[L];document.documentElement.lang=L;document.documentElement.dir=L==='ar'?'rtl':'ltr';$('h').textContent=d.h;$('s').textContent=d.s;$('name').placeholder=d.n;$('pin').placeholder=d.p;$('go').textContent=d.g;document.querySelectorAll('.lang a').forEach(function(a){a.className=a.dataset.l===L?'on':''})}
 document.querySelectorAll('.lang a').forEach(function(a){a.onclick=function(e){e.preventDefault();L=a.dataset.l;try{localStorage.setItem('nara_lang',L)}catch(x){}paint()}});paint();
 fetch('/api/auth/invite-check?t='+encodeURIComponent(tok)).then(function(r){if(r.ok)$('f').hidden=false;else{$('m').textContent=T[L].bad;$('s').textContent=''}});
-$('f').onsubmit=function(e){e.preventDefault();$('m').textContent='';
+$('f').onsubmit=function(e){e.preventDefault();$('m').textContent='';if(!$('name').value.trim()){$('m').textContent=T[L].nn;$('name').focus();return}if(String($('pin').value).length<4){$('m').textContent=T[L].np;$('pin').focus();return}
 fetch('/api/auth/join',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,name:$('name').value,pin:$('pin').value})}).then(function(r){return r.json().then(function(j){return{ok:r.ok,j:j}})}).then(function(x){if(x.ok){$('m').style.color='#4cc38a';$('m').textContent=T[L].ok;setTimeout(function(){location.href='driver.html'},700)}else $('m').textContent=x.j.error||T[L].bad})};
 })();
 </script></body></html>
