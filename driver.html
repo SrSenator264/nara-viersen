@@ -75,6 +75,8 @@ main{padding:12px 12px 90px}
       if(Date.now()-lastSent>15000){lastSent=Date.now();api('POST','/api/driver/position',last).then(j=>{if(j.finished){toast(t('welcome'));load()}}).catch(()=>{})}
     },e=>gps('off',e.code===1?t('allowGps'):t('noSignal')),{enableHighAccuracy:true,maximumAge:10000,timeout:20000});
   }
+  function sendNow(){if(!('geolocation' in navigator)||!window.isSecureContext)return;navigator.geolocation.getCurrentPosition(function(p){last={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy};lastSent=Date.now();gps('on',t('gpsOn'));api('POST','/api/driver/position',last).then(function(j){if(j.finished){toast(t('welcome'));load()}}).catch(function(){})},function(){},{enableHighAccuracy:true,maximumAge:5000,timeout:8000})}
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')sendNow()});window.addEventListener('pageshow',sendNow);
   async function keepAwake(){try{if('wakeLock' in navigator&&!wake){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>wake=null)}}catch(e){}}
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&routes.some(r=>r.startedAt))keepAwake()});
 
@@ -143,9 +145,9 @@ main{padding:12px 12px 90px}
     const st=e.target.closest('[data-start]'),dl=e.target.closest('[data-deliver]'),fn=e.target.closest('[data-finish]');
     if(!st&&!dl&&!fn)return;const b=st||dl||fn;b.disabled=true;
     try{
-      if(st){await api('POST','/api/driver/start',{routeId:st.dataset.start});keepAwake();const r=routes.find(x=>x.routeId===st.dataset.start);if(r&&r.googleMapsUrl)window.open(r.googleMapsUrl,'_blank')}
+      if(st){await api('POST','/api/driver/start',{routeId:st.dataset.start,...(last||{})});keepAwake();const r=routes.find(x=>x.routeId===st.dataset.start);if(r&&r.googleMapsUrl)window.open(r.googleMapsUrl,'_blank')}
       if(dl){await api('POST','/api/driver/delivered',{orderId:dl.dataset.deliver,...(last||{})});toast(t('done'));if(navigator.vibrate)navigator.vibrate(80)}
-      if(fn){await api('POST','/api/driver/finish',{routeId:fn.dataset.finish});toast(t('welcome'))}
+      if(fn){await api('POST','/api/driver/finish',{routeId:fn.dataset.finish,...(last||{})});toast(t('welcome'))}
     }catch(err){toast(err.message)}
     await load();
   });

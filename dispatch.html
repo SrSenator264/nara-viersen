@@ -168,7 +168,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       line.push(shop);L.polyline(line,{color:c,weight:3,dashArray:'6 8',opacity:.8}).addTo(layer);
     }
     for(const u of plan.unplaced||[])if(Number.isFinite(u.lat)){L.marker([u.lat,u.lng],{icon:pin('•','#8a8f98'),opacity:.9}).addTo(layer).bindTooltip(esc(u.code||'')+' · '+esc(u.address||''));pts.push([u.lat,u.lng])}
-    for(const p of plan.positions||[])if(Number.isFinite(p.lat)){L.marker([p.lat,p.lng],{icon:L.divIcon({className:'',html:'<div class="car">🛵</div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(layer).bindTooltip(esc(p.name||'')+' · '+hm(p.at),{permanent:true,direction:'top'});pts.push([p.lat,p.lng])}
+    for(const p of plan.positions||[])if(Number.isFinite(p.lat)){const age=Math.max(0,Math.round((Date.now()-Date.parse(p.at))/60000)),old=age>=3;L.marker([p.lat,p.lng],{opacity:old?.45:1,icon:L.divIcon({className:'',html:'<div class="car">🛵'+(old?'<sup>?</sup>':'')+'</div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(layer).bindTooltip(esc(p.name||'')+' · '+hm(p.at)+(old?' · '+age+' min':''),{permanent:true,direction:'top'});pts.push([p.lat,p.lng])}
     if(!fitted&&pts.length>1){map.fitBounds(pts,{padding:[30,30]});fitted=true}
   }
 
