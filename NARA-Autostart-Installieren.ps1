@@ -21,7 +21,7 @@ $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoi
   -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew
 
 # 1) NARA-Server
-$cmd = "/c cd /d `"$root`" && `"$node`" server.js >> logs\server.log 2>&1"
+$cmd = "/c cd /d `"$root`" && set `"PORT=4185`" && `"$node`" server.js >> logs\server.log 2>&1"
 $action = New-ScheduledTaskAction -Execute 'cmd.exe' -Argument $cmd -WorkingDirectory $root
 $trigger = New-ScheduledTaskTrigger -AtStartup
 $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -RunLevel Highest
