@@ -1,0 +1,11 @@
+{
+  "appId": "de.flamo.fahrer",
+  "appName": "Flamo Fahrer",
+  "webDir": "www",
+  "server": {
+    "url": "https://app.flamo.co.de/driver.html",
+    "cleartext": false,
+    "allowNavigation": ["app.flamo.co.de"]
+  },
+  "android": { "allowMixedContent": false }
+}

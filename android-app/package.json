@@ -1,0 +1,13 @@
+{
+  "name": "flamo-fahrer-apk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Android-Huelle fuer die Flamo Fahrer-App (laedt https://app.flamo.co.de/driver.html, GPS im Hintergrund)",
+  "dependencies": {
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/cli": "^6.1.0",
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/local-notifications": "^6.1.0",
+    "@capacitor-community/background-geolocation": "^1.2.20"
+  }
+}

@@ -67,7 +67,21 @@ main{padding:12px 12px 90px}
 
   // الموقع: بيتبعت كل 15 ثانية طول ما الصفحة مفتوحة (بس وقت الشغل)
   function gps(state,text){const g=$('#gps');g.className='gps '+state;g.textContent=text}
+  var IS_APK=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()),lastPoll=0;
+  // APK: GPS لحاله بالخلفية (خدمة أمامية) حتى لو السائق بالخرائط أو الشاشة مقفلة
+  function nativeGps(){
+    try{
+      var BG=Capacitor.registerPlugin('BackgroundGeolocation');
+      BG.addWatcher({backgroundTitle:'Flamo Fahrer',backgroundMessage:'Standort wird für die Lieferungen geteilt',requestPermissions:true,stale:false,distanceFilter:0},function(loc,err){
+        if(err){gps('off',err.code==='NOT_AUTHORIZED'?t('allowGps'):t('noSignal'));return}
+        last={lat:loc.latitude,lng:loc.longitude,accuracy:loc.accuracy};gps('on',t('gpsOn'));
+        if(Date.now()-lastSent>15000){lastSent=Date.now();api('POST','/api/driver/position',last).then(function(j){if(j.finished){toast(t('welcome'));load()}}).catch(function(){})}
+        if(Date.now()-lastPoll>10000){lastPoll=Date.now();load()}
+      });
+    }catch(e){gps('off',t('noSignal'))}
+  }
   function startGps(){
+    if(IS_APK){nativeGps();return}
     if(!('geolocation' in navigator)){gps('off',t('noGeo'));return}
     if(!window.isSecureContext){gps('off',t('needHttps'));return}
     navigator.geolocation.watchPosition(p=>{
@@ -177,7 +191,7 @@ main{padding:12px 12px 90px}
   ['touchstart','click','keydown'].forEach(function(ev){window.addEventListener(ev,unlock,{once:false,passive:true})});
   function chime(){if(!ac)return;try{var t=ac.currentTime;[[880,0],[1175,.16],[1568,.32]].forEach(function(n){var o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=n[0];g.gain.setValueAtTime(0.0001,t+n[1]);g.gain.exponentialRampToValueAtTime(0.5,t+n[1]+.02);g.gain.exponentialRampToValueAtTime(0.0001,t+n[1]+.4);o.connect(g);g.connect(ac.destination);o.start(t+n[1]);o.stop(t+n[1]+.45)})}catch(e){}}
   function ring(){chime();if(navigator.vibrate)navigator.vibrate([300,120,300,120,500]);}
-  function notify(codes){try{if(!('Notification' in window)||Notification.permission!=='granted'||!navigator.serviceWorker)return;navigator.serviceWorker.ready.then(function(r){r.showNotification(X[0],{body:X[2]+codes.join(', '),icon:'web-prototype/c/flamo-present.webp',badge:'web-prototype/c/flamo-present.webp',tag:'nara-new-order',renotify:true,vibrate:[300,120,300],data:{url:'driver.html'}})})}catch(e){}}
+  function notify(codes){try{if(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()){var LN=Capacitor.registerPlugin('LocalNotifications');LN.requestPermissions().then(function(){return LN.schedule({notifications:[{id:Math.floor(Date.now()/1000)%2147483000,title:X[0],body:X[2]+codes.join(', ')}]})}).catch(function(){});return}if(!('Notification' in window)||Notification.permission!=='granted'||!navigator.serviceWorker)return;navigator.serviceWorker.ready.then(function(r){r.showNotification(X[0],{body:X[2]+codes.join(', '),icon:'web-prototype/c/flamo-present.webp',badge:'web-prototype/c/flamo-present.webp',tag:'nara-new-order',renotify:true,vibrate:[300,120,300],data:{url:'driver.html'}})})}catch(e){}}
   var pop=document.getElementById('flamo-pop'),vid=document.getElementById('fp-vid');
   document.getElementById('fp-h').textContent=X[0];document.getElementById('fp-p').textContent=X[1];document.getElementById('fp-ok').textContent=X[3];
   document.getElementById('fp-ok').onclick=function(){pop.classList.remove('on');clearInterval(loopT);loopT=null;document.title=orig;try{vid.pause()}catch(e){}
@@ -207,6 +221,7 @@ main{padding:12px 12px 90px}
   var bar=document.createElement('div');bar.id='pushbar';bar.style.cssText='position:fixed;left:10px;right:10px;bottom:58px;z-index:9000;background:#ff7a1a;color:#1a0d02;border-radius:16px;padding:12px 14px;font-weight:800;font-size:15px;display:none;box-shadow:0 6px 24px #0006;cursor:pointer;text-align:center';
   document.body.appendChild(bar);
   function paintBar(){
+    if(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()){bar.style.display='none';return}
     var P=PX;if(!P)return;
     if(!pushOk()){bar.innerHTML=P[0]+'<div style="font-weight:600;font-size:13px;margin-top:4px">'+P[3]+'</div>';bar.style.display=/iphone|ipad/i.test(navigator.userAgent)&&!window.navigator.standalone?'block':'none';return}
     if(Notification.permission==='granted'){pushSub().then(function(ok){if(ok){bar.style.display='none'}});return}
