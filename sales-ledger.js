@@ -70,9 +70,10 @@ function build(data, from, to) {
 // ملخص شامل لكل المبيعات (محلي + منصات) للتقرير
 function summary(data, l) {
   const days = {};
-  const slot = d => (days[d] ||= { day: d, ownCents: 0, platformCents: 0, ownCount: 0, platformCount: 0 });
-  for (const r of l.own.rows) { const x = slot(r.businessDay); x.ownCents += r.grossCents; x.ownCount++; }
-  for (const r of l.platform.rows) if (r.status === 'OK') { const x = slot(r.businessDay); x.platformCents += r.grossCents; x.platformCount++; }
+  const slot = d => (days[d] ||= { day: d, ownCents: 0, platformCents: 0, ownCount: 0, platformCount: 0, byPlat: {} });
+  const addP = (x, k, c) => { const e = (x.byPlat[k] ||= { cents: 0, count: 0 }); e.cents += c; e.count++; };
+  for (const r of l.own.rows) { const x = slot(r.businessDay); x.ownCents += r.grossCents; x.ownCount++; addP(x, r.channel === 'Website' ? 'WEBSITE' : 'KASSE', r.grossCents); }
+  for (const r of l.platform.rows) if (r.status === 'OK') { const x = slot(r.businessDay); x.platformCents += r.grossCents; x.platformCount++; addP(x, r.platform || 'OTHER', r.grossCents); }
   const byDay = Object.values(days).sort((a, b) => a.day.localeCompare(b.day)).map(x => ({ ...x, totalCents: x.ownCents + x.platformCents, count: x.ownCount + x.platformCount }));
   const ownCents = l.own.totals.grossCents, platCents = l.platform.totals.grossCents;
   const brand = {}; brand['IU GENE (Kasse/Web)'] = ownCents; for (const [k, v] of Object.entries(l.platform.totals.byBrand)) brand[k + ' (Plattformen)'] = v;
