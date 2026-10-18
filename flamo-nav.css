@@ -23,7 +23,7 @@ html[dir=rtl] .fn-arrow{display:inline-block;transform:scaleX(-1)}
 /* Seitenleiste */
 .fn-side{visibility:hidden;position:fixed;z-index:950;top:0;bottom:0;inset-inline-start:0;width:var(--fn-w);display:flex;flex-direction:column;gap:2px;padding:14px 10px;background:#fff;border-inline-end:1px solid var(--fn-line);overflow:auto;transform:translateX(-105%);transition:transform .2s ease,visibility 0s linear .2s;box-shadow:8px 0 30px #0003}
 html[dir=rtl] .fn-side{transform:translateX(105%);box-shadow:-8px 0 30px #0003}
-.fn-side.open{transform:none;visibility:visible;transition:transform .2s ease}
+html[dir=rtl] .fn-side.open,.fn-side.open{transform:none;visibility:visible;transition:transform .2s ease}
 body.fn-on{padding-top:46px}
 html{scroll-padding-top:58px}
 .fn-backdrop{display:none;position:fixed;inset:0;z-index:940;background:#0006}.fn-backdrop.open{display:block}
