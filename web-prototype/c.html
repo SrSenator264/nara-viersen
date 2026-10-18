@@ -340,8 +340,8 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 function save(){try{localStorage.setItem('cart',JSON.stringify(cart));localStorage.setItem('lang',lang)}catch(e){}}
 var byId={};MENU.forEach(function(p){byId[p.id]=p});
 /* freigegebene Übersetzungen (Menüverwaltung) überlagern die deutschen Texte je nach Sprache */
-var TRM={};function applyTr(){MENU.forEach(function(p){if(p.n0===undefined){p.n0=p.n;p.d0=p.d}var e=(TRM[p.id]||{})[lang]||{};p.n=e.n||p.n0;p.d=e.d||p.d0})}
-try{fetch('/api/menu').then(function(r){return r.ok?r.json():null}).then(function(j){if(!j)return;(j.products||[]).forEach(function(p){if(p.tr&&Object.keys(p.tr).length)TRM[p.id]=p.tr});applyTr();if(typeof render==='function')render()}).catch(function(){})}catch(e){}
+var TRM={},OFF={};function applyTr(){MENU.forEach(function(p){p.off=!!OFF[p.id];if(p.n0===undefined){p.n0=p.n;p.d0=p.d}var e=(TRM[p.id]||{})[lang]||{};p.n=e.n||p.n0;p.d=e.d||p.d0})}
+try{fetch('/api/menu').then(function(r){return r.ok?r.json():null}).then(function(j){if(!j)return;(j.products||[]).forEach(function(p){OFF[p.id]=!!(p.unavailable||(p.channels&&p.channels.customer===false));if(p.tr&&Object.keys(p.tr).length)TRM[p.id]=p.tr});applyTr();if(typeof render==='function')render()}).catch(function(){})}catch(e){}
 // السلة: سطر لكل منتج مع خياراتو (نفس فكرة الكاشير)
 function normCart(c){var out={};for(var k in c){var v=c[k];if(typeof v==='number'){if(byId[k]&&v>0)out[k]={id:+k,q:v,m:0,o:[],nt:'',u:byId[k].p}}else if(v&&byId[v.id]&&v.q>0)out[k]=v}return out}
 cart=normCart(cart);
@@ -371,13 +371,13 @@ function header(){
 }
 function home(){
  var secs=SECS.map(function(s,i){
-  var n=MENU.filter(function(p){return p.s===s.k}).length;
+  var n=MENU.filter(function(p){return p.s===s.k&&!p.off}).length;
   return '<a href="#'+s.k+'" class="sec sec-'+s.k+'" style="--c:'+s.c+';--ink:'+s.ink+'"><span class="num">'+THEME.numLabel(i)+'</span><span class="name">'+esc(tt(s.name))+'</span><span class="sub">'+esc(tt(s.sub))+' · '+n+'</span>'+(s.img?'<img src="'+s.img+'" alt="" loading="lazy">':'')+'</a>';
  }).join('');
  return '<section class="hero"><div class="hero-text"><p class="eyebrow">'+esc(t('addr'))+' · '+esc(t('open'))+'</p><h1>'+th('h1')+'</h1><p class="lede">'+esc(th('lede'))+'</p></div><div class="hero-art">'+(THEME.heroMascot?mascot(300):'<img src="c/b20.webp" alt="">')+'</div></section><section class="secs" aria-label="Bereiche">'+secs+'</section>'+footer();
 }
 function section(k){
- var s=secOf(k), items=MENU.filter(function(p){return p.s===k});
+ var s=secOf(k), items=MENU.filter(function(p){return p.s===k&&!p.off});
  var groups=[];items.forEach(function(p){if(groups.indexOf(p.g)<0)groups.push(p.g)});
  var cards=groups.map(function(g){
   return '<h3 class="grp">'+esc(g)+'</h3><div class="grid">'+items.filter(function(p){return p.g===g}).map(function(p){

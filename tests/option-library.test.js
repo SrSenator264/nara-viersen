@@ -38,3 +38,9 @@ test('Echte Daten (falls vorhanden): Migration verlustfrei für alle Produkte', 
   migrate(d);
   for (const p of d.products) if (orig.get(p.id).length) assert.equal(canon(compose(p, d.optionGroups)), canon(orig.get(p.id)), p.name);
 });
+
+test('today(): Format JJJJ-MM-TT (Basis für „heute aus“)', () => {
+  const { today } = require('../option-library');
+  assert.equal(today(new Date(2026, 9, 19)), '2026-10-19');
+  assert.equal(today(new Date(2026, 0, 5)), '2026-01-05');
+});
