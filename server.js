@@ -506,7 +506,7 @@ serveFile=function(req,res){
   if(pathname==='/admin-foundation.html'){
     const file=path.resolve(root,'.'+pathname);
     const rel=path.relative(root,file);if(!rel||rel.startsWith('..'+path.sep)||path.isAbsolute(rel)||!fs.existsSync(file))return reply(res,404,{error:'Not found'});
-    const html=fs.readFileSync(file,'utf8').replace('</body>','<script src="admin-menu-enhancements.js?v=20260930-menu-editor"></script></body>');
+    const html=fs.readFileSync(file,'utf8');
     res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store, no-cache, must-revalidate'});
     return res.end(naraAuth.inject(pathname,html));
   }
