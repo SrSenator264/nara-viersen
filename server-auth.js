@@ -217,13 +217,21 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     return false;
   }
 
+  const NAV_SKIP = new Set(['driver.html', 'delivery.html', 'nara-app.html', 'join.html', 'pay.html']);
+
   // شاشة الدخول بتنحقن بالصفحات المحمية
   function inject(pathname, html) {
     const name = pathname.replace(/^\//, '');
     const roles = A.PAGE_ROLES[name];
     if (!roles) return html;
     let v = '0'; try { v = String(Math.floor(fs.statSync(path.join(__dirname, 'nara-auth.js')).mtimeMs)); } catch {}
-    const tag = `<script src="/nara-auth.js?v=${v}" data-roles="${roles.join(',')}"></script>`;
+    let tag = `<script src="/nara-auth.js?v=${v}" data-roles="${roles.join(',')}"></script>`;
+    // Flamo-Navigation (Seitenleiste, Zurück, Suche) — überall außer Fahrer-/Kundenseiten mit eigener Oberfläche
+    if (!NAV_SKIP.has(name)) {
+      const ver = f => { try { return String(Math.floor(fs.statSync(path.join(__dirname, f)).mtimeMs)); } catch { return '0'; } };
+      const map = JSON.stringify(A.PAGE_ROLES).replace(/"/g, '&quot;');
+      tag += `<link rel="stylesheet" href="/flamo-nav.css?v=${ver('flamo-nav.css')}"><script src="/flamo-nav.js?v=${ver('flamo-nav.js')}" data-roles-map="${map}" defer></script>`;
+    }
     return /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, m => m + tag) : tag + html;
   }
 

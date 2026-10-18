@@ -16,7 +16,7 @@ test('Tunnel-Config: letzte Regel ist 404 (Catch-all) und hostname gesetzt', () 
 
 test('Tunnel-Config: erlaubte Pfade (Fahrer + Kunde) sind offen', () => {
   for (const p of ['/driver.html', '/delivery.html', '/nara-lang.js', '/nara-auth.js', '/vendor/qrcode.bundle.js', '/nara-shell.css', '/nara.webmanifest', '/sw.js', '/icons/icon-192.png',
-    '/web-prototype/b.html', '/web-prototype/c/mascot.webp', '/web-prototype/app.js', '/web-prototype/menu.json',
+    '/web-prototype/c.html', '/web-prototype/c/mascot.webp', '/web-prototype/menu.json',
     '/api/auth/login', '/api/auth/logout', '/api/auth/me', '/api/auth/employees', '/api/attendance', '/api/menu', '/api/web-orders', '/api/web-orders/status',
     '/api/pay/enabled', '/api/pay/door', '/api/flamo/chat', '/api/flamo/status', '/api/delivery/scan', '/api/delivery/route-link', '/api/delivery/quote', '/api/delivery/zones',
     '/api/driver/position', '/api/driver/start', '/api/driver/delivered', '/api/driver/finish', '/api/driver/proof', '/api/driver/door-pay', '/api/driver/routes'])
@@ -42,9 +42,8 @@ test('Tunnel-Config: Pfad-Tricks (Traversal, %-Kodierung, Groß/Klein, Anhängse
 
 test('Menü: Team & PINs ist in der Seitenleiste; Login-Skript hat Versions-Parameter', () => {
   const fs = require('node:fs'), path = require('node:path');
-  const shell = fs.readFileSync(path.join(__dirname, '..', 'nara-shell.js'), 'utf8');
-  assert.ok(/'team\.html','team'\]/.test(shell));
-  assert.ok(/endsWith\('team\.html'\)\)return'team'/.test(shell));
+  const nav = fs.readFileSync(path.join(__dirname, '..', 'flamo-nav.js'), 'utf8');
+  assert.ok(/k: 'team', f: 'team\.html'/.test(nav));
   const srv = fs.readFileSync(path.join(__dirname, '..', 'server-auth.js'), 'utf8');
   assert.ok(srv.includes('/nara-auth.js?v=${v}'));
 });

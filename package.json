@@ -4,6 +4,7 @@
   },
   "scripts": {
     "lieferando:bridge": "node lieferando-playwright-bridge.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "i18n:audit": "node scripts/i18n-audit.mjs"
   }
 }

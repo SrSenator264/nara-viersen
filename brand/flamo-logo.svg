@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 96" role="img" aria-label="Flamo">
+  <title>Flamo</title>
+  <!-- PLACEHOLDER: ersetzt durch das endgültige Flamo-Logo (gleicher Dateiname = überall automatisch aktualisiert) -->
+  <defs>
+    <path id="fl" d="M0 26C-11 14-5 4 1-8C4 2 13 7 11 18C10 23 5 26 0 26Z"/>
+  </defs>
+  <g font-family="'Arial Rounded MT Bold','Arial Black',Arial,sans-serif" font-weight="900" font-size="68" stroke="#20231f" stroke-width="7" stroke-linejoin="round" paint-order="stroke" fill="#ef491d">
+    <text x="10" y="82" dy="0">F</text>
+    <text x="55" y="76">l</text>
+    <text x="84" y="84">a</text>
+    <text x="134" y="74">m</text>
+    <text x="206" y="82">o</text>
+  </g>
+  <g fill="#ffb21a" stroke="#20231f" stroke-width="3.5" stroke-linejoin="round">
+    <use href="#fl" transform="translate(28 22) scale(.9)"/>
+    <use href="#fl" transform="translate(236 24) scale(.9)"/>
+  </g>
+</svg>
