@@ -76,7 +76,7 @@
   const OK = ['de', 'ar', 'en'];
   const lang = () => {
     try { if (window.NARA_LANG && NARA_LANG.get) return NARA_LANG.get(); } catch (e) { /* ignore */ }
-    for (const k of ['nara-lang-app', 'nara-language']) { const v = store.get(k); if (OK.includes(v)) return v; }
+    for (const k of ['nara-lang-app', 'nara-language', 'nara.language']) { const v = store.get(k); if (OK.includes(v)) return v; }
     return 'de';
   };
   const tr = d => (d && (d[lang()] || d.de)) || '';
@@ -160,7 +160,7 @@
 
     function setLang(c) {
       if (!OK.includes(c) || c === lang()) return;
-      store.set('nara-lang-app', c); store.set('nara-language', c);
+      store.set('nara-lang-app', c); store.set('nara-language', c); store.set('nara.language', c);
       try { if (window.NARA_LANG) NARA_LANG.set(c); } catch (e) { /* ignore */ }
       location.reload();
     }
