@@ -2,6 +2,7 @@
 // web-order.js — طلبات الموقع (بلا عمولة): بيتحقق من السلة بالسيرفر وبيحسب الأسعار من بيانات NARA، ما منثق بأسعار المتصفح.
 // نفس منطق مجموعات الخيارات تبع الكاشير (لحالو/منيو، مشروب، صوص، ديبس، إضافات).
 const crypto = require('crypto');
+const OL = require('./option-library');
 
 const str = v => (v == null ? '' : String(v)).trim();
 const clip = (v, n) => str(v).slice(0, n);
@@ -31,17 +32,20 @@ function groupsFor(p, catalog) {
 }
 
 // المنتج المتاح للزبون: من الكتالوج، والسعر/التوفر من إعدادات NARA (data.products) إذا موجودة
-function productFor(id, catalog, products) {
+function productFor(id, catalog, products, optionGroups) {
   const p = catalog.find(x => String(x.id) === String(id) && !x.hidden);
   if (!p || p.unavailable === true) return null;
   const row = (products || []).find(x => String(x.sourceId) === String(id));
   if (row && (row.active === false || row.available === false || (row.channels && row.channels.customer === false))) return null;
+  if (row && row.soldOutDay === OL.today()) return null;
   const cents = row && Number.isFinite(Number(row.priceCents)) ? Number(row.priceCents) : Number(p.cents) || 0;
-  return { ...p, cents };
+  // Optionen/Extras kommen aus der gemeinsamen Bibliothek (Menüverwaltung), sobald das Produkt verknüpft ist
+  const dips = row && Array.isArray(row.optionGroupIds) && row.optionGroupIds.length ? OL.compose(row, optionGroups || []) : p.dips;
+  return { ...p, cents, dips };
 }
 
-function priceLine(line, catalog, products) {
-  const p = productFor(line && line.id, catalog, products);
+function priceLine(line, catalog, products, optionGroups) {
+  const p = productFor(line && line.id, catalog, products, optionGroups);
   if (!p) throw Object.assign(Error('Produkt nicht verfügbar.'), { code: 'UNAVAILABLE', id: line && line.id });
   const qty = Math.trunc(Number(line.q));
   if (!(qty >= 1 && qty <= 30)) throw Object.assign(Error('Ungültige Menge.'), { code: 'QTY' });
@@ -88,11 +92,11 @@ function validateCustomer(c, type) {
 }
 
 // payload = {type, cart:[{id,q,m,o:[{g,i}],nt}], customer, note, payment:'CASH'|'CARD'}
-function buildOrder(payload, { catalog, products, rules, deliveryConfig, now = new Date() }) {
+function buildOrder(payload, { catalog, products, optionGroups, rules, deliveryConfig, now = new Date() }) {
   const type = payload && payload.type === 'pickup' ? 'pickup' : 'delivery';
   const lines = Array.isArray(payload && payload.cart) ? payload.cart : [];
   if (!lines.length || lines.length > 40) throw Object.assign(Error('Warenkorb ist leer.'), { code: 'EMPTY' });
-  const cart = lines.map(l => priceLine(l, catalog, products));
+  const cart = lines.map(l => priceLine(l, catalog, products, optionGroups));
   const subtotal = cart.reduce((s, i) => s + i.totalCents, 0);
   const customer = validateCustomer(payload.customer || {}, type);
   let fee = 0, zone = null;

@@ -45,3 +45,15 @@ test('web order: pickup has no fee, card payment has no cash due; public status 
   assert.equal(s.step, 'received');
   assert.equal(W.publicStatus({ ...o, liveStage: 'DONE' }).step, 'done');
 });
+
+test('web order: Optionspreise kommen aus der Bibliothek, „heute aus“ sperrt das Produkt', () => {
+  const OL = require('../option-library.js');
+  const data = { optionGroups: [], products: [{ id: 'row1', sourceId: String(burger.id), priceCents: burger.cents, menuData: { dips: JSON.parse(JSON.stringify(burger.dips || [])) } }] };
+  OL.migrate(data);
+  const grp = data.optionGroups.find(g => g.name === 'Ihre Extras'); assert.ok(grp, 'Burger hat Extras');
+  const ex = grp.items.find(i => !/(double|triple)/i.test(i.name)); ex.cents = 777;
+  const o = W.buildOrder({ type: 'delivery', cart: [{ id: burger.id, q: 1, o: [{ g: 'Ihre Extras', i: String(ex.id || ex.name) }], u: 1 }], customer: cust, cust, zoneKey: undefined }, { ...ctx, products: data.products, optionGroups: data.optionGroups });
+  assert.equal(o.cart[0].unitCents, burger.cents + 777);
+  data.products[0].soldOutDay = OL.today();
+  assert.throws(() => W.buildOrder({ type: 'delivery', cart: [{ id: burger.id, q: 1, o: [], u: 1 }], cust }, { ...ctx, products: data.products, optionGroups: data.optionGroups }), /nicht verf/);
+});

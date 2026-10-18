@@ -340,8 +340,9 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 function save(){try{localStorage.setItem('cart',JSON.stringify(cart));localStorage.setItem('lang',lang)}catch(e){}}
 var byId={};MENU.forEach(function(p){byId[p.id]=p});
 /* freigegebene Übersetzungen (Menüverwaltung) überlagern die deutschen Texte je nach Sprache */
+function syncItem(a){var w=byId[a.id];if(!w)return;if(Number.isFinite(a.cents)&&a.cents>0)w.p=a.cents;if(Number.isFinite(a.menuCents)&&a.menuCents>0&&w.mc)w.mc=a.menuCents;if(!Array.isArray(a.dips)||!w.o)return;w.o=w.o.filter(function(g){if(g.g.indexOf('__')===0)return true;var items=a.dips.filter(function(d){return d.group===g.g&&!d.unavailable});if(!items.length&&!a.dips.some(function(d){return d.group===g.g}))return false;var old={};g.x.forEach(function(x){old[x.i]=x});g.x=items.map(function(d){var o=old[d.id];return{i:d.id,n:o?o.n:d.name,c:Number(d.cents)||0}});return g.x.length>0})}
 var TRM={},OFF={};function applyTr(){MENU.forEach(function(p){p.off=!!OFF[p.id];if(p.n0===undefined){p.n0=p.n;p.d0=p.d}var e=(TRM[p.id]||{})[lang]||{};p.n=e.n||p.n0;p.d=e.d||p.d0})}
-try{fetch('/api/menu').then(function(r){return r.ok?r.json():null}).then(function(j){if(!j)return;(j.products||[]).forEach(function(p){OFF[p.id]=!!(p.unavailable||(p.channels&&p.channels.customer===false));if(p.tr&&Object.keys(p.tr).length)TRM[p.id]=p.tr});applyTr();if(typeof render==='function')render()}).catch(function(){})}catch(e){}
+try{fetch('/api/menu').then(function(r){return r.ok?r.json():null}).then(function(j){if(!j)return;(j.products||[]).forEach(function(p){OFF[p.id]=!!(p.unavailable||(p.channels&&p.channels.customer===false));syncItem(p);if(p.tr&&Object.keys(p.tr).length)TRM[p.id]=p.tr});applyTr();if(typeof render==='function')render()}).catch(function(){})}catch(e){}
 // السلة: سطر لكل منتج مع خياراتو (نفس فكرة الكاشير)
 function normCart(c){var out={};for(var k in c){var v=c[k];if(typeof v==='number'){if(byId[k]&&v>0)out[k]={id:+k,q:v,m:0,o:[],nt:'',u:byId[k].p}}else if(v&&byId[v.id]&&v.q>0)out[k]=v}return out}
 cart=normCart(cart);
