@@ -34,3 +34,6 @@ publish-staging-*/
 nara-worker-deploy-archive-backup-*/
 
 flamo-source/
+
+backups/
+*.corrupt-*

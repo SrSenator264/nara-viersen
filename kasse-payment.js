@@ -37,7 +37,7 @@
   }
 
   async function serverOrder(id) {
-    try { const r = await fetch('/api/kasse-state', { cache: 'no-store' }); const j = await r.json(); return (j.orders || []).find(o => String(o.id) === String(id)) || null; } catch (e) { return null; }
+    try { const r = await fetch('/api/kasse-state?days=3', { cache: 'no-store' }); const j = await r.json(); return (j.orders || []).find(o => String(o.id) === String(id)) || null; } catch (e) { return null; }
   }
 
   async function open(kind, ctx) {

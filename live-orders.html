@@ -201,9 +201,15 @@ function ring(o,big){
   return '<div class="ring'+(big?' big':'')+'"><svg width="'+size+'" height="'+size+'"><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="#e7e3de" stroke-width="5"/><circle cx="'+size/2+'" cy="'+size/2+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+(c*frac)+' '+c+'"/></svg><span style="color:'+(left<0?'var(--late)':'inherit')+'">'+Math.abs(left)+'<small>'+(left<0?t('minLate'):t('min'))+'</small></span></div>'
 }
 
+// Normal: nur die letzten 2 Tage + Offenes (schnell, auch nach Jahren). Report/Archiv holen kurz die ganze Historie.
+let fullUntil=0,fullAt=0;
+function wantFull(){fullUntil=Date.now()+10*60000;fullAt=0;return load()}
 async function load(){
   try{
-    const r=await fetch('/api/kasse-state',{cache:'no-store'});
+    const full=Date.now()<fullUntil;
+    if(full&&fullAt&&Date.now()-fullAt<60000){render();return}
+    const r=await fetch('/api/kasse-state'+(full?'':'?days=2'),{cache:'no-store'});
+    if(full)fullAt=Date.now();
     if(!r.ok)throw Error(r.status);
     const j=await r.json(),today=localDay(Date.now());
     all=j.orders||[];pays={};for(const p of j.payments||[])pays[p.id]=p;
@@ -345,14 +351,14 @@ function reportHtml(day){
   return rows+'<div class="rsum"><div><span>'+t('orders')+'</span><span>'+ok.length+(canc?' (+'+canc+' '+t('plusCanc')+')':'')+'</span></div><div><span>'+t('Bar')+'</span><span>'+eur(by.Bar)+'</span></div><div><span>'+t('Karte')+'</span><span>'+eur(by.Karte)+'</span></div><div><span>'+t('onlinePlat')+'</span><span>'+eur(by.Online)+'</span></div>'+(svcAll?'<div><span>'+t('custPaid')+'</span><span>'+eur(total)+'</span></div><div><span>'+t('platFee')+'</span><span>− '+eur(svcAll)+'</span></div>':'')+'<div class="big"><span>'+t(svcAll?'forYou':'revenue')+'</span><span>'+eur(total-svcAll)+'</span></div></div>'||'<p>'+t('noOrders')+'</p>';
 }
 function isoDay(t){const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function openRep(){const r=$('#rday');if(!r.value)r.value=isoDay(Date.now()-DAY_START_H*3600000);drawRep();$('#rep').hidden=false}
+function openRep(){const r=$('#rday');if(!r.value)r.value=isoDay(Date.now()-DAY_START_H*3600000);drawRep();$('#rep').hidden=false;wantFull().then(drawRep)}
 function drawRep(){const [y,m,d]=$('#rday').value.split('-').map(Number);$('#rbody').innerHTML=reportHtml(y+'-'+m+'-'+d)+(isMgr?'<p class="arhint">🧪 '+esc(t('testHint'))+'</p>':'');
   document.querySelectorAll('[data-tst]').forEach(b=>b.onclick=async()=>{if(!confirm(t('markTestQ')))return;b.disabled=true;try{const r=await fetch('/api/orders/mark-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:b.dataset.tst})});if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||r.status);const o=all.find(x=>String(x.id)===b.dataset.tst);if(o)o.isTest=true;drawRep();render()}catch(e){b.disabled=false;alert(e.message)}})}
 let isMgr=false;fetch('/api/auth/me',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{const role=j&&(j.user||j).role;isMgr=['OWNER','MANAGER'].includes(role)}).catch(()=>{});
 $('#rday').onchange=drawRep;$('#rclose').onclick=()=>{$('#rep').hidden=true};
 $('#rprint').onclick=()=>{const sh=$('#nara-print-sheet');sh.innerHTML='<div style="font:12px Arial"><b style="font-size:16px">'+esc(t('report'))+' '+esc($('#rday').value)+'</b>'+$('#rbody').innerHTML+'</div>';setTimeout(()=>window.print(),50)};
 // الأرشيف: كل طلبات المنصات بيوم شغل معيّن (بس للقراءة)
-function openArc(){const a=$('#aday');if(!a.value)a.value=isoDay(Date.now()-DAY_START_H*3600000-86400000);drawArc();$('#arc').hidden=false}
+function openArc(){const a=$('#aday');if(!a.value)a.value=isoDay(Date.now()-DAY_START_H*3600000-86400000);drawArc();$('#arc').hidden=false;wantFull().then(drawArc)}
 function drawArc(){
   const [y,m,d]=$('#aday').value.split('-').map(Number),day=y+'-'+m+'-'+d;
   const q=($('#asearch').value||'').replace(/[\s#-]/g,'').toLowerCase();$('#asearch').placeholder=t('arSearch');
