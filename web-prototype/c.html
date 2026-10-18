@@ -339,6 +339,9 @@ function eur(c){return (c/100).toFixed(2).replace('.',',')+' €'}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function save(){try{localStorage.setItem('cart',JSON.stringify(cart));localStorage.setItem('lang',lang)}catch(e){}}
 var byId={};MENU.forEach(function(p){byId[p.id]=p});
+/* freigegebene Übersetzungen (Menüverwaltung) überlagern die deutschen Texte je nach Sprache */
+var TRM={};function applyTr(){MENU.forEach(function(p){if(p.n0===undefined){p.n0=p.n;p.d0=p.d}var e=(TRM[p.id]||{})[lang]||{};p.n=e.n||p.n0;p.d=e.d||p.d0})}
+try{fetch('/api/menu').then(function(r){return r.ok?r.json():null}).then(function(j){if(!j)return;(j.products||[]).forEach(function(p){if(p.tr&&Object.keys(p.tr).length)TRM[p.id]=p.tr});applyTr();if(typeof render==='function')render()}).catch(function(){})}catch(e){}
 // السلة: سطر لكل منتج مع خياراتو (نفس فكرة الكاشير)
 function normCart(c){var out={};for(var k in c){var v=c[k];if(typeof v==='number'){if(byId[k]&&v>0)out[k]={id:+k,q:v,m:0,o:[],nt:'',u:byId[k].p}}else if(v&&byId[v.id]&&v.q>0)out[k]=v}return out}
 cart=normCart(cart);
@@ -535,6 +538,7 @@ document.addEventListener('click',function(e){var b=e.target.closest('#track [da
 
 var drawerOpen=false;
 function render(){
+ applyTr();
  var app=document.getElementById('app');
  document.documentElement.lang=lang; document.documentElement.dir=lang==='ar'?'rtl':'ltr';
  var s=secOf(route);

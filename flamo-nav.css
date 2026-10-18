@@ -23,7 +23,7 @@ html[dir=rtl] .fn-arrow{display:inline-block;transform:scaleX(-1)}
 /* Seitenleiste */
 .fn-side{visibility:hidden;position:fixed;z-index:950;top:0;bottom:0;inset-inline-start:0;width:var(--fn-w);display:flex;flex-direction:column;gap:2px;padding:14px 10px;background:#fff;border-inline-end:1px solid var(--fn-line);overflow:auto;transform:translateX(-105%);transition:transform .2s ease,visibility 0s linear .2s;box-shadow:8px 0 30px #0003}
 html[dir=rtl] .fn-side{transform:translateX(105%);box-shadow:-8px 0 30px #0003}
-.fn-side.open{transform:none;visibility:visible;transition:transform .2s ease}
+html[dir=rtl] .fn-side.open,.fn-side.open{transform:none;visibility:visible;transition:transform .2s ease}
 body.fn-on{padding-top:46px}
 html{scroll-padding-top:58px}
 .fn-backdrop{display:none;position:fixed;inset:0;z-index:940;background:#0006}.fn-backdrop.open{display:block}
@@ -59,3 +59,14 @@ html{scroll-padding-top:58px}
 @media print{.fn-bar,.fn-side,.fn-backdrop,.fn-pal{display:none!important}body.fn-full{padding:0}}
 /* Benutzer + Abmelden sitzen jetzt in der Seitenleiste → alter Schwebe-Chip aus nara-auth.js entfällt */
 body.fn-on #na-chip{display:none!important}
+
+.fn-menu{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:99px;background:var(--fn-fire);color:#fff;font-weight:800;text-decoration:none;white-space:nowrap}
+.fn-menu:hover{filter:brightness(.92)}
+.fn-who{display:inline-flex;align-items:center;gap:8px;padding-inline-start:10px;border-inline-start:1px solid var(--fn-line);white-space:nowrap}
+.fn-who b{max-width:140px;overflow:hidden;text-overflow:ellipsis;font-size:.9rem}
+.fn-who button{height:32px;padding:0 12px;border-radius:99px;background:var(--fn-paper)!important;border:1px solid var(--fn-line)!important;font-weight:700}
+.fn-who button:hover{background:#20231f!important;color:#fff}
+@media(max-width:700px){.fn-menu span,.fn-who b{display:none}}
+/* Kasse: Navigationslinks stehen jetzt in der Seitenleiste – der Kassenkopf zeigt nur Werkzeuge (Status, Drucker, Kundensuche) */
+body.fn-on header .header-actions #nara-live-orders-link,body.fn-on header .header-actions #nara-dispatch-link,body.fn-on header .header-actions #nara-kitchen-link,body.fn-on header .header-actions #nara-custlog-link,body.fn-on header .header-actions #nara-connect-link{display:none!important}
+@media(max-width:700px){.fn-find{display:none}.fn-bar{gap:6px;padding-inline:8px}.fn-who{padding-inline-start:6px}.fn-who button{padding:0 9px;font-size:.8rem}.fn-sp{flex:1}}
