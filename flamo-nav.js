@@ -35,7 +35,6 @@
     { k: 'invoices', f: 'inventory-foundation.html#invoices', i: '🧮', g: 'ops', n: L('Einkaufsrechnungen', 'فواتير الشراء', 'Purchase invoices') },
     { k: 'staff', f: 'staff.html', i: '🗓️', g: 'ops', n: L('Mitarbeiter & Schichten', 'الموظفين والورديات', 'Staff & shifts') },
     { k: 'team', f: 'team.html', i: '🔑', g: 'ops', n: L('Team & PINs', 'الفريق والرموز', 'Team & PINs') },
-    { k: 'admin', f: 'admin.html', i: '⚙️', g: 'ops', n: L('Verwaltung', 'الإدارة', 'Admin') },
     { k: 'status', f: 'status.html', i: '🩺', g: 'flamo', n: L('Betriebsstatus', 'حالة الشغل', 'System status') },
     { k: 'dashboard', f: 'dashboard.html', i: '🏠', g: 'flamo', n: L('Dashboard', 'لوحة التحكم', 'Dashboard') },
     { k: 'ai', f: 'ai-control.html', i: '🤖', g: 'flamo', n: L('AI Manager', 'AI Manager', 'AI Manager') },

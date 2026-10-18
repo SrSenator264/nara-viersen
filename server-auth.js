@@ -217,7 +217,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     return false;
   }
 
-  const NAV_SKIP = new Set(['driver.html', 'delivery.html', 'nara-app.html', 'join.html', 'pay.html']);
+  const NAV_SKIP = new Set(['admin.html', 'driver.html', 'delivery.html', 'nara-app.html', 'join.html', 'pay.html']);
 
   // شاشة الدخول بتنحقن بالصفحات المحمية
   function inject(pathname, html) {
