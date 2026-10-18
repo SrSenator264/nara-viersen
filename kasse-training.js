@@ -30,7 +30,6 @@
     const brand = document.querySelector('header .brand');
     if (brand) { let n = 0, t; brand.addEventListener('click', e => { e.preventDefault(); n++; clearTimeout(t); t = setTimeout(() => { const c = n; n = 0; if (c >= 3 && canToggle()) { window.NARA_TRAINING = !window.NARA_TRAINING; set(window.NARA_TRAINING); paint(); } else location.href = brand.getAttribute('href'); }, 450); }); }
     const acts = document.querySelector('header .header-actions');
-    if (acts && !document.getElementById('nara-menu-edit')) { const a = document.createElement('a'); a.id = 'nara-menu-edit'; a.href = 'admin-foundation.html'; a.textContent = 'Menü ✎'; acts.insertBefore(a, acts.firstChild); }
     paint(); setInterval(paint, 2000);
   }
   document.body ? init() : document.addEventListener('DOMContentLoaded', init);
