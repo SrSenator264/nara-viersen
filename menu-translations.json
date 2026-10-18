@@ -1,0 +1,2071 @@
+{
+ "_info": "Entwürfe (draft). Schlüssel = sourceId. In der Menüverwaltung → Übersetzungen prüfen und freigeben.",
+ "products": {
+  "10": {
+   "name": {
+    "en": "Joppie Beef burger",
+    "ar": "Joppie Beef burger"
+   },
+   "description": {
+    "en": "Beef, tomatoes, pickles, red onions, cheddar and Joppie sauce on a sesame brioche bun.",
+    "ar": "لحمة بقر، بندورة، مخلل، بصل أحمر، شيدر وصوص Joppie بخبز بريوش بالسمسم."
+   }
+  },
+  "11": {
+   "name": {
+    "en": "Joppie Chicken Burger",
+    "ar": "Joppie Chicken Burger"
+   },
+   "description": {
+    "en": "Chicken fillet patty, pickles, red onions, cheddar and Joppie sauce on a sesame brioche bun.",
+    "ar": "قرص فيليه دجاج، مخلل، بصل أحمر، شيدر وصوص Joppie بخبز بريوش بالسمسم."
+   }
+  },
+  "12": {
+   "name": {
+    "en": "Crunchy Chik’n Burger",
+    "ar": "Crunchy Chik’n Burger"
+   },
+   "description": {
+    "en": "Chicken breast, lettuce, pickles, red onions, cheddar and creamy burger sauce on a sesame bun.",
+    "ar": "صدر دجاج، خس، مخلل، بصل أحمر، شيدر وصوص برغر كريمي بخبز بالسمسم."
+   }
+  },
+  "2": {
+   "name": {
+    "en": "Cheese Burger",
+    "ar": "Cheese Burger"
+   },
+   "description": {
+    "en": "Beef, cheddar, lettuce, tomatoes, red onions, ketchup and mayonnaise on a sesame bun.",
+    "ar": "لحمة بقر، شيدر، خس، بندورة، بصل أحمر، كاتشب ومايونيز بخبز بالسمسم."
+   }
+  },
+  "5": {
+   "name": {
+    "en": "Cheese chicken burger",
+    "ar": "Cheese chicken burger"
+   },
+   "description": {
+    "en": "Crispy chicken breast, cheddar, lettuce, red onions, pickles, ketchup and mayonnaise on a sesame bun.",
+    "ar": "صدر دجاج كرسبي، شيدر، خس، بصل أحمر، مخلل، كاتشب ومايونيز بخبز بالسمسم."
+   }
+  },
+  "1": {
+   "name": {
+    "en": "Smashed Beef Burger",
+    "ar": "Smashed Beef Burger"
+   },
+   "description": {
+    "en": "Two beef patties (160 g), cheddar, lettuce and creamy mushroom burger sauce with mushroom pieces. Burger bun.",
+    "ar": "قرصين لحمة بقر (160 غ)، شيدر، خس وصوص برغر كريمي بالفطر مع قطع فطر. خبز برغر."
+   }
+  },
+  "13": {
+   "name": {
+    "en": "Mega Crispy Chicken Zinger (spicy)",
+    "ar": "Mega Crispy Chicken Zinger (حار)"
+   },
+   "description": {
+    "en": "Crispy zinger chicken breast, cheddar, lettuce, pickles, red onions and spicy zinger sauce on a sesame bun.",
+    "ar": "صدر دجاج زنجر مقرمش، شيدر، خس، مخلل، بصل أحمر وصوص زنجر حار بخبز بالسمسم."
+   }
+  },
+  "14": {
+   "name": {
+    "en": "XXXL Beef Burger",
+    "ar": "XXXL Beef Burger"
+   },
+   "description": {
+    "en": "Three layers of beef (300 g), cheddar, lettuce, tomatoes, red onions, pickles and burger sauce.",
+    "ar": "ثلاث طبقات لحمة بقر (300 غ)، شيدر، خس، بندورة، بصل أحمر، مخلل وصوص برغر."
+   }
+  },
+  "15": {
+   "name": {
+    "en": "XXXL Chik’n Burger",
+    "ar": "XXXL Chik’n Burger"
+   },
+   "description": {
+    "en": "Three chicken patties, two slices of cheddar, lettuce, red onions, pickles and creamy burger sauce on a sesame bun.",
+    "ar": "ثلاث أقراص دجاج، شريحتين شيدر، خس، بصل أحمر، مخلل وصوص برغر كريمي بخبز بالسمسم."
+   }
+  },
+  "3": {
+   "name": {
+    "en": "Guacamole Beef Burger",
+    "ar": "Guacamole Beef Burger"
+   },
+   "description": {
+    "en": "Beef patty (150 g), cheddar, tomatoes, red onions, lettuce, pickles and guacamole-style sauce.",
+    "ar": "قرص لحمة بقر (150 غ)، شيدر، بندورة، بصل أحمر، خس، مخلل وصوص على طريقة الغواكامولي."
+   }
+  },
+  "16": {
+   "name": {
+    "en": "Original Hamburger",
+    "ar": "Original Hamburger"
+   },
+   "description": {
+    "en": "Beef, lettuce, tomatoes, red onions, pickles, ketchup and mayonnaise on a sesame bun.",
+    "ar": "لحمة بقر، خس، بندورة، بصل أحمر، مخلل، كاتشب ومايونيز بخبز بالسمسم."
+   }
+  },
+  "17": {
+   "name": {
+    "en": "Big Beef Burger",
+    "ar": "Big Beef Burger"
+   },
+   "description": {
+    "en": "Two beef patties (200 g), double cheddar, iceberg lettuce, red onions, tomatoes, pickles and Big Burger sauce.",
+    "ar": "قرصين لحمة بقر (200 غ)، شيدر مرتين، خس آيسبرغ، بصل أحمر، بندورة، مخلل وصوص Big Burger."
+   }
+  },
+  "18": {
+   "name": {
+    "en": "Big Chicken Burger",
+    "ar": "Big Chicken Burger"
+   },
+   "description": {
+    "en": "Two chicken patties, double cheddar, iceberg lettuce, red onions, pickles and Big sauce on a sesame bun.",
+    "ar": "قرصين دجاج، شيدر مرتين، خس آيسبرغ، بصل أحمر، مخلل وصوص Big بخبز بالسمسم."
+   }
+  },
+  "19": {
+   "name": {
+    "en": "Chill cheese Crunchy Chicken",
+    "ar": "Chill cheese Crunchy Chicken"
+   },
+   "description": {
+    "en": "Chicken fillet, chili cheese sauce, lettuce, jalapeños and red onions on a sesame bun.",
+    "ar": "فيليه دجاج، صوص جبنة حار، خس، هالابينو وبصل أحمر بخبز بالسمسم."
+   }
+  },
+  "20": {
+   "name": {
+    "en": "Chill Cheese Beef Burger",
+    "ar": "Chill Cheese Beef Burger"
+   },
+   "description": {
+    "en": "Beef, chili cheese sauce, tomatoes, red onions, lettuce and jalapeños. Spicy.",
+    "ar": "لحمة بقر، صوص جبنة حار، بندورة، بصل أحمر، خس وهالابينو. حار."
+   }
+  },
+  "21": {
+   "name": {
+    "en": "BBQ Burger",
+    "ar": "BBQ Burger"
+   },
+   "description": {
+    "en": "Beef, halal bacon, cheddar, lettuce, tomatoes, red onions and BBQ sauce.",
+    "ar": "لحمة بقر، بيكون حلال، شيدر، خس، بندورة، بصل أحمر وصوص باربكيو."
+   }
+  },
+  "22": {
+   "name": {
+    "en": "Surf and Turf Burger",
+    "ar": "Surf and Turf Burger"
+   },
+   "description": {
+    "en": "Beef patty (150 g), three shrimp, tomatoes, cheddar, lettuce, grilled onions and Original Burger sauce.",
+    "ar": "قرص لحمة بقر (150 غ)، ثلاث جمبري، بندورة، شيدر، خس، بصل مشوي وصوص Original Burger."
+   }
+  },
+  "23": {
+   "name": {
+    "en": "Veggie Burger",
+    "ar": "Veggie Burger"
+   },
+   "description": {
+    "en": "Plant-based patty, tomatoes, lettuce, red onions, pickles, mayonnaise and ketchup.",
+    "ar": "قرص نباتي، بندورة، خس، بصل أحمر، مخلل، مايونيز وكاتشب."
+   }
+  },
+  "24": {
+   "name": {
+    "en": "Mini pulled chik’n BBQ Burger (4 pieces)",
+    "ar": "Mini pulled chik’n BBQ Burger (4 قطع)"
+   },
+   "description": {
+    "en": "Four mini burgers with pulled chicken, BBQ sauce, lettuce, tomatoes and onions.",
+    "ar": "أربع برغر صغيرة بدجاج مفتّت، صوص باربكيو، خس، بندورة وبصل."
+   }
+  },
+  "30": {
+   "name": {
+    "en": "Korean Classic Yangnyeom Wings",
+    "ar": "Korean Classic Yangnyeom Wings"
+   },
+   "description": {
+    "en": "6 wings with classic sweet Korean yangnyeom glaze and toasted sesame. Mild.",
+    "ar": "6 أجنحة بجلاز يانغنيوم الكوري الكلاسيكي الحلو وسمسم محمّص. معتدل."
+   }
+  },
+  "31": {
+   "name": {
+    "en": "Creamy Cheese Bomb Wings",
+    "ar": "Creamy Cheese Bomb Wings"
+   },
+   "description": {
+    "en": "6 wings with warm cheddar cheese sauce and spicy mayo. Spicy.",
+    "ar": "6 أجنحة مع صوص جبنة شيدر دافئ وسبايسي مايو. حار."
+   }
+  },
+  "32": {
+   "name": {
+    "en": "Original Korean Chili Wings",
+    "ar": "Original Korean Chili Wings"
+   },
+   "description": {
+    "en": "6 wings with a fiery, slightly sweet Korean chili glaze and sesame. Spicy.",
+    "ar": "6 أجنحة بجلاز فلفل كوري ناري وحلو شوي مع سمسم. حار."
+   }
+  },
+  "33": {
+   "name": {
+    "en": "Tokyo Teriyaki Wings",
+    "ar": "Tokyo Teriyaki Wings"
+   },
+   "description": {
+    "en": "6 wings in teriyaki glaze, garnished with sesame.",
+    "ar": "6 أجنحة بجلاز تيرياكي مزيّنة بالسمسم."
+   }
+  },
+  "34": {
+   "name": {
+    "en": "Truffle Mayo Gourmet Wings",
+    "ar": "Truffle Mayo Gourmet Wings"
+   },
+   "description": {
+    "en": "6 wings with creamy truffle mayonnaise.",
+    "ar": "6 أجنحة مع مايونيز الترفل الكريمي."
+   }
+  },
+  "35": {
+   "name": {
+    "en": "Spicy Buffalo Wings (US-Style)",
+    "ar": "Spicy Buffalo Wings (US-Style)"
+   },
+   "description": {
+    "en": "6 wings in a spicy buffalo sauce.",
+    "ar": "6 أجنحة بصوص بوفالو حار."
+   }
+  },
+  "40": {
+   "name": {
+    "en": "Ultra Wings Bucket",
+    "ar": "Ultra Wings Bucket"
+   },
+   "description": {
+    "en": "12 crispy chicken wings. Incl. 2 dips of your choice & 1 portion of fries. The same flavour can be chosen twice. Additional dips for an extra charge.",
+    "ar": "12 جناح دجاج مقرمش. مع 2 ديب حسب اختيارك وحصّة بطاطا. فيك تختار نفس النكهة مرتين. ديبات إضافية بسعر إضافي."
+   }
+  },
+  "41": {
+   "name": {
+    "en": "Crispy Tenders Bucket",
+    "ar": "Crispy Tenders Bucket"
+   },
+   "description": {
+    "en": "12 tender, extra crispy chicken tenders (boneless). Incl. 2 dips of your choice & 1 portion of fries. The same flavour can be chosen twice. Additional dips for an extra charge.",
+    "ar": "12 قطعة تندرز دجاج طرية ومقرمشة جداً (بدون عظم). مع 2 ديب حسب اختيارك وحصّة بطاطا. فيك تختار نفس النكهة مرتين. ديبات إضافية بسعر إضافي."
+   }
+  },
+  "42": {
+   "name": {
+    "en": "Half & Half Bucket",
+    "ar": "Half & Half Bucket"
+   },
+   "description": {
+    "en": "6 crispy wings & 6 tender crispy tenders. Incl. 2 dips of your choice & 1 portion of fries. The same flavour can be chosen twice. Additional dips for an extra charge.",
+    "ar": "6 أجنحة مقرمشة و6 قطع كريسبي تندرز طرية. مع 2 ديب حسب اختيارك وحصّة بطاطا. فيك تختار نفس النكهة مرتين. ديبات إضافية بسعر إضافي."
+   }
+  },
+  "43": {
+   "name": {
+    "en": "Ultimate Variety Bucket",
+    "ar": "Ultimate Variety Bucket"
+   },
+   "description": {
+    "en": "6 wings, 4 crispy tenders & 6 chicken nuggets. Incl. 2 dips of your choice & 1 portion of fries. The same flavour can be chosen twice. Additional dips for an extra charge.",
+    "ar": "6 أجنحة، 4 كريسبي تندرز و6 قطع ناجتس دجاج. مع 2 ديب حسب اختيارك وحصّة بطاطا. فيك تختار نفس النكهة مرتين. ديبات إضافية بسعر إضافي."
+   }
+  },
+  "50": {
+   "name": {
+    "en": "Wings 16 pieces",
+    "ar": "Wings 16 قطعة"
+   },
+   "description": {
+    "en": "16 crispy fried wings.",
+    "ar": "16 جناح مقلي مقرمش."
+   }
+  },
+  "51": {
+   "name": {
+    "en": "Nuggets 16 pieces",
+    "ar": "Nuggets 16 قطعة"
+   },
+   "description": {
+    "en": "16 crispy fried nuggets.",
+    "ar": "16 قطعة ناجتس مقلية مقرمشة."
+   }
+  },
+  "52": {
+   "name": {
+    "en": "Mix – 8 Wings, 8 Nuggets",
+    "ar": "Mix – 8 Wings, 8 Nuggets"
+   },
+   "description": {
+    "en": "8 crispy chicken wings and 8 crispy nuggets.",
+    "ar": "8 أجنحة دجاج مقرمشة و8 قطع ناجتس مقرمشة."
+   }
+  },
+  "53": {
+   "name": {
+    "en": "3 für 2 Angebot – Cheese Chicken Burger",
+    "ar": "3 für 2 Angebot – Cheese Chicken Burger"
+   },
+   "description": {
+    "en": "Crispy chicken patty made from chicken breast, cheddar, fresh lettuce, red onions, pickles, ketchup and mayonnaise on a sesame bun.",
+    "ar": "قرص دجاج كرسبي من صدر الدجاج، شيدر، خس طازج، بصل أحمر، مخلل، كاتشب ومايونيز بخبز بالسمسم."
+   }
+  },
+  "54": {
+   "name": {
+    "en": "3 für 2 Angebot – Cheese Beef Burger",
+    "ar": "3 für 2 Angebot – Cheese Beef Burger"
+   },
+   "description": {
+    "en": "Juicy beef, cheddar, lettuce, fresh tomatoes, red onions, ketchup and mayonnaise on a sesame bun.",
+    "ar": "لحمة بقر طرية، شيدر، خس، بندورة طازجة، بصل أحمر، كاتشب ومايونيز بخبز بالسمسم."
+   }
+  },
+  "130": {
+   "name": {
+    "en": "Duo Power Meal",
+    "ar": "Duo Power Meal"
+   },
+   "description": {
+    "en": "1 Cheese Beef Burger, 1 Cheese Chicken Burger, 4 crispy chicken fillet pieces, a large portion of fries, 2 soft drinks of your choice and a sauce.",
+    "ar": "1 Cheese Beef Burger، 1 Cheese Chicken Burger، 4 قطع فيليه دجاج مقرمشة، حصّة بطاطا كبيرة، 2 مشروب غازي حسب اختيارك وصوص."
+   }
+  },
+  "131": {
+   "name": {
+    "en": "Friends Feast Combo",
+    "ar": "Friends Feast Combo"
+   },
+   "description": {
+    "en": "1 Cheese Beef Burger, 1 Crunchy Chicken Burger, 1 BBQ Burger, 6 crispy chicken fillets, 2 portions of fries, 3 drinks of your choice and 2 sauces. Ideal for sharing with friends.",
+    "ar": "1 Cheese Beef Burger، 1 Crunchy Chicken Burger، 1 BBQ Burger، 6 قطع فيليه دجاج مقرمشة، 2 حصّة بطاطا، 3 مشروبات حسب اختيارك و2 صوص. مثالية للمشاركة مع الأصدقاء."
+   }
+  },
+  "132": {
+   "name": {
+    "en": "Family Mix Box",
+    "ar": "Family Mix Box"
+   },
+   "description": {
+    "en": "2 Cheese Beef Burgers, 2 Crunchy Chicken Burgers, 8 crispy chicken fillets, 2 large portions of fries, 1.0 l Coca-Cola and 4 sauces. A hearty family meal to enjoy together.",
+    "ar": "2 Cheese Beef Burger، 2 Crunchy Chicken Burger، 8 قطع فيليه دجاج مقرمشة، 2 حصّة بطاطا كبيرة، 1.0 l كوكا كولا و4 صوصات. وجبة عائلية دسمة للمشاركة."
+   }
+  },
+  "133": {
+   "name": {
+    "en": "Party Platter XL",
+    "ar": "Party Platter XL"
+   },
+   "description": {
+    "en": "3 Cheese Beef Burgers, 3 Crunchy Chicken Burgers, 12 crispy chicken fillets, 4 large portions of fries, 2.0 l Coca-Cola, 6 sauces and a large coleslaw – perfect for large groups and parties.",
+    "ar": "3 Cheese Beef Burger، 3 Crunchy Chicken Burger، 12 قطعة فيليه دجاج مقرمشة، 4 حصص بطاطا كبيرة، 2.0 l كوكا كولا، 6 صوصات وسلطة كولسلو كبيرة – مثالية للمجموعات الكبيرة والحفلات."
+   }
+  },
+  "150": {
+   "name": {
+    "en": "Falafel Taco",
+    "ar": "Falafel Taco"
+   },
+   "description": {
+    "en": "Tortillas, falafel, tahini sauce, tomatoes, lettuce, pickled beetroot and fries.",
+    "ar": "تورتيلا، فلافل، صوص طحينة، بندورة، خس، شمندر مخلل وبطاطا مقلية."
+   }
+  },
+  "151": {
+   "name": {
+    "en": "(Extra) Falafel Taco",
+    "ar": "(Extra) Falafel Taco"
+   },
+   "description": {
+    "en": "Double tortillas and ingredients. Tortillas, falafel, tahini sauce, tomatoes, lettuce, pickled beetroot and fries.",
+    "ar": "تورتيلا ومكوّنات مضاعفة. تورتيلا، فلافل، صوص طحينة، بندورة، خس، شمندر مخلل وبطاطا مقلية."
+   }
+  },
+  "152": {
+   "name": {
+    "en": "Chilli Cheese Beef Taco",
+    "ar": "Chilli Cheese Beef Taco"
+   },
+   "description": {
+    "en": "Beef, fries, chili cheese sauce, mushrooms, corn, red onions and jalapeños. Spicy.",
+    "ar": "لحمة بقر، بطاطا مقلية، صوص جبنة حار، فطر، ذرة، بصل أحمر وهالابينو. حار."
+   }
+  },
+  "153": {
+   "name": {
+    "en": "(Extra) Chilli Cheese Beef Taco",
+    "ar": "(Extra) Chilli Cheese Beef Taco"
+   },
+   "description": {
+    "en": "Double tortillas and ingredients. Beef, fries, chili cheese sauce, mushrooms, corn, red onions and jalapeños. Spicy.",
+    "ar": "تورتيلا ومكوّنات مضاعفة. لحمة بقر، بطاطا مقلية، صوص جبنة حار، فطر، ذرة، بصل أحمر وهالابينو. حار."
+   }
+  },
+  "6": {
+   "name": {
+    "en": "Taco Pollo",
+    "ar": "Taco Pollo"
+   },
+   "description": {
+    "en": "Tortillas, chicken strips, chili tomato sauce, fries, red onions, mushrooms, corn and cheese sauce.",
+    "ar": "تورتيلا، شرائح دجاج، صوص بندورة حار، بطاطا مقلية، بصل أحمر، فطر، ذرة وصوص جبنة."
+   }
+  },
+  "154": {
+   "name": {
+    "en": "(Extra) Taco Pollo",
+    "ar": "(Extra) Taco Pollo"
+   },
+   "description": {
+    "en": "Double tortillas and ingredients. Tortillas, chicken strips, chili tomato sauce, fries, red onions, mushrooms, corn and cheese sauce.",
+    "ar": "تورتيلا ومكوّنات مضاعفة. تورتيلا، شرائح دجاج، صوص بندورة حار، بطاطا مقلية، بصل أحمر، فطر، ذرة وصوص جبنة."
+   }
+  },
+  "155": {
+   "name": {
+    "en": "BBQ Taco",
+    "ar": "BBQ Taco"
+   },
+   "description": {
+    "en": "Tortillas, chicken strips, fries, mushrooms, red onions, corn and smoky barbecue sauce.",
+    "ar": "تورتيلا، شرائح دجاج، بطاطا مقلية، فطر، بصل أحمر، ذرة وصوص باربكيو مدخّن."
+   }
+  },
+  "156": {
+   "name": {
+    "en": "(Extra) BBQ Taco",
+    "ar": "(Extra) BBQ Taco"
+   },
+   "description": {
+    "en": "Double tortillas and ingredients. Tortillas, chicken strips, fries, mushrooms, red onions, corn and smoky barbecue sauce.",
+    "ar": "تورتيلا ومكوّنات مضاعفة. تورتيلا، شرائح دجاج، بطاطا مقلية، فطر، بصل أحمر، ذرة وصوص باربكيو مدخّن."
+   }
+  },
+  "157": {
+   "name": {
+    "en": "Hot dog Taco",
+    "ar": "Hot dog Taco"
+   },
+   "description": {
+    "en": "Onions, hot dog, lettuce, mushrooms, corn and cheese sauce.",
+    "ar": "بصل، هوت دوغ، خس، فطر، ذرة وصوص جبنة."
+   }
+  },
+  "158": {
+   "name": {
+    "en": "(Extra) Hot dog Taco",
+    "ar": "(Extra) Hot dog Taco"
+   },
+   "description": {
+    "en": "Double tortillas and ingredients. Onions, hot dog, lettuce, mushrooms, corn and cheese sauce.",
+    "ar": "تورتيلا ومكوّنات مضاعفة. بصل، هوت دوغ، خس، فطر، ذرة وصوص جبنة."
+   }
+  },
+  "159": {
+   "name": {
+    "en": "Iu Gene Taco",
+    "ar": "Iu Gene Taco"
+   },
+   "description": {
+    "en": "Tortillas, beef, chicken strips, taco sauce, red onions, cheese and fries.",
+    "ar": "تورتيلا، لحمة بقر، شرائح دجاج، صوص تاكو، بصل أحمر، جبنة وبطاطا مقلية."
+   }
+  },
+  "160": {
+   "name": {
+    "en": "(Extra) Iu Gene Taco",
+    "ar": "(Extra) Iu Gene Taco"
+   },
+   "description": {
+    "en": "Double tortillas and ingredients. Tortillas, beef, chicken strips, taco sauce, red onions, cheese and fries.",
+    "ar": "تورتيلا ومكوّنات مضاعفة. تورتيلا، لحمة بقر، شرائح دجاج، صوص تاكو، بصل أحمر، جبنة وبطاطا مقلية."
+   }
+  },
+  "161": {
+   "name": {
+    "en": "Joppie Beef Taco",
+    "ar": "Joppie Beef Taco"
+   },
+   "description": {
+    "en": "Tortillas, beef, fries, mushrooms, red onions, pickles and Joppie sauce.",
+    "ar": "تورتيلا، لحمة بقر، بطاطا مقلية، فطر، بصل أحمر، مخلل وصوص Joppie."
+   }
+  },
+  "162": {
+   "name": {
+    "en": "(Extra) Joppie Beef Taco",
+    "ar": "(Extra) Joppie Beef Taco"
+   },
+   "description": {
+    "en": "Double tortillas and ingredients. Tortillas, beef, fries, mushrooms, red onions, pickles and Joppie sauce.",
+    "ar": "تورتيلا ومكوّنات مضاعفة. تورتيلا، لحمة بقر، بطاطا مقلية، فطر، بصل أحمر، مخلل وصوص Joppie."
+   }
+  },
+  "163": {
+   "name": {
+    "en": "Joppie Chicken Taco",
+    "ar": "Joppie Chicken Taco"
+   },
+   "description": {
+    "en": "Tortillas, chicken strips, fries, red onions, mushrooms, pickles and Joppie sauce.",
+    "ar": "تورتيلا، شرائح دجاج، بطاطا مقلية، بصل أحمر، فطر، مخلل وصوص Joppie."
+   }
+  },
+  "164": {
+   "name": {
+    "en": "(Extra) Joppie Chicken Taco",
+    "ar": "(Extra) Joppie Chicken Taco"
+   },
+   "description": {
+    "en": "Double tortillas and ingredients. Tortillas, chicken strips, fries, red onions, mushrooms, pickles and Joppie sauce.",
+    "ar": "تورتيلا ومكوّنات مضاعفة. تورتيلا، شرائح دجاج، بطاطا مقلية، بصل أحمر، فطر، مخلل وصوص Joppie."
+   }
+  },
+  "165": {
+   "name": {
+    "en": "Chicken shawarma tacos",
+    "ar": "تاكو شاورما دجاج"
+   },
+   "description": {
+    "en": "Tortilla, chicken, pickled cucumbers, fries and garlic cream.",
+    "ar": "تورتيلا، دجاج، مخلل خيار، بطاطا مقلية وثومية."
+   }
+  },
+  "166": {
+   "name": {
+    "en": "Beef shawarma tacos",
+    "ar": "تاكو شاورما لحمة"
+   },
+   "description": {
+    "en": "Beef shawarma, tahini, onions, pickles and parsley.",
+    "ar": "شاورما لحمة، طحينة، بصل، مخلل وبقدونس."
+   }
+  },
+  "170": {
+   "name": {
+    "en": "Double Fries",
+    "ar": "Double Fries"
+   },
+   "description": {
+    "en": "Double portion of fries.",
+    "ar": "حصّة بطاطا مضاعفة."
+   }
+  },
+  "171": {
+   "name": {
+    "en": "Chilli-Cheese Fries (spicy)",
+    "ar": "Chilli-Cheese Fries (حار)"
+   },
+   "description": {
+    "en": "Fries with chili cheese sauce and jalapeños.",
+    "ar": "بطاطا مقلية مع صوص جبنة حار وهالابينو."
+   }
+  },
+  "172": {
+   "name": {
+    "en": "Avocado Tots",
+    "ar": "Avocado Tots"
+   },
+   "description": {
+    "en": "Fries with avocado sauce.",
+    "ar": "بطاطا مقلية مع صوص أفوكادو."
+   }
+  },
+  "173": {
+   "name": {
+    "en": "Joppie Fries",
+    "ar": "Joppie Fries"
+   },
+   "description": {
+    "en": "Fries with Joppie sauce.",
+    "ar": "بطاطا مقلية مع صوص Joppie."
+   }
+  },
+  "174": {
+   "name": {
+    "en": "Beef Loaded Fries",
+    "ar": "Beef Loaded Fries"
+   },
+   "description": {
+    "en": "Fries with chopped beef, onions and cheese sauce.",
+    "ar": "بطاطا مقلية مع لحمة بقر مقطّعة صغير، بصل وصوص جبنة."
+   }
+  },
+  "175": {
+   "name": {
+    "en": "Chick’n Loaded Fries",
+    "ar": "Chick’n Loaded Fries"
+   },
+   "description": {
+    "en": "Fries with chopped crispy fried chicken and fries sauce.",
+    "ar": "بطاطا مقلية مع دجاج مقلي مقرمش مقطّع صغير وصوص بطاطا."
+   }
+  },
+  "176": {
+   "name": {
+    "en": "Potato Pops",
+    "ar": "Potato Pops"
+   },
+   "description": {
+    "en": "Round fried potato balls.",
+    "ar": "كرات بطاطا مقلية."
+   }
+  },
+  "177": {
+   "name": {
+    "en": "Potato Curly Twister",
+    "ar": "Potato Curly Twister"
+   },
+   "description": {
+    "en": "Twister fries.",
+    "ar": "بطاطا تويستر."
+   }
+  },
+  "178": {
+   "name": {
+    "en": "Onion Rings (10 pieces)",
+    "ar": "Onion Rings (10 قطع)"
+   },
+   "description": {
+    "en": "Fried onion rings.",
+    "ar": "حلقات بصل مقلية."
+   }
+  },
+  "179": {
+   "name": {
+    "en": "Cheese Nuggets (7 pieces)",
+    "ar": "Cheese Nuggets (7 قطع)"
+   },
+   "description": {
+    "en": "With chili and cheddar.",
+    "ar": "بالفلفل الحار والشيدر."
+   }
+  },
+  "180": {
+   "name": {
+    "en": "Chicken Nuggets (8 pieces)",
+    "ar": "Chicken Nuggets (8 قطع)"
+   },
+   "description": {
+    "en": "Crispy fried.",
+    "ar": "مقلية ومقرمشة."
+   }
+  },
+  "181": {
+   "name": {
+    "en": "Crispy Shrimp Torpedo (6 pieces)",
+    "ar": "Crispy Shrimp Torpedo (6 قطع)"
+   },
+   "description": {
+    "en": "Floured and fried shrimp.",
+    "ar": "جمبري مطحون بالطحين ومقلي."
+   }
+  },
+  "182": {
+   "name": {
+    "en": "Mini spring rolls",
+    "ar": "ميني سبرينغ رول"
+   },
+   "description": {
+    "en": "Filled with vegetables.",
+    "ar": "محشية بالخضار."
+   }
+  },
+  "183": {
+   "name": {
+    "en": "Mozzarella Sticks (7 pieces)",
+    "ar": "Mozzarella Sticks (7 قطع)"
+   },
+   "description": {
+    "en": "Crispy breaded mozzarella.",
+    "ar": "موزاريلا مقرمشة بالبقسماط."
+   }
+  },
+  "184": {
+   "name": {
+    "en": "Virginia Chicken Wings BBQ (6 pieces)",
+    "ar": "Virginia Chicken Wings BBQ (6 قطع)"
+   },
+   "description": {
+    "en": "Mild, gently marinated chicken wings with a typical smoky barbecue note.",
+    "ar": "أجنحة دجاج معتدلة ومتبّلة بلطف بنكهة باربكيو مدخّنة."
+   }
+  },
+  "185": {
+   "name": {
+    "en": "Buffalo Chicken Wings (6 pieces, very spicy)",
+    "ar": "Buffalo Chicken Wings (6 قطع, حار جداً)"
+   },
+   "description": {
+    "en": "Juicy split chicken wings, marinated and cooked.",
+    "ar": "أجنحة دجاج طرية مقطّعة، متبّلة ومطبوخة."
+   }
+  },
+  "186": {
+   "name": {
+    "en": "Cheese-baked camembert (3 pieces)",
+    "ar": "كاممبير بالجبنة (3 قطع)"
+   },
+   "description": {
+    "en": "Crispy breaded camembert.",
+    "ar": "كاممبير مقرمش بالبقسماط."
+   }
+  },
+  "187": {
+   "name": {
+    "en": "Special-Mix-Box",
+    "ar": "Special-Mix-Box"
+   },
+   "description": {
+    "en": "3 crispy shrimp torpedoes, 3 chicken nuggets, 4 chicken wings, 3 cheese nuggets and 2 cheese-baked camembert.",
+    "ar": "3 جمبري تورپيدو مقرمش، 3 ناجتس دجاج، 4 أجنحة دجاج، 3 ناجتس جبنة و2 كاممبير بالجبنة."
+   }
+  },
+  "188": {
+   "name": {
+    "en": "Pickled vegetables",
+    "ar": "خضار مخلل"
+   },
+   "description": {
+    "en": "Pickled vegetables.",
+    "ar": "خضار مخلل."
+   }
+  },
+  "189": {
+   "name": {
+    "en": "Chicken Pops",
+    "ar": "Chicken Pops"
+   },
+   "description": {
+    "en": "Small fried chicken pieces.",
+    "ar": "قطع دجاج صغيرة مقلية."
+   }
+  },
+  "190": {
+   "name": {
+    "en": "Churrito cinnamon & sugar (5 pieces)",
+    "ar": "تشوريتو بالقرفة والسكر (5 قطع)"
+   },
+   "description": {
+    "en": "With cinnamon and sugar.",
+    "ar": "بالقرفة والسكر."
+   }
+  },
+  "191": {
+   "name": {
+    "en": "Corn-on-the-cob pieces",
+    "ar": "قطع ذرة"
+   },
+   "description": {
+    "en": "Corn-on-the-cob pieces. Vegan and vegetarian.",
+    "ar": "قطع ذرة على الكوب. نباتي وخالي من اللحوم."
+   }
+  },
+  "192": {
+   "name": {
+    "en": "Coleslaw Salat",
+    "ar": "Coleslaw Salat"
+   },
+   "description": {
+    "en": "White cabbage, carrots, onions, dressing, mayonnaise, garlic, vinegar, sugar, lemon juice, salt and pepper.",
+    "ar": "ملفوف أبيض، جزر، بصل، دريسينغ، مايونيز، ثوم، خل، سكر، عصير ليمون، ملح وبهار."
+   }
+  },
+  "193": {
+   "name": {
+    "en": "Giant white beans",
+    "ar": "فاصولياء بيضاء كبيرة"
+   },
+   "description": {
+    "en": "In tomato sauce.",
+    "ar": "بصوص البندورة."
+   }
+  },
+  "194": {
+   "name": {
+    "en": "Potato salad",
+    "ar": "سلطة بطاطا"
+   },
+   "description": {
+    "en": "Classic potato salad.",
+    "ar": "سلطة بطاطا كلاسيكية."
+   }
+  },
+  "195": {
+   "name": {
+    "en": "Noodle salad",
+    "ar": "سلطة نودلز"
+   },
+   "description": {
+    "en": "Fresh pasta salad.",
+    "ar": "سلطة معكرونة طازجة."
+   }
+  },
+  "196": {
+   "name": {
+    "en": "Mexican salad",
+    "ar": "سلطة مكسيكية"
+   },
+   "description": {
+    "en": "With bell pepper, corn, kidney beans, cucumbers, carrots and pearl onions.",
+    "ar": "بالفليفلة، ذرة، فاصولياء حمراء، خيار، جزر وبصل صغير."
+   }
+  },
+  "197": {
+   "name": {
+    "en": "Pasta salad",
+    "ar": "سلطة باستا"
+   },
+   "description": {
+    "en": "With pasta, tomatoes, bell pepper, celery, white cabbage, zucchini and white balsamic.",
+    "ar": "بمعكرونة، بندورة، فليفلة، كرفس، ملفوف أبيض، كوسا وخل بلسمي أبيض."
+   }
+  },
+  "198": {
+   "name": {
+    "en": "Falafel Sandwich",
+    "ar": "Falafel Sandwich"
+   },
+   "description": {
+    "en": "With parsley, sumac, tahini, pickles and lemon.",
+    "ar": "ببقدونس، سمّاق، طحينة، مخلل وليمون."
+   }
+  },
+  "199": {
+   "name": {
+    "en": "Falafel Sandwich Extra",
+    "ar": "Falafel Sandwich Extra"
+   },
+   "description": {
+    "en": "With egg and fries.",
+    "ar": "مع بيض وبطاطا مقلية."
+   }
+  },
+  "200": {
+   "name": {
+    "en": "Falafel plate",
+    "ar": "صحن فلافل"
+   },
+   "description": {
+    "en": "With lettuce, pickles, tomatoes, lemon, hummus and tahini.",
+    "ar": "مع خس، مخلل، بندورة، ليمون، حمص وطحينة."
+   }
+  },
+  "201": {
+   "name": {
+    "en": "Jalangi",
+    "ar": "Jalangi"
+   },
+   "description": {
+    "en": "Vine leaves filled with rice, tomatoes, garlic, mint and parsley.",
+    "ar": "ورق عنب محشي برز، بندورة، ثوم، نعنع وبقدونس."
+   }
+  },
+  "202": {
+   "name": {
+    "en": "Hummus",
+    "ar": "Hummus"
+   },
+   "description": {
+    "en": "Sesame paste with chickpeas.",
+    "ar": "حمص بطحينة."
+   }
+  },
+  "203": {
+   "name": {
+    "en": "Falafel meal",
+    "ar": "وجبة فلافل"
+   },
+   "description": {
+    "en": "Falafel sandwich or falafel sandwich extra, with a dip and a drink of your choice.",
+    "ar": "ساندويش فلافل أو ساندويش فلافل إكسترا، مع ديب ومشروب حسب اختيارك."
+   }
+  },
+  "204": {
+   "name": {
+    "en": "3 für 2 Angebot – Hot Dogs Classic",
+    "ar": "3 für 2 Angebot – Hot Dogs Classic"
+   },
+   "description": {
+    "en": "With chicken sausage, crispy fried onions, pickles, mustard, ketchup, mayonnaise and a brioche roll.",
+    "ar": "مع نقانق دجاج، بصل مقرمش، مخلل، خردل، كاتشب، مايونيز وخبز بريوش."
+   }
+  },
+  "205": {
+   "name": {
+    "en": "Hotdog Cheddar Dream",
+    "ar": "Hotdog Cheddar Dream"
+   },
+   "description": {
+    "en": "With cheddar sauce, crispy fried onions and pickles.",
+    "ar": "مع صوص شيدر، بصل مقلي مقرمش ومخلل."
+   }
+  },
+  "206": {
+   "name": {
+    "en": "Hotdog Classic",
+    "ar": "Hotdog Classic"
+   },
+   "description": {
+    "en": "With chicken sausage, crispy fried onions, pickles, mustard, ketchup, mayonnaise and a brioche roll.",
+    "ar": "مع نقانق دجاج، بصل مقرمش، مخلل، خردل، كاتشب، مايونيز وخبز بريوش."
+   }
+  },
+  "207": {
+   "name": {
+    "en": "Hotdog Chili (spicy)",
+    "ar": "Hotdog Chili (حار)"
+   },
+   "description": {
+    "en": "With chili sauce, jalapeños and crispy fried onions.",
+    "ar": "مع صوص حار، هالابينو وبصل مقرمش."
+   }
+  },
+  "208": {
+   "name": {
+    "en": "Hotdog BBQ",
+    "ar": "Hotdog BBQ"
+   },
+   "description": {
+    "en": "With barbecue sauce, crispy fried onions and pickles.",
+    "ar": "مع صوص باربكيو، بصل مقرمش ومخلل."
+   }
+  },
+  "209": {
+   "name": {
+    "en": "Hot Dog Pommes",
+    "ar": "Hot Dog Pommes"
+   },
+   "description": {
+    "en": "With special fries sauce, fries and pickles.",
+    "ar": "مع صوص بطاطا سبيشال، بطاطا ومخلل."
+   }
+  },
+  "210": {
+   "name": {
+    "en": "Currywurst with fries",
+    "ar": "كوريفورست مع بطاطا مقلية"
+   },
+   "description": {
+    "en": "With curry sauce and fries.",
+    "ar": "مع صوص كاري وبطاطا مقلية."
+   }
+  },
+  "211": {
+   "name": {
+    "en": "Shawarma wrap in tortilla bread",
+    "ar": "لفّة شاورما بخبز تورتيلا"
+   },
+   "description": {
+    "en": "With chicken, pickled cucumbers and garlic cream.",
+    "ar": "مع دجاج، مخلل خيار وثومية."
+   }
+  },
+  "212": {
+   "name": {
+    "en": "Double shawarma",
+    "ar": "شاورما دبل"
+   },
+   "description": {
+    "en": "Chicken shawarma in a baguette, garlic cream and pickles.",
+    "ar": "شاورما دجاج بخبز باغيت، ثومية ومخلل."
+   }
+  },
+  "213": {
+   "name": {
+    "en": "Beef shawarma wrap in tortilla bread",
+    "ar": "لفّة شاورما لحمة بخبز تورتيلا"
+   },
+   "description": {
+    "en": "Beef shawarma, tahini, onions and pickles.",
+    "ar": "شاورما لحمة، طحينة، بصل ومخلل."
+   }
+  },
+  "214": {
+   "name": {
+    "en": "Double beef shawarma",
+    "ar": "شاورما لحمة دبل"
+   },
+   "description": {
+    "en": "Beef shawarma in a baguette, tahini, onions, pickles and double ingredients.",
+    "ar": "شاورما لحمة بخبز باغيت، طحينة، بصل، مخلل ومكوّنات مضاعفة."
+   }
+  },
+  "215": {
+   "name": {
+    "en": "Shawarma Arabi plate",
+    "ar": "صحن شاورما عربي"
+   },
+   "description": {
+    "en": "Shawarma wrap cut up onto a plate, with chicken, pickled cucumbers and garlic cream.",
+    "ar": "لفّة شاورما مقطّعة بصحن، مع دجاج، مخلل خيار وثومية."
+   }
+  },
+  "216": {
+   "name": {
+    "en": "Beef shawarma Arabi plate",
+    "ar": "صحن شاورما لحمة عربي"
+   },
+   "description": {
+    "en": "Shawarma wrap cut up onto a plate, with beef, pickled cucumbers and garlic cream.",
+    "ar": "لفّة شاورما مقطّعة بصحن، مع لحمة بقر، مخلل خيار وثومية."
+   }
+  },
+  "217": {
+   "name": {
+    "en": "Double falafel (vegan)",
+    "ar": "فلافل دبل (نباتي)"
+   },
+   "description": {
+    "en": "Falafel sandwich in a baguette with extra falafel balls, lettuce and sauce.",
+    "ar": "ساندويش فلافل بخبز باغيت مع أقراص فلافل إضافية، خس وصوص."
+   }
+  },
+  "218": {
+   "name": {
+    "en": "Beef Jalo Sandwich",
+    "ar": "Beef Jalo Sandwich"
+   },
+   "description": {
+    "en": "Beef, onions, lettuce, tomatoes, sauce, jalapeños and cheese. Spicy.",
+    "ar": "لحمة بقر، بصل، خس، بندورة، صوص، هالابينو وجبنة. حار."
+   }
+  },
+  "219": {
+   "name": {
+    "en": "Crispy chicken fillet sandwich",
+    "ar": "ساندويش فيليه دجاج كرسبي"
+   },
+   "description": {
+    "en": "Crispy chicken fillet, mayonnaise, coleslaw, lettuce, pickles and onions in a baguette.",
+    "ar": "فيليه دجاج كرسبي، مايونيز، كولسلو، خس، مخلل وبصل بخبز باغيت."
+   }
+  },
+  "220": {
+   "name": {
+    "en": "Jumbo Philly Beef Sandwich",
+    "ar": "Jumbo Philly Beef Sandwich"
+   },
+   "description": {
+    "en": "200 g beef, two slices of cheese, tomatoes, pickles, lettuce, sauce, onions and pomegranate molasses.",
+    "ar": "200 غ لحمة بقر، شريحتين جبنة، بندورة، مخلل، خس، صوص، بصل ودبس رمان."
+   }
+  },
+  "221": {
+   "name": {
+    "en": "Crunchy Chicken Cheesy Sandwich",
+    "ar": "Crunchy Chicken Cheesy Sandwich"
+   },
+   "description": {
+    "en": "Crunchy chicken breast, chili cheese nuggets, onions, pickles and lettuce.",
+    "ar": "صدر دجاج كرانشي، ناجتس جبنة حار، بصل، مخلل وخس."
+   }
+  },
+  "222": {
+   "name": {
+    "en": "Fries sandwich",
+    "ar": "ساندويش بطاطا"
+   },
+   "description": {
+    "en": "Fries, mayonnaise, pickles, ketchup, cheese and coleslaw.",
+    "ar": "بطاطا مقلية، مايونيز، مخلل، كاتشب، جبنة وكولسلو."
+   }
+  },
+  "223": {
+   "name": {
+    "en": "Crispy chicken fillet meal",
+    "ar": "وجبة فيليه دجاج كرسبي"
+   },
+   "description": {
+    "en": "8 chicken fillet pieces, 1 fries, 1 coleslaw, 1 sauce and 1 non-alcoholic drink of your choice.",
+    "ar": "8 قطع فيليه دجاج، 1 بطاطا مقلية، 1 كولسلو، 1 صوص و1 مشروب بدون كحول حسب اختيارك."
+   }
+  },
+  "224": {
+   "name": {
+    "en": "Crispy Chicken Filet (4 pieces)",
+    "ar": "Crispy Chicken Filet (4 قطع)"
+   },
+   "description": {
+    "en": "Marinated chicken breast fillet pieces, crispy fried, including 1 sauce.",
+    "ar": "قطع فيليه صدر دجاج متبّلة، مقلية ومقرمشة، مع صوص واحد."
+   }
+  },
+  "225": {
+   "name": {
+    "en": "Crispy Chicken Filet (6 pieces)",
+    "ar": "Crispy Chicken Filet (6 قطع)"
+   },
+   "description": {
+    "en": "Marinated chicken breast fillet pieces, crispy fried, including 1 sauce.",
+    "ar": "قطع فيليه صدر دجاج متبّلة، مقلية ومقرمشة، مع صوص واحد."
+   }
+  },
+  "226": {
+   "name": {
+    "en": "Choconougat muffin Pof",
+    "ar": "Choconougat muffin Pof"
+   },
+   "description": {
+    "en": "Chocolate-hazelnut muffin.",
+    "ar": "مافن شوكولاتة وبندق."
+   }
+  },
+  "227": {
+   "name": {
+    "en": "Rich Chocolate Muffin",
+    "ar": "Rich Chocolate Muffin"
+   },
+   "description": {
+    "en": "Chocolate muffin.",
+    "ar": "مافن شوكولاتة."
+   }
+  },
+  "228": {
+   "name": {
+    "en": "Blue Berry Muffin",
+    "ar": "Blue Berry Muffin"
+   },
+   "description": {
+    "en": "Blueberry muffin.",
+    "ar": "مافن توت أزرق."
+   }
+  },
+  "229": {
+   "name": {
+    "en": "Pinky-Donut",
+    "ar": "Pinky-Donut"
+   },
+   "description": {
+    "en": "With pink glaze.",
+    "ar": "بطبقة سكر وردية."
+   }
+  },
+  "230": {
+   "name": {
+    "en": "Crispy caramel-filled donut",
+    "ar": "دونات كراميل مقرمش محشي"
+   },
+   "description": {
+    "en": "With caramel filling.",
+    "ar": "محشي بالكراميل."
+   }
+  },
+  "231": {
+   "name": {
+    "en": "Chocolate Black Donut",
+    "ar": "دونات شوكولاتة بلاك"
+   },
+   "description": {
+    "en": "With chocolate glaze.",
+    "ar": "بطبقة شوكولاتة."
+   }
+  },
+  "232": {
+   "name": {
+    "en": "White Donut",
+    "ar": "White Donut"
+   },
+   "description": {
+    "en": "With white glaze.",
+    "ar": "بطبقة سكر بيضاء."
+   }
+  },
+  "233": {
+   "name": {
+    "en": "Brownie",
+    "ar": "Brownie"
+   },
+   "description": {
+    "en": "Dark sponge base with chocolate cream.",
+    "ar": "قاعدة كيك داكنة مع كريمة شوكولاتة."
+   }
+  },
+  "234": {
+   "name": {
+    "en": "Tiramisu cafe",
+    "ar": "Tiramisu cafe"
+   },
+   "description": {
+    "en": "Tiramisu café cake.",
+    "ar": "كيكة تيراميسو بالقهوة."
+   }
+  },
+  "235": {
+   "name": {
+    "en": "Cheesecake",
+    "ar": "Cheesecake"
+   },
+   "description": {
+    "en": "Cheesecake.",
+    "ar": "تشيز كيك."
+   }
+  },
+  "236": {
+   "name": {
+    "en": "Soufflé Al Cioccolato",
+    "ar": "Soufflé Al Cioccolato"
+   },
+   "description": {
+    "en": "Soufflé al cioccolato.",
+    "ar": "سوفليه بالشوكولاتة."
+   }
+  },
+  "264": {
+   "name": {
+    "en": "Mayonnaise",
+    "ar": "Mayonnaise"
+   },
+   "description": {
+    "en": "Creamy mayonnaise.",
+    "ar": "مايونيز كريمي."
+   }
+  },
+  "265": {
+   "name": {
+    "en": "Ketchup",
+    "ar": "Ketchup"
+   },
+   "description": {
+    "en": "Classic tomato ketchup.",
+    "ar": "كاتشب بندورة كلاسيكي."
+   }
+  },
+  "266": {
+   "name": {
+    "en": "Aioli",
+    "ar": "Aioli"
+   },
+   "description": {
+    "en": "Spicy garlic sauce.",
+    "ar": "صوص ثوم غني بالنكهة."
+   }
+  },
+  "267": {
+   "name": {
+    "en": "Hot chili sauce",
+    "ar": "صوص فلفل حار"
+   },
+   "description": {
+    "en": "Hot chili sauce.",
+    "ar": "صوص فلفل حار."
+   }
+  },
+  "268": {
+   "name": {
+    "en": "Barbecue sauce",
+    "ar": "صوص باربكيو"
+   },
+   "description": {
+    "en": "Smoky barbecue sauce.",
+    "ar": "صوص باربكيو مدخّن."
+   }
+  },
+  "269": {
+   "name": {
+    "en": "Chili cheese sauce",
+    "ar": "صوص جبنة حار"
+   },
+   "description": {
+    "en": "Hot chili cheese sauce.",
+    "ar": "صوص جبنة حار."
+   }
+  },
+  "270": {
+   "name": {
+    "en": "Cheese Sauce",
+    "ar": "Cheese Sauce"
+   },
+   "description": {
+    "en": "Creamy cheese sauce.",
+    "ar": "صوص جبنة كريمي."
+   }
+  },
+  "271": {
+   "name": {
+    "en": "Mustard",
+    "ar": "خردل"
+   },
+   "description": {
+    "en": "Mustard.",
+    "ar": "خردل."
+   }
+  },
+  "272": {
+   "name": {
+    "en": "Joppie Sauce",
+    "ar": "Joppie Sauce"
+   },
+   "description": {
+    "en": "Flavourful Joppie sauce.",
+    "ar": "صوص Joppie غني بالنكهة."
+   }
+  },
+  "273": {
+   "name": {
+    "en": "Lemon Sauce",
+    "ar": "Lemon Sauce"
+   },
+   "description": {
+    "en": "Fruity lemon sauce.",
+    "ar": "صوص ليمون منعش."
+   }
+  },
+  "274": {
+   "name": {
+    "en": "Truffle Mayo",
+    "ar": "Truffle Mayo"
+   },
+   "description": {
+    "en": "Fine truffle mayonnaise.",
+    "ar": "مايونيز ترفل فاخر."
+   }
+  },
+  "275": {
+   "name": {
+    "en": "Teriyaki Sauce",
+    "ar": "Teriyaki Sauce"
+   },
+   "description": {
+    "en": "Asian teriyaki sauce.",
+    "ar": "صوص تيرياكي آسيوي."
+   }
+  },
+  "276": {
+   "name": {
+    "en": "House sauce",
+    "ar": "صوص البيت"
+   },
+   "description": {
+    "en": "Homemade sauce.",
+    "ar": "صوص من تحضير البيت."
+   }
+  },
+  "277": {
+   "name": {
+    "en": "Garlic Sauce",
+    "ar": "Garlic Sauce"
+   },
+   "description": {
+    "en": "Creamy garlic sauce.",
+    "ar": "صوص ثوم كريمي."
+   }
+  },
+  "237": {
+   "name": {
+    "en": "Mango Cream Frappe 0,5l",
+    "ar": "Mango Cream Frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing mango cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة المانغا."
+   }
+  },
+  "238": {
+   "name": {
+    "en": "Strawberry cream Frappe 0,5l",
+    "ar": "Strawberry cream Frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing strawberry cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الفراولة."
+   }
+  },
+  "239": {
+   "name": {
+    "en": "Peach cream frappe 0,5l",
+    "ar": "Peach cream frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing peach cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الدراق."
+   }
+  },
+  "240": {
+   "name": {
+    "en": "Maracuja Cream frappe 0,5l",
+    "ar": "Maracuja Cream frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing passion fruit cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الباشن فروت."
+   }
+  },
+  "241": {
+   "name": {
+    "en": "Mocha Cream Frappe 0,5l",
+    "ar": "Mocha Cream Frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing mocha cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الموكا."
+   }
+  },
+  "242": {
+   "name": {
+    "en": "White Mocha Cream Frappe 0,5l",
+    "ar": "White Mocha Cream Frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing white mocha cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الوايت موكا."
+   }
+  },
+  "243": {
+   "name": {
+    "en": "Vanilla Cream Frappe 0,5l",
+    "ar": "Vanilla Cream Frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing vanilla cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الفانيلا."
+   }
+  },
+  "244": {
+   "name": {
+    "en": "Caramel Cream Frappe 0,5l",
+    "ar": "Caramel Cream Frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing caramel cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الكراميل."
+   }
+  },
+  "245": {
+   "name": {
+    "en": "Mango Strawberry cream frappe 0,5l",
+    "ar": "Mango Strawberry cream frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing mango-strawberry cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة المانغا والفراولة."
+   }
+  },
+  "246": {
+   "name": {
+    "en": "Strawberry white mocha cream frappe 0,5l",
+    "ar": "Strawberry white mocha cream frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing strawberry–white mocha cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الفراولة والوايت موكا."
+   }
+  },
+  "247": {
+   "name": {
+    "en": "Strawberry peach cream frappe 0,5l",
+    "ar": "Strawberry peach cream frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing strawberry-peach cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الفراولة والدراق."
+   }
+  },
+  "248": {
+   "name": {
+    "en": "Caramel mocha cream frappe 0,5l",
+    "ar": "Caramel mocha cream frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing caramel-mocha cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الكراميل والموكا."
+   }
+  },
+  "249": {
+   "name": {
+    "en": "Strawberry Mocha Cream frappe 0,5l",
+    "ar": "Strawberry Mocha Cream frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing strawberry-mocha cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الفراولة والموكا."
+   }
+  },
+  "250": {
+   "name": {
+    "en": "Caramel white mocha Cream frappe 0,5l",
+    "ar": "Caramel white mocha Cream frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing caramel–white mocha cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الكراميل والوايت موكا."
+   }
+  },
+  "251": {
+   "name": {
+    "en": "Crème Brûlée Frappe 0,5l",
+    "ar": "Crème Brûlée Frappe 0,5l"
+   },
+   "description": {
+    "en": "Refreshing crème brûlée cream frappé.",
+    "ar": "فرابيه كريمي منعش بنكهة الكريم بروليه."
+   }
+  },
+  "252": {
+   "name": {
+    "en": "Blueberry cream Frappe 0,5l",
+    "ar": "Blueberry cream Frappe 0,5l"
+   },
+   "description": {
+    "en": "Blueberry flavour with milk of your choice.",
+    "ar": "نكهة التوت الأزرق مع حليب حسب اختيارك."
+   }
+  },
+  "278": {
+   "name": {
+    "en": "Moloko Mango 0,25 l",
+    "ar": "Moloko Mango 0,25 l"
+   },
+   "description": {
+    "en": "0.25 l · 15.96 €/l",
+    "ar": "0.25 l · 15.96 €/l"
+   }
+  },
+  "279": {
+   "name": {
+    "en": "Cranberry-Moloko 0,25 l",
+    "ar": "Cranberry-Moloko 0,25 l"
+   },
+   "description": {
+    "en": "plus 0.25 € deposit · 0.25 l · 14.96 €/l",
+    "ar": "+ وديعة 0.25 € · 0.25 l · 14.96 €/l"
+   }
+  },
+  "280": {
+   "name": {
+    "en": "Softdrink-Moloko 0,25 l",
+    "ar": "Softdrink-Moloko 0,25 l"
+   },
+   "description": {
+    "en": "0.25 l · 15.96 €/l",
+    "ar": "0.25 l · 15.96 €/l"
+   }
+  },
+  "281": {
+   "name": {
+    "en": "Red Bull Energy Drink 0,25 l",
+    "ar": "Red Bull Energy Drink 0,25 l"
+   },
+   "description": {
+    "en": "0.25 l · 15.56 €/l",
+    "ar": "0.25 l · 15.56 €/l"
+   }
+  },
+  "282": {
+   "name": {
+    "en": "Red Bull The White Edition 0,25 l",
+    "ar": "Red Bull The White Edition 0,25 l"
+   },
+   "description": {
+    "en": "plus 0.25 € deposit · 0.25 l · 14.56 €/l",
+    "ar": "+ وديعة 0.25 € · 0.25 l · 14.56 €/l"
+   }
+  },
+  "283": {
+   "name": {
+    "en": "Coca-Cola 0,33 l",
+    "ar": "Coca-Cola 0,33 l"
+   },
+   "description": {
+    "en": "0.33 l",
+    "ar": "0.33 l"
+   }
+  },
+  "284": {
+   "name": {
+    "en": "Coca-Cola Zero Sugar 0,33 l",
+    "ar": "Coca-Cola Zero Sugar 0,33 l"
+   },
+   "description": {
+    "en": "0.33 l",
+    "ar": "0.33 l"
+   }
+  },
+  "285": {
+   "name": {
+    "en": "Fanta Orange 0,33 l",
+    "ar": "Fanta Orange 0,33 l"
+   },
+   "description": {
+    "en": "0.33 l",
+    "ar": "0.33 l"
+   }
+  },
+  "286": {
+   "name": {
+    "en": "Mezzo Mix 0,33 l",
+    "ar": "Mezzo Mix 0,33 l"
+   },
+   "description": {
+    "en": "0.33 l",
+    "ar": "0.33 l"
+   }
+  },
+  "287": {
+   "name": {
+    "en": "Sprite 0,33 l",
+    "ar": "Sprite 0,33 l"
+   },
+   "description": {
+    "en": "0.33 l",
+    "ar": "0.33 l"
+   }
+  },
+  "288": {
+   "name": {
+    "en": "Krombacher non-alcoholic 0.33 l",
+    "ar": "Krombacher بدون كحول 0.33 l"
+   },
+   "description": {
+    "en": "0.33 l · 10.88 €/l",
+    "ar": "0.33 l · 10.88 €/l"
+   }
+  },
+  "289": {
+   "name": {
+    "en": "Krombacher passion fruit 0.33 l",
+    "ar": "Krombacher باشن فروت 0.33 l"
+   },
+   "description": {
+    "en": "0.33 l · 10.88 €/l",
+    "ar": "0.33 l · 10.88 €/l"
+   }
+  },
+  "290": {
+   "name": {
+    "en": "Krombacher lemon 0.33 l",
+    "ar": "Krombacher ليمون 0.33 l"
+   },
+   "description": {
+    "en": "0.33 l · 10.88 €/l",
+    "ar": "0.33 l · 10.88 €/l"
+   }
+  },
+  "291": {
+   "name": {
+    "en": "Krombacher Cola-Orange 0,33 l",
+    "ar": "Krombacher Cola-Orange 0,33 l"
+   },
+   "description": {
+    "en": "0.33 l · 10.88 €/l",
+    "ar": "0.33 l · 10.88 €/l"
+   }
+  },
+  "292": {
+   "name": {
+    "en": "Krombacher rhubarb 0.33 l",
+    "ar": "Krombacher راوند 0.33 l"
+   },
+   "description": {
+    "en": "plus 0.25 € deposit · 0.33 l",
+    "ar": "+ وديعة 0.25 € · 0.33 l"
+   }
+  },
+  "293": {
+   "name": {
+    "en": "Krombacher blackcurrant 0.33 l",
+    "ar": "Krombacher كشمش أسود 0.33 l"
+   },
+   "description": {
+    "en": "0.33 l · 10.88 €/l",
+    "ar": "0.33 l · 10.88 €/l"
+   }
+  },
+  "294": {
+   "name": {
+    "en": "Coca-Cola 1,0 l",
+    "ar": "Coca-Cola 1,0 l"
+   },
+   "description": {
+    "en": "1 l · 3.49 €/l",
+    "ar": "1 l · 3.49 €/l"
+   }
+  },
+  "295": {
+   "name": {
+    "en": "Fuze Tea peach 0.4 l",
+    "ar": "Fuze Tea دراق 0.4 l"
+   },
+   "description": {
+    "en": "plus 0.25 € deposit · 0.4 l",
+    "ar": "+ وديعة 0.25 € · 0.4 l"
+   }
+  },
+  "296": {
+   "name": {
+    "en": "Fuze Tea lemon-lemongrass Zero 0.4 l",
+    "ar": "Fuze Tea ليمون وعشبة الليمون Zero 0.4 l"
+   },
+   "description": {
+    "en": "plus 0.25 € deposit · 0.4 l",
+    "ar": "+ وديعة 0.25 € · 0.4 l"
+   }
+  },
+  "297": {
+   "name": {
+    "en": "Still water 0.5 l",
+    "ar": "مياه عادية 0.5 l"
+   },
+   "description": {
+    "en": "plus 0.25 € deposit · 0.5 l · 3.50 €/l",
+    "ar": "+ وديعة 0.25 € · 0.5 l · 3.50 €/l"
+   }
+  },
+  "298": {
+   "name": {
+    "en": "Sparkling water 0.5 l",
+    "ar": "مياه غازية 0.5 l"
+   },
+   "description": {
+    "en": "plus 0.25 € deposit · 0.5 l · 3.50 €/l",
+    "ar": "+ وديعة 0.25 € · 0.5 l · 3.50 €/l"
+   }
+  },
+  "299": {
+   "name": {
+    "en": "ESN Designer Whey Protein – Cinnamon Cereal",
+    "ar": "ESN Designer Whey Protein – Cinnamon Cereal"
+   },
+   "description": {
+    "en": "Single-serve sachet · 30 g · whey protein mix with cereal pieces.",
+    "ar": "كيس حصّة واحدة · 30 g · خليط بروتين مصل اللبن مع قطع سيريال."
+   }
+  },
+  "300": {
+   "name": {
+    "en": "ESN Isoclear Whey Isolate – Peach Iced Tea",
+    "ar": "ESN Isoclear Whey Isolate – Peach Iced Tea"
+   },
+   "description": {
+    "en": "Single-serve sachet · 30 g · lactose-free, sugar-free and fat-free.",
+    "ar": "كيس حصّة واحدة · 30 g · خالٍ من اللاكتوز والسكر والدهون."
+   }
+  },
+  "301": {
+   "name": {
+    "en": "Fanta Lemon & Elderflower 0,33 l",
+    "ar": "Fanta Lemon & Elderflower 0,33 l"
+   },
+   "description": {
+    "en": "plus 0.25 € deposit · 0.33 l",
+    "ar": "+ وديعة 0.25 € · 0.33 l"
+   }
+  },
+  "302": {
+   "name": {
+    "en": "Fanta Strawberry & Kiwi 0,33 l",
+    "ar": "Fanta Strawberry & Kiwi 0,33 l"
+   },
+   "description": {
+    "en": "plus 0.25 € deposit · 0.33 l",
+    "ar": "+ وديعة 0.25 € · 0.33 l"
+   }
+  },
+  "303": {
+   "name": {
+    "en": "Fresh Cannabis Ice Tea THC Free 0,5 l",
+    "ar": "Fresh Cannabis Ice Tea THC Free 0,5 l"
+   },
+   "description": {
+    "en": "plus 0.15 € deposit · 0.5 l",
+    "ar": "+ وديعة 0.15 € · 0.5 l"
+   }
+  },
+  "304": {
+   "name": {
+    "en": "Moloko Blueberry 0,25 l",
+    "ar": "Moloko Blueberry 0,25 l"
+   },
+   "description": {
+    "en": "0.25 l · 15.96 €/l",
+    "ar": "0.25 l · 15.96 €/l"
+   }
+  },
+  "305": {
+   "name": {
+    "en": "Fanta Mango & Dragonfruit 0,33 l",
+    "ar": "Fanta Mango & Dragonfruit 0,33 l"
+   },
+   "description": {
+    "en": "plus 0.25 € deposit · 0.33 l",
+    "ar": "+ وديعة 0.25 € · 0.33 l"
+   }
+  },
+  "500": {
+   "name": {
+    "en": "Iced Coffee Latte",
+    "ar": "Iced Coffee Latte"
+   },
+   "description": {
+    "en": "Espresso + cold milk + ice",
+    "ar": "إسبريسو + حليب بارد + ثلج"
+   }
+  },
+  "501": {
+   "name": {
+    "en": "Iced Caramel Coffee",
+    "ar": "Iced Caramel Coffee"
+   },
+   "description": {
+    "en": "Espresso + cold milk + caramel syrup + ice",
+    "ar": "إسبريسو + حليب بارد + شراب كراميل + ثلج"
+   }
+  },
+  "502": {
+   "name": {
+    "en": "Iced Spanish Latte",
+    "ar": "Iced Spanish Latte"
+   },
+   "description": {
+    "en": "Espresso + sweetened condensed milk + cold milk + ice",
+    "ar": "إسبريسو + حليب مكثّف محلّى + حليب بارد + ثلج"
+   }
+  },
+  "503": {
+   "name": {
+    "en": "Iced Vanille Latte",
+    "ar": "Iced Vanille Latte"
+   },
+   "description": {
+    "en": "Espresso + cold milk + vanilla syrup + ice",
+    "ar": "إسبريسو + حليب بارد + شراب فانيلا + ثلج"
+   }
+  },
+  "504": {
+   "name": {
+    "en": "Iced Choco",
+    "ar": "Iced Choco"
+   },
+   "description": {
+    "en": "Cold milk + chocolate syrup + ice",
+    "ar": "حليب بارد + شراب شوكولاتة + ثلج"
+   }
+  },
+  "505": {
+   "name": {
+    "en": "Iced Hazelnut Coffee",
+    "ar": "Iced Hazelnut Coffee"
+   },
+   "description": {
+    "en": "Espresso + hazelnut syrup + cold milk + ice",
+    "ar": "إسبريسو + شراب بندق + حليب بارد + ثلج"
+   }
+  },
+  "506": {
+   "name": {
+    "en": "Iced Americano Coffee",
+    "ar": "Iced Americano Coffee"
+   },
+   "description": {
+    "en": "Freshly brewed coffee, chilled and served over ice",
+    "ar": "قهوة طازجة، مبرّدة ومقدّمة على الثلج"
+   }
+  },
+  "507": {
+   "name": {
+    "en": "Iced Cappuccino",
+    "ar": "Iced Cappuccino"
+   },
+   "description": {
+    "en": "Espresso + cold, creamy milk + ice",
+    "ar": "إسبريسو + حليب بارد كريمي + ثلج"
+   }
+  },
+  "508": {
+   "name": {
+    "en": "Iced Mocha",
+    "ar": "Iced Mocha"
+   },
+   "description": {
+    "en": "Espresso + cold milk + mocha syrup + ice",
+    "ar": "إسبريسو + حليب بارد + شراب موكا + ثلج"
+   }
+  },
+  "510": {
+   "name": {
+    "en": "Iced Passion Fruit Shaken",
+    "ar": "Iced Passion Fruit Shaken"
+   },
+   "description": {
+    "en": "Iced green tea shaken with passion fruit",
+    "ar": "شاي أخضر مثلّج مخفوق مع الباشن فروت"
+   }
+  },
+  "511": {
+   "name": {
+    "en": "Iced Strawberry Shaken",
+    "ar": "Iced Strawberry Shaken"
+   },
+   "description": {
+    "en": "Iced green tea shaken with strawberry",
+    "ar": "شاي أخضر مثلّج مخفوق مع الفراولة"
+   }
+  },
+  "512": {
+   "name": {
+    "en": "Iced Peach Shaken",
+    "ar": "Iced Peach Shaken"
+   },
+   "description": {
+    "en": "Iced green tea shaken with peach",
+    "ar": "شاي أخضر مثلّج مخفوق مع الدراق"
+   }
+  },
+  "513": {
+   "name": {
+    "en": "Iced Raspberry Shaken",
+    "ar": "Iced Raspberry Shaken"
+   },
+   "description": {
+    "en": "Iced green tea shaken with raspberry",
+    "ar": "شاي أخضر مثلّج مخفوق مع التوت العليق"
+   }
+  },
+  "514": {
+   "name": {
+    "en": "Iced Mango Shaken",
+    "ar": "Iced Mango Shaken"
+   },
+   "description": {
+    "en": "Iced green tea shaken with mango",
+    "ar": "شاي أخضر مثلّج مخفوق مع المانغا"
+   }
+  },
+  "515": {
+   "name": {
+    "en": "Iced Lemon Shaken",
+    "ar": "Iced Lemon Shaken"
+   },
+   "description": {
+    "en": "Iced green tea shaken with lemon",
+    "ar": "شاي أخضر مثلّج مخفوق مع الليمون"
+   }
+  },
+  "516": {
+   "name": {
+    "en": "Iced Pina Colada Shaken",
+    "ar": "Iced Pina Colada Shaken"
+   },
+   "description": {
+    "en": "Iced green tea shaken with piña colada",
+    "ar": "شاي أخضر مثلّج مخفوق مع البينا كولادا"
+   }
+  },
+  "517": {
+   "name": {
+    "en": "Iced Tropical Mix Shaken",
+    "ar": "Iced Tropical Mix Shaken"
+   },
+   "description": {
+    "en": "Iced green tea shaken with tropical mix",
+    "ar": "شاي أخضر مثلّج مخفوق مع المكس الاستوائي"
+   }
+  }
+ },
+ "categories": {
+  "Beef Burger": {
+   "en": "Beef burger",
+   "ar": "برغر لحمة"
+  },
+  "Chicken Burger": {
+   "en": "Chicken burger",
+   "ar": "برغر دجاج"
+  },
+  "Veggie Burger": {
+   "en": "Veggie burger",
+   "ar": "برغر نباتي"
+  },
+  "Korean & Fusion Wings": {
+   "en": "Korean & Fusion Wings",
+   "ar": "Korean & Fusion Wings"
+  },
+  "Chicken Buckets & Deals (New)": {
+   "en": "Chicken Buckets & Deals (New)",
+   "ar": "Chicken Buckets & Deals (New)"
+  },
+  "Angebot": {
+   "en": "Offers",
+   "ar": "عروض"
+  },
+  "Angebot 3 für 2": {
+   "en": "3-for-2 offers",
+   "ar": "عروض 3 بسعر 2"
+  },
+  "Crispyburger Bundels": {
+   "en": "Crispyburger Bundels",
+   "ar": "Crispyburger Bundels"
+  },
+  "French Tacos": {
+   "en": "French Tacos",
+   "ar": "French Tacos"
+  },
+  "Specials": {
+   "en": "Specials",
+   "ar": "سبيشال"
+  },
+  "Salate": {
+   "en": "Salads",
+   "ar": "سلطات"
+  },
+  "Falafel": {
+   "en": "Falafel",
+   "ar": "فلافل"
+  },
+  "Hot Dogs": {
+   "en": "Hot dogs",
+   "ar": "هوت دوغ"
+  },
+  "Sandwiches": {
+   "en": "Sandwiches",
+   "ar": "ساندويشات"
+  },
+  "Fried Chicken": {
+   "en": "Fried chicken",
+   "ar": "دجاج مقلي"
+  },
+  "Desserts": {
+   "en": "Desserts",
+   "ar": "حلويات"
+  },
+  "Dips": {
+   "en": "Dips",
+   "ar": "ديبات"
+  },
+  "Frappuccino Series": {
+   "en": "Frappuccino Series",
+   "ar": "Frappuccino Series"
+  },
+  "Alkoholfreie Getränke": {
+   "en": "Soft drinks (non-alcoholic)",
+   "ar": "مشروبات غير كحولية"
+  },
+  "Iced Coffee": {
+   "en": "Iced coffee",
+   "ar": "قهوة مثلّجة"
+  },
+  "Iced Tea": {
+   "en": "Iced tea",
+   "ar": "شاي مثلّج"
+  }
+ }
+}

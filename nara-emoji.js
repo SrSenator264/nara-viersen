@@ -59,11 +59,11 @@
     var e = pick(ING, s);
     return e ? e + ' ' + s : s;
   }
-  function cat(name) {
-    var s = String(name == null ? '' : name);
-    if (!s || START.test(s)) return s;
+  function cat(name, label) {   // Emoji kommt vom Originalnamen, der Text darf übersetzt sein
+    var s = String(name == null ? '' : name), shown = label == null ? s : String(label);
+    if (!s || START.test(shown)) return shown;
     var e = pick(CAT, s);
-    return e ? e + ' ' + s : s;
+    return e ? e + ' ' + shown : shown;
   }
   var api = { deco: deco, cat: cat, ing: function (t) { return pick(ING, t); } };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

@@ -75,7 +75,7 @@
     body+='<section class="npd-g"><h4>'+esc(t('note'))+'</h4><div class="npd-chips">'+QUICK.map(q=>'<button type="button" data-q="'+esc(q)+'" class="'+(S.note.split(', ').includes(q)?'on':'')+'">'+esc(q)+'</button>').join('')+'</div>'
       +'<input class="npd-note" value="'+esc(S.note)+'" placeholder="'+esc(t('notePh'))+'"></section>';
     const cb=box.querySelector('.npd-body'),st=cb.scrollTop;
-    box.querySelector('.npd-title').textContent=p.n;
+    box.querySelector('.npd-title').textContent=(p.tr&&p.tr[L()]&&p.tr[L()].n)||p.n;
     box.querySelector('.npd-price').textContent=eur(unit);
     cb.innerHTML=body;cb.scrollTop=st;
     box.querySelector('.npd-qty b').textContent=S.qty;
