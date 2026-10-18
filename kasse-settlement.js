@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
- const external=new Set(['LIEFERANDO','WOLT','UBER_EATS','WHATSAPP','TELEFON']);
+ const external=new Set(['LIEFERANDO','WOLT','UBER_EATS','WHATSAPP','TELEFON','LOCO','LANCH']);
  const fees={LIEFERANDO:25,WOLT:25,UBER_EATS:25,WHATSAPP:0,TELEFON:0,NARA:0};
  const lang=()=>{try{if(window.NARA_LANG)return window.NARA_LANG.get();const l=localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
  const T={
@@ -8,13 +8,13 @@
   ar:{title:'NARA · تسكيرة اليوم',h1:'تسكيرة اليوم والحساب 📊',intro:'ملخص المبيعات والمنصات والعمولات والربح — بدون ما نغيّر شي ببيانات الكاشير.',back:'رجوع عالكاشير',refresh:'حدّث',taxRate:'نسبة الضريبة (تجربة)',day:'يوم الشغل',gross:'كل المبيعات',fees:'عمولات المنصات',tax:'الضريبة',profit:'الربح الصافي التقريبي',bySource:'حسب المصدر',source:'المصدر',orders:'الطلبات',sales:'المبيعات',rate:'العمولة',commission:'قيمة العمولة',after:'بعد العمولة',external:'خارجي · للحساب بس',empty:'لسّا ما في طلبات',NARA:'NARA كاشير',TELEFON:'تلفون',DINE_IN:'جوّا المطعم',TAKEAWAY:'استلام',ready:n=>`كلفة المواد محسوبة من ${n} وصفة مربوطة بالمخزون.`,estimate:n=>`كلفة المواد هلق تقديرية 30% للتجربة. في ${n} صنف بالمخزون بس لسّا ما في وصفات مربوطة، فما اخترعنا كلفة مو أكيدة.`},
   en:{title:'NARA · End of day',h1:'End of day & settlement 📊',intro:'Summary of sales, platforms, commissions and profit — cashier data stays unchanged.',back:'Back to cashier',refresh:'Refresh',taxRate:'Tax rate (test)',day:'Business day',gross:'Gross sales',fees:'Platform commissions',tax:'Tax',profit:'Estimated net profit',bySource:'Breakdown by source',source:'Source',orders:'Orders',sales:'Sales',rate:'Commission',commission:'Commission amount',after:'After commission',external:'external · accounting only',empty:'No orders yet',NARA:'NARA cashier',TELEFON:'Phone',DINE_IN:'Dine-in',TAKEAWAY:'Pickup',ready:n=>`Material cost calculated from ${n} recipes linked to inventory.`,estimate:n=>`Material cost is a 30% estimate for now (test). There are ${n} inventory items but no linked recipes yet, so no uncertain cost is made up.`}};
  const tr=k=>(T[lang()]||T.de)[k]??T.de[k];
- const labels={LIEFERANDO:'Lieferando',WOLT:'Wolt',UBER_EATS:'Uber Eats',WHATSAPP:'WhatsApp'};
+ const labels={LIEFERANDO:'Lieferando',WOLT:'Wolt',UBER_EATS:'Uber Eats',WHATSAPP:'WhatsApp',LOCO:'Loco Chicken',LANCH:'Lanch',KASSE:'Kasse',WEBSITE:'Website'};
  const label=source=>labels[source]||(T.de[source]&&typeof T.de[source]==='string'&&/^[A-Z_]+$/.test(source)?tr(source):source);
  document.title=tr('title');document.querySelectorAll('[data-st]').forEach(el=>{el.textContent=tr(el.dataset.st)});
  if(window.NARA_LANG){const host=document.querySelector('#settlement-lang');if(host)window.NARA_LANG.mountSwitcher(host)}
  const euro=c=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format((c||0)/100);
  let costStatus={ready:false,recipes:0,inventory:0};
- let srv=null;const D=window.NARA_DAY;
+ let srv=null,led=null;const D=window.NARA_DAY;
  const localOrders=()=>{try{return JSON.parse(localStorage.getItem('nara-kasse-orders')||'[]')}catch{return[]}};
  const stamp=o=>o.createdAt||o.placedAt||o.updatedAt||'';
  const selDay=()=>(document.querySelector('#sd-day')?.value)||(D?D.today():'');
@@ -24,13 +24,14 @@
  const total=o=>(o.cart||[]).reduce((s,i)=>s+Number(i.unitCents||0)*Number(i.quantity||0),0);
  const render=()=>{
   const list=orders().filter(o=>!['CANCELLED','STORNIERT'].includes(String(o.status||''))&&total(o)>0);
-  const rows={};let gross=0,fee=0;
-  list.forEach(o=>{const source=String(o.source||'NARA').toUpperCase(),amount=total(o),rate=fees[source]??0;gross+=amount;const commission=Math.round(amount*rate/100);fee+=commission;if(!rows[source])rows[source]={amount:0,commission:0,count:0,rate};rows[source].amount+=amount;rows[source].commission+=commission;rows[source].count++});
+  let rows={};let gross=0,fee=0;const SLG=window.NARA_SETTLEMENT_LEDGER,LG=SLG&&led&&led.day===selDay()?SLG.rows(led.byDay,led.day):null;
+  if(LG){rows=LG.rows;gross=LG.gross;fee=LG.fee}else list.forEach(o=>{const source=String(o.source||'NARA').toUpperCase(),amount=total(o),rate=fees[source]??0;gross+=amount;const commission=Math.round(amount*rate/100);fee+=commission;if(!rows[source])rows[source]={amount:0,commission:0,count:0,rate};rows[source].amount+=amount;rows[source].commission+=commission;rows[source].count++});
   const taxRate=Number(document.querySelector('#tax-rate')?.value||19),tax=Math.round((gross-fee)*taxRate/(100+taxRate)),materials=Math.round(gross*.30),net=gross-fee-tax-materials;
   document.querySelector('#metric-gross').textContent=euro(gross);document.querySelector('#metric-fee').textContent=euro(fee);document.querySelector('#metric-tax').textContent=euro(tax);document.querySelector('#metric-profit').textContent=euro(net);
   document.querySelector('#settlement-rows').innerHTML=Object.entries(rows).map(([source,x])=>`<tr><td><strong>${label(source)}</strong>${external.has(source)?'<small class="external-row">'+tr('external')+'</small>':''}</td><td>${x.count}</td><td>${euro(x.amount)}</td><td>${x.rate}%</td><td>${euro(x.commission)}</td><td class="profit">${euro(x.amount-x.commission)}</td></tr>`).join('')||'<tr><td colspan="6">'+tr('empty')+'</td></tr>';
   document.querySelector('#settlement-note').textContent=costStatus.ready?tr('ready')(costStatus.recipes):tr('estimate')(costStatus.inventory);
  };
+ const loadLedger=async()=>{const day=selDay();if(!day)return;try{const r=await fetch('/api/reports/sales-ledger?from='+day+'&to='+day,{cache:'no-store'});if(!r.ok)throw Error(r.status);const j=await r.json();led={day,byDay:(j.summary&&j.summary.byDay)||[]}}catch(e){led=null}render()};
  const loadCostStatus=async()=>{try{const r=await fetch('/api/admin-data',{cache:'no-store'});if(!r.ok)throw Error('admin data '+r.status);const data=await r.json();srv=Array.isArray(data.orders)?data.orders:null;if(D&&data.settings&&data.settings.businessDayStartHour!=null)D.setStartHour(data.settings.businessDayStartHour);const recipes=Array.isArray(data.recipes)?data.recipes:[],inventory=Array.isArray(data.inventoryItems)?data.inventoryItems:[];costStatus={ready:recipes.length>0,recipes:recipes.length,inventory:inventory.length};render()}catch(error){console.warn('[NARA][SETTLEMENT_COST_STATUS_FAILED]',error.message)}};
- {const di=document.querySelector('#sd-day');if(di&&D){di.value=D.today();di.addEventListener('input',render)}}document.querySelector('#tax-rate')?.addEventListener('input',render);document.querySelector('#refresh')?.addEventListener('click',()=>{render();loadCostStatus()});render();loadCostStatus();
+ {const di=document.querySelector('#sd-day');if(di&&D){di.value=D.today();di.addEventListener('input',()=>{render();loadLedger()})}}document.querySelector('#tax-rate')?.addEventListener('input',render);document.querySelector('#refresh')?.addEventListener('click',()=>{render();loadCostStatus();loadLedger()});render();loadCostStatus();loadLedger();
 })();
