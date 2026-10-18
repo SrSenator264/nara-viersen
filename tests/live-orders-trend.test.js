@@ -95,3 +95,10 @@ test('Server: summary.byDay hat byPlat je Plattform/Kasse/Website', () => {
   const d = SL.summary({ orders: [] }, l).byDay[0];
   assert.equal(d.byPlat.KASSE.cents, 100); assert.equal(d.byPlat.WEBSITE.cents, 50); assert.equal(d.byPlat.LIEFERANDO.cents, 700); assert.equal(d.totalCents, 850);
 });
+test('Server: Loco-Chicken-Bestellungen zählen unter LOCO, nicht unter der Plattform', () => {
+  const SL = require('../sales-ledger.js');
+  const row = (brand, platform, c) => ({ businessDay: '2026-10-18', grossCents: c, platform, brand, status: 'OK', cashDueCents: 0 });
+  const l = { own: { rows: [], totals: { count: 0, grossCents: 0, cashCents: 0, cardCents: 0, tseMissing: 0 } }, platform: { rows: [row('IU GENE', 'LIEFERANDO', 100), row('Loco Chicken', 'LIEFERANDO', 50), row('Loco Chicken', 'UBER_EATS', 70)], totals: { count: 3, cancelled: 0, grossCents: 220, byPlatform: {}, byBrand: {} } } };
+  const d = SL.summary({ orders: [] }, l).byDay[0];
+  assert.equal(d.byPlat.LIEFERANDO.cents, 100); assert.equal(d.byPlat.LOCO.cents, 120); assert.equal(d.byPlat.UBER_EATS, undefined); assert.equal(d.totalCents, 220);
+});

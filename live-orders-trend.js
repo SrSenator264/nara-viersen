@@ -62,7 +62,7 @@
     const py = mo === 1 ? y - 1 : y, pm = mo === 1 ? 12 : mo - 1, p2 = n => String(n).padStart(2, '0');
     return { today: [today, today], yesterday: [add(today, -1), add(today, -1)], week: [mon, today], lastweek: [add(mon, -7), add(mon, -1)], month: [mf, today], lastmonth: [`${py}-${p2(pm)}-01`, add(mf, -1)] };
   }
-  const PN = { ALL: null, LIEFERANDO: 'Lieferando', UBER_EATS: 'Uber Eats', WOLT: 'Wolt', LANCH: 'Lanch', KASSE: 'Kasse', WEBSITE: 'Website', OTHER: 'Andere' };
+  const PN = { ALL: null, LIEFERANDO: 'Lieferando', UBER_EATS: 'Uber Eats', WOLT: 'Wolt', LANCH: 'Lanch', KASSE: 'Kasse', WEBSITE: 'Website', LOCO: 'Loco Chicken', OTHER: 'Andere' };
 
   const L = {
     de: { title: 'Umsatzvergleich', day: 'Heute vs. letzter', week: 'Woche (bis gestern)', month: 'Monat (bis gestern)', prev: 'davor', src: 'laut Verkaufsjournal', wd: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
