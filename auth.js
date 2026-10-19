@@ -126,7 +126,27 @@ const allowed = (access, role) => Array.isArray(access) && access.includes(role)
 
 // ───────── ملفات ثابتة مسموحة ─────────
 const BLOCKED_DIRS = new Set(['data', 'logs', 'node_modules', 'tests', 'scripts', 'checkpoint', 'local-ocr-output']);
-const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'push.js', 'customer-db.js', 'platform-trips.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'bank-pay.js', 'qonto-sync.js', 'flamo-ai.js', 'sides-login-save.ps1']);
+const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'push.js', 'customer-db.js', 'platform-trips.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'bank-pay.js', 'qonto-sync.js', 'flamo-ai.js', 'sides-login-save.ps1',
+  // 2a) Server-only (nur per require geladen, in keiner .html / keinem Frontend-Skript referenziert):
+  'alerts.js', 'monitor.js', 'data-guard.js', 'delivery-rules.js', 'local-invoice-hybrid.js', 'option-library.js', 'sales-ledger.js', 'customers-sync.js',
+  // Dev-/Benchmark-/CLI-Tools (kein Frontend)
+  'deepseek-benchmark.js', 'local-coordinate-benchmark.js', 'local-preparser-diagnostic.js', 'run-local-ocr-generalization-controlled.js', 'discover.mjs']);
+// 2b) Whitelist für Skripte: .js/.mjs außerhalb von dist/ werden NUR ausgeliefert, wenn sie hier stehen (default-deny).
+// Quelle: <script src> in den .html-Seiten + dynamisch nachgeladene Skripte (createElement('script'), import(), serviceWorker, server-injizierte nara-auth.js/flamo-nav.js).
+// Neue Frontend-Datei? → hier eintragen (tests/auth.test.js meldet es, wenn eine Seite sie lädt und sie fehlt). Server-Module gehören NICHT hierher.
+const FRONTEND_JS = new Set([
+  'accounting.js', 'admin-foundation.js', 'admin-menu-translations.js', 'ai-manager-cashier-agents.js', 'ai-manager-command-center.js',
+  'ai-manager-i18n-fix.js', 'ai-manager.js', 'allergen-data.js', 'app.js', 'business-day.js', 'catalog.js', 'customer-chef.js',
+  'customer-sidebar.js', 'flamo-nav.js', 'flamo-t.js', 'inventory-foundation.js', 'invoice-review-model.js', 'kasse-agent-suite.js',
+  'kasse-customer-directory.js', 'kasse-delivery-fee.js', 'kasse-domain.js', 'kasse-external-payment-guard.js', 'kasse-header-tidy.js',
+  'kasse-helpers.js', 'kasse-lanch-file-preview.js', 'kasse-lanch-import.js', 'kasse-lieferando-bridge.js', 'kasse-live-orders-link.js',
+  'kasse-monitor.js', 'kasse-order-hub.js', 'kasse-payment.js', 'kasse-phone-lookup.js', 'kasse-platform-sync.js', 'kasse-print-lifecycle.js',
+  'kasse-print-sound.js', 'kasse-printer-panel.js', 'kasse-product-dialog.js', 'kasse-quick-extras.js', 'kasse-receipt.js',
+  'kasse-settlement-cost-status.js', 'kasse-settlement.js', 'kasse-sync.js', 'kasse-touch.js', 'kasse-training.js', 'kasse-tse-demo.js', 'kasse.js',
+  'live-orders-trend.js', 'manager-pending-actions.js', 'menu-source.js', 'nara-3d-scene.js', 'nara-auth.js', 'nara-emoji.js', 'nara-i18n.js',
+  'nara-lang.js', 'nara-receipt-core.mjs', 'nara-sidebar-chef.js', 'operations/core.js', 'reports.js', 'settlement-ledger.js', 'staff.js', 'sw.js',
+  'vendor/qrcode.bundle.js',
+]);
 const STATIC_EXT = new Set(['.html', '.js', '.mjs', '.css', '.png', '.jpg', '.jpeg', '.webp', '.webm', '.avif', '.gif', '.svg', '.ico', '.woff', '.woff2', '.webmanifest', '.mp3', '.wav', '.ogg']);
 function staticAllowed(rel) {
   const parts = String(rel || '').split(/[\\/]+/).filter(Boolean);
@@ -142,6 +162,8 @@ function staticAllowed(rel) {
   if (!STATIC_EXT.has(ext)) return false;
   if (SERVER_FILES.has(last)) return false;
   if (parts[0].toLowerCase() === 'dist' && parts[1] && parts[1].toLowerCase() === 'server') return false;
+  // default-deny für Skripte: nur explizit gelistete Frontend-Dateien (dist/ = Build-Ausgabe, unverändert behandelt)
+  if ((ext === '.js' || ext === '.mjs') && parts[0].toLowerCase() !== 'dist' && !FRONTEND_JS.has(parts.map(x => x.toLowerCase()).join('/'))) return false;
   return true;
 }
 
@@ -168,4 +190,4 @@ const clientIp = req => {
 };
 const safeEq = (a, b) => { const x = crypto_.createHash('sha256').update(String(a)).digest(), y = crypto_.createHash('sha256').update(String(b)).digest(); return crypto_.timingSafeEqual(x, y); };
 
-module.exports = { viaProxy, isLocalOnly, clientIp, safeEq, ROLES, MANAGERS, CASH, KITCH, STAFF, ACCT, normalizeRole, validatePin, hashPin, verifyPin, newToken, tokenHash, parseCookies, Limiter, policyFor, allowed, staticAllowed, PAGE_ROLES };
+module.exports = { viaProxy, isLocalOnly, clientIp, safeEq, ROLES, MANAGERS, CASH, KITCH, STAFF, ACCT, normalizeRole, validatePin, hashPin, verifyPin, newToken, tokenHash, parseCookies, Limiter, policyFor, allowed, staticAllowed, FRONTEND_JS, SERVER_FILES, PAGE_ROLES };

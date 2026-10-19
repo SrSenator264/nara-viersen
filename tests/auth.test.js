@@ -65,3 +65,69 @@ test('parseCookies: ungueltige Prozent-Codierung wirft nicht', () => {
   assert.deepEqual(A.parseCookies('a=%; b=2'), { a: '%', b: '2' });
   assert.deepEqual(A.parseCookies('big=' + 'x'.repeat(5000)).big.length, 5000);
 });
+
+// ───────── staticAllowed: Server-Module dürfen nie ausgeliefert werden, Frontend-Skripte immer ─────────
+const fs = require('node:fs');
+const path = require('node:path');
+const ROOT = path.join(__dirname, '..');
+const rootFiles = fs.readdirSync(ROOT, { withFileTypes: true }).filter(e => e.isFile()).map(e => e.name);
+const htmlFiles = rootFiles.filter(f => f.endsWith('.html'));
+const normRef = s => s.replace(/[?#].*$/, '').replace(/^\.?\//, '');
+// Skripte, die eine Seite lädt: <script src>, plus dynamisch (createElement/.src=, import(), document.write, serviceWorker.register) in den Frontend-Skripten
+function frontendLoaded() {
+  const out = new Set();
+  for (const h of htmlFiles) for (const m of fs.readFileSync(path.join(ROOT, h), 'utf8').matchAll(/<script[^>]*\ssrc=["']([^"']+)["']/g)) if (!/^(https?:)?\/\//.test(m[1])) out.add(normRef(m[1]));
+  const serverish = new Set(['server.js', 'server-auth.js']);
+  // dynamisch geladen: in den Frontend-Skripten UND in Inline-Skripten der .html-Seiten (z. B. serviceWorker.register('sw.js'))
+  for (const f of rootFiles.filter(x => (/\.m?js$/.test(x) && !serverish.has(x)) || x.endsWith('.html'))) {
+    const t = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    for (const re of [/\.src\s*=\s*['"]([^'"?]+\.m?js)/g, /import\(\s*['"]\/?([^'"?]+\.m?js)/g, /<script src=\\?["']([^"'\\?]+\.m?js)/g, /register\(\s*['"]([^'"?]+\.js)/g])
+      for (const m of t.matchAll(re)) out.add(normRef(m[1]));
+  }
+  // server-injizierte Skripte (server-auth.js inject): nara-auth.js, flamo-nav.js
+  const inj = fs.readFileSync(path.join(ROOT, 'server-auth.js'), 'utf8');
+  for (const m of inj.matchAll(/<script src="\/([^"?]+\.js)/g)) out.add(m[1]);
+  return out;
+}
+// Alle lokalen Module, die server.js / server-auth.js (transitiv) per require() laden
+function serverGraph() {
+  const seen = new Set(), q = ['server.js', 'server-auth.js'];
+  const res = (from, r) => { const b = path.join(path.dirname(from), r); for (const c of [b, b + '.js', b + '.mjs']) { const full = path.join(ROOT, c); if (fs.existsSync(full) && fs.statSync(full).isFile()) return path.relative(ROOT, full).split(path.sep).join('/'); } return null; };
+  while (q.length) {
+    const f = q.pop(); if (seen.has(f)) continue; seen.add(f);
+    const t = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    for (const m of t.matchAll(/(?:require|import)\(\s*['"](\.[^'"]+)['"]/g)) { const r = res(f, m[1]); if (r && !seen.has(r)) q.push(r); }
+  }
+  return seen;
+}
+test('staticAllowed: every server-required module is blocked unless a page loads it', () => {
+  const loaded = frontendLoaded();
+  const leaked = [...serverGraph()].filter(f => !loaded.has(f) && A.staticAllowed(f));
+  assert.deepEqual(leaked, [], 'Server-Module werden öffentlich ausgeliefert: ' + leaked.join(', '));
+});
+test('staticAllowed: concrete server files are blocked (alerts, monitor, data-guard, delivery-rules, local-invoice-hybrid, sales-ledger …)', () => {
+  for (const f of ['server.js', 'server-auth.js', 'auth.js', 'alerts.js', 'monitor.js', 'data-guard.js', 'delivery-rules.js', 'local-invoice-hybrid.js', 'option-library.js', 'sales-ledger.js', 'customers-sync.js', 'web-order.js'])
+    assert.equal(A.staticAllowed(f), false, f);
+});
+test('staticAllowed: unknown new .js/.mjs in the root is denied by default (whitelist)', () => {
+  assert.equal(A.staticAllowed('brand-new-server-module.js'), false);
+  assert.equal(A.staticAllowed('brand-new-tool.mjs'), false);
+  assert.equal(A.staticAllowed('sub/dir/x.js'), false);
+});
+test('staticAllowed: every script loaded by an html page stays allowed (frontend must not break)', () => {
+  const missing = [...frontendLoaded()].filter(f => /\.m?js$/.test(f) && fs.existsSync(path.join(ROOT, f)) && !A.staticAllowed(f));
+  assert.deepEqual(missing, [], 'Frontend-Skripte fehlen in FRONTEND_JS (auth.js): ' + missing.join(', '));
+});
+test('staticAllowed: whitelist has no stale or server-only entries', () => {
+  const server = serverGraph(), loaded = frontendLoaded();
+  for (const f of A.FRONTEND_JS) {
+    assert.ok(fs.existsSync(path.join(ROOT, f)), 'FRONTEND_JS verweist auf fehlende Datei: ' + f);
+    assert.ok(!server.has(f) || loaded.has(f), 'Server-Modul in FRONTEND_JS: ' + f);
+  }
+});
+test('staticAllowed: other static assets and dist/client are still served, dist/server is not', () => {
+  for (const f of ['index.html', 'kasse.css', 'brand/flamo-icon.svg', 'dist/client/kasse.js', 'dist/client/admin.html']) assert.equal(A.staticAllowed(f), true, f);
+  assert.equal(A.staticAllowed('dist/server/index.js'), false);
+  assert.equal(A.staticAllowed('data/nara-admin.json'), false);
+  assert.equal(A.staticAllowed('.env'), false);
+});
