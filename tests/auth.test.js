@@ -172,3 +172,16 @@ test('server-auth create() exposes prune() and server.js schedules it unref\'d e
   const src = fs.readFileSync(path.join(ROOT, 'server.js'), 'utf8');
   assert.match(src, /setInterval\(\(\)=>\{try\{naraAuthLib\.pruneHits\(webOrderHits,600000\);naraAuthLib\.pruneHits\(flamoHits,86400000\);naraAuth\.prune\(\)\}[^]*?\},10\*60000\)\.unref\(\)/);
 });
+
+// ───────── Berechtigungstabelle der neueren Endpoints ─────────
+test('policyFor: /api/health is public, /api/health/details is managers only', () => {
+  assert.equal(A.policyFor('GET', '/api/health'), 'public');
+  assert.deepEqual(A.policyFor('GET', '/api/health/details'), A.MANAGERS);
+});
+test('policyFor: health test-alert and menu-translation drafts are managers only', () => {
+  assert.deepEqual(A.policyFor('POST', '/api/health/test-alert'), A.MANAGERS);
+  assert.deepEqual(A.policyFor('POST', '/api/menu/translations/drafts'), A.MANAGERS);
+  assert.equal(A.allowed(A.policyFor('POST', '/api/menu/translations/drafts'), 'CASHIER'), false);
+  assert.equal(A.allowed(A.policyFor('POST', '/api/health/test-alert'), 'KITCHEN'), false);
+  assert.equal(A.allowed(A.policyFor('POST', '/api/health/test-alert'), 'MANAGER'), true);
+});
