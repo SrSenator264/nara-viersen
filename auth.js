@@ -55,6 +55,18 @@ class Limiter {
     this.m.set(key, e); return this.check(key, now);
   }
   success(key) { this.m.delete(key); }
+  // Speicher-Hygiene: Einträge löschen, die nicht mehr gesperrt sind UND deren Fenster abgelaufen ist (sonst wächst this.m mit jeder fremden IP). Gibt die Anzahl gelöschter Einträge zurück.
+  prune(now = Date.now()) {
+    let n = 0;
+    for (const [k, e] of this.m) if (e.lockedUntil <= now && now - e.first > this.windowMs) { this.m.delete(k); n++; }
+    return n;
+  }
+}
+// Zeitstempel-Maps (Rate-Limit der Web-Bestellungen / Flamo-Chat: key → [timestamps]): Schlüssel löschen, deren Stempel alle älter als das Fenster sind.
+function pruneHits(map, windowMs, now = Date.now()) {
+  let n = 0;
+  for (const [k, arr] of map) if (!Array.isArray(arr) || !arr.some(t => now - t < windowMs)) { map.delete(k); n++; }
+  return n;
 }
 
 // ───────── جدول صلاحيات المسارات (الأول المطابق يفوز) ─────────
@@ -190,4 +202,4 @@ const clientIp = req => {
 };
 const safeEq = (a, b) => { const x = crypto_.createHash('sha256').update(String(a)).digest(), y = crypto_.createHash('sha256').update(String(b)).digest(); return crypto_.timingSafeEqual(x, y); };
 
-module.exports = { viaProxy, isLocalOnly, clientIp, safeEq, ROLES, MANAGERS, CASH, KITCH, STAFF, ACCT, normalizeRole, validatePin, hashPin, verifyPin, newToken, tokenHash, parseCookies, Limiter, policyFor, allowed, staticAllowed, FRONTEND_JS, SERVER_FILES, PAGE_ROLES };
+module.exports = { viaProxy, isLocalOnly, clientIp, safeEq, ROLES, MANAGERS, CASH, KITCH, STAFF, ACCT, normalizeRole, validatePin, hashPin, verifyPin, newToken, tokenHash, parseCookies, Limiter, pruneHits, policyFor, allowed, staticAllowed, FRONTEND_JS, SERVER_FILES, PAGE_ROLES };

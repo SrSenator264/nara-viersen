@@ -235,6 +235,8 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     return /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, m => m + tag) : tag + html;
   }
 
-  return { gate, inject, userFrom, _store: () => store };
+  // Limiter-Maps aufräumen (server.js ruft das alle 10 min auf); gibt die Anzahl gelöschter Einträge zurück
+  const prune = (now = Date.now()) => acctIpLimiter.prune(now) + acctLimiter.prune(now) + ipLimiter.prune(now);
+  return { gate, inject, userFrom, prune, _store: () => store };
 }
 module.exports = { create, COOKIE };

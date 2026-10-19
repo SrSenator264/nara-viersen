@@ -131,3 +131,44 @@ test('staticAllowed: other static assets and dist/client are still served, dist/
   assert.equal(A.staticAllowed('data/nara-admin.json'), false);
   assert.equal(A.staticAllowed('.env'), false);
 });
+
+// ───────── Speicher-Hygiene: Limiter.prune / pruneHits / server-auth prune ─────────
+test('Limiter.prune removes expired entries and keeps active ones', () => {
+  const L = new A.Limiter({ max: 3, windowMs: 1000, lockMs: 5000 });
+  L.fail('old', 0);                                   // Fenster 0..1000, nicht gesperrt
+  L.fail('fresh', 9500);                              // Fenster noch offen bei now=10000
+  L.fail('locked', 0); L.fail('locked', 1); L.fail('locked', 2); // gesperrt bis 5002
+  L.fail('lockedLong', 9000); L.fail('lockedLong', 9001); L.fail('lockedLong', 9002); // gesperrt bis 14002
+  const removed = L.prune(10000);
+  assert.equal(removed, 2);                           // 'old' + 'locked' (Sperre abgelaufen, Fenster zu)
+  assert.equal(L.m.has('old'), false);
+  assert.equal(L.m.has('locked'), false);
+  assert.equal(L.m.has('fresh'), true);
+  assert.equal(L.m.has('lockedLong'), true);
+  assert.equal(L.check('lockedLong', 10000).ok, false); // aktive Sperre bleibt wirksam
+});
+test('Limiter.prune: still-locked entry is never removed even if its window is over', () => {
+  const L = new A.Limiter({ max: 2, windowMs: 100, lockMs: 10000 });
+  L.fail('k', 0); L.fail('k', 1);
+  assert.equal(L.prune(5000), 0);
+  assert.equal(L.m.size, 1);
+  assert.equal(L.prune(20000), 1);
+  assert.equal(L.m.size, 0);
+});
+test('pruneHits drops keys whose timestamps are all older than the window', () => {
+  const now = 1_000_000, hits = new Map([['stale', [now - 700000, now - 650000]], ['mixed', [now - 700000, now - 1000]], ['fresh', [now - 5]], ['empty', []]]);
+  const n = A.pruneHits(hits, 600000, now);
+  assert.equal(n, 2);
+  assert.deepEqual([...hits.keys()].sort(), ['fresh', 'mixed']);
+});
+test('server-auth create() exposes prune() and server.js schedules it unref\'d every 10 min', () => {
+  const os = require('node:os');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-prune-'));
+  try {
+    const auth = require('../server-auth.js').create({ readAdminData: () => ({ employees: [] }), writeAdminData() {}, reply() {}, adminId: p => p + '-1', dir });
+    assert.equal(typeof auth.prune, 'function');
+    assert.equal(auth.prune(), 0);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+  const src = fs.readFileSync(path.join(ROOT, 'server.js'), 'utf8');
+  assert.match(src, /setInterval\(\(\)=>\{try\{naraAuthLib\.pruneHits\(webOrderHits,600000\);naraAuthLib\.pruneHits\(flamoHits,86400000\);naraAuth\.prune\(\)\}[^]*?\},10\*60000\)\.unref\(\)/);
+});

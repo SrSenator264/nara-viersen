@@ -28,7 +28,7 @@ const S = {};
 test('before setup: protected API is denied, data files not downloadable', async () => {
   for (const u of ['/api/kasse-state', '/api/customers', '/api/employees', '/api/delivery/config', '/api/accounting/accounts', '/api/delivery/driver-pay'])
     assert.equal((await call('GET', u)).status, 401, u);
-  for (const u of ['/data/nara-admin.json', '/data/nara-auth.json', '/.env', '/server.js', '/auth.js', '/package.json', '/tests/auth.test.js', '/kitchen.js'])
+  for (const u of ['/data/nara-admin.json', '/data/nara-auth.json', '/.env', '/server.js', '/auth.js', '/package.json', '/tests/auth.test.js', '/kitchen.js', '/alerts.js', '/monitor.js', '/data-guard.js', '/delivery-rules.js', '/local-invoice-hybrid.js', '/sales-ledger.js'])
     assert.equal((await call('GET', u)).status, 404, u);
   assert.equal((await call('GET', '/api/delivery/zones')).status, 200);
 });

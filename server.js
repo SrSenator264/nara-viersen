@@ -158,6 +158,8 @@ function googleMapsDirectionsUrl(origin, stops){
 }
 const naraAuth=require('./server-auth.js').create({readAdminData,writeAdminData,reply,adminId,dir:adminDataDir});
 const naraAuthLib=require('./auth.js');
+// تنظيف دوري كل 10 دقايق: Rate-Limit-Maps (web-orders 10 min، flamo 24 h) وlimiters الدخول — بدونه الـMaps بتكبر مع كل IP غريب. unref = ما بيمنع إغلاق العملية
+setInterval(()=>{try{naraAuthLib.pruneHits(webOrderHits,600000);naraAuthLib.pruneHits(flamoHits,86400000);naraAuth.prune()}catch(e){console.warn('[NARA][PRUNE]',e.message)}},10*60000).unref();
 const pushLib=require('./push.js');let _pushKeys=null;const pushKeys=()=>_pushKeys||(_pushKeys=pushLib.loadKeys(adminDataDir));
 function pushDrivers(targets){if(!targets||!targets.length)return;(async()=>{try{const keys=pushKeys(),data=readAdminData();const before=new Set((data.pushSubs||[]).map(x=>x.endpoint));for(const t of targets)await pushLib.notifyUser(keys,data,t.driverId,{title:'Flamo 🛵 Neuer Auftrag · اجاك طلب',body:t.codes.join(', '),url:'driver.html',tag:'nara-new-order'});const alive=new Set((data.pushSubs||[]).map(x=>x.endpoint));if(alive.size!==before.size){const fresh=readAdminData();fresh.pushSubs=(fresh.pushSubs||[]).filter(x=>alive.has(x.endpoint)||!before.has(x.endpoint));writeAdminData(fresh)}}catch(e){console.error('push failed',e.message)}})()}
 const naraSafeHandler=fn=>(req,res)=>{try{return fn(req,res)}catch(e){console.error('[NARA][HANDLER_ERROR]',req.method,String(req.url||'').slice(0,120),e&&e.message);try{if(!res.headersSent)res.writeHead(500,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Interner Fehler.'}))}catch(_){}}};
