@@ -67,7 +67,7 @@
     const box=document.getElementById('npd');if(!box||!S)return;
     const p=S.p,menu=menuOK(p),miss=missing(),unit=unitCents();
     let body='';
-    if(menu){
+    if(menu&&!S.noSeg){
       const m=isMenu();
       body+='<div class="npd-seg"><button type="button" data-seg="__single" class="'+(m?'':'on')+'"><b>'+esc(t('single'))+'</b><span>'+eur(p.cents)+'</span></button>'
         +'<button type="button" data-seg="__menu" class="'+(m?'on':'')+'"><b>🍟 '+esc(t('menu'))+'</b><span>'+eur(p.cents+menuCents(p))+'</span></button></div>';
@@ -135,6 +135,8 @@
     if(old&&Array.isArray(old.options))for(const x of old.options){const g=gs.find(y=>y.group===x.group);const o=g&&g.options.find(y=>(y.id||y.name)===x.id);if(o)(S.sel[g.group]||(S.sel[g.group]={}))[x.id]={opt:o,qty:x.quantity||1}}
     if(menuOK(p)&&!S.sel.__order)S.sel.__order={__single:{opt:gs[0].options[0],qty:1}};
     if(wantMenu)S.sel.__order={__menu:{opt:gs[0].options[1],qty:1}};
+    // أصناف بلا منيو أصلي: لحالو هو الديفولت وما منعرض تبويبة منيو، المنيو بيجي بس من الزر الأصفر أو كلمة منيو
+    S.noSeg=menuOK(p)&&!p.menuCents&&!wantMenu&&!(S.sel.__order&&S.sel.__order.__menu);
     // مجموعة إجبارية فيها خيار واحد بس: منختارو لحالو
     for(const g of gs)if(g.required&&g.options.length===1&&!S.sel[g.group])S.sel[g.group]={[g.options[0].id||g.options[0].name]:{opt:g.options[0],qty:1}};
     let box=document.getElementById('npd');
@@ -145,7 +147,7 @@
       document.body.appendChild(box);
       box.addEventListener('click',onClick);
       box.addEventListener('input',e=>{if(e.target.classList.contains('npd-note')&&S){S.note=e.target.value;const c=box.querySelector('.npd-chips');if(c)c.querySelectorAll('[data-q]').forEach(b=>b.classList.toggle('on',S.note.split(', ').includes(b.dataset.q)))}});
-      document.addEventListener('keydown',e=>{if(!S)return;if(e.key==='Escape')close();if(e.key==='Enter'&&e.target.classList.contains('npd-note')&&menuOK(S.p)&&MENU_WORD.test(S.note)&&!isMenu()){S.note=S.note.replace(MENU_WORD,'').replace(/^[\s,]+|[\s,]+$/g,'');S.sel.__order={__menu:{opt:S.gs[0].options[1],qty:1}};draw();return}if(e.key==='Enter'&&!e.target.classList.contains('npd-note'))commit()});
+      document.addEventListener('keydown',e=>{if(!S)return;if(e.key==='Escape')close();if(e.key==='Enter'&&e.target.classList.contains('npd-note')&&menuOK(S.p)&&MENU_WORD.test(S.note)&&!isMenu()){S.note=S.note.replace(MENU_WORD,'').replace(/^[\s,]+|[\s,]+$/g,'');S.sel.__order={__menu:{opt:S.gs[0].options[1],qty:1}};S.noSeg=false;draw();return}if(e.key==='Enter'&&!e.target.classList.contains('npd-note'))commit()});
     }
     box.hidden=false;box.querySelector('.npd-body').scrollTop=0;draw();
   }
