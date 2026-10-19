@@ -6,7 +6,8 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $src  = Join-Path $root 'tunnel\config.example.yml'
-$dst  = 'C:\Windows\System32\config\systemprofile\.cloudflared\config.yml'
+$dst  = Join-Path $env:USERPROFILE '.cloudflared\config.yml'   # der Dienst 'cloudflared' liest diese Datei (--config)
+if (-not (Test-Path $dst)) { $dst = 'C:\Windows\System32\config\systemprofile\.cloudflared\config.yml' }
 if (-not (Test-Path $src)) { throw "Nicht gefunden: $src" }
 if (-not (Test-Path $dst)) { throw "Nicht gefunden: $dst (Tunnel noch nie eingerichtet?)" }
 
@@ -19,10 +20,13 @@ Copy-Item $dst ($dst + '.bak-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 [System.IO.File]::WriteAllText($dst, $new, (New-Object System.Text.UTF8Encoding($false)))
 Write-Host "OK: Config aktualisiert ($($cred.Trim()))"
 
-Stop-ScheduledTask -TaskName 'cloudflared-nara' -ErrorAction SilentlyContinue
-Start-Sleep 2
-Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-Start-ScheduledTask -TaskName 'cloudflared-nara'
+if (Get-Service cloudflared -ErrorAction SilentlyContinue) { Restart-Service cloudflared }
+else {
+  Stop-ScheduledTask -TaskName 'cloudflared-nara' -ErrorAction SilentlyContinue
+  Start-Sleep 2
+  Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+  Start-ScheduledTask -TaskName 'cloudflared-nara'
+}
 Start-Sleep 6
 Write-Host ("Oeffentlich /api/push/key (401 = erreichbar, Login noetig): " + (curl.exe -s -o NUL -w "%{http_code}" --max-time 10 https://app.flamo.co.de/api/push/key))
 Write-Host ("Oeffentlich driver.html (200 erwartet):                  " + (curl.exe -s -o NUL -w "%{http_code}" --max-time 10 https://app.flamo.co.de/driver.html))

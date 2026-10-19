@@ -1,0 +1,15 @@
+{
+  "id": "/kasse.html",
+  "name": "Flamo Kasse",
+  "short_name": "Flamo Kasse",
+  "description": "Flamo – Kasse",
+  "start_url": "/kasse.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1d2327",
+  "theme_color": "#1d2327",
+  "icons": [
+    { "src": "/icons/nara-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/nara-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

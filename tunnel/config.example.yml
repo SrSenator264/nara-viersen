@@ -21,5 +21,9 @@ ingress:
   - hostname: app.flamo.co.de
     path: ^/api/(auth/(login|logout|me|employees|join|invite-check)|attendance|menu|web-orders(/status)?|pay/(enabled|door)|flamo/(chat|status)|delivery/(scan|route-link|quote|zones)|driver/(position|start|delivered|finish|proof|door-pay|routes|note|notes)|push/(key|subscribe))$
     service: http://127.0.0.1:4185
+  # Kasse NUR für dein Handy: eigener Host, geschützt durch Cloudflare Access (nur deine Mail) + NARA_KASSE_EMAILS im .env.
+  # Der Server prüft zusätzlich selbst (kasse-gate.js) und lehnt alles ohne gültige Access-Mail mit 403 ab.
+  - hostname: kasse.flamo.co.de
+    service: http://127.0.0.1:4185
   # Alles andere (Kasse, Admin, Buchhaltung, Küche, Live Orders, Dispatch, bootstrap ...) -> 404
   - service: http_status:404

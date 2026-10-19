@@ -19,3 +19,10 @@
 - PC muss laufen (Single Point of Failure) → später Hybrid (VPS für Web/Fahrer-App).
 - PWA liefert GPS nur bei geöffnetem Bildschirm; echte Hintergrund-Ortung → später native App.
 - Training-Modus-Härtung (403 für Nicht-OWNER/MANAGER) steht in `NARA-FUTURE-PLAN.md` unter „Vor dem Launch“.
+
+## Kasse auf dem Handy (nur Owner) – Stand 20.10.2026
+- Eigener Host `kasse.flamo.co.de` (Tunnel-Regel in `tunnel/config.example.yml`), geschützt durch **Cloudflare Access** (nur deine Mail, Einmalcode, Sitzung 30 Tage) + Server-Sperre `kasse-gate.js` (403 ohne Access-Mail).
+- `.env`: `NARA_KASSE_HOST=kasse.flamo.co.de` und `NARA_KASSE_EMAILS=<deine Mail>` → NARA neu starten. Ohne diese Zeilen bleibt der Host gesperrt/aus.
+- Cloudflare-Schritte: DNS-Route `cloudflared tunnel route dns <Tunnel> kasse.flamo.co.de`; Zero Trust → Access → Applications → Self-hosted → Domain kasse.flamo.co.de → Policy „Allow“ nur deine Mail, Session 1 Monat.
+- Config übernehmen: `Tunnel-Config-Aktualisieren.ps1` (Admin-PowerShell) – schreibt in `%USERPROFILE%\.cloudflared\config.yml` und startet den Dienst `cloudflared` neu.
+- Kasse als App auf dem Handy: Chrome → ⋮ → „Zum Startbildschirm“ (Manifest `icons/kasse.webmanifest`).
