@@ -40,7 +40,7 @@
 
   // زر المنيو على كل سطر
   function decorate(){
-    const o=cur();if(!o)return;
+    paintMenuOpen();const o=cur();if(!o)return;
     const rows=[...cartEl.querySelectorAll('.cart-item')];
     (o.cart||[]).forEach((it,i)=>{
       const row=rows[i];if(!row)return;
@@ -58,6 +58,12 @@
   // زر "أكتر"
   const extraBtn=document.createElement('button');extraBtn.type='button';extraBtn.id='qx-extra';
   cartEl.after(extraBtn); // مباشرة تحت أصناف الطلب
+  // زر "🍟 منيو" بارز: بيفتح نافذة خيارات المنيو لآخر صنف بالسلة (إله منيو)
+  const menuOpen=document.createElement('button');menuOpen.type='button';menuOpen.id='qx-menu-open';extraBtn.before(menuOpen);
+  function menuTarget(){const o=cur();if(!o)return -1;const c=o.cart||[];for(let i=c.length-1;i>=0;i--){const it=c[i];if(SKIP.has(it.kind))continue;const p=productOf(it);if(p&&window.NARA_MENU_OK&&window.NARA_MENU_OK(p))return i}return -1}
+  function paintMenuOpen(){const i=menuTarget();menuOpen.hidden=i<0;menuOpen.textContent='🍟 '+tr('menu')}
+  menuOpen.onclick=()=>{const i=menuTarget();if(i<0)return;const o=cur(),it=o.cart[i],p=productOf(it);if(!p||!window.NARA_PRODUCT_DIALOG)return;window.NARA_PRODUCT_DIALOG.open(p,{...it,note:((it.note||'')+' منيو').trim()},i)};
+  new MutationObserver(paintMenuOpen).observe(cartEl,{childList:true});paintMenuOpen();
   const modal=document.createElement('div');modal.id='qx-modal';modal.hidden=true;document.body.appendChild(modal);
   const PRICES=[0,50,100,150,200,300,400,500];
   let price=100;
