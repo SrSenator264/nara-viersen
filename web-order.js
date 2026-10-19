@@ -32,7 +32,7 @@ function groupsFor(p, catalog) {
 }
 
 // المنتج المتاح للزبون: من الكتالوج، والسعر/التوفر من إعدادات NARA (data.products) إذا موجودة
-function productFor(id, catalog, products, optionGroups) {
+function productFor(id, catalog, products, optionGroups, optionCatalog) {
   const p = catalog.find(x => String(x.id) === String(id) && !x.hidden);
   if (!p || p.unavailable === true) return null;
   const row = (products || []).find(x => String(x.sourceId) === String(id));
@@ -40,12 +40,12 @@ function productFor(id, catalog, products, optionGroups) {
   if (row && row.soldOutDay === OL.today()) return null;
   const cents = row && Number.isFinite(Number(row.priceCents)) ? Number(row.priceCents) : Number(p.cents) || 0;
   // Optionen/Extras kommen aus der gemeinsamen Bibliothek (Menüverwaltung), sobald das Produkt verknüpft ist
-  const dips = row && Array.isArray(row.optionGroupIds) && row.optionGroupIds.length ? OL.compose(row, optionGroups || []) : p.dips;
+  const dips = row && Array.isArray(row.optionGroupIds) && row.optionGroupIds.length ? OL.compose(row, optionGroups || [], undefined, optionCatalog || []) : p.dips;
   return { ...p, cents, dips };
 }
 
-function priceLine(line, catalog, products, optionGroups) {
-  const p = productFor(line && line.id, catalog, products, optionGroups);
+function priceLine(line, catalog, products, optionGroups, optionCatalog) {
+  const p = productFor(line && line.id, catalog, products, optionGroups, optionCatalog);
   if (!p) throw Object.assign(Error('Produkt nicht verfügbar.'), { code: 'UNAVAILABLE', id: line && line.id });
   const qty = Math.trunc(Number(line.q));
   if (!(qty >= 1 && qty <= 30)) throw Object.assign(Error('Ungültige Menge.'), { code: 'QTY' });
@@ -92,11 +92,11 @@ function validateCustomer(c, type) {
 }
 
 // payload = {type, cart:[{id,q,m,o:[{g,i}],nt}], customer, note, payment:'CASH'|'CARD'}
-function buildOrder(payload, { catalog, products, optionGroups, rules, deliveryConfig, now = new Date() }) {
+function buildOrder(payload, { catalog, products, optionGroups, optionCatalog, rules, deliveryConfig, now = new Date() }) {
   const type = payload && payload.type === 'pickup' ? 'pickup' : 'delivery';
   const lines = Array.isArray(payload && payload.cart) ? payload.cart : [];
   if (!lines.length || lines.length > 40) throw Object.assign(Error('Warenkorb ist leer.'), { code: 'EMPTY' });
-  const cart = lines.map(l => priceLine(l, catalog, products, optionGroups));
+  const cart = lines.map(l => priceLine(l, catalog, products, optionGroups, optionCatalog));
   const subtotal = cart.reduce((s, i) => s + i.totalCents, 0);
   const customer = validateCustomer(payload.customer || {}, type);
   let fee = 0, zone = null;

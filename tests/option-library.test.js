@@ -48,3 +48,24 @@ test('today(): Format JJJJ-MM-TT (Basis für „heute aus“)', () => {
   assert.equal(today(new Date(2026, 9, 19)), '2026-10-19');
   assert.equal(today(new Date(2026, 0, 5)), '2026-01-05');
 });
+
+test('Katalog v2: verlustfrei, gleicher Name = ein Eintrag, Preis-Modi, Plattformpreis gesichert', () => {
+  const { migrateCatalog } = require('../option-library');
+  const d = mk(); d.products[0].menuData.cents = 899; d.products[0].priceCents = 750; migrate(d);
+  const before = d.products.slice(0, 2).map(p => canon(compose(p, d.optionGroups)));
+  const n = migrateCatalog(d);
+  assert.equal(n, 4, 'Beef extra, Cheddar, BBQ, Mayo (jeder Name einmal)');
+  const after = d.products.slice(0, 2).map(p => canon(compose(p, d.optionGroups, undefined, d.optionCatalog)));
+  assert.deepEqual(after, before);
+  assert.equal(d.products[0].platformPriceCents, 899, 'Lieferando-Referenz = ursprünglicher Preis');
+  const bbq = d.optionCatalog.find(c => c.name === 'BBQ');
+  const modes = d.optionGroups.flatMap(g => g.items).filter(i => i.ref === bbq.id).map(i => i.priceMode).sort();
+  assert.deepEqual(modes, ['catalog', 'fixed']);
+  bbq.cents = 55;  // ein Preis im Katalog ändern → wirkt in allen Gruppen mit Modus „catalog“
+  const c0 = compose(d.products[0], d.optionGroups, undefined, d.optionCatalog).find(x => x.id === 'd1');
+  const c1 = compose(d.products[1], d.optionGroups, undefined, d.optionCatalog).find(x => x.id === 'd1');
+  assert.deepEqual([c0.cents, c1.cents].sort((a, b) => a - b), [55, 99]);
+  bbq.soldOutDay = '2026-10-19';
+  assert.equal(compose(d.products[0], d.optionGroups, '2026-10-19', d.optionCatalog).find(x => x.id === 'd1').unavailable, true);
+  assert.equal(migrateCatalog(d), 0, 'läuft nur einmal');
+});
