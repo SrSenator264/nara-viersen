@@ -4,6 +4,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const A = require('./auth.js');
+const { readBody } = require('./body-reader.js');
 
 const COOKIE = 'nara_session';
 const SESSION_MS = 14 * 3600 * 1000;
@@ -52,10 +53,12 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body), 'Cache-Control': 'no-store', ...(cookie ? { 'Set-Cookie': cookie } : {}) });
     res.end(body);
   }
+  // Body > limit → 413, kaputtes JSON → 400 'Bad request.' (ohne Exception-Text): body-reader.js; Handler-Fehler wie bisher
   function readJson(req, res, limit, handler) {
-    let body = '', dead = false;
-    req.on('data', c => { body += c; if (body.length > limit) { dead = true; req.destroy(); } });
-    req.on('end', () => { if (dead) return; try { handler(JSON.parse(body || '{}')); } catch (e) { reply(res, 400, { error: e.message || 'Bad request.' }); } });
+    readBody(req, res, limit, reply).then(b => {
+      if (b === undefined) return;
+      try { handler(b); } catch (e) { console.error('[NARA][AUTH] Handler-Fehler', req.method, String(req.url || '').slice(0, 80), e && e.message); reply(res, 400, { error: e.message || 'Bad request.' }); }
+    });
   }
   const activeManagers = () => Object.entries(store.accounts).filter(([, a]) => a.active !== false && A.MANAGERS.includes(a.role) && a.pin);
 

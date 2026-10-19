@@ -317,3 +317,30 @@ test('Lieferdetails per orderId: nur eingeloggt, fremde/unbekannte Bestellung = 
   assert.equal((await call('POST', '/api/driver/note', { orderId: 'abc', text: 'x' }, S.driver)).status, 404);
   assert.equal((await call('GET', '/api/driver/notes?orderId=abc', null, S.driver)).status, 404);
 });
+
+// ───────── Body-Fehler: 413 bei zu großem Body, 400 mit generischer Meldung bei kaputtem JSON, Handler-422 bleibt sichtbar ─────────
+const rawPost = async (url, text, headers = {}) => { const r = await fetch(base + url, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: text }); const t = await r.text(); let j = null; try { j = JSON.parse(t); } catch { /* kein JSON */ } return { status: r.status, json: j, text: t, headers: r.headers }; };
+test('body: oversized body → 413 "Payload too large." with Connection: close (auth login, web-orders, flamo chat)', async () => {
+  for (const [u, big] of [['/api/auth/login', 5000], ['/api/web-orders', 70000], ['/api/flamo/chat', 8000]]) {
+    const r = await rawPost(u, JSON.stringify({ pad: 'x'.repeat(big) }));
+    assert.equal(r.status, 413, u);
+    assert.deepEqual(r.json, { error: 'Payload too large.' }, u);
+    assert.equal(r.headers.get('connection'), 'close', u);
+  }
+});
+test('body: corrupt JSON → 400 "Bad request." without the parser message (auth login, web-orders, flamo chat)', async () => {
+  for (const u of ['/api/auth/login', '/api/web-orders', '/api/flamo/chat']) {
+    const r = await rawPost(u, '{"employeeId": nope');
+    assert.equal(r.status, 400, u);
+    assert.deepEqual(r.json, { error: 'Bad request.' }, u);
+    assert.doesNotMatch(r.text, /JSON|Unexpected|token|position/i, u);
+  }
+});
+test('body: handler validation errors stay visible (web-orders 422 with its own message, login 401 BAD_PIN)', async () => {
+  const w = await rawPost('/api/web-orders', '{}');
+  assert.equal(w.status, 422);
+  assert.notEqual(w.json.error, 'Bad request.');
+  assert.ok(w.json.code);
+  const l = await rawPost('/api/auth/login', JSON.stringify({ employeeId: 'nobody', pin: '000000' }));
+  assert.equal(l.status, 401); assert.equal(l.json.code, 'BAD_PIN');
+});
