@@ -126,7 +126,7 @@ body .nara-print-actions button{min-height:40px;padding:4px 6px;border-radius:12
 /* لوحة بيانات التوصيل (درج جانبي) */
 body #dl-scrim{position:fixed;inset:0;z-index:55;background:#10130f80;opacity:0;pointer-events:none;transition:opacity .2s}
 body.dl-open #dl-scrim{opacity:1;pointer-events:auto}
-body .delivery-card{position:fixed;inset-block:0;inset-inline-start:0;z-index:60;width:min(580px,94vw);max-width:none;margin:0;padding:16px 18px 24px;overflow-y:auto;background:#fff;
+body .delivery-card{position:fixed;top:var(--fn-bar-h,0px);bottom:0;inset-inline-start:0;z-index:60;width:min(580px,94vw);max-width:none;margin:0;padding:16px 18px 24px;overflow-y:auto;background:#fff;
   border-radius:0 22px 22px 0;box-shadow:0 0 60px #0007;transform:translateX(calc(-104% * var(--t-dir)));visibility:hidden;pointer-events:none;
   transition:transform .24s var(--t-ease),visibility 0s .24s}
 html[dir=rtl] body .delivery-card{border-radius:22px 0 0 22px}

@@ -197,6 +197,10 @@
     function ping() {
       fetch(base + 'sw.js', { method: 'HEAD', cache: 'no-store' }).then(r => { srvOk = r.ok || r.status < 500; paintStatus(); }).catch(() => { srvOk = false; paintStatus(); });
     }
+    
+  // Höhe der oberen Leiste als CSS-Variable, damit Seitenpanels (z. B. Kunde) nicht darunter verschwinden
+  function setBarVar(){try{const b=document.querySelector('.fn-bar');if(b)document.documentElement.style.setProperty('--fn-bar-h',b.offsetHeight+'px')}catch(e){}}
+  window.addEventListener('resize',setBarVar);setBarVar();setTimeout(setBarVar,600);
     window.addEventListener('online', paintStatus); window.addEventListener('offline', paintStatus);
     setInterval(ping, 20000);
 
