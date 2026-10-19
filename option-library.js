@@ -82,4 +82,18 @@ function compose(p, groups, day = today(), catalog = []) {
   return out;
 }
 
-module.exports = { migrate, migrateCatalog, compose, resolvePrice, catId, canon, today };
+// Repair: Gruppen-Einträge verweisen (ref) auf Katalog-Einträge, die fehlen → aus der Sicherung (pre-catalog) wiederherstellen.
+function orphanRefs(data) {
+  const have = new Set((data.optionCatalog || []).map(c => c.id)), out = new Set();
+  for (const g of data.optionGroups || []) for (const it of g.items || []) if (it.ref && !have.has(it.ref)) out.add(it.ref);
+  return out;
+}
+function repairCatalog(data, bakData) {
+  const orph = orphanRefs(data); if (!orph.size || !bakData) return 0;
+  const tmp = JSON.parse(JSON.stringify({ optionGroups: bakData.optionGroups || [], products: [], optionCatalog: [] }));
+  migrateCatalog(tmp);
+  const add = tmp.optionCatalog.filter(c => orph.has(c.id));
+  data.optionCatalog = [...(data.optionCatalog || []), ...add];
+  return add.length;
+}
+module.exports = { orphanRefs, repairCatalog, migrate, migrateCatalog, compose, resolvePrice, catId, canon, today };

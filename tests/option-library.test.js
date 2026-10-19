@@ -69,3 +69,14 @@ test('Katalog v2: verlustfrei, gleicher Name = ein Eintrag, Preis-Modi, Plattfor
   assert.equal(compose(d.products[0], d.optionGroups, '2026-10-19', d.optionCatalog).find(x => x.id === 'd1').unavailable, true);
   assert.equal(migrateCatalog(d), 0, 'läuft nur einmal');
 });
+
+test('repairCatalog restores missing catalog entries from backup', () => {
+  const OL = require('../option-library.js');
+  const bak = { optionGroups: [{ id: 'g', items: [{ id: 'i', name: 'Mayo', cents: 50 }] }], products: [] };
+  const data = JSON.parse(JSON.stringify(bak)); OL.migrateCatalog(data);
+  const lost = JSON.parse(JSON.stringify(data)); lost.optionCatalog = [];
+  assert.equal(OL.orphanRefs(lost).size, 1);
+  assert.equal(OL.repairCatalog(lost, bak), 1);
+  assert.equal(lost.optionCatalog[0].name, 'Mayo');
+  assert.equal(OL.orphanRefs(lost).size, 0);
+});
