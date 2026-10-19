@@ -1,6 +1,6 @@
 param()
 $ErrorActionPreference = 'Stop'
-$root = 'C:\Users\droma\Documents\Codex\2026-09-08\new-chat'
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $logs = Join-Path $root 'logs'
 $startupLog = Join-Path $logs 'startup.log'
 New-Item -ItemType Directory -Force -Path $logs | Out-Null

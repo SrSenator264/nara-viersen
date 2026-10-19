@@ -1,6 +1,6 @@
 param([switch]$SkipBrowser)
 $ErrorActionPreference = 'Stop'
-$root = 'C:\Users\droma\Documents\Codex\2026-09-08\new-chat'
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $server = Join-Path $root 'server.js'
 $logs = Join-Path $root 'logs'
 $node = 'C:\Program Files\nodejs\node.exe'
