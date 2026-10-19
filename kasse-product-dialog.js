@@ -23,15 +23,22 @@
   const K=()=>window.NARA_KASSE_PRODUCT||{};
   const oname=n=>{try{return K().optionName?K().optionName(n):String(n)}catch(e){return String(n)}};
   const gname=g=>(t('groups')||{})[g]||oname(g);
-  const MULTI=new Set(['Ihre Extras']);   // إضافات: كمية؛ الباقي (Dips…) كبسة = تشغيل/إطفاء
+  const MULTI=new Set(['Ihre Extras']);
+  // منيو: كل الأكل (ما عدا الحلويات والمشروبات والسبيشلز والديبس). الفئة بتحدد.
+  const NON_MENU=/dessert|getr|drink|iced|frappu|^dips?$|special|kaffee|tee$|wasser|cola|bier|wein/i;
+  const MENU_WORD=/منيو|menü|menu/i;
+  const menuOK=p=>!!p&&(!!p.menuCents||(!!p.c&&!NON_MENU.test(p.c)));
+  window.NARA_MENU_OK=menuOK;
+  // تاكو: زر جاهز، بيتحط بسرعة بدون نافذة (المنيو بالزر 🍟 بالسلة أو بكلمة منيو)
+  window.NARA_QUICK_ADD=p=>!!p&&/taco/i.test(p.c||'');   // إضافات: كمية؛ الباقي (Dips…) كبسة = تشغيل/إطفاء
 
   let S=null; // {p, gs, sel:{group:{id:{opt,qty}}}, open:{group:bool}, qty, note, index}
 
   function menuCents(p){return Number.isInteger(window.NARA_MENU_SURCHARGE)?window.NARA_MENU_SURCHARGE:Math.max(0,(p.menuCents||p.cents)-p.cents)}
-  function isMenu(){return !!(S.p.menuCents&&S.sel.__order&&S.sel.__order.__menu)}
+  function isMenu(){return !!(menuOK(S.p)&&S.sel.__order&&S.sel.__order.__menu)}
   function visible(g){
     if(g.group==='__order')return true;
-    if((g.group==='__drink'||g.group==='__sauce')&&S.p.menuCents)return isMenu();
+    if((g.group==='__drink'||g.group==='__sauce')&&menuOK(S.p))return isMenu();
     const need=(S.p.conditionalGroups||{})[g.group];
     if(!need)return true;
     const chosen=new Set(Object.values(S.sel).flatMap(m=>Object.keys(m)));
@@ -58,7 +65,7 @@
   }
   function draw(){
     const box=document.getElementById('npd');if(!box||!S)return;
-    const p=S.p,menu=p.menuCents,miss=missing(),unit=unitCents();
+    const p=S.p,menu=menuOK(p),miss=missing(),unit=unitCents();
     let body='';
     if(menu){
       const m=isMenu();
@@ -86,7 +93,7 @@
   function close(){const b=document.getElementById('npd');if(b)b.hidden=true;S=null}
   function commit(){
     if(!S||missing().length)return;
-    const p=S.p,opts=chosenOptions(),note=S.note.trim(),q=S.qty,index=S.index;
+    const p=S.p,opts=chosenOptions(),note=S.note.replace(MENU_WORD,'').replace(/^[\s,]+|[\s,]+$/g,'').trim(),q=S.qty,index=S.index;
     close();
     K().add(p,opts,index,note);
     // الكمية (add بيعمل 1)
@@ -120,11 +127,14 @@
   function open(p,old=null,index=-1){
     const k=K();if(!k.groups||!k.add)return;
     let gs=k.groups(p);
-    if(p.menuCents)gs=[{group:'__order',required:true,options:[{id:'__single',name:'Einzel / بدون منيو',cents:0},{id:'__menu',name:'Menü / إضافة كمنيو',cents:menuCents(p)}]},...gs];
+    if(menuOK(p))gs=[{group:'__order',required:true,options:[{id:'__single',name:'Einzel / بدون منيو',cents:0},{id:'__menu',name:'Menü / إضافة كمنيو',cents:menuCents(p)}]},...gs];
     if(!gs.length)return k.add(p,[],index);
     S={p,gs,sel:{},open:{},qty:old?(+old.quantity||1):1,note:old?String(old.note||''):'',index};
+    const wantMenu=menuOK(p)&&MENU_WORD.test(S.note);
+    if(wantMenu)S.note=S.note.replace(MENU_WORD,'').replace(/^[\s,]+|[\s,]+$/g,'');
     if(old&&Array.isArray(old.options))for(const x of old.options){const g=gs.find(y=>y.group===x.group);const o=g&&g.options.find(y=>(y.id||y.name)===x.id);if(o)(S.sel[g.group]||(S.sel[g.group]={}))[x.id]={opt:o,qty:x.quantity||1}}
-    if(p.menuCents&&!S.sel.__order)S.sel.__order={__single:{opt:gs[0].options[0],qty:1}};
+    if(menuOK(p)&&!S.sel.__order)S.sel.__order={__single:{opt:gs[0].options[0],qty:1}};
+    if(wantMenu)S.sel.__order={__menu:{opt:gs[0].options[1],qty:1}};
     // مجموعة إجبارية فيها خيار واحد بس: منختارو لحالو
     for(const g of gs)if(g.required&&g.options.length===1&&!S.sel[g.group])S.sel[g.group]={[g.options[0].id||g.options[0].name]:{opt:g.options[0],qty:1}};
     let box=document.getElementById('npd');
@@ -135,7 +145,7 @@
       document.body.appendChild(box);
       box.addEventListener('click',onClick);
       box.addEventListener('input',e=>{if(e.target.classList.contains('npd-note')&&S){S.note=e.target.value;const c=box.querySelector('.npd-chips');if(c)c.querySelectorAll('[data-q]').forEach(b=>b.classList.toggle('on',S.note.split(', ').includes(b.dataset.q)))}});
-      document.addEventListener('keydown',e=>{if(!S)return;if(e.key==='Escape')close();if(e.key==='Enter'&&!e.target.classList.contains('npd-note'))commit()});
+      document.addEventListener('keydown',e=>{if(!S)return;if(e.key==='Escape')close();if(e.key==='Enter'&&e.target.classList.contains('npd-note')&&menuOK(S.p)&&MENU_WORD.test(S.note)&&!isMenu()){S.note=S.note.replace(MENU_WORD,'').replace(/^[\s,]+|[\s,]+$/g,'');S.sel.__order={__menu:{opt:S.gs[0].options[1],qty:1}};draw();return}if(e.key==='Enter'&&!e.target.classList.contains('npd-note'))commit()});
     }
     box.hidden=false;box.querySelector('.npd-body').scrollTop=0;draw();
   }
