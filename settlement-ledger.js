@@ -14,6 +14,37 @@
     }
     return out;
   }
-  const api = { rows, FEES };
+  const ISO = /^\d{4}-\d{2}-\d{2}$/;
+  const addDays = (iso, n) => { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+  // rowsRange(byDay, from, to, fees) -> wie rows(), aber summiert alle Tage von..bis (inklusive). from > to -> leer.
+  function rowsRange(byDay, from, to, fees) {
+    const f = Object.assign({}, FEES, fees || {}), out = { rows: {}, gross: 0, fee: 0, days: 0 };
+    if (!ISO.test(from || '') || !ISO.test(to || '') || from > to) return out;
+    const sum = {};
+    for (const d of byDay || []) {
+      if (!d || d.day < from || d.day > to) continue;
+      out.days++;
+      for (const [k, v] of Object.entries(d.byPlat || {})) {
+        const s = sum[k] || (sum[k] = { amount: 0, count: 0 });
+        s.amount += Number(v.cents) || 0; s.count += Number(v.count) || 0;
+      }
+    }
+    for (const [k, s] of Object.entries(sum)) {
+      const rate = f[k] != null ? f[k] : 0, commission = Math.round(s.amount * rate / 100);
+      out.rows[k] = { amount: s.amount, count: s.count, commission, rate };
+      out.gross += s.amount; out.fee += commission;
+    }
+    return out;
+  }
+  // preset(name, today) -> { from, to }: today | yesterday | week (Montag bis heute) | month (1. bis heute)
+  function preset(name, today) {
+    if (!ISO.test(today || '')) return null;
+    if (name === 'today') return { from: today, to: today };
+    if (name === 'yesterday') { const y = addDays(today, -1); return { from: y, to: y }; }
+    if (name === 'week') { const wd = (new Date(today + 'T00:00:00Z').getUTCDay() + 6) % 7; return { from: addDays(today, -wd), to: today }; }
+    if (name === 'month') return { from: today.slice(0, 8) + '01', to: today };
+    return null;
+  }
+  const api = { rows, rowsRange, preset, addDays, FEES };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.NARA_SETTLEMENT_LEDGER = api;
 })(typeof window !== 'undefined' ? window : globalThis);
