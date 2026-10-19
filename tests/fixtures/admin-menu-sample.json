@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 8,
+  "_info": "Kleines Test-Fixture (keine echten Daten): Produkte mit menuData.dips, noch ohne optionGroups — Eingabe fuer option-library migrate().",
+  "optionGroups": [],
+  "products": [
+    { "id": "p-burger", "name": "Test Burger", "menuData": { "dips": [
+      { "id": "e1", "name": "Beef extra", "cents": 450, "group": "Ihre Extras" },
+      { "id": "e2", "name": "Cheddar", "cents": 100, "group": "Ihre Extras", "unavailable": true },
+      { "id": "d1", "name": "BBQ", "cents": 80, "group": "Dips" },
+      { "id": "d2", "name": "Ketchup", "cents": 80, "group": "Dips" } ] } },
+    { "id": "p-chicken", "name": "Test Chicken", "menuData": { "dips": [
+      { "id": "e1", "name": "Beef extra", "cents": 450, "group": "Ihre Extras" },
+      { "id": "e2", "name": "Cheddar", "cents": 100, "group": "Ihre Extras", "unavailable": true },
+      { "id": "d1", "name": "BBQ", "cents": 99, "group": "Dips" } ] } },
+    { "id": "p-drink", "name": "Test Drink", "menuData": {} }
+  ]
+}

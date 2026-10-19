@@ -37,3 +37,7 @@ flamo-source/
 
 backups/
 *.corrupt-*
+
+# Hosting-Konfig eines externen Deploy-Tools (nicht Teil von NARA)
+.openai/
+dist/.openai/

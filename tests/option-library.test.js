@@ -31,10 +31,14 @@ test('compose: Ausschluss pro Produkt und „heute aus“ nur am eingetragenen T
   assert.ok(!('soldOutDay' in compose(p, d.optionGroups, '2026-10-19').find(x => x.id === 'd1')));
 });
 
-test('Echte Daten (falls vorhanden): Migration verlustfrei für alle Produkte', { skip: !fs.existsSync(path.join(__dirname, '..', 'data', 'nara-admin.json')) }, () => {
-  const d = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'nara-admin.json'), 'utf8'));
-  if ((d.optionGroups || []).length) return;
+// Läuft IMMER: mit data/nara-admin.json (echte Daten), falls vorhanden — sonst mit dem kleinen Fixture tests/fixtures/admin-menu-sample.json (kein skip mehr).
+test('Migration verlustfrei für alle Produkte (echte Daten oder Fixture)', () => {
+  const real = path.join(__dirname, '..', 'data', 'nara-admin.json'), fixture = path.join(__dirname, 'fixtures', 'admin-menu-sample.json');
+  const usingReal = fs.existsSync(real);
+  const d = JSON.parse(fs.readFileSync(usingReal ? real : fixture, 'utf8'));
+  if (usingReal && (d.optionGroups || []).length) { console.warn('[option-library.test] data/nara-admin.json hat schon optionGroups → Fixture wird genutzt'); Object.assign(d, JSON.parse(fs.readFileSync(fixture, 'utf8'))); }
   const orig = new Map(d.products.map(p => [p.id, JSON.parse(JSON.stringify((p.menuData && p.menuData.dips) || []))]));
+  assert.ok([...orig.values()].some(x => x.length), 'Testdaten brauchen mindestens ein Produkt mit dips');
   migrate(d);
   for (const p of d.products) if (orig.get(p.id).length) assert.equal(canon(compose(p, d.optionGroups)), canon(orig.get(p.id)), p.name);
 });
