@@ -25,7 +25,7 @@
   const gname=g=>(t('groups')||{})[g]||oname(g);
   const MULTI=new Set(['Ihre Extras']);
   // منيو: كل الأكل (ما عدا الحلويات والمشروبات والسبيشلز والديبس). الفئة بتحدد.
-  const NON_MENU=/dessert|getr|drink|iced|frappu|^dips?$|special|bucket|bundel|kaffee|tee$|wasser|cola|bier|wein/i;
+  const NON_MENU=/dessert|getr|drink|iced|frappu|^dips?$|special|bucket|bundel|angebot|kaffee|tee$|wasser|cola|bier|wein/i;
   const MENU_WORD=/منيو|menü|menu/i;
   const menuOK=p=>!!p&&(!!p.menuCents||(!!p.c&&!NON_MENU.test(p.c)));
   window.NARA_MENU_OK=menuOK;
