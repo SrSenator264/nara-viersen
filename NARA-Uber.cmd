@@ -9,6 +9,7 @@ if exist ".env" for /f "usebackq eol=# tokens=1,* delims==" %%a in (".env") do (
   if /i "%%a"=="NARA_SERVICE_KEY" set "NARA_SERVICE_KEY=%%b"
   if /i "%%a"=="UBER_URL" set "UBER_URL=%%b"
   if /i "%%a"=="UBER_PLAYWRIGHT_PROFILE" set "UBER_PLAYWRIGHT_PROFILE=%%b"
+  if /i "%%a"=="UBER_DATA_DIR" set "UBER_DATA_DIR=%%b"
 )
 set "NARA_BASE_URL=http://127.0.0.1:%PORT%"
 if not exist "logs" mkdir "logs"
