@@ -4,10 +4,8 @@ title Flamo - Daten einspielen (SHOP-PC)
 cd /d "%~dp0"
 set "Z1="
 set "Z2="
-for %%p in ("%USERPROFILE%\Downloads" "%USERPROFILE%\OneDrive\Downloads" "%USERPROFILE%\Desktop" "%USERPROFILE%\OneDrive\Desktop") do (
-  if exist "%%~p\nara-data.zip" set "Z1=%%~p\nara-data.zip"
-  if exist "%%~p\platform-data.zip" set "Z2=%%~p\platform-data.zip"
-)
+for /f "usebackq delims=" %%a in (`powershell -NoProfile -Command "$d=@((New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path,[Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Downloads'),(Join-Path $env:USERPROFILE 'OneDrive\Downloads'));$f=Get-ChildItem -Path $d -Filter nara-data.zip -ErrorAction SilentlyContinue|Select-Object -First 1;if($f){$f.FullName}"`) do set "Z1=%%a"
+for /f "usebackq delims=" %%a in (`powershell -NoProfile -Command "$d=@((New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path,[Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Downloads'),(Join-Path $env:USERPROFILE 'OneDrive\Downloads'));$f=Get-ChildItem -Path $d -Filter platform-data.zip -ErrorAction SilentlyContinue|Select-Object -First 1;if($f){$f.FullName}"`) do set "Z2=%%a"
 if "%Z1%"=="" (echo FEHLER: nara-data.zip nicht gefunden ^(Downloads/Desktop^) & pause & exit /b 1)
 echo Kundendaten: %Z1%
 if "%Z2%"=="" (echo Plattform-Daten: nicht vorhanden ^(wird uebersprungen^) ) else echo Plattform-Daten: %Z2%
