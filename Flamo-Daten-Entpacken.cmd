@@ -2,10 +2,15 @@
 setlocal
 title Flamo - Daten einspielen (SHOP-PC)
 cd /d "%~dp0"
-set "ZIP="
-for %%p in ("%USERPROFILE%\Downloads\flamo-daten.zip" "%USERPROFILE%\OneDrive\Downloads\flamo-daten.zip" "%USERPROFILE%\Desktop\flamo-daten.zip" "%USERPROFILE%\OneDrive\Desktop\flamo-daten.zip") do if exist %%p set "ZIP=%%~p"
-if "%ZIP%"=="" (echo FEHLER: flamo-daten.zip nicht gefunden ^(Downloads/Desktop^) & pause & exit /b 1)
-echo Gefunden: %ZIP%
+set "Z1="
+set "Z2="
+for %%p in ("%USERPROFILE%\Downloads" "%USERPROFILE%\OneDrive\Downloads" "%USERPROFILE%\Desktop" "%USERPROFILE%\OneDrive\Desktop") do (
+  if exist "%%~p\nara-data.zip" set "Z1=%%~p\nara-data.zip"
+  if exist "%%~p\platform-data.zip" set "Z2=%%~p\platform-data.zip"
+)
+if "%Z1%"=="" (echo FEHLER: nara-data.zip nicht gefunden ^(Downloads/Desktop^) & pause & exit /b 1)
+echo Kundendaten: %Z1%
+if "%Z2%"=="" (echo Plattform-Daten: nicht vorhanden ^(wird uebersprungen^) ) else echo Plattform-Daten: %Z2%
 echo Stoppe NARA ...
 call "%~dp0NARA-Stop.cmd"
 timeout /t 3 /nobreak >nul
@@ -14,12 +19,14 @@ set "TS=%TS: =0%"
 if exist "%~dp0data" robocopy "%~dp0data" "C:\Flamo-Backup\data-vorher-%TS%" /E /NFL /NDL /NJH /NJS >nul
 set "X=%TEMP%\flamo-unpack"
 if exist "%X%" rmdir /s /q "%X%"
-powershell -NoProfile -Command "Expand-Archive -LiteralPath '%ZIP%' -DestinationPath '%X%' -Force"
+powershell -NoProfile -Command "Expand-Archive -LiteralPath '%Z1%' -DestinationPath '%X%\a' -Force"
 if errorlevel 1 (echo FEHLER beim Entpacken & pause & exit /b 1)
-if not exist "%X%\data" (echo FEHLER: data im Zip fehlt & pause & exit /b 1)
-robocopy "%X%\data" "%~dp0data" /E /NFL /NDL /NJH /NJS >nul
-for %%d in (data sides-data uber-data) do (
-  if exist "%X%\pw\%%d" robocopy "%X%\pw\%%d" "C:\Flamo-Playwright\%%d" /E /NFL /NDL /NJH /NJS >nul
+set "SRC=%X%\a\data"
+if not exist "%SRC%" set "SRC=%X%\a"
+robocopy "%SRC%" "%~dp0data" /E /NFL /NDL /NJH /NJS >nul
+if not "%Z2%"=="" (
+  powershell -NoProfile -Command "Expand-Archive -LiteralPath '%Z2%' -DestinationPath '%X%\b' -Force"
+  for %%d in (data sides-data uber-data) do if exist "%X%\b\%%d" robocopy "%X%\b\%%d" "C:\Flamo-Playwright\%%d" /E /NFL /NDL /NJH /NJS >nul
 )
 rmdir /s /q "%X%"
 echo Starte NARA ...
