@@ -4,11 +4,11 @@ title Flamo - Daten einspielen (SHOP-PC)
 cd /d "%~dp0"
 set "Z1="
 set "Z2="
-if exist "%~dp0nara-data.zip" set "Z1=%~dp0nara-data.zip"
-if exist "%~dp0platform-data.zip" set "Z2=%~dp0platform-data.zip"
+for %%f in ("%~dp0nara-data*.zip") do set "Z1=%%~ff"
+for %%f in ("%~dp0platform-data*.zip") do set "Z2=%%~ff"
 if not "%Z1%"=="" goto :found
-for /f "usebackq delims=" %%a in (`powershell -NoProfile -Command "$d=@((New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path,[Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Downloads'),(Join-Path $env:USERPROFILE 'OneDrive\Downloads'));$f=Get-ChildItem -Path $d -Filter nara-data.zip -ErrorAction SilentlyContinue|Select-Object -First 1;if($f){$f.FullName}"`) do set "Z1=%%a"
-for /f "usebackq delims=" %%a in (`powershell -NoProfile -Command "$d=@((New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path,[Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Downloads'),(Join-Path $env:USERPROFILE 'OneDrive\Downloads'));$f=Get-ChildItem -Path $d -Filter platform-data.zip -ErrorAction SilentlyContinue|Select-Object -First 1;if($f){$f.FullName}"`) do set "Z2=%%a"
+for /f "usebackq delims=" %%a in (`powershell -NoProfile -Command "$d=@((New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path,[Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Downloads'),(Join-Path $env:USERPROFILE 'OneDrive\Downloads'));$f=Get-ChildItem -Path $d -Filter 'nara-data*.zip' -ErrorAction SilentlyContinue|Select-Object -First 1;if($f){$f.FullName}"`) do set "Z1=%%a"
+for /f "usebackq delims=" %%a in (`powershell -NoProfile -Command "$d=@((New-Object -ComObject Shell.Application).NameSpace('shell:Downloads').Self.Path,[Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Downloads'),(Join-Path $env:USERPROFILE 'OneDrive\Downloads'));$f=Get-ChildItem -Path $d -Filter 'platform-data*.zip' -ErrorAction SilentlyContinue|Select-Object -First 1;if($f){$f.FullName}"`) do set "Z2=%%a"
 :found
 if "%Z1%"=="" (echo FEHLER: nara-data.zip nicht gefunden ^(weder in C:\Flamo noch Downloads^) & pause & exit /b 1)
 echo Kundendaten: %Z1%
