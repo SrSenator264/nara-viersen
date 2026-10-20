@@ -1,4 +1,4 @@
-/* kasse-quick-extras.css — زر المنيو على كل سطر + زر "أكتر" ونافذته */
+/* kasse-quick-extras.css — زر المنيو على سطر السلة (للأصناف المؤهلة فقط) + زر "أكتر" ونافذته */
 body .cart-controls button.qx-menu{font-size:.95rem;font-weight:800;background:#ffffff14;color:#ffe7b0;border:2px dashed #ffffff40;min-height:52px;padding:0 12px}
 body .cart-controls button.qx-menu.on{background:#f59e0b;color:#1a1300;border:2px solid #f59e0b}
 #qx-extra{order:4;flex:none;display:block;width:calc(100% - 32px);margin-inline:16px !important;min-height:54px;margin:10px 0 4px;border:2px dashed #ffffff55;border-radius:14px;background:transparent;color:#fff;font-size:1.15rem;font-weight:800;cursor:pointer}
@@ -25,4 +25,3 @@ body .cart-controls button.qx-menu.on{background:#f59e0b;color:#1a1300;border:2p
 .nara-eta small{display:block;opacity:.7;font-size:.8rem}
 .nara-eta[hidden]{display:none}
 
-#qx-menu-open{order:4;flex:none;display:block;width:calc(100% - 32px);margin:10px 16px 4px;min-height:58px;border:0;border-radius:14px;background:#f59e0b;color:#1a1300;font-weight:900;font-size:1.15rem;cursor:pointer}#qx-menu-open[hidden]{display:none}

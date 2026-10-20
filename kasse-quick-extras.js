@@ -1,9 +1,25 @@
-// kasse-quick-extras.js — زرّين سريعين بالكاشير:
-// 1) "🍟 Menü +4 €" على كل صنف بالسلة: أي صنف بيصير منيو بكبسة (حتى لو ما إله منيو بالقائمة). كبسة تانية بتلغيه.
+// kasse-quick-extras.js — بالكاشير:
+// 1) زر "🍟 زيد منيو" على سطر السلة: بس للأصناف اللي بتقبل منيو وما سألتك عنو نافذة الصنف (يعني بلا منيو جاهز بالقائمة).
+//    بيفتح نافذة الصنف على وضع المنيو (صوص + مشروب). البرغر ونحوه: لحالو/منيو بيتختار بنافذة الصنف، فما بيطلع إلو زر.
+//    الصنف اللي صار منيو بيطلع عليه "🍟 منيو ✓" وبيفتح نفس النافذة للتعديل.
 // 2) "➕ Extra" تحت السلة: شي مو موجود بالمنيو (بندورة زيادة، كاسة بلاستيك…): سعر بكبسة، والاسم والملاحظة والصنف كلهم اختياري،
 //    إما سطر لحاله أو ملزوق على صنف معيّن (بيطلع تحته بالمطبخ والفاتورة).
 // سعر المنيو بيجي من إعدادات السيرفر (/api/kasse/settings)، الافتراضي 4 €.
+// قاعدة وحدة لزر المنيو على سطر السلة (بتتختبر بـ tests/kasse-menu-rules.test.js)
+//  'none' = بلا زر | 'add' = "زيد منيو" | 'edit' = "منيو ✓" (تعديل)
+function naraMenuAction(it,product,menuOK){
+  if(!it||it.kind==='DELIVERY_FEE'||it.kind==='EXTRA')return 'none';
+  const opts=it.options||[];
+  const quick=opts.some(x=>x.id==='__quickmenu');          // سلات قديمة محفوظة: منيو بدون خيارات
+  const native=opts.some(x=>x.id==='__menu');
+  if(!product||typeof menuOK!=='function'||!menuOK(product))return (quick||native)?'edit':'none';
+  if(Number(product.menuCents)>0)return quick?'edit':'none';   // نافذة الصنف أصلاً بتسأل لحالو/منيو
+  if(/men[uü]/i.test(String(it.name||''))&&!(quick||native))return 'none'; // الصنف نفسه منيو جاهز
+  return (quick||native)?'edit':'add';
+}
+if(typeof module!=='undefined'&&module.exports)module.exports={naraMenuAction};
 (function(){
+  if(typeof document==='undefined')return; // استيراد للاختبار (node)
   const $=s=>document.querySelector(s);
   const cartEl=$('#cart'),panel=$('.cart-panel');
   if(!cartEl||!panel)return;
@@ -11,9 +27,9 @@
   const cur=()=>{const l=L();return l&&l.getCurrent?l.getCurrent():null};
   const lang=()=>{try{if(window.NARA_LANG)return window.NARA_LANG.get();const l=localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
   const T={
-    de:{menu:'Menü',extra:'➕ Extra',title:'Extra hinzufügen',what:'Was genau? (optional)',ph:'z. B. extra Tomate, Plastikbecher',price:'Preis',note:'Notiz (optional)',for:'Für welchen Artikel? (optional)',alone:'Eigene Zeile',add:'Hinzufügen',cancel:'Abbrechen',per:'Preis pro Stück',need:'Bitte eingeben, was der Kunde möchte',other:'Anderer Preis',bad:'Ungültiger Preis'},
-    ar:{menu:'منيو',extra:'➕ إكسترا',title:'زيد شي مو بالمنيو',what:'شو بالزبط؟ (مو ضروري)',ph:'مثلاً بندورة زيادة، كاسة بلاستيك',price:'السعر',note:'ملاحظة (مو ضروري)',for:'لأي صنف؟ (مو ضروري)',alone:'سطر لحالو',add:'زيد',cancel:'إلغاء',per:'السعر للقطعة',need:'اكتب شو بدّو الزبون',other:'سعر تاني',bad:'السعر مو مزبوط'},
-    en:{menu:'Menu',extra:'➕ Extra',title:'Add extra',what:'What exactly? (optional)',ph:'e.g. extra tomato, plastic cup',price:'Price',note:'Note (optional)',for:'For which item? (optional)',alone:'Separate line',add:'Add',cancel:'Cancel',per:'Price per piece',need:'Type what the customer wants',other:'Other price',bad:'Invalid price'}};
+    de:{menu:'Menü',addMenu:'Menü hinzufügen',extra:'➕ Extra',title:'Extra hinzufügen',what:'Was genau? (optional)',ph:'z. B. extra Tomate, Plastikbecher',price:'Preis',note:'Notiz (optional)',for:'Für welchen Artikel? (optional)',alone:'Eigene Zeile',add:'Hinzufügen',cancel:'Abbrechen',per:'Preis pro Stück',need:'Bitte eingeben, was der Kunde möchte',other:'Anderer Preis',bad:'Ungültiger Preis'},
+    ar:{menu:'منيو',addMenu:'زيد منيو',extra:'➕ إكسترا',title:'زيد شي مو بالمنيو',what:'شو بالزبط؟ (مو ضروري)',ph:'مثلاً بندورة زيادة، كاسة بلاستيك',price:'السعر',note:'ملاحظة (مو ضروري)',for:'لأي صنف؟ (مو ضروري)',alone:'سطر لحالو',add:'زيد',cancel:'إلغاء',per:'السعر للقطعة',need:'اكتب شو بدّو الزبون',other:'سعر تاني',bad:'السعر مو مزبوط'},
+    en:{menu:'Menu',addMenu:'Add menu',extra:'➕ Extra',title:'Add extra',what:'What exactly? (optional)',ph:'e.g. extra tomato, plastic cup',price:'Price',note:'Note (optional)',for:'For which item? (optional)',alone:'Separate line',add:'Add',cancel:'Cancel',per:'Price per piece',need:'Type what the customer wants',other:'Other price',bad:'Invalid price'}};
   const tr=k=>(T[lang()]||T.de)[k]||T.de[k];
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const eur=c=>(c/100).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
@@ -21,49 +37,38 @@
   let menuCents=450;window.NARA_MENU_SURCHARGE=menuCents; // نفس سعر المنيو لكل الأصناف (من الإعدادات)
   fetch('/api/kasse/settings',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Number.isInteger(j.menuSurchargeCents)){menuCents=j.menuSurchargeCents;window.NARA_MENU_SURCHARGE=menuCents;decorate()}}).catch(()=>{});
 
-  const isMenu=it=>(it.options||[]).some(x=>x.id==='__menu'||x.id==='__quickmenu');
-  // زر المنيو بس للأصناف اللي إلها نسخة منيو بالقائمة (برغر، ساندويش…). المنيوهات والعروض والمشروبات ما إلها.
   const productOf=it=>{const list=(typeof catalog!=='undefined'&&Array.isArray(catalog))?catalog:[];const pid=String(it.id||'').replace(/-\d+$/,'');return list.find(p=>p.id===pid)||list.find(p=>p.n===it.name)||null};
-  const canMenu=it=>{if(isMenu(it))return true;const p=productOf(it);return !!(p&&p.menuCents>0)&&!/men[uü]/i.test(String(it.name||''))};
   function commit(){const l=L();if(l){l.save();l.render()}}
 
-  // منيو: تشغيل/إطفاء على سطر بالسلة
-  function toggleMenu(index){
-    const o=cur();if(!o)return;const it=o.cart[index];if(!it||SKIP.has(it.kind)||!canMenu(it))return;
-    it.options=it.options||[];
-    const quick=it.options.findIndex(x=>x.id==='__quickmenu'),native=it.options.findIndex(x=>x.id==='__menu');
-    if(quick>=0){it.unitCents-=Number(it.options[quick].cents)||0;it.options.splice(quick,1)}
-    else if(native>=0){it.unitCents-=Number(it.options[native].cents)||0;it.options.splice(native,1,{id:'__single',name:'Einzel / بدون منيو',cents:0,group:'__order',quantity:1})}
-    else{it.options=it.options.filter(x=>x.id!=='__single');it.options.push({id:'__quickmenu',name:'Menü',cents:menuCents,group:'__quick',quantity:1});it.unitCents+=menuCents}
-    commit();
+  // زر المنيو على سطر السلة: "زيد منيو" أو "منيو ✓". الضغط بيفتح نافذة الصنف (صوص + مشروب).
+  function openMenuDialog(index){
+    const o=cur();if(!o)return;const it=o.cart[index];if(!it)return;
+    const p=productOf(it);if(!p||!window.NARA_PRODUCT_DIALOG)return;
+    const hasNative=(it.options||[]).some(x=>x.id==='__menu');
+    // منيو أصلي: نفتح النافذة كما هي للتعديل. غير هيك: كلمة "منيو" بالملاحظة بتفتحها على وضع المنيو.
+    const old=hasNative?it:{...it,note:((it.note||'')+' منيو').trim()};
+    window.NARA_PRODUCT_DIALOG.open(p,old,index);
   }
-
-  // زر المنيو على كل سطر
   function decorate(){
-    paintMenuOpen();const o=cur();if(!o)return;
+    const o=cur();if(!o)return;
     const rows=[...cartEl.querySelectorAll('.cart-item')];
     (o.cart||[]).forEach((it,i)=>{
       const row=rows[i];if(!row)return;
       if(it.kind==='EXTRA'){const ed=row.querySelector('[data-act=edit]');if(ed)ed.remove();return} // سطر "أكتر" ما إله منتج يتعدّل
-      if(SKIP.has(it.kind)||!canMenu(it))return;
+      const act=naraMenuAction(it,productOf(it),window.NARA_MENU_OK);
+      if(act==='none')return;
       const ctr=row.querySelector('.cart-controls');if(!ctr||ctr.querySelector('.qx-menu'))return;
-      const b=document.createElement('button');b.type='button';b.className='qx-menu'+(isMenu(it)?' on':'');b.dataset.index=String(i);
-      b.textContent=isMenu(it)?'🍟 '+tr('menu')+' ✓':'🍟 '+tr('menu')+' +'+eur(menuCents);
+      const b=document.createElement('button');b.type='button';b.className='qx-menu'+(act==='edit'?' on':'');b.dataset.index=String(i);
+      b.textContent=act==='edit'?'🍟 '+tr('menu')+' ✓':'🍟 '+tr('addMenu');
       ctr.insertBefore(b,ctr.querySelector('[data-act=edit]')||null);
     });
   }
-  cartEl.addEventListener('click',e=>{const b=e.target.closest('.qx-menu');if(!b)return;e.stopPropagation();toggleMenu(Number(b.dataset.index))},true);
+  cartEl.addEventListener('click',e=>{const b=e.target.closest('.qx-menu');if(!b)return;e.stopPropagation();openMenuDialog(Number(b.dataset.index))},true);
   new MutationObserver(decorate).observe(cartEl,{childList:true});
 
   // زر "أكتر"
   const extraBtn=document.createElement('button');extraBtn.type='button';extraBtn.id='qx-extra';
   cartEl.after(extraBtn); // مباشرة تحت أصناف الطلب
-  // زر "🍟 منيو" بارز: بيفتح نافذة خيارات المنيو لآخر صنف بالسلة (إله منيو)
-  const menuOpen=document.createElement('button');menuOpen.type='button';menuOpen.id='qx-menu-open';extraBtn.before(menuOpen);
-  function menuTarget(){const o=cur();if(!o)return -1;const c=o.cart||[];for(let i=c.length-1;i>=0;i--){const it=c[i];if(SKIP.has(it.kind))continue;const p=productOf(it);if(p&&window.NARA_MENU_OK&&window.NARA_MENU_OK(p))return i}return -1}
-  function paintMenuOpen(){const i=menuTarget();menuOpen.hidden=i<0;menuOpen.textContent='🍟 '+tr('menu')}
-  menuOpen.onclick=()=>{const i=menuTarget();if(i<0)return;const o=cur(),it=o.cart[i],p=productOf(it);if(!p||!window.NARA_PRODUCT_DIALOG)return;window.NARA_PRODUCT_DIALOG.open(p,{...it,note:((it.note||'')+' منيو').trim()},i)};
-  new MutationObserver(paintMenuOpen).observe(cartEl,{childList:true});paintMenuOpen();
   const modal=document.createElement('div');modal.id='qx-modal';modal.hidden=true;document.body.appendChild(modal);
   const PRICES=[0,50,100,150,200,300,400,500];
   let price=100;
@@ -103,5 +108,5 @@
   document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setTimeout(labels,0)));
   window.addEventListener('nara-lang',()=>setTimeout(labels,0));
   labels();
-  window.NARA_QUICK_EXTRAS={toggleMenu,menuCents:()=>menuCents};
+  window.NARA_QUICK_EXTRAS={openMenuDialog};
 })();
