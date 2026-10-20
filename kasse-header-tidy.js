@@ -17,8 +17,24 @@
     }
     return more.querySelector('#nara-more-pop');
   }
+  /* Vollbild-Knopf: ein Klick rein/raus (⛶ / ✖). Nur wenn der Browser Vollbild kann; sonst bleibt er weg. */
+  function fullscreenBtn() {
+    const acts = document.querySelector('header .header-actions'); if (!acts) return;
+    const root = document.documentElement; if (!root.requestFullscreen || !document.exitFullscreen) return;
+    let b = document.getElementById('nara-fs');
+    if (!b) {
+      b = document.createElement('button'); b.id = 'nara-fs'; b.type = 'button';
+      b.style.cssText = 'min-height:44px;min-width:44px;border-radius:10px;background:#eef0e9;font-size:20px;font-weight:800;line-height:1';
+      const sync = () => { const on = !!document.fullscreenElement; b.textContent = on ? '✖' : '⛶'; b.setAttribute('aria-label', on ? 'Vollbild beenden' : 'Vollbild'); };
+      b.onclick = () => { try { const r = document.fullscreenElement ? document.exitFullscreen() : root.requestFullscreen(); if (r && r.catch) r.catch(() => {}); } catch (e) {} };
+      document.addEventListener('fullscreenchange', sync); sync();
+    }
+    const more = document.getElementById('nara-more');
+    if (b.parentNode !== acts) acts.insertBefore(b, more && more.parentNode === acts ? more : null);
+  }
   function tidy() {
     const pop = build(); if (!pop) return;
+    fullscreenBtn();
     const h = document.querySelector('header');
     document.querySelectorAll('header a[data-i18n="back"]').forEach(a => a.remove());
     ['header .language-switcher', '#nara-menu-edit', 'header > a[href="admin-foundation.html"]'].forEach(sel => {
