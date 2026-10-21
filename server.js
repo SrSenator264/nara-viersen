@@ -248,6 +248,8 @@ http.createServer(naraSafeHandler((req,res)=>{if(req.method!=='GET'&&req.method!
   }catch(error){return reply(res,400,{error:error.message||'invalid request'});}});
  }
  if(url.pathname==='/api/health'&&req.method==='GET')return reply(res,200,{ok:true,uptimeSec:Math.round(process.uptime())});
+ if(url.pathname==='/api/system/update'&&req.method==='GET')return require('./system-update.js').status(root).then(r=>reply(res,200,{ok:true,...r}),e=>reply(res,500,{ok:false,error:e.message}));
+ if(url.pathname==='/api/system/update'&&req.method==='POST')return require('./system-update.js').start(root).then(r=>reply(res,200,{ok:true,...r}),e=>reply(res,500,{ok:false,error:e.message}));
  if(url.pathname==='/api/health/test-alert'&&req.method==='POST')return naraAlerts.send('test','🔥 Flamo: رسالة تجريبية. التنبيهات شغالة.',{force:true,level:'info'}).then(r=>reply(res,200,{ok:true,...r}));
  if(url.pathname==='/api/health/details'&&req.method==='GET')return reply(res,200,{ok:true,...naraMonitor.snapshot()});
  if(url.pathname==='/api/kasse-state'&&req.method==='GET'&&url.searchParams.has('days')){const d=Math.min(400,Math.max(1,Number(url.searchParams.get('days'))||2));return reply(res,200,kasseStateWindow(readAdminDataShared(),d));}

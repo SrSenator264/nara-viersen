@@ -96,6 +96,7 @@ const RULES = [
   ['GET', /^\/api\/system\/lan$/, CASH],
   ['POST', /^\/api\/kasse\/events$/, KITCH],
   ['GET', /^\/api\/health$/, 'public'],
+  ['*', /^\/api\/system\/update$/, ['OWNER']],
   ['GET', /^\/api\/health\/details$/, MANAGERS],
   ['GET', /^\/api\/kasse-state$/, KITCH],
   ['GET', /^\/api\/kasse\/open-orders$/, KITCH],
@@ -140,7 +141,7 @@ const allowed = (access, role) => Array.isArray(access) && access.includes(role)
 const BLOCKED_DIRS = new Set(['data', 'logs', 'node_modules', 'tests', 'scripts', 'checkpoint', 'local-ocr-output']);
 const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'push.js', 'customer-db.js', 'platform-trips.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'bank-pay.js', 'qonto-sync.js', 'flamo-ai.js', 'sides-login-save.ps1',
   // 2a) Server-only (nur per require geladen, in keiner .html / keinem Frontend-Skript referenziert):
-  'alerts.js', 'monitor.js', 'data-guard.js', 'delivery-rules.js', 'local-invoice-hybrid.js', 'option-library.js', 'sales-ledger.js', 'customers-sync.js', 'menu-translations-lib.js', 'kasse-window.js', 'body-reader.js',
+  'alerts.js', 'monitor.js', 'data-guard.js', 'delivery-rules.js', 'local-invoice-hybrid.js', 'option-library.js', 'sales-ledger.js', 'customers-sync.js', 'menu-translations-lib.js', 'kasse-window.js', 'body-reader.js', 'system-update.js',
   // Dev-/Benchmark-/CLI-Tools (kein Frontend)
   'deepseek-benchmark.js', 'local-coordinate-benchmark.js', 'local-preparser-diagnostic.js', 'run-local-ocr-generalization-controlled.js', 'discover.mjs']);
 // 2b) Whitelist für Skripte: .js/.mjs außerhalb von dist/ werden NUR ausgeliefert, wenn sie hier stehen (default-deny).
@@ -185,6 +186,7 @@ const PAGE_ROLES = {
   'driver-app-v2.html': STAFF, 'driver.html': STAFF, 'dispatch.html': CASH, 'connect.html': CASH, 'delivery.html': STAFF, 'delivery-print.html': STAFF,
   'staff.html': MANAGERS, 'customers.html': KITCH, 'team.html': MANAGERS, 'admin.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'dashboard.html': MANAGERS, 'status.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
   'accounting.html': ACCT, 'banking.html': ACCT, 'reports.html': ACCT, 'sales.html': ACCT, 'kasse-settlement.html': ACCT,
+  'update.html': ['OWNER'],
 };
 
 
