@@ -62,3 +62,31 @@ test('geocode uses Nominatim with a clear user agent and returns lat/lng', async
   assert.match(seen.url, /nominatim\.openstreetmap\.org\/search/);
   assert.match(seen.opt.headers['User-Agent'], /NARA/);
 });
+
+test('addressOf: Bestellung ohne PLZ/Ort bekommt 41747 Viersen als Ersatz (kein falscher Ort in Google Maps)', () => {
+  const a = S.addressOf({ delivery: { address: 'Helenenstraße 12' } });
+  assert.match(a, /Helenenstraße 12, 41747 Viersen/);
+  assert.equal(S.plzAssumed({ delivery: { address: 'Helenenstraße 12' } }), true);
+});
+test('addressOf: vorhandene PLZ/Ort bleiben, nichts wird doppelt', () => {
+  const o = { delivery: { street: 'Hauptstr.', house: '5', postal: '41749', city: 'Viersen' } };
+  assert.equal(S.addressOf(o), 'Hauptstr. 5, 41749 Viersen, Deutschland');
+  assert.equal(S.plzAssumed(o), false);
+  // nur PLZ, kein Ort -> kein Ersatz
+  assert.equal(S.addressOf({ delivery: { street: 'Weg', house: '1', postal: '41063' } }), 'Weg 1, 41063, Deutschland');
+  // PLZ steckt schon in der Adresse -> kein Ersatz
+  const b = S.addressOf({ delivery: { address: 'Musterweg 6, 41751 Viersen' } });
+  assert.equal(b, 'Musterweg 6, 41751 Viersen, Deutschland');
+  assert.equal(S.plzAssumed({ delivery: { address: 'Musterweg 6, 41751 Viersen' } }), false);
+});
+test('driverRoutes: Stopp ohne PLZ zeigt Viersen und Warn-Flag', () => {
+  const data = { ...base(), orders: [{ id: 'z1', type: 'delivery', status: 'OPEN', delivery: { address: 'Helenenstraße 12' }, createdAt: '2026-10-08T16:55:00Z' }],
+    deliveryRoutes: [{ id: 'r-abcd', employeeId: 'd1', status: 'OPEN', orderIds: ['z1'] }] };
+  const rs = S.driverRoutes(data, 'd1');
+  if (rs.length) { assert.equal(rs[0].stops[0].plzAssumed, true); assert.match(rs[0].stops[0].city, /Viersen/); }
+});
+test('geocode: Suche bevorzugt die Gegend um Viersen', async () => {
+  let url = '';
+  await S.geocode('Helenenstraße 12, 41747 Viersen', async u => { url = u; return { ok: true, json: async () => [] }; });
+  assert.match(url, /viewbox=/);
+});

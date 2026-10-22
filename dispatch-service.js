@@ -14,11 +14,20 @@ const MIN = 60000;
 const str = v => (v == null ? '' : String(v)).trim();
 const num = v => (v === '' || v == null ? NaN : Number(v));
 
+// PLZ + Ort des Restaurants: Ersatz, wenn die Bestellung (z. B. Plattform) keine PLZ/keinen Ort mitliefert
+const DEFAULT_CITY = '41747 Viersen';
+const hasPlz = v => /\b\d{5}\b/.test(str(v));
+function plzAssumed(o) {
+  const d = o.delivery || {};
+  const street = str(d.address) || [str(d.street), str(d.house || d.houseNumber)].filter(Boolean).join(' ');
+  return !!street && !str(d.postal || d.postalCode) && !str(d.city) && !hasPlz(street);
+}
 function addressOf(o) {
   const d = o.delivery || {};
   const street = str(d.address) || [str(d.street), str(d.house || d.houseNumber)].filter(Boolean).join(' ');
-  const city = [str(d.postal || d.postalCode), str(d.city)].filter(Boolean).join(' ');
+  let city = [str(d.postal || d.postalCode), str(d.city)].filter(Boolean).join(' ');
   if (!street) return '';
+  if (!city && !hasPlz(street)) city = DEFAULT_CITY;
   return [street, city, 'Deutschland'].filter(Boolean).join(', ');
 }
 const addressKey = a => str(a).toLowerCase().replace(/\s+/g, ' ').replace(/str\.?(\s|,)/g, 'straße$1');
@@ -374,7 +383,7 @@ function driverRoutes(data, driverId) {
     const stops = (r.orderIds || []).map(id => (data.orders || []).find(o => String(o.id) === String(id))).filter(Boolean).map(o => {
       const d = o.delivery || {}, kv = kitchen.kitchenView(o);
       const cash = !paidOnline(o);
-      return { orderId: o.id, code: kv.displayCode, source: kv.source, name: kv.customerName, phone: kv.phone, address: kv.address, city: kv.city, floor: kv.floor, canProof: paidOnline(o), proof: !!o.deliveryProof, doorState: o.doorPay ? o.doorPay.status : null,
+      return { orderId: o.id, code: kv.displayCode, source: kv.source, name: kv.customerName, phone: kv.phone, address: kv.address, city: kv.city || (plzAssumed(o) ? DEFAULT_CITY : ''), plzAssumed: plzAssumed(o), floor: kv.floor, canProof: paidOnline(o), proof: !!o.deliveryProof, doorState: o.doorPay ? o.doorPay.status : null,
         notes: kv.notes, itemsCount: kv.items.reduce((s, i) => s + i.quantity, 0), cash, delivered: !!o.deliveredAt, etaAt: o.assignment && o.assignment.etaAt || null, ...(pointOf(o, cache) || {}) };
     });
     return { routeId: r.id, roundId: r.id.slice(-4).toUpperCase(), status: r.status, startedAt: r.startedAt, allDelivered: stops.every(s => s.delivered), stops,
@@ -394,7 +403,7 @@ function missingAddresses(data, now = Date.now()) {
 
 // Nominatim: مجاني، طلب واحد بالثانية، ولازم اسم برنامج واضح
 async function geocode(address, fetchImpl = fetch) {
-  const url = 'https://nominatim.openstreetmap.org/search?' + new URLSearchParams({ q: address, format: 'json', limit: '1', countrycodes: 'de' });
+  const url = 'https://nominatim.openstreetmap.org/search?' + new URLSearchParams({ q: address, format: 'json', limit: '1', countrycodes: 'de', viewbox: '6.05,51.55,6.75,50.95' });
   const r = await fetchImpl(url, { headers: { 'User-Agent': 'NARA-Viersen/1.0 (restaurant delivery planner)', 'Accept-Language': 'de' } });
   if (!r.ok) throw new Error('geocode ' + r.status);
   const j = await r.json();
@@ -402,4 +411,4 @@ async function geocode(address, fetchImpl = fetch) {
   return { lat: Number(j[0].lat), lng: Number(j[0].lon) };
 }
 
-module.exports = { DEFAULT_SHOP, shopOf, addressOf, addressKey, pointOf, buildInput, planFor, missingAddresses, geocode, activeDrivers, assignRoute, pushTargets, moveOrder, swapOrders, reorderStops, setOrderPref, setDriverPref, cancelRoute, startRoute, deliverStop, finishRoute, driverRoutes, travelModel, paidOnline, proofDelivery };
+module.exports = { DEFAULT_CITY, plzAssumed, DEFAULT_SHOP, shopOf, addressOf, addressKey, pointOf, buildInput, planFor, missingAddresses, geocode, activeDrivers, assignRoute, pushTargets, moveOrder, swapOrders, reorderStops, setOrderPref, setDriverPref, cancelRoute, startRoute, deliverStop, finishRoute, driverRoutes, travelModel, paidOnline, proofDelivery };
