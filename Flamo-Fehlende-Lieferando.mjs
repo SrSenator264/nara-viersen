@@ -1,6 +1,6 @@
 // Einmaliges Nachtragen von 6 Lieferando-Bestellungen (Dienstag 20.10.2026), die NARA nicht erreicht haben.
 // Quelle: Partner Hub (Details von Omar abgetippt). Aufruf: Flamo-Fehlende-Lieferando.cmd
-// Sicher: macht erst ein Backup, ueberspringt vorhandene Bestellungen (nach Code), fragt vor dem Import.
+// Sicher: macht erst ein Backup (liest data/nara-admin.json direkt), ueberspringt vorhandene Bestellungen (nach Code), fragt vor dem Import.
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
@@ -89,16 +89,16 @@ async function main() {
   console.log(`\nServer: ${BASE}`);
   let data;
   try {
-    const r = await fetch(`${BASE}/api/admin-data`, { headers: HEADERS });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const text = await r.text();
+    // Datei direkt lesen (der /api/admin-data-Endpunkt verlangt eine Anmeldung); das Skript laeuft auf dem Shop-PC
+    const file = path.join(here, 'data', 'nara-admin.json');
+    const text = fs.readFileSync(file, 'utf8');
     data = JSON.parse(text);
     fs.mkdirSync(path.join(here, 'backups'), { recursive: true });
     const bak = path.join(here, 'backups', `vor-fehlende-lieferando-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
     fs.writeFileSync(bak, text);
     console.log(`Backup gespeichert: ${bak}`);
   } catch (e) {
-    console.error(`FEHLER: Daten konnten nicht gelesen werden (${e.message}). Es wurde NICHTS geaendert. Laeuft der Server (NARA-Start)?`);
+    console.error(`FEHLER: Daten konnten nicht gelesen werden (${e.message}). Es wurde NICHTS geaendert. Liegt das Skript in C:\\Flamo (neben dem Ordner data)?`);
     process.exit(1);
   }
   const have = new Set((data.orders || []).filter(o => String(o.source || o.platform || '').toUpperCase() === 'LIEFERANDO').map(o => String(o.displayCode || '').toUpperCase()));
