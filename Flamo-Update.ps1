@@ -17,7 +17,7 @@ Log 'Update gestartet'
 # git finden: PATH, Standard-Installation, GitHub Desktop (eingebautes git)
 $git = (Get-Command git -ErrorAction SilentlyContinue).Source
 if (-not $git) { $git = @("$env:ProgramFiles\Git\cmd\git.exe", "${env:ProgramFiles(x86)}\Git\cmd\git.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1 }
-if (-not $git) { $git = Get-ChildItem 'C:\Users\*\AppData\Local\GitHubDesktop\app-*\resources\app\git\cmd\git.exe' -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName }
+if (-not $git) { $git = Get-ChildItem @('C:\Users\*\AppData\Local\GitHubDesktop\app-*\resources\app\git\cmd\git.exe','C:\Users\*\AppData\Local\GitHubDesktop\app-*\resources\app\git\mingw64\bin\git.exe') -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName }
 if (-not $git) { Log 'FEHLER: git nicht gefunden'; Stat 'DONE' $false $null $null 'git مو موجود على هالكمبيوتر'; exit 1 }
 Log "git: $git"
 
