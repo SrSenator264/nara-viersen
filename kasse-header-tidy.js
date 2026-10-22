@@ -43,11 +43,11 @@
     updateLink(pop);
     const mb = document.querySelector('#nara-more'); if (mb && mb.parentNode && mb !== mb.parentNode.lastElementChild) mb.parentNode.appendChild(mb);
   }
-  /* „System aktualisieren“ — nur für den Inhaber (Seite update.html) */
+  /* „System aktualisieren“ — nur Inhaber/Manager (Seite update.html) */
   function updateLink(pop) {
     let u = null; try { u = window.NARA_AUTH && NARA_AUTH.user && NARA_AUTH.user(); } catch (e) { /* ignore */ }
     let a = document.getElementById('nara-update-link');
-    if (!u || u.role !== 'OWNER') { if (a) a.remove(); return; }
+    if (!u || (u.role !== 'OWNER' && u.role !== 'MANAGER')) { if (a) a.remove(); return; }
     const L = window.NARA_LANG;
     const txt = L && L.t ? L.t({ de: '🔄 System aktualisieren', ar: '🔄 تحديث النظام', en: '🔄 Update system' }) : '🔄 System aktualisieren';
     if (!a) { a = document.createElement('a'); a.id = 'nara-update-link'; a.href = 'update.html'; a.style.cssText = 'display:block;padding:10px 14px;font-weight:700;color:inherit;text-decoration:none;white-space:nowrap'; }

@@ -7,14 +7,15 @@ const path = require('node:path');
 const A = require('../auth.js');
 const U = require('../system-update.js');
 
-test('system update: nur der Inhaber (API + Seite)', () => {
+test('system update: nur Inhaber und Manager (API + Seite)', () => {
   for (const m of ['GET', 'POST']) {
     const acc = A.policyFor(m, '/api/system/update');
-    assert.deepEqual(acc, ['OWNER']);
-    assert.equal(A.allowed(acc, 'MANAGER'), false);
+    assert.equal(A.allowed(acc, 'OWNER'), true);
+    assert.equal(A.allowed(acc, 'MANAGER'), true);
+    assert.equal(A.allowed(acc, 'CASHIER'), false);
     assert.equal(A.allowed(acc, 'DRIVER'), false);
   }
-  assert.deepEqual(A.PAGE_ROLES['update.html'], ['OWNER']);
+  assert.deepEqual(A.PAGE_ROLES['update.html'], ['OWNER', 'MANAGER']);
 });
 
 test('system update: Modul wird nie ausgeliefert, Seite schon', () => {

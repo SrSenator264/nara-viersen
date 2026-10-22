@@ -96,7 +96,7 @@ const RULES = [
   ['GET', /^\/api\/system\/lan$/, CASH],
   ['POST', /^\/api\/kasse\/events$/, KITCH],
   ['GET', /^\/api\/health$/, 'public'],
-  ['*', /^\/api\/system\/update$/, ['OWNER']],
+  ['*', /^\/api\/system\/update$/, MANAGERS],
   ['GET', /^\/api\/health\/details$/, MANAGERS],
   ['GET', /^\/api\/kasse-state$/, KITCH],
   ['GET', /^\/api\/kasse\/open-orders$/, KITCH],
@@ -186,7 +186,7 @@ const PAGE_ROLES = {
   'driver-app-v2.html': STAFF, 'driver.html': STAFF, 'dispatch.html': CASH, 'connect.html': CASH, 'delivery.html': STAFF, 'delivery-print.html': STAFF,
   'staff.html': MANAGERS, 'customers.html': KITCH, 'team.html': MANAGERS, 'admin.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'dashboard.html': MANAGERS, 'status.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
   'accounting.html': ACCT, 'banking.html': ACCT, 'reports.html': ACCT, 'sales.html': ACCT, 'kasse-settlement.html': ACCT,
-  'update.html': ['OWNER'],
+  'update.html': MANAGERS,
 };
 
 
