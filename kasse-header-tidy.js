@@ -40,8 +40,22 @@
     ['header .language-switcher', '#nara-menu-edit', 'header > a[href="admin-foundation.html"]'].forEach(sel => {
       const el = document.querySelector(sel); if (el && !pop.contains(el)) pop.appendChild(el);
     });
+    updateLink(pop);
     const mb = document.querySelector('#nara-more'); if (mb && mb.parentNode && mb !== mb.parentNode.lastElementChild) mb.parentNode.appendChild(mb);
   }
+  /* „System aktualisieren“ — nur für den Inhaber (Seite update.html) */
+  function updateLink(pop) {
+    let u = null; try { u = window.NARA_AUTH && NARA_AUTH.user && NARA_AUTH.user(); } catch (e) { /* ignore */ }
+    let a = document.getElementById('nara-update-link');
+    if (!u || u.role !== 'OWNER') { if (a) a.remove(); return; }
+    const L = window.NARA_LANG;
+    const txt = L && L.t ? L.t({ de: '🔄 System aktualisieren', ar: '🔄 تحديث النظام', en: '🔄 Update system' }) : '🔄 System aktualisieren';
+    if (!a) { a = document.createElement('a'); a.id = 'nara-update-link'; a.href = 'update.html'; a.style.cssText = 'display:block;padding:10px 14px;font-weight:700;color:inherit;text-decoration:none;white-space:nowrap'; }
+    a.textContent = txt;
+    if (a.parentNode !== pop) pop.appendChild(a);
+  }
+  window.addEventListener('nara-lang', () => { const pop = document.getElementById('nara-more-pop'); if (pop) updateLink(pop); });
+  [1500, 4000, 9000].forEach(ms => setTimeout(() => { const pop = document.getElementById('nara-more-pop'); if (pop) updateLink(pop); }, ms));
   let t; const run = () => { clearTimeout(t); t = setTimeout(tidy, 150); };
   const start = () => { tidy(); const h = document.querySelector('header'); if (h) new MutationObserver(run).observe(h, { childList: true, subtree: true }); };
   document.body ? start() : document.addEventListener('DOMContentLoaded', start);
