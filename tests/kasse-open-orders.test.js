@@ -99,3 +99,9 @@ test('open-orders drawer: refreshes on open, polls every 5 s while open, pulses 
   assert.match(j, /if \(isOpen\) refreshNow\(\);[\s\S]*5000/);
   assert.match(j, /classList\.add\('pulse'\)/);
 });
+
+test('cards: dine-in/pickup never show the driver stage; served state keeps type for wording', () => {
+  const r = cards([{ id: 'l', type: 'local', table: '3', cart: [item(849)] }, { id: 'd', type: 'delivery', cart: [item(500)] }],
+    { l: { kitchen: true, kitchenStatus: 'PICKED_UP' }, d: { kitchen: true, kitchenStatus: 'PICKED_UP' } }, '', T);
+  assert.deepEqual(r.map(x => [x.type, x.stage]), [['local', 'delivered'], ['delivery', 'driver']]);
+});

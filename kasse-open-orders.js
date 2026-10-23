@@ -6,9 +6,9 @@
   'use strict';
   const CLOSED = new Set(['COMPLETED', 'CANCELLED', 'STORNIERT']);
   const TX = {
-    de: { title: 'Offene Bestellungen', items: 'Artikel', kitchen: 'In der Küche', table: 'Tisch', pickup: 'Abholung', local: 'Im Restaurant', delivery: 'Lieferung', delivered: 'Geliefert – kassieren', stNew: 'Neu', stPrep: 'Wird zubereitet', stReady: 'Fertig', stDriver: 'Beim Fahrer', cod: '🛵 An Küche · Zahlung bei Lieferung', payNow: 'Jetzt kassieren', hint: 'Offene Bestellung nochmal tippen = zurück ins Kästchen', open: 'Offene Bestellungen', close: 'Schließen' },
-    ar: { title: 'الطلبات المفتوحة', items: 'صنف', kitchen: 'بالمطبخ', table: 'طاولة', pickup: 'استلام', local: 'بالمحل', delivery: 'توصيل', delivered: 'انسلّم · اقبض', stNew: 'جديد', stPrep: 'عم يتجهّز', stReady: 'جاهز', stDriver: 'مع السواق', cod: '🛵 للمطبخ · الدفع عند التسليم', payNow: 'دفع الآن', hint: 'اضغط عالطلب المفتوح مرة تانية = بيرجع لمربعه', open: 'الطلبات المفتوحة', close: 'سكّر' },
-    en: { title: 'Open orders', items: 'items', kitchen: 'In kitchen', table: 'Table', pickup: 'Pickup', local: 'Dine-in', delivery: 'Delivery', delivered: 'Delivered · collect', stNew: 'New', stPrep: 'Preparing', stReady: 'Ready', stDriver: 'With driver', cod: '🛵 To kitchen · pay on delivery', payNow: 'Pay now', hint: 'Tap the open order again to put it back in its box', open: 'Open orders', close: 'Close' },
+    de: { title: 'Offene Bestellungen', items: 'Artikel', kitchen: 'In der Küche', table: 'Tisch', pickup: 'Abholung', local: 'Im Restaurant', delivery: 'Lieferung', delivered: 'Geliefert – kassieren', servedLocal: 'Serviert – kassieren', servedPickup: 'Abholbereit – kassieren', stNew: 'Neu', stPrep: 'Wird zubereitet', stReady: 'Fertig', stDriver: 'Beim Fahrer', cod: '🛵 An Küche · Zahlung bei Lieferung', payNow: 'Jetzt kassieren', hint: 'Offene Bestellung nochmal tippen = zurück ins Kästchen', open: 'Offene Bestellungen', close: 'Schließen' },
+    ar: { title: 'الطلبات المفتوحة', items: 'صنف', kitchen: 'بالمطبخ', table: 'طاولة', pickup: 'استلام', local: 'بالمحل', delivery: 'توصيل', delivered: 'انسلّم للزبون · اقبض', servedLocal: 'قُدّم للطاولة · اقبض', servedPickup: 'جاهز للاستلام · اقبض', stNew: 'جديد', stPrep: 'عم يتجهّز', stReady: 'جاهز', stDriver: 'مع السواق', cod: '🛵 للمطبخ · الدفع عند التسليم', payNow: 'دفع الآن', hint: 'اضغط عالطلب المفتوح مرة تانية = بيرجع لمربعه', open: 'الطلبات المفتوحة', close: 'سكّر' },
+    en: { title: 'Open orders', items: 'items', kitchen: 'In kitchen', table: 'Table', pickup: 'Pickup', local: 'Dine-in', delivery: 'Delivery', delivered: 'Delivered · collect', servedLocal: 'Served · collect', servedPickup: 'Ready for pickup · collect', stNew: 'New', stPrep: 'Preparing', stReady: 'Ready', stDriver: 'With driver', cod: '🛵 To kitchen · pay on delivery', payNow: 'Pay now', hint: 'Tap the open order again to put it back in its box', open: 'Open orders', close: 'Close' },
   };
   const ICON = { local: '🍽️', pickup: '🛍️', delivery: '🛵' };
   const total = o => (o.cart || []).reduce((s, i) => s + (Number(i.unitCents) || 0) * (Number(i.quantity) || 0), 0);
@@ -33,7 +33,7 @@
         const title = type === 'local' ? (o.table ? T.table + ' ' + o.table : T.local)
           : (String(d.name || '').trim() || String(d.street || '').trim() || (type === 'delivery' ? T.delivery : T.pickup));
         return { id: String(o.id), icon: ICON[type] || '🧾', title, items: (o.cart || []).reduce((s, i) => s + (Number(i.quantity) || 0), 0),
-          cents: total(o), stage: stageOf(srv[o.id]), kitchen: !!(srv[o.id] && srv[o.id].kitchen), delivered: !!(srv[o.id] && srv[o.id].delivered), active: String(o.id) === String(currentId) };
+          cents: total(o), type, stage: (type !== 'delivery' && stageOf(srv[o.id]) === 'driver') ? 'delivered' : stageOf(srv[o.id]), kitchen: !!(srv[o.id] && srv[o.id].kitchen), delivered: !!(srv[o.id] && srv[o.id].delivered), active: String(o.id) === String(currentId) };
       });
   }
   // توصيل قبل التسليم: بدل كاش/كرت بيظهر "للمطبخ · الدفع عند التسليم" (السائق بيقبض). بعد التسليم أو "دفع الآن" بترجع الأزرار.
@@ -87,8 +87,8 @@
     w.querySelector('#cod-now').onclick = () => { const c = S.getCurrent(); payNowId = c ? String(c.id) : ''; draw(); };
   }
 
-  const stText = (st) => ({ new: T.stNew, kitchen: T.kitchen, prep: T.stPrep, ready: T.stReady, driver: T.stDriver, delivered: T.delivered }[st]);
-  const chip = c => '<span class="oo-chip oo-st-' + c.stage + (c.stage === 'ready' || c.stage === 'delivered' ? ' oo-done' : '') + '">' + STAGE_ICON[c.stage] + ' ' + esc(stText(c.stage)) + '</span>';
+  const stText = (st, type) => ({ new: T.stNew, kitchen: T.kitchen, prep: T.stPrep, ready: T.stReady, driver: T.stDriver, delivered: type === 'local' ? T.servedLocal : type === 'pickup' ? T.servedPickup : T.delivered }[st]);
+  const chip = c => '<span class="oo-chip oo-st-' + c.stage + (c.stage === 'ready' || c.stage === 'delivered' ? ' oo-done' : '') + '">' + STAGE_ICON[c.stage] + ' ' + esc(stText(c.stage, c.type)) + '</span>';
   let prevStages = null;
   // تجديد فوري + كل 5 ثواني طول ما اللوحة مفتوحة (وكل 15 ثانية لما تنسكر)
   function refreshNow() { return pull().then(draw); }
