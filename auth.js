@@ -128,6 +128,7 @@ const RULES = [
   ['POST', /^\/api\/driver\/note$/, STAFF],
   ['GET', /^\/api\/push\/key$/, STAFF],
   ['POST', /^\/api\/push\/subscribe$/, STAFF],
+  ['POST', /^\/api\/push\/fcm-token$/, STAFF],
   ['GET', /^\/api\/driver\/notes$/, STAFF],
 ];
 function policyFor(method, pathname) {
