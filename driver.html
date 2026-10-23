@@ -14,7 +14,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",
 header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:12px 14px;background:#101820;color:#fff}
 header h1{margin:0;font-size:18px;flex:1}
 .gps{font-size:13px;border-radius:999px;padding:4px 10px;background:#ffffff1a}
-.gps.on{background:#14532d}.gps.off{background:#7f1d1d}
+.gps.wait{background:#78350f}.gps.on{background:#14532d}.gps.off{background:#7f1d1d}
 main{padding:12px 12px 90px}
 .empty{text-align:center;color:var(--muted);padding:50px 10px;font-size:17px}
 .route{background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 2px 10px #0001}
@@ -50,7 +50,7 @@ main{padding:12px 12px 90px}
 </style>
 </head>
 <body>
-<header><h1 id="title">🛵</h1><span id="langsw"></span><span class="gps" id="gps">📍 …</span></header>
+<header><h1 id="title">🛵</h1><span id="langsw"></span><span class="gps" id="gps">📍 …</span><span class="gps" id="pushst" hidden></span></header>
 <main id="main"><div class="empty">…</div></main>
 <div id="msg"></div>
 <input type="file" id="cam" accept="image/*" capture="environment" hidden>
@@ -231,25 +231,38 @@ main{padding:12px 12px 90px}
   bar.onclick=function(){if(!pushOk()||Notification.permission==='denied')return;try{Notification.requestPermission().then(function(){paintBar()})}catch(e){Notification.requestPermission(paintBar)}};
   setTimeout(paintBar,1200);
   // ===== FCM (nur APK): Benachrichtigung auch bei geschlossener App =====
+  // Die 🔔-Pille im Header zeigt den Zustand (antippen = Details). Kanal "orders" wird zuerst angelegt, damit er sofort in den Handy-Einstellungen steht.
   (function fcmInit(){
     if(!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()))return;
-    var FX={de:'🔔 Benachrichtigungen sind aus – bitte in den Handy-Einstellungen erlauben.',ar:'🔔 الإشعارات مقفلة، اسمح فيها من إعدادات الجوال.',en:'🔔 Notifications are off – please allow them in phone settings.'}[L]||'',tok=null,timer=null;
-    function warn(){var m=document.getElementById('msg');if(!m||!FX)return;m.textContent=FX;m.style.display='block';setTimeout(function(){m.style.display='none'},8000)}
+    var M={de:{wait:'Benachrichtigungen werden eingerichtet …',old:'Die App ist veraltet (Push-Plugin fehlt) – bitte die neue APK installieren.',perm:'Benachrichtigungen sind blockiert – bitte in den Handy-Einstellungen erlauben.',reg:'Token erhalten, Anmeldung beim Server …',login:'Bitte anmelden – danach wird Push aktiviert.',ok:'Push aktiv – neue Aufträge kommen auch bei geschlossener App.',srv:'Server-Fehler beim Anmelden: ',err:'Fehler: '},
+      ar:{wait:'عم نجهّز الإشعارات …',old:'التطبيق قديم (ناقصه إضافة الإشعارات) – ثبّت الـ APK الجديد.',perm:'الإشعارات محظورة – اسمح فيها من إعدادات الجوال.',reg:'وصل التوكن، عم نسجّله عالسيرفر …',login:'سجّل دخول، وبعدها بتشتغل الإشعارات.',ok:'الإشعارات شغّالة – بتجيك الطلبات حتى والتطبيق مسكّر.',srv:'خطأ من السيرفر عند التسجيل: ',err:'خطأ: '},
+      en:{wait:'Setting up notifications …',old:'App is outdated (push plugin missing) – please install the new APK.',perm:'Notifications are blocked – allow them in phone settings.',reg:'Token received, registering with server …',login:'Please log in – push turns on afterwards.',ok:'Push is on – new orders arrive even when the app is closed.',srv:'Server error while registering: ',err:'Error: '}}[L]||{},
+      tok=null,timer=null,pill=document.getElementById('pushst'),detail='';
+    function st(cls,short,full){if(!pill)return;pill.hidden=false;pill.className='gps '+cls;pill.textContent='🔔 '+short;detail=full||short}
+    if(pill)pill.onclick=function(){var m=document.getElementById('msg');if(m&&detail){m.textContent=detail;m.style.display='block';setTimeout(function(){m.style.display='none'},7000)}};
     // Token beim Server anmelden; solange der Fahrer noch nicht eingeloggt ist (401), alle 30 s neu versuchen
     function post(){
       if(!tok)return;
       fetch('/api/push/fcm-token',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok})})
-        .then(function(r){if(r.ok){window.__fcmOk=true;clearInterval(timer);timer=null}}).catch(function(){});
+        .then(function(r){
+          if(r.ok){window.__fcmOk=true;clearInterval(timer);timer=null;st('on','✓',M.ok)}
+          else if(r.status===401)st('wait','Login',M.login);
+          else st('off','Server '+r.status,M.srv+r.status);
+        }).catch(function(e){st('wait','…',M.srv+(e&&e.message||'offline'))});
     }
     try{
+      if(Capacitor.isPluginAvailable&&!Capacitor.isPluginAvailable('PushNotifications')){st('off','APK alt',M.old);return}
+      st('wait','…',M.wait);
       var PN=Capacitor.registerPlugin('PushNotifications');
-      PN.addListener('registration',function(t){tok=t&&t.value;post();clearInterval(timer);timer=setInterval(post,30000)});
-      PN.addListener('registrationError',function(){});
-      PN.requestPermissions().then(function(r){
-        if(!r||r.receive!=='granted'){warn();return}
-        return PN.createChannel({id:'orders',name:'Neue Aufträge',description:'Neue Lieferaufträge',importance:5,visibility:1,vibration:true}).catch(function(){}).then(function(){return PN.register()});
-      }).catch(function(){});
-    }catch(e){}
+      PN.addListener('registration',function(t){tok=t&&t.value;st('wait','…',M.reg);post();clearInterval(timer);timer=setInterval(post,30000)});
+      PN.addListener('registrationError',function(e){st('off','Fehler',M.err+((e&&e.error)||'registration'))});
+      PN.createChannel({id:'orders',name:'Neue Aufträge',description:'Neue Lieferaufträge',importance:5,visibility:1,vibration:true}).catch(function(){})
+        .then(function(){return PN.requestPermissions()})
+        .then(function(r){
+          if(!r||r.receive!=='granted'){st('off','Erlaubnis',M.perm);var m=document.getElementById('msg');if(m){m.textContent=M.perm;m.style.display='block';setTimeout(function(){m.style.display='none'},8000)}return}
+          return PN.register();
+        }).catch(function(e){st('off','Fehler',M.err+(e&&e.message||e))});
+    }catch(e){st('off','Fehler',M.err+(e&&e.message||e))}
   })();
 })();
 </script>
