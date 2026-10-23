@@ -41,3 +41,6 @@ backups/
 # Hosting-Konfig eines externen Deploy-Tools (nicht Teil von NARA)
 .openai/
 dist/.openai/
+
+test-results/
+playwright-report/
