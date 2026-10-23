@@ -3,7 +3,7 @@ const test = require('node:test'), assert = require('node:assert/strict'), fs = 
 const root = path.join(__dirname, '..');
 const read = f => fs.readFileSync(path.join(root, f), 'utf8');
 global.window = global.window || {};
-const { cards, deliveryHold } = require('../kasse-open-orders.js');
+const { cards, deliveryHold, cardAction } = require('../kasse-open-orders.js');
 const { shouldAutoKitchen } = require('../kasse-payment.js');
 const T = { table: 'Tisch', local: 'Im Restaurant', delivery: 'Lieferung', pickup: 'Abholung' };
 const item = (c, q = 1) => ({ name: 'x', unitCents: c, quantity: q });
@@ -57,4 +57,16 @@ test('delivery: cash/card are replaced by pay-on-delivery until delivered or "pa
   assert.equal(deliveryHold({ id: 'e', type: 'delivery', cart: [] }, {}, ''), false);
   const c = cards([d], { d1: { delivered: true } }, 'd1', T)[0];
   assert.equal(c.delivered, true);                                     // Karte zeigt "geliefert - kassieren"
+});
+test('card tap: other order opens it; tapping the open order again puts it back (reuse empty draft, else new)', () => {
+  const orders = [{ id: 'a', cart: [item(500)] }, { id: 'b', cart: [item(500)] }, { id: 'e', cart: [] }, { id: 'z', status: 'COMPLETED', cart: [] }];
+  assert.deepEqual(cardAction(orders, 'a', 'b'), { type: 'select', id: 'b' });
+  assert.deepEqual(cardAction(orders, 'a', 'a'), { type: 'park', id: 'e' });          // leerer Entwurf wird wiederverwendet
+  assert.deepEqual(cardAction(orders.slice(0, 2), 'a', 'a'), { type: 'new' });        // kein Entwurf -> neuer Auftrag
+  assert.deepEqual(cardAction([{ id: 'a', cart: [item(1)] }, { id: 'z', status: 'CANCELLED', cart: [] }], 'a', 'a'), { type: 'new' }); // geschlossene zaehlen nicht
+});
+test('drawer: side panel (logical edge, RTL aware), closed by default, cart/pay area is not covered by a bottom bar', () => {
+  const j = read('kasse-open-orders.js');
+  assert.match(j, /inset-inline-start:0/); assert.match(j, /html\[dir="rtl"\] #oo-drawer/); assert.match(j, /visibility:hidden/);
+  assert.ok(!/position:fixed;[^']*bottom:/.test(j), 'no bottom bar');
 });
