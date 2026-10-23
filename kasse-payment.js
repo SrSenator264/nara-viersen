@@ -40,11 +40,20 @@
     try { const r = await fetch('/api/kasse-state?days=3', { cache: 'no-store' }); const j = await r.json(); return (j.orders || []).find(o => String(o.id) === String(id)) || null; } catch (e) { return null; }
   }
 
+  // بالمحل/استلام: أول دفعة ناجحة = الطلب بينبعت للمطبخ لحاله وبتبدأ دورة التجهيز. التوصيل لأ (ببعته بزر "للمطبخ").
+  // بيتخطى الطلب اللي انبعت للمطبخ قبل. دالة صافية (بتنختبر).
+  function shouldAutoKitchen(o, srv) {
+    if (!o || o.type === 'delivery' || !(o.cart || []).length) return false;
+    return !(srv && (srv.kitchenPrintedAt || srv.kitchenSentAt || srv.kitchenStatus));
+  }
+  if (typeof module !== 'undefined' && module.exports) module.exports = { shouldAutoKitchen };
+
   async function open(kind, ctx) {
     const o = ctx.current(); if (!o) return;
     const gross = ctx.total(o);
     const srv = await serverOrder(o.id);
     let paidBefore = (srv && srv.paidCents) || 0;
+    let kitchenDone = !shouldAutoKitchen(o, srv); // مرة وحدة لكل طلب
     if (paidBefore > 0) o.paidCents = paidBefore; // السلة بتنقفل بالكاشير
     const lockedDiscount = paidBefore > 0 ? (srv.billDiscount || null) : null;
     const units = []; (o.cart || []).forEach(it => { for (let q = 0; q < (Number(it.quantity) || 0); q++) units.push({ name: it.name, cents: Number(it.unitCents) || 0 }); });
@@ -163,6 +172,13 @@
       try {
         if (paidBefore === 0) await ctx.send('ORDER_SYNC');
         const res = await ctx.send('FINALIZE_PAYMENT', payload);
+        if (!kitchenDone) {
+          kitchenDone = true; // الدفع نجح: أي خطأ هون ما بيوقفه
+          try {
+            const job = window.NARA_PRINT_KITCHEN ? window.NARA_PRINT_KITCHEN() : ctx.send('KITCHEN_PRINT');
+            await Promise.race([Promise.resolve(job).catch(() => null), new Promise(r => setTimeout(r, 12000))]);
+          } catch (e) { /* ignore */ }
+        }
         const info = res && res.payment;
         if (!info || info.completed) { d.close(); ctx.fresh(); try { await (window.NARA_PRINT_PENDING || null); } catch (e) { /* ignore */ } location.reload(); return; }
         paidBefore = info.paidCents;

@@ -153,7 +153,7 @@ const FRONTEND_JS = new Set([
   'customer-sidebar.js', 'flamo-nav.js', 'flamo-t.js', 'inventory-foundation.js', 'invoice-review-model.js', 'kasse-agent-suite.js',
   'kasse-customer-directory.js', 'kasse-delivery-fee.js', 'kasse-domain.js', 'kasse-external-payment-guard.js', 'kasse-header-tidy.js',
   'kasse-helpers.js', 'kasse-lanch-file-preview.js', 'kasse-lanch-import.js', 'kasse-lieferando-bridge.js', 'kasse-live-orders-link.js',
-  'kasse-monitor.js', 'kasse-order-hub.js', 'kasse-payment.js', 'kasse-phone-lookup.js', 'kasse-platform-sync.js', 'kasse-print-lifecycle.js',
+  'kasse-monitor.js', 'kasse-open-orders.js', 'kasse-order-hub.js', 'kasse-payment.js', 'kasse-phone-lookup.js', 'kasse-platform-sync.js', 'kasse-print-lifecycle.js',
   'kasse-print-sound.js', 'kasse-printer-panel.js', 'kasse-product-dialog.js', 'kasse-quick-extras.js', 'kasse-receipt.js',
   'kasse-settlement-cost-status.js', 'kasse-settlement.js', 'kasse-sync.js', 'kasse-touch.js', 'kasse-training.js', 'kasse-tse-demo.js', 'kasse.js',
   'live-orders-trend.js', 'manager-pending-actions.js', 'menu-source.js', 'nara-3d-scene.js', 'nara-auth.js', 'nara-emoji.js', 'nara-i18n.js',

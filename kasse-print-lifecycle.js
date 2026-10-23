@@ -39,6 +39,8 @@
       const close=()=>b.remove();y.onclick=async()=>{close();try{await window.NARA_RECEIPT.print(o,'customer')}catch(e){}};n.onclick=close;
       b.append(x,y,n);document.body.appendChild(b);setTimeout(close,15000)}catch(e){}
   }
+  // للدفع بالمحل/استلام: kasse-payment.js بيرسل الطلب للمطبخ ويطبع ورقته لحاله (نفس زر "للمطبخ")
+  window.NARA_PRINT_KITCHEN=()=>print('kitchen','KITCHEN_PRINT');
   async function print(kind,action){const o=current();if(!o||!(o.cart||[]).length){$('#message').textContent=t('empty');return}
     // "المطبخ": الطلب لازم يكون محفوظ عالسيرفر قبل، وبعدها بيطلع عشاشة المطبخ
     if(kind==='kitchen'){try{if(window.NARA_SYNC&&NARA_SYNC.pushOrders)await NARA_SYNC.pushOrders()}catch(e){}}
