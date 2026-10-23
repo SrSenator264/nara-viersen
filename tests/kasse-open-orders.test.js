@@ -80,3 +80,22 @@ test('customer: "remove customer from bill" button exists in 3 languages, clears
   assert.match(read('kasse-customer-directory.css'), /#remove-customer-from-invoice\[hidden\]\{display:none\}/);
   assert.match(read('kasse-open-orders.js'), /body\.dl-open #oo-tab\{display:none\}/); // Lasche verdeckt die Liefer-Seitenleiste nicht
 });
+
+test('stageOf: new → kitchen → prep → ready → driver → delivered', () => {
+  const { stageOf } = require('../kasse-open-orders.js');
+  assert.equal(stageOf(undefined), 'new');
+  assert.equal(stageOf({ kitchen: true }), 'kitchen');
+  assert.equal(stageOf({ kitchen: true, kitchenStatus: 'NEW' }), 'kitchen');
+  assert.equal(stageOf({ kitchen: true, kitchenStatus: 'PREPARING' }), 'prep');
+  assert.equal(stageOf({ kitchen: true, kitchenStatus: 'READY' }), 'ready');
+  assert.equal(stageOf({ kitchen: true, kitchenStatus: 'PICKED_UP' }), 'driver');
+  assert.equal(stageOf({ kitchen: true, kitchenStatus: 'PICKED_UP', delivered: true }), 'delivered');
+  const r = cards([{ id: 'a', type: 'delivery', cart: [item(500)] }], { a: { kitchen: true, kitchenStatus: 'READY' } }, '', T);
+  assert.equal(r[0].stage, 'ready');
+});
+test('open-orders drawer: refreshes on open, polls every 5 s while open, pulses on stage change', () => {
+  const j = read('kasse-open-orders.js');
+  assert.match(j, /if \(isOpen && !was\) refreshNow\(\)/);
+  assert.match(j, /if \(isOpen\) refreshNow\(\);[\s\S]*5000/);
+  assert.match(j, /classList\.add\('pulse'\)/);
+});
