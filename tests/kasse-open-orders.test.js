@@ -3,7 +3,7 @@ const test = require('node:test'), assert = require('node:assert/strict'), fs = 
 const root = path.join(__dirname, '..');
 const read = f => fs.readFileSync(path.join(root, f), 'utf8');
 global.window = global.window || {};
-const { cards } = require('../kasse-open-orders.js');
+const { cards, deliveryHold } = require('../kasse-open-orders.js');
 const { shouldAutoKitchen } = require('../kasse-payment.js');
 const T = { table: 'Tisch', local: 'Im Restaurant', delivery: 'Lieferung', pickup: 'Abholung' };
 const item = (c, q = 1) => ({ name: 'x', unitCents: c, quantity: q });
@@ -44,4 +44,17 @@ test('wiring: script is served (whitelist), loaded by the cashier page, and paym
   assert.match(read('kasse-print-lifecycle.js'), /window\.NARA_PRINT_KITCHEN=\(\)=>print\('kitchen','KITCHEN_PRINT'\)/);
   const p = read('kasse-payment.js');
   assert.ok(p.indexOf("ctx.send('FINALIZE_PAYMENT'") < p.indexOf('NARA_PRINT_KITCHEN()'), 'kitchen only after the payment succeeded');
+});
+test('delivery: cash/card are replaced by pay-on-delivery until delivered or "pay now"; other types untouched', () => {
+  const cart = [item(1600)], d = { id: 'd1', type: 'delivery', cart };
+  assert.equal(deliveryHold(d, undefined, ''), true);
+  assert.equal(deliveryHold(d, { kitchen: true }, ''), true);          // nach "für Küche" weiter ohne Kassendialog
+  assert.equal(deliveryHold(d, { delivered: true }, ''), false);       // geliefert -> Bar/Karte wieder da
+  assert.equal(deliveryHold(d, {}, 'd1'), false);                      // "Jetzt kassieren"
+  assert.equal(deliveryHold(d, {}, 'other'), true);
+  assert.equal(deliveryHold({ id: 'l', type: 'local', cart }, {}, ''), false);
+  assert.equal(deliveryHold({ id: 'p', type: 'pickup', cart }, {}, ''), false);
+  assert.equal(deliveryHold({ id: 'e', type: 'delivery', cart: [] }, {}, ''), false);
+  const c = cards([d], { d1: { delivered: true } }, 'd1', T)[0];
+  assert.equal(c.delivered, true);                                     // Karte zeigt "geliefert - kassieren"
 });
