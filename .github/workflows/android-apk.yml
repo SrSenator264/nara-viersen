@@ -19,6 +19,15 @@ jobs:
           npx cap add android
           python3 patch_manifest.py android/app/src/main/AndroidManifest.xml
           npx cap sync android
+      - name: Firebase-Konfiguration (FCM)
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo "::error::GitHub-Secret GOOGLE_SERVICES_JSON fehlt - ohne Firebase bekommt die APK keine Benachrichtigungen bei geschlossener App."
+            exit 1
+          fi
+          printf '%s' "$GOOGLE_SERVICES_JSON" > android-app/android/app/google-services.json
       - name: APK bauen
         working-directory: android-app/android
         run: ./gradlew assembleDebug --no-daemon
