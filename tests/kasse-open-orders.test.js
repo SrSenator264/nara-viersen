@@ -70,3 +70,13 @@ test('drawer: side panel (logical edge, RTL aware), closed by default, cart/pay 
   assert.match(j, /inset-inline-start:0/); assert.match(j, /html\[dir="rtl"\] #oo-drawer/); assert.match(j, /visibility:hidden/);
   assert.ok(!/position:fixed;[^']*bottom:/.test(j), 'no bottom bar');
 });
+test('customer: "remove customer from bill" button exists in 3 languages, clears name/phone/address, hides when empty', () => {
+  const j = read('kasse-customer-directory.js');
+  assert.equal((j.match(/removeInv:/g) || []).length, 3);
+  assert.match(j, /id='remove-customer-from-invoice'/);
+  for (const id of ['customer-name', 'customer-phone', 'street', 'house-number', 'postal-code', 'city', 'floor', 'bell-name', 'address-extra']) assert.ok(j.includes("'" + id + "'"), id);
+  assert.ok(!/clearIds=\[[^\]]*driver-notes/.test(j), 'driver note stays (belongs to the order)');
+  assert.match(j, /del\.hidden=!hasCustomer\(\)/);
+  assert.match(read('kasse-customer-directory.css'), /#remove-customer-from-invoice\[hidden\]\{display:none\}/);
+  assert.match(read('kasse-open-orders.js'), /body\.dl-open #oo-tab\{display:none\}/); // Lasche verdeckt die Liefer-Seitenleiste nicht
+});
