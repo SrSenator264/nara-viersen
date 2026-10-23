@@ -17,7 +17,7 @@ test('workflow builds a debug apk and uploads it; manifest patch adds background
 });
 test('driver page has native GPS + notification hooks guarded by Capacitor', () => {
   const h = fs.readFileSync(path.join(__dirname, '..', 'driver.html'), 'utf8');
-  assert.match(h, /capPlugin\('BackgroundGeolocation'\)/); assert.match(h, /registerPlugin\('LocalNotifications'\)/); assert.match(h, /isNativePlatform/);
+  assert.match(h, /capPlugin\('BackgroundGeolocation'\)/); assert.match(h, /capPlugin\('LocalNotifications'\)/); assert.match(h, /isNativePlatform/);
 });
 test('apk has FCM: push plugin, firebase config from secret in CI, default channel in manifest', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
