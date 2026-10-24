@@ -344,3 +344,15 @@ test('body: handler validation errors stay visible (web-orders 422 with its own 
   const l = await rawPost('/api/auth/login', JSON.stringify({ employeeId: 'nobody', pin: '000000' }));
   assert.equal(l.status, 401); assert.equal(l.json.code, 'BAD_PIN');
 });
+
+test('staff delete: removes login, keeps record archived, protects self / last manager / owner accounts', async () => {
+  const mk = await call('POST', '/api/auth/staff', { name: 'tmp-del', role: 'CASHIER', pin: '7351' }, S.owner); assert.equal(mk.status, 200);
+  const id = mk.json.id;
+  assert.equal((await call('POST', '/api/auth/staff/delete', { id }, S.cashier)).status, 403); // Kasse darf nicht
+  assert.equal((await call('POST', '/api/auth/staff/delete', { id: S.ownerId }, S.owner)).status, 409); // nicht sich selbst
+  assert.equal((await call('POST', '/api/auth/staff/delete', { id: 'nope' }, S.owner)).status, 404);
+  const del = await call('POST', '/api/auth/staff/delete', { id }, S.owner); assert.equal(del.status, 200);
+  const team = await call('GET', '/api/auth/team', null, S.owner);
+  assert.ok(!team.json.team.some(t => t.id === id));
+  const lg = await call('POST', '/api/auth/login', { employeeId: id, pin: '7351' }); assert.notEqual(lg.status, 200);
+});

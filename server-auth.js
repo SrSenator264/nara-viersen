@@ -163,7 +163,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
       return true;
     }
     const isMgr = req.naraUser && A.MANAGERS.includes(req.naraUser.role);
-    if (/^\/api\/auth\/(team|set-pin|staff|invite)$/.test(p)) {
+    if (/^\/api\/auth\/(team|set-pin|staff|staff\/delete|invite)$/.test(p)) {
       if (!req.naraUser) { reply(res, 401, { error: 'Anmeldung erforderlich.', code: 'AUTH_REQUIRED' }); return true; }
       if (!isMgr) { reply(res, 403, { error: 'Keine Berechtigung.', code: 'FORBIDDEN' }); return true; }
     }
@@ -177,9 +177,30 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     }
     if (p === '/api/auth/team' && m === 'GET') {
       const data = readAdminData();
-      const ids = new Set([...(data.employees || []).map(e => e.id), ...Object.keys(store.accounts)]);
+      const ids = new Set([...(data.employees || []).filter(e => !e.archivedAt).map(e => e.id), ...Object.keys(store.accounts)]);
       const team = [...ids].map(id => { const a = store.accounts[id]; const e = (data.employees || []).find(x => x.id === id); return { id, name: nameOf(data, id), role: a?.role || null, active: a ? a.active !== false : false, hasPin: !!a?.pin, customers: a?.role === 'OWNER' || a?.customers === true, employeeActive: e ? e.active !== false : false, empRole: e ? A.normalizeRole(e.role) : null }; });
       replyC(res, 200, { ok: true, team, roles: A.ROLES }); return true;
+    }
+    if (p === '/api/auth/staff/delete' && m === 'POST') {
+      readJson(req, res, 2000, b => {
+        const id = String(b.id || ''), acc = store.accounts[id], data = readAdminData();
+        const emp = (data.employees || []).find(e => e.id === id);
+        if (!acc && !emp) return reply(res, 404, { error: 'Mitarbeiter nicht gefunden.' });
+        if (id === req.naraUser.id) return reply(res, 409, { error: 'Du kannst dein eigenes Konto nicht löschen.', code: 'SELF' });
+        if (acc?.role === 'OWNER' && req.naraUser.role !== 'OWNER') return reply(res, 403, { error: 'Nur der Inhaber löscht Inhaber-Konten.', code: 'FORBIDDEN' });
+        if (acc && A.MANAGERS.includes(acc.role) && acc.active !== false && acc.pin && activeManagers().filter(([k]) => k !== id).length === 0)
+          return reply(res, 409, { error: 'Der letzte Manager kann nicht gelöscht werden.' });
+        if (acc?.role === 'OWNER' && acc.active !== false && !Object.entries(store.accounts).some(([k, a]) => k !== id && a.role === 'OWNER' && a.active !== false))
+          return reply(res, 409, { error: 'Der letzte Inhaber kann nicht gelöscht werden.' });
+        const now = new Date().toISOString();
+        delete store.accounts[id]; revoke(id); save();
+        // Mitarbeiter-Datensatz bleibt (Schichten/Touren/Buchhaltung) - nur archiviert und aus Listen ausgeblendet
+        if (emp) { emp.active = false; emp.archivedAt = now; emp.updatedAt = now; }
+        data.auditEvents ??= []; data.auditEvents.push({ id: adminId('audit'), type: 'STAFF_DELETED', createdAt: now, details: { by: req.naraUser.name || req.naraUser.id, employeeId: id, name: nameOf(data, id), role: acc?.role || null } });
+        writeAdminData(data);
+        replyC(res, 200, { ok: true, id });
+      });
+      return true;
     }
     if (p === '/api/auth/set-pin' && m === 'POST') {
       readJson(req, res, 2000, b => {
