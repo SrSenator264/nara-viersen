@@ -20,7 +20,7 @@
     const total=official||Math.max(0,gross-discount);
     const isPlat=/LIEFERANDO|UBER|WOLT|LANCH|SIDES/.test(String(o.platform||o.source||'').toUpperCase());
     const type=o.type==='delivery'?'DELIVERY':o.type==='pickup'?'PICKUP':'DINE_IN';
-    const code=o.displayCode||o.externalOrderCode||('NARA-'+String(o.id||'').replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase());
+    const code=o.displayCode||o.externalOrderCode||('FLAMO-'+String(o.id||'').replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase());
     const platform=String(o.platform||o.source||'').toUpperCase();
     const plat=/LIEFERANDO|UBER|WOLT|LANCH/.test(platform)?platform.replace('_',' '):'FLAMO';
     let method='OPEN';
@@ -116,7 +116,7 @@
     if(a&&(a.driverName||a.roundId))rows.push('<div class="rc-driver">'+(a.driverName?'<div><b>'+esc(t.driver)+':</b> '+esc(a.driverName)+'</div>':'')+(a.roundId?'<div><b>'+esc(t.round)+':</b> '+esc(a.roundId)+'</div>':'')+(a.etaAt?'<div><b>'+esc(t.eta)+':</b> '+esc(hhmm(a.etaAt))+'</div>':'')+'</div>');
     // QR محلي (بدون إنترنت)
     // Lieferando: نفس QR تبعهم ("Zum Liefern scannen")؛ غير هيك QR داخلي
-    const payload=r.deliveryQrUrl||('NARA|'+(r.platform||'')+'|'+r.displayCode);
+    const payload=r.deliveryQrUrl||('FLAMO|'+(r.platform||'')+'|'+r.displayCode);
     let qr='';try{if(window.NARA_QR)qr='<div class="rc-qr">'+window.NARA_QR.svg(payload,{level:'M',quiet:1})+'</div>'}catch(e){console.warn('[NARA][RECEIPT_QR_FAILED]',e.message)}
     rows.push(qr+'<div class="rc-small rc-c">'+esc(r.deliveryQrUrl?t.scanDeliver:t.scan)+'</div><div class="rc-small rc-c rc-nb">'+esc(t.notBill)+'</div><div class="rc-thanks">'+esc(t.thanks)+'</div>');
     return '<div class="nara-rc">'+rows.join('')+'</div>';

@@ -203,7 +203,7 @@ export function renderLines(o, opt = {}) {
   // ── التذييل
   sep();
   add(t.notBill, { align: 'center' });
-  L.push({ text: '', qr: o.deliveryQrUrl || `NARA|${o.platform || ''}|${o.displayCode || o.externalOrderCode}`, align: 'center' });
+  L.push({ text: '', qr: o.deliveryQrUrl || `FLAMO|${o.platform || ''}|${o.displayCode || o.externalOrderCode}`, align: 'center' });
   for (const s of wrap(o.deliveryQrUrl ? t.scanDeliver : t.scan, W)) add(s, { align: 'center' });
   sep();
   return L;

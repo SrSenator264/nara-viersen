@@ -61,5 +61,5 @@ test('Lieferando delivery QR (Zum Liefern scannen) goes on our receipt', async (
   assert.ok(lines.some(l => l.qr === url));
   assert.match(core.toText(lines), /Zum Liefern scannen/);
   const plain = core.renderLines({ displayCode: 'X1', platform: 'NARA', orderType: 'PICKUP', cart: [], totalCents: 0 }, { lang: 'de' });
-  assert.ok(plain.some(l => l.qr === 'NARA|NARA|X1'));
+  assert.ok(plain.some(l => l.qr === 'FLAMO|NARA|X1'));
 });

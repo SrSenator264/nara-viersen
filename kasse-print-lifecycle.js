@@ -12,7 +12,7 @@
   // الورقة المطبوعة (فاتورة/تذكرة) بتضل ألماني أو إنجليزي، مو عربي
   function pt(k){return (lang()==='en'?text.en:text.de)[k]}
   window.NARA_PRINT_T=t;
-  function code(o){if(!o)return '';if(o.displayCode)return o.displayCode;return 'NARA-'+String(o.id||'').replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase()}
+  function code(o){if(!o)return '';if(o.displayCode)return o.displayCode;return 'FLAMO-'+String(o.id||'').replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase()}
   function esc(v){return String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]))}
   function total(o){return (o.cart||[]).reduce((s,x)=>s+(Number(x.unitCents)||0)*(Number(x.quantity)||0),0)}
   function platformBrand(o){const p=String(o?.platform||o?.source||'NARA').toUpperCase();if(p.includes('LIEFERANDO'))return {name:'LIEFERANDO',mark:'🟠'};if(p.includes('UBER'))return {name:'UBER EATS',mark:'🟩'};if(p.includes('WOLT'))return {name:'WOLT',mark:'🔵'};if(p.includes('LANCH'))return {name:'LANCH',mark:'🟣'};return {name:'NARA',mark:'🤖'}}
