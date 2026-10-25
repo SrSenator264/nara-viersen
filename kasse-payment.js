@@ -180,7 +180,7 @@
           } catch (e) { /* ignore */ }
         }
         const info = res && res.payment;
-        if (!info || info.completed) { d.close(); ctx.fresh(); try { await (window.NARA_PRINT_PENDING || null); } catch (e) { /* ignore */ } location.reload(); return; }
+        if (!info || info.completed) { d.close(); const soft = ctx.freshSoft ? ctx.freshSoft() : false; if (!soft) ctx.fresh(); try { await (window.NARA_PRINT_PENDING || null); } catch (e) { /* ignore */ } if (!soft) location.reload(); return; }
         paidBefore = info.paidCents;
         o.paidCents = info.paidCents; try { ctx.save && ctx.save(); } catch (e) { /* ignore */ }
         st.partsPaid.push(st.partIdx);
@@ -188,7 +188,7 @@
         const doneN = st.partIdx + 1; st.partIdx = nextIdx < 0 ? st.partIdx : nextIdx; st.given = ''; st.cashPart = '';
         render(); setMsg(t('partDone').replace('{n}', doneN).replace('{m}', st.partIdx + 1));
       } catch (e) {
-        if (String(e.message).toLowerCase().includes('abgeschlossen') || String(e.message).toLowerCase().includes('completed')) { d.close(); ctx.fresh(); location.reload(); return; }
+        if (String(e.message).toLowerCase().includes('abgeschlossen') || String(e.message).toLowerCase().includes('completed')) { d.close(); const soft = ctx.freshSoft ? ctx.freshSoft() : false; if (!soft) { ctx.fresh(); location.reload(); } return; }
         setMsg(e.message || t('err')); go.disabled = false;
       }
     }
