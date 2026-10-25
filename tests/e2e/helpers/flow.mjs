@@ -10,7 +10,7 @@ export function makeOrder({ kind = 'delivery', tag = Date.now().toString(36).toU
   const cart = [{ name: ITEM_NAME, category: 'Beef Burger', quantity: 1, unitCents: 799, totalCents: 799, options: [] }];
   const base = {
     externalOrderCode: code, displayCode: code, isTest: true,
-    platform: 'NARA', brand: 'NARA',                    // مثل طلب الكاشير
+    platform: 'LANCH', brand: 'Flamo',                   // منصة بتظهر بـ Live Orders (طلبات NARA/الكاشير مخفية فيها عمداً)
     kitchenSentAt: iso(-2), kitchenStartAt: iso(-2),     // "انبعت للمطبخ" (غير هيك بيضل مسودة)
     liveStage: 'PREPARE', placedAt: iso(-2), createdAt: iso(-2), prepMinutes: 15, dueAt: iso(38),
     customerName: 'E2E Testkunde', customerPhone: '+49 151 0000000',

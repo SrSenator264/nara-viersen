@@ -16,8 +16,9 @@ function watchErrors(page) {
   page.on('pageerror', e => errors.push(String(e.message || e)));
   return errors;
 }
-async function expectShows(page, url, text) {
+async function expectShows(page, url, text, tabSelector) {
   await page.goto(url, { waitUntil: 'domcontentloaded' });
+  if (tabSelector) await page.locator(tabSelector).click();
   await expect.poll(async () => (await page.locator('body').innerText()).includes(text),
     { timeout: 20000, message: `${url} لازم يعرض "${text}"` }).toBe(true);
 }
@@ -36,7 +37,7 @@ test('توصيل: طلب → مطبخ → Live Orders → سائق → تم ال
   expect((await F.getKitchenOrder(call, id))?.kitchenStatus).toBe('READY');
 
   // 3) Live Orders بيعرضه، وبننقله لمرحلة التسليم للسائق
-  await expectShows(page, '/live-orders.html', F.ITEM_NAME);
+  await expectShows(page, '/live-orders.html', F.ITEM_NAME, 'button[data-st="HANDOVER"]')  // مطبخ "جاهز" ← بينتقل لتبويب التسليم;
   expect((await F.setStage(call, id, 'HANDOVER'))[0]).toBe(200);
   expect((await F.getOrder(call, id))?.liveStage).toBe('HANDOVER');
 
@@ -65,7 +66,7 @@ test('استلام (Pickup): طلب → مطبخ → Live Orders → خلص بد
   const id = await F.importOrder(call, F.makeOrder({ kind: 'pickup' }));
   await expectShows(page, '/kitchen.html', F.ITEM_NAME);
   expect((await F.setKitchen(call, id, 'READY'))[0]).toBe(200);
-  await expectShows(page, '/live-orders.html', F.ITEM_NAME);
+  await expectShows(page, '/live-orders.html', F.ITEM_NAME, 'button[data-st="HANDOVER"]')  // مطبخ "جاهز" ← بينتقل لتبويب التسليم;
   expect((await F.setStage(call, id, 'DONE'))[0]).toBe(200);
   const done = await F.getOrder(call, id);
   expect(done.liveStage).toBe('DONE');
@@ -79,6 +80,7 @@ test('إعادة تحميل صفحة المطبخ بنص الطريق ما بت�
   await expectShows(page, '/kitchen.html', F.ITEM_NAME);
   await F.setKitchen(call, id, 'PREPARING');
   await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.locator('button.tab[data-v="PREPARING"]').click();   // بعد التحديث بيرجع لتبويب "جديد"
   await expect.poll(async () => (await page.locator('body').innerText()).includes(F.ITEM_NAME), { timeout: 20000 }).toBe(true);
   expect((await F.getKitchenOrder(call, id))?.kitchenStatus).toBe('PREPARING');
 });
