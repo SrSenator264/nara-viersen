@@ -98,7 +98,9 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
       const data = readAdminData();
       // Über den Tunnel (Proxy-Header) nur Fahrer zeigen und nie "setupNeeded" verraten; Geschäfts-PC/WLAN sehen alle wie bisher.
       const tunnel = A.viaProxy(req);
-      const list = Object.entries(store.accounts).filter(([, a]) => a.active !== false && a.pin && (!tunnel || A.normalizeRole(a.role) === 'DRIVER')).map(([id, a]) => ({ id, name: nameOf(data, id), role: a.role }));
+      // Kasse-Host: nach bestandener Cloudflare-Access-/Mail-Prüfung (kasseGate ok) alle aktiven Konten zeigen; die PIN bleibt Pflicht.
+      const kasseOk = (() => { try { const g = require('./kasse-gate.js').kasseGate(req); return !!(g.gated && g.ok); } catch { return false; } })();
+      const list = Object.entries(store.accounts).filter(([, a]) => a.active !== false && a.pin && (!tunnel || kasseOk || A.normalizeRole(a.role) === 'DRIVER')).map(([id, a]) => ({ id, name: nameOf(data, id), role: a.role }));
       replyC(res, 200, { ok: true, employees: list, setupNeeded: tunnel ? false : activeManagers().length === 0 }); return true;
     }
     if (p === '/api/auth/logout' && m === 'POST') {
