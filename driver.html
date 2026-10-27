@@ -35,6 +35,7 @@ main{padding:12px 12px 90px}
 .addr{font-size:16px;margin-top:2px}
 .addr a,.tel{color:var(--blue);text-decoration:none;font-weight:700}
 .note{margin-top:6px;padding:6px 9px;background:#fff7d6;border:1px solid #f3d36b;border-radius:8px;font-weight:700}
+.note .orig{margin-top:5px;padding-top:4px;border-top:1px dashed #d9b84a;font-size:12px;font-weight:600;opacity:.75}
 .pay{margin-top:6px;font-weight:800}
 .pay.cash{color:#b45309}.pay.paid{color:var(--ok)}
 .acts{display:flex;gap:8px;margin-top:10px}
@@ -112,7 +113,7 @@ function capPlugin(n){var C=window.Capacitor||{};return typeof C.registerPlugin=
           +(s.name?'<div class="name"><bdi>'+esc(s.name)+'</bdi></div>':'')
           +'<div class="addr"><a href="'+esc(nav)+'" target="_blank" rel="noopener"><bdi dir="ltr">'+esc(addr||'—')+'</bdi></a>'+(s.floor?' · '+t('floor')+' <bdi>'+esc(s.floor)+'</bdi>':'')+'</div>'+(s.plzAssumed?'<div style="color:#ffb020;font-weight:700;font-size:13px;margin-top:2px">'+t('plz')+'</div>':'')
           +(s.phone?'<div><a class="tel" href="tel:'+esc(String(s.phone).replace(/\s/g,''))+'">☎ <bdi dir="ltr">'+esc(s.phone)+'</bdi></a></div>':'')
-          +(s.notes?'<div class="note"><bdi>'+esc(s.notes)+'</bdi></div>':'')
+          +(s.notes?(()=>{const tr=(s.notesI18n&&(L==='en'||L==='ar'))?s.notesI18n[L]:'';return tr&&tr!==s.notes?'<div class="note"><bdi>'+esc(tr)+'</bdi><div class="orig"><bdi>'+esc(s.notes)+'</bdi></div></div>':'<div class="note"><bdi>'+esc(s.notes)+'</bdi></div>'})():'')
           +'<div class="pay '+(s.cash?'cash':'paid')+'">'+(s.cash?t('cash'):t('paid'))+'</div>'
           +(s.cash&&doorOk&&!s.delivered&&r.startedAt?'<button class="doorb" data-door="'+esc(s.orderId)+'">'+t('door')+'</button>':'')
           +(!s.delivered&&r.startedAt?'<div class="acts"><a class="nav" href="'+esc(nav)+'" target="_blank" rel="noopener">'+t('navi')+'</a><button class="deliver" data-deliver="'+esc(s.orderId)+'">'+t('delivered')+'</button></div>'
