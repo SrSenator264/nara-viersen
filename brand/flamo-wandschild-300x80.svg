@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 3000" width="800" height="3000" role="img" aria-label="Flamo Wandschild 300x80 cm">
+  <title>Flamo – Wandschild flach 300 x 80 cm (1 Einheit = 1 mm) – Flamme steigt</title>
+  <!-- ENTWURF. Flach an der Wand, zur Seitenstrasse. Schrift vor Produktion in Pfade umwandeln. LED: Lauflicht von unten nach oben (Feuer-Effekt). -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2216"/><stop offset="1" stop-color="#24140d"/></linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7a1a"/><stop offset=".55" stop-color="#ffb21a"/><stop offset="1" stop-color="#ffd23a"/></linearGradient>
+    <linearGradient id="fire" gradientUnits="userSpaceOnUse" x1="0" y1="1150" x2="0" y2="2950"><stop offset="0" stop-color="#ffd23a"/><stop offset=".5" stop-color="#ff9a1f"/><stop offset="1" stop-color="#ef491d"/></linearGradient>
+    <radialGradient id="halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ff7a1a" stop-opacity=".55"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/></radialGradient>
+    <path id="fl" d="M0 30C-13 17 -6 4 1.5 -11C5 2 16 8 13.5 22C12 28 6 30 0 30Z"/>
+    <filter id="glow" x="-20%" y="-5%" width="140%" height="110%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="800" height="3000" rx="45" fill="url(#bg)"/>
+  <rect x="34" y="34" width="732" height="2932" rx="30" fill="none" stroke="#ff7a1a" stroke-width="14" filter="url(#glow)"/>
+  <!-- Glut hinter den Buchstaben -->
+  <ellipse cx="400" cy="2050" rx="380" ry="1000" fill="url(#halo)"/>
+  <!-- Aufsteigende Flammenzungen -->
+  <g fill="url(#fire)" stroke="#2b1a12" stroke-width="5" stroke-linejoin="round" opacity=".95"><use href="#fl" transform="translate(150 2880) scale(2.28) rotate(-14)"/><use href="#fl" transform="translate(672 2780) scale(2.85) rotate(16)"/><use href="#fl" transform="translate(120 2560) scale(3.23) rotate(-18)"/><use href="#fl" transform="translate(680 2420) scale(3.61) rotate(18)"/><use href="#fl" transform="translate(118 2200) scale(3.99) rotate(-20)"/><use href="#fl" transform="translate(684 2060) scale(4.37) rotate(20)"/><use href="#fl" transform="translate(112 1850) scale(4.75) rotate(-22)"/><use href="#fl" transform="translate(690 1700) scale(5.13) rotate(22)"/><use href="#fl" transform="translate(108 1500) scale(5.51) rotate(-24)"/><use href="#fl" transform="translate(694 1330) scale(5.89) rotate(24)"/></g>
+  <!-- Buchstaben senkrecht: F-l-a-m-o (von oben nach unten lesen) -->
+  <g font-family="'Arial Rounded MT Bold','Arial Black',Arial,sans-serif" font-weight="900" font-size="330" text-anchor="middle"
+     stroke="#2b1a12" stroke-width="26" stroke-linejoin="round" paint-order="stroke" fill="url(#fire)"><text x="400" y="1450">F</text><text x="400" y="1790">l</text><text x="400" y="2130">a</text><text x="400" y="2470">m</text><text x="400" y="2810">o</text></g>
+  <!-- Flamo-Gesicht oben: der Kopf der aufsteigenden Flamme -->
+  <g transform="translate(400 700) scale(1.15)" stroke="#2b1a12" stroke-width="16" stroke-linejoin="round">
+    <path d="M0 -480C30 -330 250 -270 235 -60C225 120 130 260 0 260C-130 260 -225 120 -235 -60C-245 -190 -160 -250 -125 -330C-110 -260 -75 -230 -55 -230C-75 -330 -55 -420 0 -480Z" fill="url(#body)"/>
+  </g>
+  <g transform="translate(400 700) scale(1.15)">
+    <ellipse cx="-90" cy="-20" rx="38" ry="48" fill="#3a2216"/><ellipse cx="90" cy="-20" rx="38" ry="48" fill="#3a2216"/>
+    <circle cx="-78" cy="-38" r="13" fill="#fff"/><circle cx="102" cy="-38" r="13" fill="#fff"/>
+    <path d="M-135 -95Q-90 -125 -45 -95M45 -95Q90 -125 135 -95" stroke="#3a2216" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <circle cx="-150" cy="50" r="30" fill="#ff6f7d" opacity=".75"/><circle cx="150" cy="50" r="30" fill="#ff6f7d" opacity=".75"/>
+    <path d="M-85 60Q0 190 85 60Z" fill="#3a2216" stroke="#3a2216" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M-38 118Q0 150 38 118Q0 98 -38 118Z" fill="#ff6f7d"/>
+  </g>
+</svg>
