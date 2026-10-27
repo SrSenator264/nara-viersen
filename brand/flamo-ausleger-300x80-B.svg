@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 3000" width="800" height="3000" role="img" aria-label="Flamo Ausleger 300x80 cm, Variante B">
+  <title>Flamo – Ausleger 300 x 80 cm (1 Einheit = 1 mm) – Variante B</title>
+  <!-- ENTWURF zur Abstimmung. Schrift vor Produktion in Pfade umwandeln (Outlines). Beide Seiten identisch (Doppelseitig). -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2216"/><stop offset="1" stop-color="#24140d"/></linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7a1a"/><stop offset=".55" stop-color="#ffb21a"/><stop offset="1" stop-color="#ffd23a"/></linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7a1a" stop-opacity="0"/><stop offset=".3" stop-color="#ff7a1a"/><stop offset="1" stop-color="#ffb21a"/></linearGradient>
+    <path id="fl" d="M0 62C-26 34 -12 8 3 -22C10 4 32 16 27 44C24 56 12 62 0 62Z"/>
+    <filter id="glow" x="-20%" y="-5%" width="140%" height="110%"><feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <!-- Tafel -->
+  <rect width="800" height="3000" rx="45" fill="url(#bg)"/>
+  <rect x="34" y="34" width="732" height="2932" rx="30" fill="none" stroke="#ff7a1a" stroke-width="14" filter="url(#glow)"/>
+
+  <!-- Flamo-Gesicht (ca. 1 m hoch) -->
+  <g transform="translate(400 740) scale(1.25)" stroke="#2b1a12" stroke-width="16" stroke-linejoin="round">
+    <path d="M0 -480C30 -330 250 -270 235 -60C225 120 130 260 0 260C-130 260 -225 120 -235 -60C-245 -190 -160 -250 -125 -330C-110 -260 -75 -230 -55 -230C-75 -330 -55 -420 0 -480Z" fill="url(#body)"/>
+  </g>
+  <g transform="translate(400 740) scale(1.25)">
+    <ellipse cx="-90" cy="-20" rx="38" ry="48" fill="#3a2216"/><ellipse cx="90" cy="-20" rx="38" ry="48" fill="#3a2216"/>
+    <circle cx="-78" cy="-38" r="13" fill="#fff"/><circle cx="102" cy="-38" r="13" fill="#fff"/>
+    <path d="M-135 -95Q-90 -125 -45 -95M45 -95Q90 -125 135 -95" stroke="#3a2216" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <circle cx="-150" cy="50" r="30" fill="#ff6f7d" opacity=".75"/><circle cx="150" cy="50" r="30" fill="#ff6f7d" opacity=".75"/>
+    <path d="M-85 60Q0 190 85 60Z" fill="#3a2216" stroke="#3a2216" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M-38 118Q0 150 38 118Q0 98 -38 118Z" fill="#ff6f7d"/>
+  </g>
+
+  <!-- Schriftzug Flamo (umrandet) -->
+  <g font-family="'Arial Rounded MT Bold','Arial Black',Arial,sans-serif" font-weight="900" font-size="300"
+     stroke="#2b1a12" stroke-width="26" stroke-linejoin="round" paint-order="stroke" fill="#ff9a1f">
+    <text x="85" y="1620" textLength="630" lengthAdjust="spacingAndGlyphs">Flamo</text>
+  </g>
+  <g fill="#ffd23a" stroke="#2b1a12" stroke-width="10" stroke-linejoin="round">
+    <use href="#fl" transform="translate(150 1240) scale(1.3) rotate(-12)"/>
+    <use href="#fl" transform="translate(646 1290) scale(1.35)"/>
+  </g>
+
+  <!-- Halal -->
+  <g font-family="'Arial Rounded MT Bold',Arial,sans-serif" font-weight="800" font-size="170" fill="#ffd9a0">
+    <text x="120" y="2070" textLength="560" lengthAdjust="spacingAndGlyphs">HALAL</text>
+  </g>
+
+  <!-- Flammenlinie -->
+  <rect x="388" y="2230" width="24" height="560" rx="12" fill="url(#line)" filter="url(#glow)"/>
+  <g fill="#ffb21a" stroke="#2b1a12" stroke-width="8" stroke-linejoin="round"><use href="#fl" transform="translate(400 2760) scale(1.5)"/></g>
+</svg>
