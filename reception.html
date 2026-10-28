@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Annahme · Flamo</title>
+<title>Plattformen · Flamo</title>
 <script src="nara-lang.js?v=20261028a" data-section="reception"></script>
 <style>
 :root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--late:#d1342f}
@@ -82,15 +82,15 @@ main{padding:18px 20px 40px}
 const $=s=>document.querySelector(s);
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const T={
-  de:{title:'Annahme',waiting:'warten auf Annahme',none:'Keine Bestellung wartet ✅',accept:'✅ Annehmen',accepting:'Wird angenommen …',retry:'🔁 Nochmal versuchen',failed:'Annahme fehlgeschlagen',
+  de:{title:'Plattformen',waiting:'warten auf Annahme',none:'Keine Bestellung wartet ✅',accept:'✅ Annehmen',accepting:'Wird angenommen …',retry:'🔁 Nochmal versuchen',failed:'Annahme fehlgeschlagen',
     prep:'Zubereitungszeit',min:'Min',delivery:'🛵 Lieferung',pickup:'🛍 Abholung',cash:'💶 Barzahlung',online:'💳 Online bezahlt',asap:'So schnell wie möglich',at:'um',now:'jetzt',ago:'vor {n} Min',
     queue:'🍳 Küche aktuell: {n}',sounds:'⚙️ Töne',enableSound:'🔊 Tippen, um den Ton zu aktivieren',volume:'Lautstärke',repeat:'Wiederholen alle',off:'aus',test:'Test',close:'Schließen',offline:'Keine Verbindung',live:'Live',
     short:'Kurz',double:'Doppelt',long:'Lang',triple:'Dreifach',rising:'Steigend',falling:'Fallend',bell:'Glocke',siren:'Sirene',mute:'Stumm',web:'Website',sec:'{n} Sek',errGeneric:'Fehler: '},
-  ar:{title:'استلام الطلبات',waiting:'بانتظار الموافقة',none:'ما في طلبات بانتظار الموافقة ✅',accept:'✅ استلام',accepting:'عم ينقبل …',retry:'🔁 جرّب مرة ثانية',failed:'فشل الاستلام',
+  ar:{title:'تجميع المنصات',waiting:'بانتظار الموافقة',none:'ما في طلبات بانتظار الموافقة ✅',accept:'✅ استلام',accepting:'عم ينقبل …',retry:'🔁 جرّب مرة ثانية',failed:'فشل الاستلام',
     prep:'وقت التحضير',min:'د',delivery:'🛵 توصيل',pickup:'🛍 استلام من المحل',cash:'💶 دفع كاش',online:'💳 مدفوع أونلاين',asap:'بأسرع وقت',at:'الساعة',now:'هلق',ago:'قبل {n} د',
     queue:'🍳 بالمطبخ هلق: {n}',sounds:'⚙️ الأصوات',enableSound:'🔊 اضغط لتفعيل الصوت',volume:'مستوى الصوت',repeat:'كرّر كل',off:'بلا',test:'جرّب',close:'سكّر',offline:'ما في اتصال',live:'Live',
     short:'قصير',double:'مرتين',long:'طويل',triple:'ثلاث مرات',rising:'صاعد',falling:'نازل',bell:'جرس',siren:'صفّارة',mute:'بلا صوت',web:'الموقع',sec:'{n} ث',errGeneric:'غلط: '},
-  en:{title:'Order intake',waiting:'waiting for acceptance',none:'No orders waiting ✅',accept:'✅ Accept',accepting:'Accepting …',retry:'🔁 Try again',failed:'Accept failed',
+  en:{title:'Platform hub',waiting:'waiting for acceptance',none:'No orders waiting ✅',accept:'✅ Accept',accepting:'Accepting …',retry:'🔁 Try again',failed:'Accept failed',
     prep:'Prep time',min:'min',delivery:'🛵 Delivery',pickup:'🛍 Pickup',cash:'💶 Cash',online:'💳 Paid online',asap:'As soon as possible',at:'at',now:'now',ago:'{n} min ago',
     queue:'🍳 In kitchen now: {n}',sounds:'⚙️ Sounds',enableSound:'🔊 Tap to enable sound',volume:'Volume',repeat:'Repeat every',off:'off',test:'Test',close:'Close',offline:'No connection',live:'Live',
     short:'Short',double:'Double',long:'Long',triple:'Triple',rising:'Rising',falling:'Falling',bell:'Bell',siren:'Siren',mute:'Mute',web:'Website',sec:'{n} s',errGeneric:'Error: '}

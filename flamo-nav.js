@@ -18,7 +18,7 @@
   const PAGES = [
     { k: 'kasse', f: 'kasse.html', i: '🧾', g: 'today', n: L('Kasse', 'الكاشير', 'Till') },
     { k: 'live', f: 'live-orders.html', i: '📋', g: 'today', n: L('Live Orders', 'الطلبات الحية', 'Live Orders') },
-    { k: 'reception', f: 'reception.html', i: '📥', g: 'today', n: L('Annahme', 'استلام الطلبات', 'Order intake') },
+    { k: 'reception', f: 'reception.html', i: '📥', g: 'today', n: L('Plattformen', 'تجميع المنصات', 'Platform hub') },
     { k: 'kitchen', f: 'kitchen.html', i: '👨‍🍳', g: 'today', n: L('Küche', 'المطبخ', 'Kitchen') },
     { k: 'customers', f: 'customers.html', i: '👥', g: 'today', n: L('Kunden', 'الزباين', 'Customers') },
     { k: 'dispatch', f: 'dispatch.html', i: '🛵', g: 'delivery', n: L('Fahrer-Plan', 'توزيع السواقين', 'Dispatch') },

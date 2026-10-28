@@ -17,7 +17,7 @@ function boot({ lang = 'de', orders = [] } = {}) {
   const state = { orders, posts: [], tones: 0, lang, acceptStatus: 200 };
   const els = {}, intervals = [], winHandlers = {};
   const $ = s => (els[s] ||= new El());
-  const document = { title: 'Annahme · Flamo', documentElement: { lang: 'de' }, querySelector: s => $(s), querySelectorAll: () => [], addEventListener() {} };
+  const document = { title: 'Plattformen · Flamo', documentElement: { lang: 'de' }, querySelector: s => $(s), querySelectorAll: () => [], addEventListener() {} };
   const store = {};
   const win = {
     document, localStorage: { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } },
