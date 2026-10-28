@@ -541,3 +541,6 @@ const loyversePrices={
 for(const p of catalog){const c=loyversePrices[p.id];if(c!=null)Object.assign(p,{cents:c,p:c/100});}
 // Burger-Menüpreis folgt dem (versteckten) Menü-Artikel, genau wie oben bei burgerMenuPairs.
 for(const [burgerId,menuId] of burgerMenuPairs){const burger=catalog.find(p=>p.id===burgerId),menu=catalog.find(p=>p.id===menuId);if(burger&&menu)burger.menuCents=menu.cents;}
+// Inhaber 2026-10-29: Hummus 4,99 € (jetzt verfügbar) und neue Shisha 15,00 €.
+Object.assign(catalog.find(p=>p.id===202),{cents:499,p:4.99,unavailable:false});
+catalog.push({id:520,n:'Shisha (Wasserpfeife)',c:'Shisha',cents:1500,p:15,d:'Wasserpfeife.',img:null,verified:true,optionsPending:false});
