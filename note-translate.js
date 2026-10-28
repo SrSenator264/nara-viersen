@@ -50,7 +50,10 @@ async function translateNote(text, { key, model, base, fetchImpl = fetch } = {})
   const think = /gemini-2\.5-flash/.test(model) ? { thinkingBudget: 0 } : /(gemini-3.*flash|flash-latest)/.test(model) && !/lite/.test(model) ? { thinkingLevel: 'minimal' } : null;
   const body = { contents: [{ role: 'user', parts: [{ text: buildPrompt(masked) }] }], generationConfig: { temperature: 0.1, maxOutputTokens: 1200, responseMimeType: 'application/json', ...(think ? { thinkingConfig: think } : {}) } };
   const r = await fetchImpl(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body), signal: AbortSignal.timeout(20000) });
-  if (!r.ok) throw Object.assign(new Error('Gemini ' + r.status), { status: r.status });
+  if (!r.ok) {
+    let m = ''; try { const e = await r.json(); m = (e.error && (e.error.message || e.error.status)) || ''; } catch { /* no body */ }
+    throw Object.assign(new Error('Gemini ' + r.status + ' ' + String(m).replace(/\s+/g, ' ').slice(0, 300)), { status: r.status });
+  }
   const j = await r.json();
   const parts = (((j.candidates || [])[0] || {}).content || {}).parts || [];
   const parsed = extractJson(parts.filter(p => typeof p.text === 'string' && !p.thought).map(p => p.text).join(''));
