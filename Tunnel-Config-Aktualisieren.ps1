@@ -1,6 +1,6 @@
 # Tunnel-Config-Aktualisieren.ps1
 # Als Administrator ausfuehren:
-#   powershell -ExecutionPolicy Bypass -File "C:\Users\droma\Documents\GitHub\nara-viersen\Tunnel-Config-Aktualisieren.ps1"
+#   powershell -ExecutionPolicy Bypass -File .\Tunnel-Config-Aktualisieren.ps1   (im Projektordner, z. B. C:\Flamo)
 # Uebernimmt tunnel\config.example.yml in die echte Tunnel-Config (SYSTEM-Profil), behaelt dabei deinen
 # credentials-file-Pfad, legt eine Sicherung an und startet die Aufgabe cloudflared-nara neu.
 $ErrorActionPreference = 'Stop'
@@ -8,6 +8,12 @@ $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $src  = Join-Path $root 'tunnel\config.example.yml'
 $dst  = Join-Path $env:USERPROFILE '.cloudflared\config.yml'   # der Dienst 'cloudflared' liest diese Datei (--config)
 if (-not (Test-Path $dst)) { $dst = 'C:\Windows\System32\config\systemprofile\.cloudflared\config.yml' }
+# Aufgabe 'cloudflared-nara' (oder Dienst): den echten --config-Pfad aus dem Aufruf lesen (z. B. C:\Flamo-Tunnel\config.yml)
+try {
+  $act = (Get-ScheduledTask -TaskName 'cloudflared-nara' -ErrorAction Stop).Actions | Select-Object -First 1
+  if ($act.Arguments -match '--config\s+"?([^"\r\n]+?\.yml)"?') { $dst = $Matches[1] }
+} catch { }
+if (-not (Test-Path $dst) -and (Test-Path 'C:\Flamo-Tunnel\config.yml')) { $dst = 'C:\Flamo-Tunnel\config.yml' }
 if (-not (Test-Path $src)) { throw "Nicht gefunden: $src" }
 if (-not (Test-Path $dst)) { throw "Nicht gefunden: $dst (Tunnel noch nie eingerichtet?)" }
 
