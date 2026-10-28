@@ -46,15 +46,27 @@ test('view: only when the translation matches the current note text', () => {
   assert.equal(NT.view({}, t), null);
 });
 
-test('503 (high demand) is retried once immediately, then retried again after 1 minute (not 10)', async () => {
-  let n = 0;
-  const f = async () => (++n === 1 ? { ok: false, status: 503, json: async () => ({}) } : reply({ en: 'Hi', ar: 'مرحبا' }));
-  const ok = await NT.run([{ id: 'a', text: 'Hallo', hash: 'h' }], { ...opts(f), retryDelayMs: 0 }, 5);
+test('503 on one model falls back to the next model; all models busy = retry after 1 minute (not 10)', async () => {
+  const seen = [];
+  const f = async (url) => { seen.push(url); return seen.length === 1 ? { ok: false, status: 503, json: async () => ({}) } : reply({ en: 'Hi', ar: 'مرحبا' }); };
+  const ok = await NT.run([{ id: 'a', text: 'Hallo', hash: 'h' }], { ...opts(f), models: ['m-one', 'm-two'] }, 5);
   assert.equal(ok.results[0].rec.en, 'Hi');
+  assert.match(seen[0], /m-one/); assert.match(seen[1], /m-two/);
   const down = async () => ({ ok: false, status: 503, json: async () => ({}) });
-  const bad = await NT.run([{ id: 'b', text: 'Hallo', hash: 'h2' }], { ...opts(down), retryDelayMs: 0 }, 1000);
+  const bad = await NT.run([{ id: 'b', text: 'Hallo', hash: 'h2' }], { ...opts(down), models: ['m-one', 'm-two'] }, 1000);
   assert.equal(bad.results[0].rec.retryAt, 1000 + 60000);
   const items = [{ order: { id: 'b', noteI18n: { ...bad.results[0].rec, src: NT.hashOf('Hallo') } }, text: 'Hallo' }];
   assert.equal(NT.pending(items, 1000 + 30000).length, 0);
   assert.equal(NT.pending(items, 1000 + 61000).length, 1);
+});
+
+test('404 (model gone) also falls back; a different error (e.g. 400) does not', async () => {
+  let n = 0;
+  const f = async () => (++n === 1 ? { ok: false, status: 404, json: async () => ({}) } : reply({ en: 'x', ar: 'y' }));
+  const ok = await NT.run([{ id: 'a', text: 'Hallo', hash: 'h' }], { ...opts(f), models: ['gone', 'ok'] }, 5);
+  assert.equal(ok.results[0].rec.en, 'x');
+  let calls = 0;
+  const bad = async () => { calls++; return { ok: false, status: 400, json: async () => ({}) }; };
+  const r = await NT.run([{ id: 'b', text: 'Hallo', hash: 'h2' }], { ...opts(bad), models: ['m1', 'm2'] }, 5);
+  assert.equal(calls, 1); assert.equal(r.results[0].rec.en, '');
 });

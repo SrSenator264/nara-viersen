@@ -80,19 +80,21 @@ function pending(items, now = Date.now(), max = 3) {
   return out;
 }
 
-// ترجمة عدّة ملاحظات؛ بيرجّع [{ id, rec }] جاهزة للحفظ. عند حد Google (429) بيوقف.
+// ترجمة عدّة ملاحظات؛ بيرجّع { results:[{ id, rec }], quota }. عند حد Google (429 على كل الموديلات) بيوقف.
+// opts.models = قائمة موديلات: إذا فشل واحد بسبب ضغط/حد/غير متاح (500/503/429/404) بينتقل للتالي.
+const SWITCH = new Set([500, 503, 429, 404]);
 async function run(jobs, opts, now = Date.now()) {
-  const results = [];
+  const results = [], models = (opts.models && opts.models.length ? opts.models : [opts.model]);
   for (const job of jobs) {
     try {
-      let tr;
-      try { tr = await translateNote(job.text, opts); }
-      catch (e1) { // ضغط مؤقت (500/503): محاولة تانية بعد ثواني
-        if (e1 && (e1.status === 503 || e1.status === 500)) { await new Promise(r => setTimeout(r, opts.retryDelayMs == null ? 3000 : opts.retryDelayMs)); tr = await translateNote(job.text, opts); }
-        else throw e1;
+      let tr = null, last = null;
+      for (const m of models) {
+        try { tr = await translateNote(job.text, { ...opts, model: m }); tr.model = m; break; }
+        catch (e) { last = e; console.log('[note-translate] model', m, 'failed:', e && e.status); if (!(e && SWITCH.has(e.status))) throw e; }
       }
+      if (!tr) throw last;
       results.push({ id: job.id, rec: { src: job.hash, en: tr.en, ar: tr.ar, at: now } });
-      console.log('[note-translate] ok', job.id, tr.en ? 'en' : '-', tr.ar ? 'ar' : '-');
+      console.log('[note-translate] ok', job.id, tr.en ? 'en' : '-', tr.ar ? 'ar' : '-', 'via', tr.model);
     } catch (e) {
       console.log('[note-translate] FAILED', job.id, 'status=' + (e && e.status), String(e && e.message).replace(/AIza[\w-]+/g, '[REDACTED]').slice(0, 200));
       results.push({ id: job.id, rec: { src: job.hash, en: '', ar: '', failedAt: now, ...(e && (e.status === 503 || e.status === 500) ? { retryAt: now + RETRY_BUSY_MS } : {}) } });
