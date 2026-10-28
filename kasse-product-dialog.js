@@ -34,7 +34,7 @@
 
   let S=null; // {p, gs, sel:{group:{id:{opt,qty}}}, open:{group:bool}, qty, note, index}
 
-  function menuCents(p){return Number.isInteger(window.NARA_MENU_SURCHARGE)?window.NARA_MENU_SURCHARGE:Math.max(0,(p.menuCents||p.cents)-p.cents)}
+  function menuCents(p){if(window.naraMenuSurcharge)return window.naraMenuSurcharge(p,window.NARA_MENU_SURCHARGE);return Number.isInteger(window.NARA_MENU_SURCHARGE)?window.NARA_MENU_SURCHARGE:Math.max(0,(p.menuCents||p.cents)-p.cents)}
   function isMenu(){return !!(menuOK(S.p)&&S.sel.__order&&S.sel.__order.__menu)}
   function visible(g){
     if(g.group==='__order')return true;

@@ -163,7 +163,7 @@ const FRONTEND_JS = new Set([
   'kasse-monitor.js', 'kasse-open-orders.js', 'kasse-order-hub.js', 'kasse-payment.js', 'kasse-phone-lookup.js', 'kasse-platform-sync.js', 'kasse-print-lifecycle.js',
   'kasse-print-sound.js', 'kasse-printer-panel.js', 'kasse-product-dialog.js', 'kasse-quick-extras.js', 'kasse-receipt.js',
   'kasse-settlement-cost-status.js', 'kasse-settlement.js', 'kasse-sync.js', 'kasse-touch.js', 'kasse-training.js', 'kasse-tse-demo.js', 'kasse.js',
-  'live-orders-trend.js', 'manager-pending-actions.js', 'menu-source.js', 'nara-3d-scene.js', 'nara-auth.js', 'nara-emoji.js', 'nara-i18n.js',
+  'live-orders-trend.js', 'manager-pending-actions.js', 'menu-source.js', 'menu-surcharge.js', 'nara-3d-scene.js', 'nara-auth.js', 'nara-emoji.js', 'nara-i18n.js',
   'nara-lang.js', 'nara-receipt-core.mjs', 'nara-sidebar-chef.js', 'operations/core.js', 'reports.js', 'settlement-ledger.js', 'staff.js', 'sw.js',
   'vendor/qrcode.bundle.js',
 ]);
