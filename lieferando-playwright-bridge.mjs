@@ -451,6 +451,15 @@ async function alertServer(type, extra = {}) {
   await tryPost('/api/platform-orders/alert', { source: 'LIEFERANDO', type, at: new Date().toISOString(), ...extra }, { quiet: true });
 }
 
+// الـ Authorization تبع صفحة Lieferando نفسها (بالذاكرة بس، ما بنحفظه ولا بنطبعه): منستعمله لنداء confirm-order
+let lastAuth = '', lastAuthAt = 0;
+page.on('request', req => {
+  try {
+    if (new URL(req.url()).hostname !== 'live-orders-api.takeaway.com') return;
+    const a = req.headers()['authorization'];
+    if (a) { lastAuth = a; lastAuthAt = Date.now(); }
+  } catch { /* تجاهل */ }
+});
 page.on('response', async r => {
   try {
     const u = new URL(r.url());
@@ -527,6 +536,7 @@ page.on('websocket', ws => {
 // السيرفر بيحط أمر بالطابور لما الموظف يكبس ✅ استلام. الجسر بيسحبه، بيكبس الزر بنفس صفحة Lieferando،
 // وبعدين بيتأكد من بيانات Lieferando نفسها (confirmed) قبل ما يقول "تم". وبيرجّع النتيجة للسيرفر.
 // أسماء الأزرار الافتراضية تخمين عام؛ الضبط الدقيق بملف اختياري (ما بيحتاج تعديل كود):
+//   (القبول الافتراضي عبر API. "method":"ui" = القديم بكبس الأزرار. "deliveryMinutes": مدة التوصيل المرسلة، افتراضي 15)
 //   <NARA_DATA_DIR>/accept-selectors.json = { "acceptButton": "accept|annehmen", "timeButton": "{min} min", "printButton": "print|drucken", "autoQr": false }
 // autoQr=true: بعد الاستلام بيكبس Print order (مع منع نافذة الطباعة) ليلقط QR "Zum Liefern scannen". مطفي افتراضياً.
 const authHeaders = () => ({ ...(CFG.token ? { authorization: `Bearer ${CFG.token}` } : {}), ...(CFG.serviceKey ? { 'x-nara-service-key': CFG.serviceKey } : {}) });
@@ -572,6 +582,31 @@ async function dumpAcceptDebug(cmd, step, err) {
     log(`accept debug saved: accept-debug-${t}.json (step ${step})`);
   } catch (e) { log('accept debug failed: ' + e.message); }
 }
+// القبول الحقيقي: نفس نداء صفحة Live Orders → POST /api/orders/{id}/confirm-order (المدة بالدقايق)
+// بيتنفّذ من جوّا صفحة Lieferando بنفس تسجيل دخولها. بعدين منتأكد من بيانات Lieferando نفسها (confirmed).
+async function acceptViaApi(cmd, known, sel) {
+  if (!lastAuth || Date.now() - lastAuthAt > 10 * 60000) return { ok: false, error: 'Keine Anmeldung von Lieferando erfasst (Seite kurz neu laden)' };
+  if (!/live-orders\.takeaway\.com/.test(page.url())) await page.goto('https://live-orders.takeaway.com/orders', { waitUntil: 'domcontentloaded' });
+  const prep = Math.round(Number(cmd.minutes));
+  const isDelivery = !/pick/i.test(S(known.delivery_type));
+  const del = isDelivery ? Math.max(0, Math.round(Number(sel.deliveryMinutes ?? 15))) : null;
+  const eta = new Date(Date.now() + (prep + (del || 0)) * 60000).toISOString().split('.')[0] + 'Z';
+  const body = { food_preparation_duration: prep, delivery_time_duration: del, estimated_delivery_time: eta };
+  const url = `https://live-orders-api.takeaway.com/api/orders/${encodeURIComponent(known.id)}/confirm-order`;
+  const r = await page.evaluate(async ({ url, auth, body }) => {
+    try {
+      const x = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', authorization: auth }, body: JSON.stringify(body) });
+      return { status: x.status, text: (await x.text()).slice(0, 160) };
+    } catch (e) { return { status: 0, text: String(e && e.message || e) }; }
+  }, { url, auth: lastAuth, body });
+  if (r.status < 200 || r.status >= 300) {
+    await dumpAcceptDebug(cmd, 'confirm-order', new Error(`HTTP ${r.status} ${r.text}`));
+    return { ok: false, error: `[confirm-order] HTTP ${r.status} ${String(r.text).replace(/\s+/g, ' ').slice(0, 90)}` };
+  }
+  if (!(await waitConfirmed(cmd.externalOrderCode, 25000))) return { ok: false, error: 'confirm-order gesendet, aber Lieferando zeigt die Bestellung noch nicht als bestätigt' };
+  const qrUrl = sel.autoQr ? await grabQr(S(known.public_reference), sel) : '';
+  return { ok: true, qrUrl };
+}
 async function acceptOrder(cmd) {
   const sel = loadSelectors();
   const known = entryOf(cmd.externalOrderCode);
@@ -579,6 +614,7 @@ async function acceptOrder(cmd) {
   if (!known) return { ok: false, error: 'Bestellung nicht in der Lieferando-Liste (Bridge hat sie nicht gesehen)' };
   acting = true; let step = 'open';
   try {
+    if (sel.method !== 'ui') return await acceptViaApi(cmd, known, sel);
     if (!/live-orders\.takeaway\.com/.test(page.url())) await page.goto('https://live-orders.takeaway.com/orders', { waitUntil: 'domcontentloaded' });
     const ref = S(known.public_reference);
     step = 'order-card';
