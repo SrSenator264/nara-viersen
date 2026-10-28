@@ -557,26 +557,46 @@ async function grabQr(ref, sel) {
   } catch (e) { log('autoQr failed: ' + String(e.message).split('\n')[0]); }
   return state.qr[ref.toUpperCase()] || '';
 }
+// عند الفشل: لقطة شاشة + قائمة أزرار الصفحة (بدون بيانات زبون بالقائمة) بمجلد البيانات، لضبط أسماء الأزرار
+async function dumpAcceptDebug(cmd, step, err) {
+  try {
+    const t = new Date().toISOString().replace(/[:.]/g, '-');
+    const info = await page.evaluate(() => {
+      const vis = el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+      const btns = [...document.querySelectorAll('button,[role=button],a[role=button],input[type=button],input[type=submit]')].filter(vis)
+        .map(el => ({ tag: el.tagName, text: (el.innerText || el.value || '').trim().slice(0, 40), aria: el.getAttribute('aria-label') || '', testid: el.getAttribute('data-testid') || '', cls: String(el.className || '').slice(0, 60) })).slice(0, 80);
+      return { url: location.href, buttons: btns };
+    });
+    fs.writeFileSync(P(`accept-debug-${t}.json`), JSON.stringify({ at: new Date().toISOString(), step, error: String(err && err.message || err).split('\n')[0], order: cmd.displayCode, ...info }, null, 1));
+    await page.screenshot({ path: P(`accept-debug-${t}.png`) }).catch(() => {});
+    log(`accept debug saved: accept-debug-${t}.json (step ${step})`);
+  } catch (e) { log('accept debug failed: ' + e.message); }
+}
 async function acceptOrder(cmd) {
   const sel = loadSelectors();
   const known = entryOf(cmd.externalOrderCode);
   if (confirmedNow(known)) return { ok: true, already: true };            // انقبل قبل (مرة وحدة بس)
   if (!known) return { ok: false, error: 'Bestellung nicht in der Lieferando-Liste (Bridge hat sie nicht gesehen)' };
-  acting = true;
+  acting = true; let step = 'open';
   try {
     if (!/live-orders\.takeaway\.com/.test(page.url())) await page.goto('https://live-orders.takeaway.com/orders', { waitUntil: 'domcontentloaded' });
     const ref = S(known.public_reference);
+    step = 'order-card';
     await page.getByText(ref, { exact: false }).first().click({ timeout: 10000 });
+    step = 'time-button';
     if (sel.timeButton) {
       try { await page.getByRole('button', { name: rx(String(sel.timeButton).replace('{min}', String(cmd.minutes))) }).first().click({ timeout: 4000 }); }
       catch { log(`time button for ${cmd.minutes} min not found - continuing without it`); }
     }
+    step = 'accept-button';
     await page.getByRole('button', { name: rx(sel.acceptButton) }).first().click({ timeout: 10000 });
+    step = 'confirm-check';
     if (!(await waitConfirmed(cmd.externalOrderCode, 25000))) return { ok: false, error: 'Accept geklickt, aber Lieferando hat die Bestellung nicht bestätigt' };
     const qrUrl = sel.autoQr ? await grabQr(ref, sel) : '';
     return { ok: true, qrUrl };
   } catch (e) {
-    return { ok: false, error: String(e.message || e).split('\n')[0].slice(0, 140) };
+    await dumpAcceptDebug(cmd, step, e);
+    return { ok: false, error: `[${step}] ` + String(e.message || e).split('\n')[0].slice(0, 130) };
   } finally { acting = false; }
 }
 let cmdBusy = false;
