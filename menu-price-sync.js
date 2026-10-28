@@ -38,4 +38,37 @@ function applyPriceSync(data, map, tag) {
   return { applied: true, changed, menuChanged };
 }
 
-module.exports = { buildMap, applyPriceSync };
+// Einmalig: fehlende Produkte anlegen (samt Kategorie) und vorhandene Produkte aktivieren.
+// items: Katalog-Einträge (id, n, c, cents, d, ...); enableIds: sourceIds, die sichtbar/verfügbar werden sollen.
+function applyAdditions(data, items, enableIds, tag, newId) {
+  data.settings = data.settings && typeof data.settings === 'object' ? data.settings : {};
+  const done = Array.isArray(data.settings.priceSyncsApplied) ? data.settings.priceSyncsApplied : [];
+  if (done.includes(tag)) return { applied: false, added: 0, enabled: 0 };
+  data.categories = Array.isArray(data.categories) ? data.categories : [];
+  data.products = Array.isArray(data.products) ? data.products : [];
+  let added = 0, enabled = 0;
+  for (const it of items || []) {
+    if (data.products.some(p => String(p.sourceId) === String(it.id))) continue;
+    let cat = data.categories.find(c => c.name === it.c);
+    if (!cat) {
+      cat = { id: 'cat_' + String(it.c).toLowerCase().replace(/[^a-z0-9]+/g, '-'), name: it.c, active: true, sortOrder: data.categories.length };
+      data.categories.push(cat);
+    }
+    const inCat = data.products.filter(p => p.categoryId === cat.id).length;
+    data.products.push({
+      id: newId(), sourceId: it.id, name: it.n, categoryId: cat.id, priceCents: Number(it.cents) || 0,
+      description: it.d || '', active: true, available: true, sortOrder: inCat, imageRef: it.img || null,
+      translations: { de: null, ar: null, en: null }, optionGroupIds: [], channels: it.channels && typeof it.channels === 'object' ? { ...it.channels } : { kasse: true, customer: true }, menuData: it,
+    });
+    added++;
+  }
+  for (const p of data.products) {
+    if ((enableIds || []).some(id => String(id) === String(p.sourceId)) && (p.active === false || p.available === false)) {
+      p.active = true; p.available = true; enabled++;
+    }
+  }
+  data.settings.priceSyncsApplied = [...done, tag];
+  return { applied: true, added, enabled };
+}
+
+module.exports = { buildMap, applyPriceSync, applyAdditions };

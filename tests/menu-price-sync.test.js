@@ -40,3 +40,27 @@ test('price sync: leere/fehlende Daten brechen nicht ab', () => {
   assert.doesNotThrow(() => applyPriceSync(d, map, 't2'));
   assert.deepStrictEqual(d.settings.priceSyncsApplied, ['t2']);
 });
+
+const { applyAdditions } = require('../menu-price-sync.js');
+test('additions: Produkt + Kategorie werden einmalig angelegt, Hummus aktiviert', () => {
+  const d = { settings: {}, categories: [{ id: 'cat_a', name: 'Falafel', sortOrder: 0 }], products: [{ sourceId: 202, name: 'Hummus', categoryId: 'cat_a', active: true, available: false }] };
+  const shisha = { id: 520, n: 'Shisha (Wasserpfeife)', c: 'Shisha', cents: 1500, d: 'Wasserpfeife.', channels: { kasse: true, customer: false } };
+  const r = applyAdditions(d, [shisha], [202], 'x1', () => 'menu_test');
+  assert.deepStrictEqual(r, { applied: true, added: 1, enabled: 1 });
+  const p = d.products.find(x => x.sourceId === 520);
+  assert.strictEqual(p.priceCents, 1500);
+  assert.strictEqual(p.active, true);
+  assert.deepStrictEqual(p.channels, { kasse: true, customer: false }, 'nur Kasse, nicht Kunden/Website');
+  assert.strictEqual(d.categories.find(c => c.id === p.categoryId).name, 'Shisha');
+  assert.strictEqual(d.products[0].available, true);
+  const again = applyAdditions(d, [shisha], [202], 'x1', () => 'menu_test2');
+  assert.strictEqual(again.applied, false);
+  assert.strictEqual(d.products.filter(x => x.sourceId === 520).length, 1);
+});
+test('additions: vorhandenes Produkt wird nicht doppelt angelegt', () => {
+  const d = { settings: {}, categories: [], products: [{ sourceId: 520, name: 'Shisha', priceCents: 1400, categoryId: 'c', active: true }] };
+  const r = applyAdditions(d, [{ id: 520, n: 'Shisha', c: 'Shisha', cents: 1500 }], [], 'x2', () => 'm');
+  assert.strictEqual(r.added, 0);
+  assert.strictEqual(d.products.length, 1);
+  assert.strictEqual(d.products[0].priceCents, 1400, 'bestehender Preis bleibt');
+});
