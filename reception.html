@@ -160,7 +160,14 @@ let ctx=null;
 function audio(){if(ctx)return ctx;const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;try{ctx=new C()}catch(e){ctx=null}return ctx}
 function playStyle(style){
   if(style==='off')return;
-  const c=audio();if(!c||c.state!=='running')return;
+  const c=audio();if(!c)return;
+  if(c.state!=='running'){      // أندرويد: resume غير فوري، فنستنى لحد ما يشتغل ثم نشغّل
+    try{c.resume().then(()=>{if(c.state==='running')playNow(c,style)}).catch(()=>{})}catch(e){/* ignore */}
+    return;
+  }
+  playNow(c,style);
+}
+function playNow(c,style){
   let at=c.currentTime+0.02;const vol=volume()/100*0.9;
   for(const [f,d] of (TONES[style]||TONES.short)){
     const o=c.createOscillator(),g=c.createGain();
@@ -170,7 +177,7 @@ function playStyle(style){
   }
 }
 const playFor=p=>playStyle(toneOf(p));
-function unlock(){const c=audio();if(!c)return;if(c.state==='suspended')c.resume().then(syncBanner).catch(()=>{});syncBanner()}
+function unlock(){const c=audio();if(!c)return;if(c.state==='suspended')c.resume().then(syncBanner).catch(()=>{});try{const b=c.createBuffer(1,1,22050),n=c.createBufferSource();n.buffer=b;n.connect(c.destination);n.start(0)}catch(e){/* ignore */}syncBanner()}
 function syncBanner(){const c=audio();$('#banner').style.display=(c&&c.state==='running')?'none':'block'}
 document.addEventListener('pointerdown',unlock);
 $('#enableSound').onclick=()=>{unlock();setTimeout(()=>playStyle('short'),150)};
