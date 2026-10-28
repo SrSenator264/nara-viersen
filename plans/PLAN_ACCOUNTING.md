@@ -83,7 +83,7 @@
 - ما بينفّذ شي بدون موافقة. مزوّد الـ AI قابل للتبديل.
 
 ## التصدير للمحاسب (DATEV / Lexware) + إرسال بالإيميل
-الموجود اليوم: تصدير CSV بسيط فقط (`/api/reports/accounting-export`)، بدون صيغة DATEV وبدون إرسال.
+الحالة (2026-10-28): **انبنى محرك التصدير** (`accounting-export.js` + `GET /api/accounting/export` + قسم «التصدير للمحاسب» بـ`accounting.html`): بروفايل لكل محاسب (صيغة، SKR، Beraternummer، Mandantennummer، بداية السنة المالية، ربط الحسابات، BU)، معاينة بتحذيرات، تنزيل DATEV EXTF وLexware (مسودة)، واختبارات `tests/accounting-export.test.js`. **لسا ناقص:** الإرسال بالإيميل، وتأكيد المحاسب إنو ملف DATEV بيتفتح عنده وصيغة Lexware الصحيحة، وربط BU-Schlüssel الضريبة.
 
 **الصيغ (عمر بيختار وقت التصدير):**
 1. **DATEV Buchungsstapel (CSV):** صيغة EXTF الرسمية: سطر ترويسة + سطر أعمدة، فاصل `;`، ترميز Windows-1252، تاريخ DDMM، مبلغ بفاصلة، Soll/Haben (S/H)، حساب وحساب مقابل، Steuerschlüssel، رقم Beleg. بنفس الملف الحسابات من دليل الحسابات الحالي (SKR03 أو SKR04 حسب اللي مفعّل بالإعدادات؛ لازم نتأكد).
