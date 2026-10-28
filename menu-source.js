@@ -469,3 +469,75 @@ const icedTeaItems=[
  [517,'Iced Tropical Mix Shaken',449,'Iced Green Tea Shaken mit Tropical Mix']
 ];
 for(const [id,n,cents,d] of icedTeaItems)catalog.push({id,n,cents,p:cents/100,d,c:'Iced Tea',img:null,verified:true,optionsPending:false});
+
+// ── Preise aus Loyverse (Export 2026-10-28, vom Inhaber freigegeben: alles = Loyverse) ──
+// Einzige Stelle für die Preis-Angleichung: id → Cent. Nicht erfasst: Hummus (nicht verfügbar), Falafel-Menü ("ab"-Preis),
+// Artikel mit Loyverse-Preis "variable" und Artikel ohne Treffer in Loyverse.
+const loyversePrices={
+ 1:799, // Smashed Beef Burger
+ 2:699, // Cheese Burger
+ 3:899, // Guacamole Beef Burger
+ 5:585, // Cheese chicken burger
+ 6:849, // Taco Pollo
+ 10:749, // Joppie Beef burger
+ 11:749, // Joppie Chicken Burger
+ 12:599, // Crunchy Chik’n Burger
+ 14:1399, // XXXL Beef Burger
+ 15:1299, // XXXL Chik’n Burger
+ 17:1199, // Big Beef Burger
+ 18:1099, // Big Chicken Burger
+ 21:899, // BBQ Burger
+ 22:1099, // Surf and Turf Burger
+ 23:799, // Veggie Burger
+ 102:1049, // Joppie Beef burger (Menu)
+ 103:1049, // Joppie Chicken Burger (Menu)
+ 104:999, // Crunchy Chik’n Burger (Menü)
+ 105:1099, // Cheese Burger (Menü)
+ 106:945, // Cheese chicken burger (menu)
+ 107:1099, // Smashed Beef Burger (Menü)
+ 108:1299, // Mega Crispy Chicken Zinger (Menü)
+ 109:1099, // Original Hamburger (Menü)
+ 110:1499, // Big Beef Burger (Menü)
+ 111:1499, // Big Chicken Burger (Menü)
+ 112:1199, // BBQ Burger (Menü)
+ 115:1699, // XXXL Beef burger (Menü)
+ 117:1199, // Guacamole Beef Burger (Menü)
+ 118:1399, // Surf and Turf Burger (Menü)
+ 119:1099, // Veggie Burger (Menü)
+ 151:1349, // (Extra) Falafel Taco
+ 152:849, // Chilli Cheese Beef Taco
+ 153:1349, // (Extra) Chilli Cheese Beef Taco
+ 154:1349, // (Extra) Taco Pollo
+ 156:1349, // (Extra) BBQ Taco
+ 159:1299, // Iu Gene Taco
+ 160:1649, // (Extra) Iu Gene Taco
+ 172:599, // Avocado Tots
+ 186:599, // Cheese Back-Camembert (3 Stück)
+ 189:549, // Chicken Pops
+ 198:499, // Falafel Sandwich
+ 199:750, // Falafel Sandwich Extra
+ 201:410, // Jalangi
+ 206:699, // Hotdog Classic
+ 208:699, // Hotdog BBQ
+ 209:699, // Hot Dog Pommes
+ 218:899, // Beef Jalo Sandwich
+ 220:1299, // Jumbo Philly Beef Sandwich
+ 221:899, // Crunchy Chicken Cheesy Sandwich
+ 222:599, // Pommes Sandwich
+ 223:1699, // Crispy Chicken Filet Menü
+ 224:699, // Crispy Chicken Filet (4 Stück)
+ 227:380, // Rich Chocolate Muffin
+ 228:380, // Blue Berry Muffin
+ 230:215, // Crispy Caramel-gefüllte Donut
+ 232:185, // White Donut
+ 266:99, // Aioli
+ 269:99, // Chillicheese Sauce
+ 270:99, // Cheese Sauce
+ 276:99, // Haus Sauce
+ 277:100, // Garlic Sauce
+ 279:345, // Cranberry-Moloko 0,25 l
+ 508:445, // Iced Mocha
+};
+for(const p of catalog){const c=loyversePrices[p.id];if(c!=null)Object.assign(p,{cents:c,p:c/100});}
+// Burger-Menüpreis folgt dem (versteckten) Menü-Artikel, genau wie oben bei burgerMenuPairs.
+for(const [burgerId,menuId] of burgerMenuPairs){const burger=catalog.find(p=>p.id===burgerId),menu=catalog.find(p=>p.id===menuId);if(burger&&menu)burger.menuCents=menu.cents;}
