@@ -11,10 +11,11 @@
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Segoe UI",system-ui,Arial,sans-serif}
 button{font:inherit;cursor:pointer;touch-action:manipulation}
-header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;min-height:68px;padding:8px 20px;background:#fff;box-shadow:0 1px 0 var(--line);flex-wrap:wrap}
-header h1{margin:0;font-size:1.35rem;color:var(--brand)}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;min-height:60px;padding:6px 14px;background:#fff;box-shadow:0 1px 0 var(--line),0 4px 10px #0000000d;flex-wrap:wrap}
+header h1{margin:0;font-size:1.2rem;color:var(--brand)}
 header .sp{flex:1}
-.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px;flex:1 1 520px;order:5}
+.tabs>*{flex:1 1 0;justify-content:center;min-height:52px}
 .cnt,.tab{display:flex;align-items:center;gap:8px;padding:6px 16px;border:2px solid transparent;border-radius:999px;background:#fff;color:var(--ink);font-weight:800;box-shadow:inset 0 0 0 1px var(--line)}
 .cnt b,.tab b{font-size:1.5rem;line-height:1}
 .cnt{background:var(--ok);color:#fff}
@@ -27,51 +28,58 @@ header .sp{flex:1}
 .sync.off b{background:var(--late)}
 #banner{display:none;margin:14px 20px 0}
 #banner button{width:100%;height:64px;border:0;border-radius:16px;background:var(--brand);color:#fff;font-weight:800;font-size:1.2rem}
-main{padding:18px 20px 40px}
-#list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;align-items:start}
+main{padding:12px 12px 40px}
+#list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
 .empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:70px 10px;font-size:1.3rem}
-.card{background:var(--card);border-radius:18px;box-shadow:0 1px 3px #0000001a;border-inline-start:8px solid var(--pc,#999);padding:14px 16px 16px}
+.card{background:var(--card);border-radius:16px;box-shadow:0 1px 3px #0000001a;border-inline-start:10px solid var(--pc,#999);padding:10px 12px 12px;border-top:5px solid var(--st,transparent)}
+.card.late{--st:var(--late);background:#fff5f4}
+.card.warn{--st:var(--brand)}
+.card.PENDING,.card.ACCEPTING{--st:var(--ok)}
 .card.FAILED{outline:3px solid var(--late);background:#fff5f4}
 .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.badge{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:800;font-size:.85rem;background:var(--pc);color:#fff}
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:800;font-size:.95rem;background:var(--pc);color:#fff}
 .badge.brand{background:#1d2327}
-.code{font-size:1.15rem}
+.code{font-size:1.3rem}
 .age{margin-inline-start:auto;color:var(--mute);font-size:.9rem}
-.meta{margin:8px 0 6px;color:var(--mute);font-size:.95rem}
-.items{list-style:none;margin:6px 0;padding:8px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)}
-.items li{padding:4px 0;font-weight:700;font-size:1.05rem}
-.items .opt{font-weight:400;color:var(--mute);font-size:.92rem;padding-inline-start:1.6em}
+.meta{margin:4px 0;color:var(--mute);font-size:.88rem}
+.items{list-style:none;margin:4px 0;padding:6px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)}
+.items li{padding:2px 0;font-weight:800;font-size:1.05rem}
+.items .opts{font-weight:400;color:var(--mute);font-size:.85rem;padding-inline-start:1.4em;line-height:1.3}
+.sum{margin:4px 0;font-weight:700;font-size:1rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tog{display:block;width:100%;height:36px;margin:2px 0;border:0;border-radius:10px;background:#f0ede9;color:var(--mute);font-weight:700}
 .items .note{font-weight:600;color:#7a5200;font-size:.92rem;padding-inline-start:1.6em}
-.notes{margin:6px 0;padding:8px 10px;border-radius:10px;background:#fff6e0;color:#7a5200;font-weight:600}
+.notes{margin:6px 0;padding:8px 10px;border-radius:10px;background:#fff0c2;border:2px solid #f0b400;color:#5c3d00;font-weight:800;font-size:1.02rem}
 .time{display:flex;align-items:center;gap:10px;margin:10px 0 4px;flex-wrap:wrap}
 .time .lbl{font-weight:700}
 .step{display:flex;align-items:center;gap:6px;margin-inline-start:auto}
 .step button{width:56px;height:52px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:800;font-size:1.1rem}
 .step b{min-width:74px;text-align:center;font-size:1.3rem}
 .qlen{width:100%;color:var(--mute);font-size:.85rem}
-.ring{position:relative;width:62px;height:62px;flex:none}
-.ring svg{width:62px;height:62px;transform:rotate(-90deg)}
+.ring{position:relative;width:70px;height:70px;flex:none}
+.ring svg{width:70px;height:70px;transform:rotate(-90deg)}
 .ring .bg{fill:none;stroke:#e7e3de;stroke-width:6}
 .ring .fg{fill:none;stroke:var(--ok);stroke-width:6;stroke-linecap:round}
 .ring.warn .fg{stroke:var(--brand)}
 .ring.late .fg{stroke:var(--late)}
 .ring .tx{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;line-height:1.05}
-.ring .tx b{font-size:1.15rem}
+.ring .tx b{font-size:1.35rem}
 .ring .tx small{font-size:.7rem;font-weight:600;color:var(--mute)}
 .ring.late .tx b{color:var(--late)}
 .head{display:flex;align-items:center;gap:12px}
 .head .top{flex:1}
-.timerow{display:flex;align-items:center;gap:10px;margin:8px 0 2px;flex-wrap:wrap}
-.timerow .lbl{font-weight:700;min-width:96px}
-.timerow .step{margin-inline-start:auto}
-.timerow .step button{width:50px;height:46px}
-.timerow .step b{min-width:66px;font-size:1.15rem}
+.times{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:6px 0 0}
+.times.one{grid-template-columns:1fr}
+.timerow{display:flex;flex-direction:column;align-items:stretch;gap:2px;margin:0}
+.timerow .lbl{font-weight:700;font-size:.82rem;color:var(--mute);text-align:center}
+.timerow .step{margin:0;justify-content:space-between;gap:3px}
+.timerow .step button{width:38px;flex:none;height:46px;padding:0;font-size:1rem}
+.timerow .step b{min-width:0;flex:1;font-size:1rem;white-space:nowrap;text-align:center}
 .saved{width:100%;color:var(--mute);font-size:.82rem;text-align:end}
 .sync2{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:#fff1d6;color:#7a5200;font-weight:700;font-size:.9rem}
 .card.DONE{opacity:.78}
 .go.next{background:var(--brand)}
 .go.fin{background:var(--ink)}
-.go{width:100%;height:64px;margin-top:10px;border:0;border-radius:16px;background:var(--ok);color:#fff;font-weight:800;font-size:1.25rem}
+.go{width:100%;height:58px;margin-top:8px;border:0;border-radius:16px;background:var(--ok);color:#fff;font-weight:800;font-size:1.25rem}
 .go:disabled{background:#9aa5a0}
 .go.retry{background:var(--late)}
 .err{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:#fde8e8;color:#9b1c1c;font-weight:700;font-size:.92rem}
@@ -118,17 +126,17 @@ const T={
     prep:'Zubereitungszeit',min:'Min',delivery:'🛵 Lieferung',pickup:'🛍 Abholung',cash:'💶 Barzahlung',online:'💳 Online bezahlt',asap:'So schnell wie möglich',at:'um',now:'jetzt',ago:'vor {n} Min',
     queue:'🍳 Küche aktuell: {n}',sounds:'⚙️ Töne',enableSound:'🔊 Tippen, um den Ton zu aktivieren',volume:'Lautstärke',repeat:'Wiederholen alle',off:'aus',test:'Test',close:'Schließen',offline:'Keine Verbindung',live:'Live',
     short:'Kurz',double:'Doppelt',long:'Lang',triple:'Dreifach',rising:'Steigend',falling:'Fallend',bell:'Glocke',siren:'Sirene',mute:'Stumm',web:'Website',sec:'{n} Sek',errGeneric:'Fehler: ',
-    tabPrepare:'Zubereitung',tabHandover:'Übergabe',tabDone:'Erledigt',deliveryTime:'Lieferzeit',toHandover:'🚗 Handover',toDone:'✅ Fertig',noneStage:'Keine Bestellungen',saving:'wird gespeichert …',saved:'✓ gespeichert',leftMin:'Min',lateMin:'überfällig',platformFail:'Auf der Plattform nicht übernommen',doneAgo:'erledigt vor {n} Min'},
+    tabPrepare:'Zubereitung',tabHandover:'Übergabe',tabDone:'Erledigt',deliveryTime:'Lieferzeit',toHandover:'🚗 Handover',toDone:'✅ Fertig',noneStage:'Keine Bestellungen',saving:'wird gespeichert …',saved:'✓ gespeichert',leftMin:'Min',lateMin:'überfällig',platformFail:'Auf der Plattform nicht übernommen',doneAgo:'erledigt vor {n} Min',details:'▼ Details',hide:'▲ Weniger',itemsN:'{n} Artikel'},
   ar:{title:'تجميع المنصات',waiting:'بانتظار الموافقة',none:'ما في طلبات بانتظار الموافقة ✅',accept:'✅ استلام',accepting:'عم ينقبل …',retry:'🔁 جرّب مرة ثانية',failed:'فشل الاستلام',
     prep:'وقت التحضير',min:'د',delivery:'🛵 توصيل',pickup:'🛍 استلام من المحل',cash:'💶 دفع كاش',online:'💳 مدفوع أونلاين',asap:'بأسرع وقت',at:'الساعة',now:'هلق',ago:'قبل {n} د',
     queue:'🍳 بالمطبخ هلق: {n}',sounds:'⚙️ الأصوات',enableSound:'🔊 اضغط لتفعيل الصوت',volume:'مستوى الصوت',repeat:'كرّر كل',off:'بلا',test:'جرّب',close:'سكّر',offline:'ما في اتصال',live:'Live',
     short:'قصير',double:'مرتين',long:'طويل',triple:'ثلاث مرات',rising:'صاعد',falling:'نازل',bell:'جرس',siren:'صفّارة',mute:'بلا صوت',web:'الموقع',sec:'{n} ث',errGeneric:'غلط: ',
-    tabPrepare:'قيد التحضير',tabHandover:'تسليم',tabDone:'خلصت',deliveryTime:'وقت التوصيل',toHandover:'🚗 جاهز للتسليم',toDone:'✅ تم التسليم',noneStage:'ما في طلبات',saving:'عم ينحفظ …',saved:'✓ انحفظ',leftMin:'د',lateMin:'متأخر',platformFail:'ما انتقل عند المنصة',doneAgo:'خلص قبل {n} د'},
+    tabPrepare:'قيد التحضير',tabHandover:'تسليم',tabDone:'خلصت',deliveryTime:'وقت التوصيل',toHandover:'🚗 جاهز للتسليم',toDone:'✅ تم التسليم',noneStage:'ما في طلبات',saving:'عم ينحفظ …',saved:'✓ انحفظ',leftMin:'د',lateMin:'متأخر',platformFail:'ما انتقل عند المنصة',doneAgo:'خلص قبل {n} د',details:'▼ التفاصيل',hide:'▲ أقل',itemsN:'{n} أصناف'},
   en:{title:'Platform hub',waiting:'waiting for acceptance',none:'No orders waiting ✅',accept:'✅ Accept',accepting:'Accepting …',retry:'🔁 Try again',failed:'Accept failed',
     prep:'Prep time',min:'min',delivery:'🛵 Delivery',pickup:'🛍 Pickup',cash:'💶 Cash',online:'💳 Paid online',asap:'As soon as possible',at:'at',now:'now',ago:'{n} min ago',
     queue:'🍳 In kitchen now: {n}',sounds:'⚙️ Sounds',enableSound:'🔊 Tap to enable sound',volume:'Volume',repeat:'Repeat every',off:'off',test:'Test',close:'Close',offline:'No connection',live:'Live',
     short:'Short',double:'Double',long:'Long',triple:'Triple',rising:'Rising',falling:'Falling',bell:'Bell',siren:'Siren',mute:'Mute',web:'Website',sec:'{n} s',errGeneric:'Error: ',
-    tabPrepare:'Preparing',tabHandover:'Handover',tabDone:'Done',deliveryTime:'Delivery time',toHandover:'🚗 Handover',toDone:'✅ Done',noneStage:'No orders',saving:'saving …',saved:'✓ saved',leftMin:'min',lateMin:'late',platformFail:'Not applied on the platform',doneAgo:'done {n} min ago'}
+    tabPrepare:'Preparing',tabHandover:'Handover',tabDone:'Done',deliveryTime:'Delivery time',toHandover:'🚗 Handover',toDone:'✅ Done',noneStage:'No orders',saving:'saving …',saved:'✓ saved',leftMin:'min',lateMin:'late',platformFail:'Not applied on the platform',doneAgo:'done {n} min ago',details:'▼ Details',hide:'▲ Less',itemsN:'{n} items'}
 };
 const lang=()=>{try{return window.NARA_LANG?NARA_LANG.get():'de'}catch(e){return 'de'}};
 const t=(k,n)=>{const v=((T[lang()]||T.de)[k]);const s=v!=null?v:(T.de[k]!=null?T.de[k]:k);return n==null?s:s.replace('{n}',n)};
@@ -169,7 +177,7 @@ $('#enableSound').onclick=()=>{unlock();setTimeout(()=>playStyle('short'),150)};
 
 // ───── البيانات ─────
 let orders=[],counts={WAIT:0,PREPARE:0,HANDOVER:0,DONE:0},tab=null,lastOk=0,lastSig='',seen=new Set(),lastBeep=0,busy=false;
-const mins={},dels={},touched={},localErr={},localAccepting=new Set(),localStage={},ed={},savedAt={};
+const open=new Set(),mins={},dels={},touched={},localErr={},localAccepting=new Set(),localStage={},ed={},savedAt={};
 const BASE=document.title;
 const clamp=n=>Math.min(240,Math.max(5,n));
 const clampD=n=>Math.min(180,Math.max(0,n));
@@ -217,9 +225,16 @@ function alerts(){
 // ───── العرض ─────
 function itemsHtml(o){
   return (o.items||[]).map(i=>'<li><span>'+(Number(i.quantity)||1)+'× '+esc(P(i.name))+'</span>'
-    +(i.options||[]).map(x=>'<div class="opt">+ '+esc(P(x.name))+((x.quantity||1)>1?' ×'+x.quantity:'')+'</div>').join('')
+    +((i.options||[]).length?'<div class="opts">+ '+(i.options||[]).map(x=>esc(P(x.name))+((x.quantity||1)>1?' ×'+x.quantity:'')).join(' · ')+'</div>':'')
     +(i.note?'<div class="note">📝 '+esc(i.note)+'</div>':'')+'</li>').join('');
 }
+function sumHtml(o){return (o.items||[]).map(i=>(Number(i.quantity)||1)+'× '+esc(P(i.name))).join(' · ')}
+function itemsBlock(o,id,stg){
+  const its=o.items||[];
+  if(stg==='WAIT'||its.length<=1||open.has(id))return '<ul class="items">'+itemsHtml(o)+'</ul>'+(stg!=='WAIT'&&its.length>1?'<button type="button" class="tog" data-act="toggle">'+t('hide')+'</button>':'');
+  return '<div class="sum">'+sumHtml(o)+'</div><button type="button" class="tog" data-act="toggle">'+t('details')+'</button>';
+}
+function stepsHtml(a,b,pick){return '<div class="times'+(pick?' one':'')+'">'+a+(pick?'':b)+'</div>'}
 function metaHtml(o){
   const when=o.asap===false?t('at')+' '+fmt(o.requestedAt):t('asap');
   return [o.type==='pickup'?t('pickup'):t('delivery'),o.city?esc(o.city):'',o.payment&&o.payment.method==='CASH'?t('cash'):t('online'),'🕒 '+esc(when)].filter(Boolean).join(' · ')+(o.customerName?' · '+esc(o.customerName):'');
@@ -236,17 +251,16 @@ function stepHtml(lbl,val,a,b,dis){
 }
 function cardHtml(o){
   const id=String(o.id),pc=PC[o.source]||'#37474f',stg=stageOf(o);
-  const badges='<span class="badge">'+esc(PN[o.source]||o.source)+'</span>'+(o.brand?'<span class="badge brand">'+esc(o.brand)+'</span>':'')+'<b class="code">#'+esc(o.displayCode)+'</b>';
+  const badges='<span class="badge">'+esc(PN[o.source]||o.source)+'</span>'+(o.brand&&o.brand!==PN[o.source]?'<span class="badge brand">'+esc(o.brand)+'</span>':'')+'<b class="code">#'+esc(o.displayCode)+'</b>';
   const pick=o.type==='pickup';
   if(stg==='WAIT'){
     const st=o.state==='FAILED'?'FAILED':(o.state==='ACCEPTING'||localAccepting.has(id)?'ACCEPTING':'PENDING'),busyNow=st==='ACCEPTING';
     const m=mins[id]!=null?mins[id]:o.suggestedMinutes,d=dels[id]!=null?dels[id]:15;
     return '<article class="card '+st+'" style="--pc:'+pc+'" data-id="'+esc(id)+'">'
       +'<div class="top">'+badges+'<span class="age" data-ts="'+esc(o.pendingSince||o.placedAt||'')+'">'+esc(agoOf(o.pendingSince||o.placedAt))+'</span></div>'
-      +'<div class="meta">'+metaHtml(o)+'</div><ul class="items">'+itemsHtml(o)+'</ul>'
+      +'<div class="meta">'+metaHtml(o)+'</div>'+itemsBlock(o,id,'WAIT')
       +(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'')
-      +stepHtml(t('prep'),m,'minus','plus',busyNow)
-      +(pick?'':stepHtml(t('deliveryTime'),d,'dminus','dplus',busyNow))
+      +stepsHtml(stepHtml(t('prep'),m,'minus','plus',busyNow),stepHtml(t('deliveryTime'),d,'dminus','dplus',busyNow),pick)
       +'<div class="saved">'+t('queue',o.queue||0)+'</div>'
       +((st==='FAILED'||localErr[id])?'<div class="err">⚠️ '+t('failed')+(o.error||localErr[id]?': '+esc(o.error||localErr[id]):'')+'</div>':'')
       +'<button type="button" class="go'+(st==='FAILED'?' retry':'')+'" data-act="accept"'+(busyNow?' disabled':'')+'>'+(busyNow?t('accepting'):(st==='FAILED'?t('retry'):t('accept')))+'</button>'
@@ -256,13 +270,14 @@ function cardHtml(o){
   const stateTxt=e?(e.state==='ok'?t('saved'):(e.state==='err'?'⚠️ '+esc(e.msg||''):t('saving'))):(Date.now()-(savedAt[id]||0)<3000?t('saved'):'');
   const syncTxt=o.sync&&o.sync.state==='FAILED'?'<div class="sync2">⚠️ '+t('platformFail')+(o.sync.error?': '+esc(o.sync.error):'')+'</div>':'';
   let head='<div class="head">'+(stg==='DONE'?'':ringHtml(o))+'<div class="top">'+badges+'<span class="age" data-ts="'+esc(o.stageAt||o.acceptedAt||o.placedAt||'')+'">'+esc(agoOf(o.stageAt||o.acceptedAt||o.placedAt))+'</span></div></div>';
-  let body='<div class="meta">'+metaHtml(o)+'</div><ul class="items">'+itemsHtml(o)+'</ul>'+(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'');
+  let body='<div class="meta">'+metaHtml(o)+'</div>'+(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'')+itemsBlock(o,id,stg);
   let times='',btn='';
   if(stg!=='DONE'){
-    times=stepHtml(t('prep'),prep,'minus','plus',false)+(pick?'':stepHtml(t('deliveryTime'),del,'dminus','dplus',false))+'<div class="saved">'+stateTxt+'</div>';
+    times=stepsHtml(stepHtml(t('prep'),prep,'minus','plus',false),stepHtml(t('deliveryTime'),del,'dminus','dplus',false),pick)+'<div class="saved">'+stateTxt+'</div>';
     btn=stg==='PREPARE'?'<button type="button" class="go next" data-act="next">'+t('toHandover')+'</button>':'<button type="button" class="go fin" data-act="next">'+t('toDone')+'</button>';
   }
-  return '<article class="card '+stg+'" style="--pc:'+pc+'" data-id="'+esc(id)+'">'+head+body+times+syncTxt+(localErr[id]?'<div class="err">⚠️ '+esc(localErr[id])+'</div>':'')+btn+'</article>';
+  const ml0=stg==='DONE'?null:minsLeft(o),urg=ml0==null?'':(ml0<0?' late':(ml0<=10?' warn':''));
+  return '<article class="card '+stg+urg+'" style="--pc:'+pc+'" data-id="'+esc(id)+'">'+head+body+times+syncTxt+(localErr[id]?'<div class="err">⚠️ '+esc(localErr[id])+'</div>':'')+btn+'</article>';
 }
 function render(force){
   const need=needAction().length;
@@ -273,7 +288,7 @@ function render(force){
   const sy=$('#sync'),off=Date.now()-lastOk>10000;sy.classList.toggle('off',off);
   sy.querySelector('span').textContent=(off?t('offline'):t('live'))+' · '+new Date(lastOk||Date.now()).toLocaleTimeString('de-DE');
   const shown=orders.filter(o=>stageOf(o)===(tab||'WAIT'));
-  const sig=JSON.stringify([lang(),tab,counts,shown.map(o=>{const id=String(o.id),e=ed[id];return [o.id,stageOf(o),o.state,o.error,o.queue,o.prepMinutes,o.deliveryMinutes,o.dueAt,o.sync&&o.sync.state,mins[id],dels[id],localAccepting.has(id),localErr[id],e&&[e.prep,e.del,e.state],Date.now()-(savedAt[id]||0)<3000]})]);
+  const sig=JSON.stringify([lang(),tab,counts,shown.map(o=>{const id=String(o.id),e=ed[id];return [o.id,stageOf(o),o.state,o.error,o.queue,o.prepMinutes,o.deliveryMinutes,o.dueAt,o.sync&&o.sync.state,mins[id],dels[id],localAccepting.has(id),open.has(id),localErr[id],e&&[e.prep,e.del,e.state],Date.now()-(savedAt[id]||0)<3000]})]);
   if(!force&&sig===lastSig)return;   // ما منعيد الرسم إذا ما تغيّر شي (كي ما تضيع كبسة على التابلت)
   lastSig=sig;
   $('#list').innerHTML=shown.length?shown.map(cardHtml).join(''):'<div class="empty">'+((tab||'WAIT')==='WAIT'?t('none'):t('noneStage'))+'</div>';
@@ -314,6 +329,7 @@ $('#list').addEventListener('click',async e=>{
   const card=b.closest('.card'),id=card&&card.dataset.id;if(!id)return;
   const o=orders.find(x=>String(x.id)===id);if(!o)return;
   const act=b.dataset.act,stg=stageOf(o);
+  if(act==='toggle'){if(open.has(id))open.delete(id);else open.add(id);render(true);return}
   if(act==='minus'||act==='plus'||act==='dminus'||act==='dplus'){
     const dp=act==='plus'?5:(act==='minus'?-5:0),dd=act==='dplus'?5:(act==='dminus'?-5:0);
     if(stg==='WAIT'){
