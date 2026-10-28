@@ -26,6 +26,9 @@ header .sp{flex:1}
 .sync{color:var(--mute);font-size:.85rem}
 .sync b{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-inline-end:6px}
 .sync.off b{background:var(--late)}
+@keyframes pulse{0%,100%{background:#fff}50%{background:#ffd9b0}}
+body.alarm header{animation:pulse 1s infinite;box-shadow:0 3px 0 var(--brand)}
+body.alarm #cnt{animation:pulse 1s infinite;color:var(--ink)}
 #banner{display:none;margin:14px 20px 0}
 #banner button{width:100%;height:64px;border:0;border-radius:16px;background:var(--brand);color:#fff;font-weight:800;font-size:1.2rem}
 main{padding:12px 12px 40px}
@@ -211,7 +214,8 @@ function playNow(c,style){
     o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+d+0.02);at+=d+0.07;
   }
 }
-const playFor=p=>playStyle(toneOf(p));
+const vib=()=>{try{if(navigator.vibrate)navigator.vibrate([300,150,300,150,300])}catch(e){/* ignore */}};
+const playFor=p=>{vib();playStyle(toneOf(p))};
 function unlock(){const c=audio();if(!c)return;if(c.state==='suspended')c.resume().then(syncBanner).catch(()=>{});try{const b=c.createBuffer(1,1,22050),n=c.createBufferSource();n.buffer=b;n.connect(c.destination);n.start(0)}catch(e){/* ignore */}syncBanner()}
 function syncBanner(){const c=audio();$('#banner').style.display=(c&&c.state==='running')?'none':'block'}
 document.addEventListener('pointerdown',unlock);
@@ -335,7 +339,7 @@ function cardHtml(o){
 function render(force){
   const need=needAction().length;
   $('#cntN').textContent=counts.WAIT;$('#cntP').textContent=counts.PREPARE;$('#cntH').textContent=counts.HANDOVER;$('#cntD').textContent=counts.DONE;
-  $('#cnt').classList.toggle('hot',need>0);
+  $('#cnt').classList.toggle('hot',need>0);if(document.body&&document.body.classList)document.body.classList.toggle('alarm',need>0);
   document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('sel',b.dataset.tab===tab));
   document.title=(counts.WAIT?'('+counts.WAIT+') ':'')+BASE;
   const sy=$('#sync'),off=Date.now()-lastOk>10000;sy.classList.toggle('off',off);
