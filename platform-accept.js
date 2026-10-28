@@ -24,6 +24,19 @@ function lieferandoNeedsAccept(stage, rawStatus, confirmedAt) {
   return stage === 'PREPARE' && !confirmedAt && LIEF_WAITING_STATUS.test(str(rawStatus).toLowerCase());
 }
 
+// Uber Eats و Loco (Sides) بيقبلوا الطلب لحالن على المنصة، فالقبول عندنا داخلي بس (بدون كبسة على المنصة).
+// الطلب الجديد بينحجز على تابلت التجميع، ولما الموظف يكبس ✅ بينطبع على الطابعة وبيروح للمطبخ.
+const INTERNAL = new Set(['UBER_EATS', 'SIDES']);
+const FRESH_MS = 10 * MIN;       // طلب أقدم من هيك (مثلاً بعد إعادة تشغيل الجسر) ما منحجزه
+const LATE_STATUS = /ready|pick|courier|route|deliver|dispatch|complete|cancel|done|finish/i;
+const isInternalSource = o => INTERNAL.has(str(o && (o.source || o.platform)).toUpperCase());
+function holdInternally(order, now) {
+  if (!isInternalSource(order) || !isOpen(order) || order.acceptState) return false;
+  const at = Date.parse(order.placedAt || order.createdAt || '') || 0;
+  if (!at || now - at > FRESH_MS) return false;
+  return !LATE_STATUS.test(str(order.platformStatus));
+}
+
 let queue = [];
 let seq = 0;
 function reset() { queue = []; seq = 0; }
@@ -33,7 +46,8 @@ const dropQueued = orderId => { queue = queue.filter(c => c.orderId !== String(o
 function onImport(order, isNew, now = Date.now()) {
   if (!order) return 'NONE';
   if (isNew) {
-    if (order.needsAccept === true && isOpen(order)) {
+    if ((order.needsAccept === true && isOpen(order)) || holdInternally(order, now)) {
+      if (isInternalSource(order)) order.acceptInternal = true;
       order.acceptState = 'PENDING';
       order.pendingSince = iso(now);
       return 'HOLD';
@@ -79,6 +93,11 @@ function requestAccept(data, orderId, minutes, user, now = Date.now()) {
   if (st === 'ACCEPTING') throw httpError(409, 'Wird bereits angenommen');
   if (st !== 'PENDING' && st !== 'FAILED') throw httpError(422, 'Bestellung wartet nicht auf Annahme');
   if (!isOpen(o)) throw httpError(409, 'Bestellung ist nicht mehr offen');
+  if (o.acceptInternal || isInternalSource(o)) {      // المنصة قبلته لحالها: قبول داخلي فوري
+    o.acceptState = 'ACCEPTED'; o.acceptedVia = 'NARA'; o.acceptedAt = iso(now); o.acceptMinutes = min;
+    o.acceptBy = str(user && user.name); o.acceptError = ''; o.updatedAt = iso(now);
+    return { state: 'ACCEPTED', internal: true, printNow: true };
+  }
   o.acceptState = 'ACCEPTING';
   o.acceptMinutes = min;
   o.acceptRequestedAt = iso(now);

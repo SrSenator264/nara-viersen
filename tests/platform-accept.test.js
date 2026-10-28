@@ -205,3 +205,19 @@ test.describe('End-to-End', () => {
     assert.ok((await call('GET', '/api/kitchen/orders', null, cookie)).json.orders.some(o => o.id === row.id));
   });
 });
+
+test('Uber/Loco: neue frische Bestellung wird gehalten; Annahme ist intern (kein Bridge-Befehl) und druckt sofort; alte/späte werden nicht gehalten', () => {
+  const u = mk({ id: 'u1', source: 'UBER_EATS', platform: 'UBER_EATS', needsAccept: undefined, platformStatus: 'CREATED' });
+  assert.equal(A.onImport(u, true, NOW), 'HOLD'); assert.equal(u.acceptState, 'PENDING');
+  const s = mk({ id: 's1', source: 'SIDES', platform: 'SIDES', brand: 'Loco Chicken', needsAccept: undefined, platformStatus: '1' });
+  assert.equal(A.onImport(s, true, NOW), 'HOLD');
+  const old = mk({ id: 'u2', source: 'UBER_EATS', needsAccept: undefined, placedAt: new Date(NOW - 3600000).toISOString() });
+  assert.equal(A.onImport(old, true, NOW), 'NONE'); assert.equal(old.acceptState, undefined);
+  const late = mk({ id: 'u3', source: 'UBER_EATS', needsAccept: undefined, platformStatus: 'READY_SOON' });
+  assert.equal(A.onImport(late, true, NOW), 'NONE');
+  const data = { orders: [u, s] };
+  const r = A.requestAccept(data, 'u1', 20, { name: 'K' }, NOW);
+  assert.equal(r.state, 'ACCEPTED'); assert.equal(r.printNow, true); assert.equal(u.acceptState, 'ACCEPTED');
+  assert.deepEqual(A.claim('UBER_EATS', '', NOW), [], 'kein Befehl an die Bridge');
+  assert.equal(A.requestAccept(data, 'u1', 20, { name: 'K' }, NOW).already, true);
+});

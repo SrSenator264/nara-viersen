@@ -101,9 +101,9 @@ const P=x=>{const v=String(x==null?'':x);return window.NARA_LANG&&/[؀-ۿ]/.test
 if(window.NARA_LANG&&NARA_LANG.mountSwitcher)NARA_LANG.mountSwitcher($('#langsw'));
 
 // ───── المنصات: لون + اسم + نغمة افتراضية مميزة ─────
-const PC={LIEFERANDO:'#ff8000',UBER_EATS:'#06c167',WOLT:'#009de0',LANCH:'#7b4ddb',WEB:'#E3262F'};
-const PN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',WEB:'Website'};
-const DEF_TONE={LIEFERANDO:'rising',UBER_EATS:'bell',WOLT:'falling',LANCH:'triple',WEB:'siren'};
+const PC={LIEFERANDO:'#ff8000',UBER_EATS:'#06c167',WOLT:'#009de0',LANCH:'#7b4ddb',WEB:'#E3262F',SIDES:'#8d6e63'};
+const PN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',WEB:'Website',SIDES:'Loco Chicken'};
+const DEF_TONE={LIEFERANDO:'rising',UBER_EATS:'bell',WOLT:'falling',LANCH:'triple',WEB:'siren',SIDES:'long'};
 const TONES={short:[[880,.14]],double:[[880,.14],[660,.14]],long:[[740,.18],[740,.18],[740,.18]],triple:[[880,.1],[880,.1],[880,.1]],
   rising:[[523,.12],[659,.12],[784,.22]],falling:[[784,.12],[659,.12],[523,.22]],bell:[[1047,.35],[784,.4]],siren:[[900,.2],[600,.2],[900,.2],[600,.2]]};
 const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}};
