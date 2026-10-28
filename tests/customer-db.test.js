@@ -57,3 +57,41 @@ test('own channel customers may be contacted; sleeping after a long pause', () =
   assert.equal(c.totalCents, 950);
   assert.equal(c.favourites[0].name, 'Falafel (Menü)');
 });
+
+// ---- الموعد المتوقع ما بيكون بالماضي + عدد أيام التأخّر ----
+// now = 2026-10-10 20:00Z (السبت 22:00 برلين). زبون بيطلب كل يومين، آخر طلب من 5 أيام (الأحد)، موعده الأصلي فات من 3 أيام
+const lateOrders = [order('l1', 9), order('l2', 7), order('l3', 5)];
+
+test('overdue customer: expected date is never in the past; overdueDays counts from the original date', () => {
+  const c = C.build({ orders: lateOrders }, now).customers[0];
+  assert.equal(c.gapDays, 2);
+  assert.equal(c.overdueDays, 3);
+  assert.ok(Date.parse(c.nextExpectedAt) > now, 'next expected must be in the future');
+  assert.ok(Date.parse(c.nextExpectedAt) - now <= 8 * DAY);
+});
+
+test('overdue customer: next expected is the usual weekday and hour (Berlin time)', () => {
+  // بيطلب كل أربعاء 22:00 برلين (الطلبات قبل 24/17/10 يوم من السبت 10.10)؛ موعده الأصلي فات من 3 أيام
+  const c = C.build({ orders: [order('w1', 24), order('w2', 17), order('w3', 10)] }, now).customers[0];
+  assert.equal(c.gapDays, 7);
+  assert.equal(c.overdueDays, 3);
+  assert.equal(c.nextExpectedAt, new Date(now + 4 * DAY).toISOString()); // الأربعاء 14.10 بنفس الساعة
+});
+
+test('overdue customer without a clear pattern still gets a future date (most frequent weekday)', () => {
+  const c = C.build({ orders: lateOrders }, now).customers[0];
+  assert.ok(c.nextExpectedAt === null || Date.parse(c.nextExpectedAt) > now);
+});
+
+test('not yet overdue: expected date untouched, overdueDays null', () => {
+  const c = C.build({ orders: [order('n1', 5), order('n2', 3), order('n3', 1)] }, now).customers[0];
+  assert.equal(c.overdueDays, null);
+  assert.equal(c.nextExpectedAt, new Date(Date.parse(at(1)) + 2 * DAY).toISOString());
+});
+
+test('single order or sleeping customers: no expected date, no overdue', () => {
+  const one = C.build({ orders: [order('s1', 3)] }, now).customers[0];
+  assert.equal(one.nextExpectedAt, null); assert.equal(one.overdueDays, null);
+  const old = C.build({ orders: [order('o1', 90), order('o2', 80), order('o3', 70)] }, now).customers[0];
+  assert.equal(old.segment, 'SLEEPING'); assert.equal(old.overdueDays, null);
+});

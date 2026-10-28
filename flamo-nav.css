@@ -46,7 +46,13 @@ html{scroll-padding-top:58px}
   body.fn-full .fn-side{transform:none;box-shadow:none;visibility:visible}
   body.fn-full .fn-bar{inset-inline-start:var(--fn-w)}
   body.fn-full{padding-inline-start:var(--fn-w)}
-  body.fn-full .fn-burger,body.fn-full .fn-mini,body.fn-full .fn-backdrop{display:none!important}
+  body.fn-full .fn-backdrop{display:none!important}
+  /* الزر ☰ دايماً ظاهر: بيطوي/بيفتح السايدبار (الحالة محفوظة) */
+  body.fn-full:not(.fn-collapsed) .fn-mini{display:none!important}
+  body.fn-full.fn-collapsed .fn-side{transform:translateX(-105%);visibility:hidden}
+  html[dir=rtl] body.fn-full.fn-collapsed .fn-side{transform:translateX(105%)}
+  body.fn-full.fn-collapsed .fn-bar{inset-inline-start:0}
+  body.fn-full.fn-collapsed{padding-inline-start:0}
 }
 @media(max-width:700px){.fn-find span,.fn-find kbd{display:none}.fn-crumb{display:none}}
 

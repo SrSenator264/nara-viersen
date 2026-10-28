@@ -35,6 +35,17 @@ function berlin(ms) {
   return { weekday: WD[q.weekday], hour: Number(p.hour) };
 }
 
+// أقرب وقت (بعد "هلق") بيوم الأسبوع والساعة المعتادين للزبون، بتوقيت برلين؛ null إذا ما في نمط واضح
+function nextUsualSlot(now, weekday, hour) {
+  if (!Number.isFinite(weekday) || !Number.isFinite(hour)) return null;
+  const HOUR = 3600000, start = Math.floor(now / HOUR) * HOUR;
+  for (let i = 1; i <= 24 * 8; i++) {
+    const t = start + i * HOUR, b = berlin(t);
+    if (t > now && b.weekday === weekday && b.hour === hour) return t;
+  }
+  return null;
+}
+
 const isTest = o => o.isTest === true || /DEMO|TEST/i.test(str(o.displayCode || o.externalOrderCode));
 const isCancelled = o => /CANCEL|STORN|REJECT/i.test(str(o.status));
 const sourceOf = o => {
@@ -164,6 +175,13 @@ function build(data, now = Date.now()) {
     else if (visits.length === 2) segment = 'RETURNING';
     if (lastAt && since > Math.max(30, gapDays ? gapDays * 2.5 : 0)) segment = 'SLEEPING';
     if (!orders) segment = 'CANCELLED_ONLY';
+    // الموعد المتوقع: آخر طلب + الفترة المعتادة. إذا فات الموعد (وهو مو "نايم"): ما منعرض تاريخ قديم؛
+    // منحسب كم يوم تأخّر، ومنحوّل الموعد لأقرب يوم/ساعة معتادين بعد هلق (أو null إذا ما في نمط)
+    let nextExpected = lastAt && gapDays ? lastAt + gapDays * DAY : null, overdueDays = null;
+    if (nextExpected != null && nextExpected < now && segment !== 'SLEEPING' && segment !== 'CANCELLED_ONLY') {
+      overdueDays = Math.floor((now - nextExpected) / DAY);
+      nextExpected = c.times.length ? nextUsualSlot(now, Number(mode(c.weekdays)), Number(mode(c.hours))) : null;
+    }
     const total = c.totals.reduce((s, x) => s + x, 0);
     let lat = Number(d.lat), lng = Number(d.lng);
     let geoAddress = null;
@@ -186,7 +204,7 @@ function build(data, now = Date.now()) {
       minCents: orders ? Math.min(...c.totals) : 0, maxCents: orders ? Math.max(...c.totals) : 0,
       firstAt: times.length ? new Date(times[0]).toISOString() : null,
       lastAt: lastAt ? new Date(lastAt).toISOString() : null,
-      gapDays, nextExpectedAt: lastAt && gapDays ? new Date(lastAt + gapDays * DAY).toISOString() : null,
+      gapDays, nextExpectedAt: nextExpected != null ? new Date(nextExpected).toISOString() : null, overdueDays,
       usualWeekday: c.times.length ? Number(mode(c.weekdays)) : null,
       usualHour: c.times.length ? Number(mode(c.hours)) : null,
       favourites: Object.entries(c.items).sort((x, y) => y[1] - x[1]).slice(0, 6).map(([name, count]) => ({ name, count })),

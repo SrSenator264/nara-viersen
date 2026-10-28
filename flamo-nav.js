@@ -103,6 +103,7 @@
     document.body.dataset.flamoNav = '1';
     const compact = COMPACT.has(file);
     document.body.classList.add('fn-on', compact ? 'fn-compact' : 'fn-full');
+    if (!compact && store.get('flamo-nav-collapsed') === '1') document.body.classList.add('fn-collapsed');
 
     // alter Inhalt-Wrapper (nur Seiten, die ihn schon vorher hatten)
     if (WRAP.has(file)) {
@@ -125,7 +126,17 @@
     document.body.append(side, backdrop);
 
     const close = () => { side.classList.remove('open'); backdrop.classList.remove('open'); };
-    const toggle = () => { side.classList.toggle('open'); backdrop.classList.toggle('open', side.classList.contains('open')); };
+    // شاشة كبيرة: ☰ بيطوي/بيفتح السايدبار (محفوظ بالمتصفح). شاشة صغيرة: بيفتحه فوق الصفحة متل قبل.
+    const desk = () => document.body.classList.contains('fn-full') && window.matchMedia('(min-width:1000px)').matches;
+    const toggle = () => {
+      if (desk()) {
+        const c = document.body.classList.toggle('fn-collapsed');
+        store.set('flamo-nav-collapsed', c ? '1' : '0');
+        setTimeout(() => { try { window.dispatchEvent(new Event('resize')); } catch (e) { /* ignore */ } }, 250); // الخرائط والجداول بتعيد قياسها
+        return;
+      }
+      side.classList.toggle('open'); backdrop.classList.toggle('open', side.classList.contains('open'));
+    };
     backdrop.onclick = close;
 
     function goBack() {

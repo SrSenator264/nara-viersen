@@ -90,7 +90,7 @@ h3{font-size:14px;margin:12px 0 4px}
       usual:'Bestellt meistens',at:'{d} um ca. {h} Uhr',phone:'Telefon',floor:'Etage',bell:'Klingel',noteD:'Notiz',aka:'Auch als',source:'Quellen',cancelled:'Storniert',range:'Spanne',
       favs:'Bestellt am liebsten',none:'Keine Kunden gefunden.',loading:'Lade Kunden …',err:'Kunden konnten nicht geladen werden: ',
       platform:'Plattform-Kunde: Daten nur für die Lieferung verwenden, nicht für Werbung.',own:'Hat direkt bei uns bestellt (Website/Kasse).',
-      raw:'Adresse aus altem Lieferando-Text gelesen.',noMap:'Karte nicht verfügbar.',overdue:'überfällig',
+      raw:'Adresse aus altem Lieferando-Text gelesen.',noMap:'Karte nicht verfügbar.',overdue:'überfällig',overdueN:'{n} Tage überfällig',
       wd:['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag']},
     ar:{title:'الزباين',search:'دوّر بالاسم أو الشارع أو التلفون …',all:'الكل',REGULAR:'زبون دايم',RETURNING:'رجع طلب',NEW:'جديد',SLEEPING:'صارلو زمان ما طلب',CANCELLED_ONLY:'ملغى بس',
       allSrc:'كل المصادر',sLast:'آخر طلب',sOrders:'أكتر طلبات',sTotal:'أكتر مبيعات',sAvg:'أعلى فاتورة',
@@ -99,7 +99,7 @@ h3{font-size:14px;margin:12px 0 4px}
       usual:'بيطلب عادةً',at:'{d} حوالي الساعة {h}',phone:'التلفون',floor:'الطابق',bell:'الجرس',noteD:'ملاحظة',aka:'كمان باسم',source:'المصادر',cancelled:'ملغية',range:'من لـ',
       favs:'أكتر شي بيطلبه',none:'ما في زباين.',loading:'عم حمّل الزباين …',err:'ما قدرت حمّل الزباين: ',
       platform:'زبون منصة: بياناته للتوصيل بس، مو للإعلانات.',own:'طلب منّا مباشرة (الموقع أو الكاشير).',
-      raw:'العنوان مقروء من نص Lieferando القديم.',noMap:'الخريطة مو متوفرة.',overdue:'تأخّر',
+      raw:'العنوان مقروء من نص Lieferando القديم.',noMap:'الخريطة مو متوفرة.',overdue:'تأخّر',overdueN:'تأخّر {n} يوم',
       wd:['الأحد','الاتنين','التلاتا','الأربعا','الخميس','الجمعة','السبت']},
     en:{title:'Customers',search:'Search name, street or phone …',all:'All',REGULAR:'Regular',RETURNING:'Returning',NEW:'New',SLEEPING:'Not ordered in a while',CANCELLED_ONLY:'Cancelled only',
       allSrc:'All sources',sLast:'Last order',sOrders:'Most orders',sTotal:'Highest spend',sAvg:'Highest basket',
@@ -108,7 +108,7 @@ h3{font-size:14px;margin:12px 0 4px}
       usual:'Usually orders',at:'{d} around {h}:00',phone:'Phone',floor:'Floor',bell:'Bell',noteD:'Note',aka:'Also as',source:'Sources',cancelled:'Cancelled',range:'Range',
       favs:'Favourite items',none:'No customers found.',loading:'Loading customers …',err:'Could not load customers: ',
       platform:'Platform customer: use the data for delivery only, not for marketing.',own:'Ordered directly from us (website/till).',
-      raw:'Address read from old Lieferando text.',noMap:'Map not available.',overdue:'overdue',
+      raw:'Address read from old Lieferando text.',noMap:'Map not available.',overdue:'overdue',overdueN:'{n} days overdue',
       wd:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']}
   };
   const SRC={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',LOCO:'Loco (Sides)',LANCH:'Lanch',WEB:'Website',KASSE:'Kasse',DINE_IN:'Dine-in'};
@@ -144,11 +144,11 @@ h3{font-size:14px;margin:12px 0 4px}
     return db.customers.filter(c=>(seg==='all'||c.segment===seg)&&(!src||c.sources[src])&&(!q||[c.name,...(c.otherNames||[]),c.street+' '+c.house,c.postal,c.city,c.phone].join(' ').toLowerCase().includes(q))).sort(sorts[$('#sort').value]||sorts.last);
   }
   function card(c){
-    const late=c.nextExpectedAt&&Date.parse(c.nextExpectedAt)<Date.now()&&c.segment!=='SLEEPING';
+    const late=c.overdueDays!=null&&c.segment!=='SLEEPING';
     return '<div class="cust'+(sel===c.id?' sel':'')+'" data-id="'+esc(c.id)+'" style="--c:'+(SEGC[c.segment]||'#ccc')+'">'+
       '<div class="top"><span class="nm">'+esc(c.name||'—')+'</span><span class="am">'+eur(c.totalCents)+'</span></div>'+
       '<div class="ad">'+esc([c.street,c.house].filter(Boolean).join(' '))+(c.postal?' · '+esc(c.postal):'')+'</div>'+
-      '<div class="mt"><span class="badge b-'+esc(c.segment)+'">'+esc(t(c.segment))+'</span><span>🧾 '+c.orders+'</span><bdi>Ø '+eur(c.avgCents)+'</bdi><span>🕒 '+dt(c.lastAt)+(late?' · '+esc(t('overdue')):'')+'</span><span>'+esc(SRC[c.mainSource]||c.mainSource)+'</span></div></div>';
+      '<div class="mt"><span class="badge b-'+esc(c.segment)+'">'+esc(t(c.segment))+'</span><span>🧾 '+c.orders+'</span><bdi>Ø '+eur(c.avgCents)+'</bdi><span>🕒 '+dt(c.lastAt)+(late?' · '+esc(c.overdueDays>=1?t('overdueN',{n:c.overdueDays}):t('overdue')):'')+'</span><span>'+esc(SRC[c.mainSource]||c.mainSource)+'</span></div></div>';
   }
   function render(){
     if(!db)return;
