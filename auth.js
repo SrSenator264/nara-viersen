@@ -88,6 +88,10 @@ const RULES = [
   ['POST', /^\/api\/platform-orders\/(heartbeat|alert)$/, 'service'],
   ['GET', /^\/api\/platform-orders\/status$/, KITCH],
   ['POST', /^\/api\/platform-orders\/promise$/, CASH],
+  ['GET', /^\/api\/platform-orders\/pending$/, KITCH],
+  ['POST', /^\/api\/platform-orders\/accept$/, KITCH],
+  ['GET', /^\/api\/platform-orders\/commands$/, 'service'],
+  ['POST', /^\/api\/platform-orders\/command-result$/, 'service'],
   ['GET', /^\/api\/printing\/config$/, KITCH],
   ['POST', /^\/api\/printing\/config$/, MANAGERS],
   ['GET', /^\/api\/printing\/windows-printers$/, MANAGERS],
@@ -140,7 +144,7 @@ const allowed = (access, role) => Array.isArray(access) && access.includes(role)
 
 // ───────── ملفات ثابتة مسموحة ─────────
 const BLOCKED_DIRS = new Set(['data', 'logs', 'node_modules', 'tests', 'scripts', 'checkpoint', 'local-ocr-output']);
-const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'push.js', 'customer-db.js', 'platform-trips.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'bank-pay.js', 'qonto-sync.js', 'flamo-ai.js', 'sides-login-save.ps1',
+const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'push.js', 'customer-db.js', 'platform-trips.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-accept.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'bank-pay.js', 'qonto-sync.js', 'flamo-ai.js', 'sides-login-save.ps1',
   // 2a) Server-only (nur per require geladen, in keiner .html / keinem Frontend-Skript referenziert):
   'alerts.js', 'monitor.js', 'data-guard.js', 'delivery-rules.js', 'local-invoice-hybrid.js', 'option-library.js', 'sales-ledger.js', 'customers-sync.js', 'menu-translations-lib.js', 'kasse-window.js', 'body-reader.js', 'system-update.js',
   // Dev-/Benchmark-/CLI-Tools (kein Frontend)
@@ -183,7 +187,7 @@ function staticAllowed(rel) {
 
 // الصفحات اللي بتنحقن فيها شاشة الدخول (الاسم → الأدوار)
 const PAGE_ROLES = {
-  'kasse.html': CASH, 'live-orders.html': KITCH, 'kitchen.html': KITCH, 'nara-app.html': STAFF,
+  'kasse.html': CASH, 'live-orders.html': KITCH, 'kitchen.html': KITCH, 'reception.html': KITCH, 'nara-app.html': STAFF,
   'driver-app-v2.html': STAFF, 'driver.html': STAFF, 'dispatch.html': CASH, 'connect.html': CASH, 'delivery.html': STAFF, 'delivery-print.html': STAFF,
   'staff.html': MANAGERS, 'customers.html': KITCH, 'team.html': MANAGERS, 'admin.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'dashboard.html': MANAGERS, 'status.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
   'accounting.html': ACCT, 'banking.html': ACCT, 'reports.html': ACCT, 'sales.html': ACCT, 'kasse-settlement.html': ACCT,

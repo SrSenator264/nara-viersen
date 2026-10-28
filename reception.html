@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Annahme · Flamo</title>
+<script src="nara-lang.js?v=20261028a" data-section="reception"></script>
+<style>
+:root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--late:#d1342f}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Segoe UI",system-ui,Arial,sans-serif}
+button{font:inherit;cursor:pointer;touch-action:manipulation}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;min-height:68px;padding:8px 20px;background:#fff;box-shadow:0 1px 0 var(--line);flex-wrap:wrap}
+header h1{margin:0;font-size:1.35rem;color:var(--brand)}
+header .sp{flex:1}
+.cnt{display:flex;align-items:center;gap:10px;padding:6px 18px;border-radius:999px;background:var(--ok);color:#fff;font-weight:800}
+.cnt b{font-size:1.9rem;line-height:1}
+.cnt.hot{background:var(--brand)}
+.hbtn{height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:#fff;font-weight:700}
+.sync{color:var(--mute);font-size:.85rem}
+.sync b{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-inline-end:6px}
+.sync.off b{background:var(--late)}
+#banner{display:none;margin:14px 20px 0}
+#banner button{width:100%;height:64px;border:0;border-radius:16px;background:var(--brand);color:#fff;font-weight:800;font-size:1.2rem}
+main{padding:18px 20px 40px}
+#list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;align-items:start}
+.empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:70px 10px;font-size:1.3rem}
+.card{background:var(--card);border-radius:18px;box-shadow:0 1px 3px #0000001a;border-inline-start:8px solid var(--pc,#999);padding:14px 16px 16px}
+.card.FAILED{outline:3px solid var(--late);background:#fff5f4}
+.top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:800;font-size:.85rem;background:var(--pc);color:#fff}
+.badge.brand{background:#1d2327}
+.code{font-size:1.15rem}
+.age{margin-inline-start:auto;color:var(--mute);font-size:.9rem}
+.meta{margin:8px 0 6px;color:var(--mute);font-size:.95rem}
+.items{list-style:none;margin:6px 0;padding:8px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)}
+.items li{padding:4px 0;font-weight:700;font-size:1.05rem}
+.items .opt{font-weight:400;color:var(--mute);font-size:.92rem;padding-inline-start:1.6em}
+.items .note{font-weight:600;color:#7a5200;font-size:.92rem;padding-inline-start:1.6em}
+.notes{margin:6px 0;padding:8px 10px;border-radius:10px;background:#fff6e0;color:#7a5200;font-weight:600}
+.time{display:flex;align-items:center;gap:10px;margin:10px 0 4px;flex-wrap:wrap}
+.time .lbl{font-weight:700}
+.step{display:flex;align-items:center;gap:6px;margin-inline-start:auto}
+.step button{width:56px;height:52px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:800;font-size:1.1rem}
+.step b{min-width:74px;text-align:center;font-size:1.3rem}
+.qlen{width:100%;color:var(--mute);font-size:.85rem}
+.go{width:100%;height:64px;margin-top:10px;border:0;border-radius:16px;background:var(--ok);color:#fff;font-weight:800;font-size:1.25rem}
+.go:disabled{background:#9aa5a0}
+.go.retry{background:var(--late)}
+.err{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:#fde8e8;color:#9b1c1c;font-weight:700;font-size:.92rem}
+#set{position:fixed;inset:0;z-index:20;background:#0008;display:none;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto}
+#set .box{width:min(520px,100%);background:#fff;border-radius:18px;padding:20px 22px}
+#set h2{margin:0 0 12px}
+#set .row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+#set .row label{flex:1;font-weight:700}
+#set select,#set button.tst{height:42px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit;padding:0 10px}
+#set input[type=range]{flex:1;min-width:120px}
+#set .close{margin-top:14px;width:100%;height:50px;border:0;border-radius:12px;background:var(--ink);color:#fff;font-weight:800}
+</style>
+</head>
+<body>
+<header>
+  <h1>📥 <span data-t="title"></span></h1>
+  <div class="cnt" id="cnt"><b id="cntN">0</b><span data-t="waiting"></span></div>
+  <span class="sp"></span>
+  <span class="sync" id="sync"><b></b><span>…</span></span>
+  <button class="hbtn" id="openSet" type="button" data-t="sounds"></button>
+  <span id="langsw"></span>
+</header>
+<div id="banner"><button type="button" id="enableSound" data-t="enableSound"></button></div>
+<main><div id="list"></div></main>
+<div id="set"><div class="box">
+  <h2 data-t="sounds"></h2>
+  <div id="setRows"></div>
+  <div class="row"><label for="vol" data-t="volume"></label><input type="range" id="vol" min="10" max="100" step="5"></div>
+  <div class="row"><label for="rep" data-t="repeat"></label><select id="rep"></select></div>
+  <button class="close" id="closeSet" type="button" data-t="close"></button>
+</div></div>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const T={
+  de:{title:'Annahme',waiting:'warten auf Annahme',none:'Keine Bestellung wartet ✅',accept:'✅ Annehmen',accepting:'Wird angenommen …',retry:'🔁 Nochmal versuchen',failed:'Annahme fehlgeschlagen',
+    prep:'Zubereitungszeit',min:'Min',delivery:'🛵 Lieferung',pickup:'🛍 Abholung',cash:'💶 Barzahlung',online:'💳 Online bezahlt',asap:'So schnell wie möglich',at:'um',now:'jetzt',ago:'vor {n} Min',
+    queue:'🍳 Küche aktuell: {n}',sounds:'⚙️ Töne',enableSound:'🔊 Tippen, um den Ton zu aktivieren',volume:'Lautstärke',repeat:'Wiederholen alle',off:'aus',test:'Test',close:'Schließen',offline:'Keine Verbindung',live:'Live',
+    short:'Kurz',double:'Doppelt',long:'Lang',triple:'Dreifach',rising:'Steigend',falling:'Fallend',bell:'Glocke',siren:'Sirene',mute:'Stumm',web:'Website',sec:'{n} Sek',errGeneric:'Fehler: '},
+  ar:{title:'استلام الطلبات',waiting:'بانتظار الموافقة',none:'ما في طلبات بانتظار الموافقة ✅',accept:'✅ استلام',accepting:'عم ينقبل …',retry:'🔁 جرّب مرة ثانية',failed:'فشل الاستلام',
+    prep:'وقت التحضير',min:'د',delivery:'🛵 توصيل',pickup:'🛍 استلام من المحل',cash:'💶 دفع كاش',online:'💳 مدفوع أونلاين',asap:'بأسرع وقت',at:'الساعة',now:'هلق',ago:'قبل {n} د',
+    queue:'🍳 بالمطبخ هلق: {n}',sounds:'⚙️ الأصوات',enableSound:'🔊 اضغط لتفعيل الصوت',volume:'مستوى الصوت',repeat:'كرّر كل',off:'بلا',test:'جرّب',close:'سكّر',offline:'ما في اتصال',live:'Live',
+    short:'قصير',double:'مرتين',long:'طويل',triple:'ثلاث مرات',rising:'صاعد',falling:'نازل',bell:'جرس',siren:'صفّارة',mute:'بلا صوت',web:'الموقع',sec:'{n} ث',errGeneric:'غلط: '},
+  en:{title:'Order intake',waiting:'waiting for acceptance',none:'No orders waiting ✅',accept:'✅ Accept',accepting:'Accepting …',retry:'🔁 Try again',failed:'Accept failed',
+    prep:'Prep time',min:'min',delivery:'🛵 Delivery',pickup:'🛍 Pickup',cash:'💶 Cash',online:'💳 Paid online',asap:'As soon as possible',at:'at',now:'now',ago:'{n} min ago',
+    queue:'🍳 In kitchen now: {n}',sounds:'⚙️ Sounds',enableSound:'🔊 Tap to enable sound',volume:'Volume',repeat:'Repeat every',off:'off',test:'Test',close:'Close',offline:'No connection',live:'Live',
+    short:'Short',double:'Double',long:'Long',triple:'Triple',rising:'Rising',falling:'Falling',bell:'Bell',siren:'Siren',mute:'Mute',web:'Website',sec:'{n} s',errGeneric:'Error: '}
+};
+const lang=()=>{try{return window.NARA_LANG?NARA_LANG.get():'de'}catch(e){return 'de'}};
+const t=(k,n)=>{const v=((T[lang()]||T.de)[k]);const s=v!=null?v:(T.de[k]!=null?T.de[k]:k);return n==null?s:s.replace('{n}',n)};
+const P=x=>{const v=String(x==null?'':x);return window.NARA_LANG&&/[؀-ۿ]/.test(v)?NARA_LANG.pick(v):v};
+if(window.NARA_LANG&&NARA_LANG.mountSwitcher)NARA_LANG.mountSwitcher($('#langsw'));
+
+// ───── المنصات: لون + اسم + نغمة افتراضية مميزة ─────
+const PC={LIEFERANDO:'#ff8000',UBER_EATS:'#06c167',WOLT:'#009de0',LANCH:'#7b4ddb',WEB:'#E3262F'};
+const PN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',WEB:'Website'};
+const DEF_TONE={LIEFERANDO:'rising',UBER_EATS:'bell',WOLT:'falling',LANCH:'triple',WEB:'siren'};
+const TONES={short:[[880,.14]],double:[[880,.14],[660,.14]],long:[[740,.18],[740,.18],[740,.18]],triple:[[880,.1],[880,.1],[880,.1]],
+  rising:[[523,.12],[659,.12],[784,.22]],falling:[[784,.12],[659,.12],[523,.22]],bell:[[1047,.35],[784,.4]],siren:[[900,.2],[600,.2],[900,.2],[600,.2]]};
+const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){/* ignore */}};
+const toneOf=p=>lsGet('nara-sound-'+p,DEF_TONE[p]||'short');
+const volume=()=>Math.min(100,Math.max(10,Number(lsGet('nara-sound-volume','80'))||80));
+const repeatSec=()=>{const v=Number(lsGet('nara-reception-repeat','10'));return Number.isFinite(v)?v:10};
+
+// ───── الصوت ─────
+let ctx=null;
+function audio(){if(ctx)return ctx;const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;try{ctx=new C()}catch(e){ctx=null}return ctx}
+function playStyle(style){
+  if(style==='off')return;
+  const c=audio();if(!c||c.state!=='running')return;
+  let at=c.currentTime+0.02;const vol=volume()/100*0.9;
+  for(const [f,d] of (TONES[style]||TONES.short)){
+    const o=c.createOscillator(),g=c.createGain();
+    o.type=style==='bell'?'triangle':'sine';o.frequency.value=f;
+    g.gain.setValueAtTime(0,at);g.gain.linearRampToValueAtTime(vol,at+0.015);g.gain.linearRampToValueAtTime(0,at+d);
+    o.connect(g);g.connect(c.destination);o.start(at);o.stop(at+d+0.02);at+=d+0.07;
+  }
+}
+const playFor=p=>playStyle(toneOf(p));
+function unlock(){const c=audio();if(!c)return;if(c.state==='suspended')c.resume().then(syncBanner).catch(()=>{});syncBanner()}
+function syncBanner(){const c=audio();$('#banner').style.display=(c&&c.state==='running')?'none':'block'}
+document.addEventListener('pointerdown',unlock);
+$('#enableSound').onclick=()=>{unlock();setTimeout(()=>playStyle('short'),150)};
+
+// ───── البيانات ─────
+let orders=[],lastOk=0,lastSig='',seen=new Set(),lastBeep=0,busy=false;
+const mins={},touched={},localErr={},localAccepting=new Set();
+const BASE=document.title;
+const clamp=n=>Math.min(240,Math.max(5,n));
+const fmt=iso=>{const d=Date.parse(iso||'');return d?new Date(d).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):''};
+const agoOf=iso=>{const d=Date.parse(iso||'');if(!d)return '';const m=Math.floor((Date.now()-d)/60000);return m<1?t('now'):t('ago',m)};
+
+async function load(){
+  if(busy)return;busy=true;
+  try{
+    const r=await fetch('/api/platform-orders/pending',{cache:'no-store'});
+    if(!r.ok)throw Error(r.status);
+    const j=await r.json();
+    orders=j.orders||[];
+    for(const o of orders){
+      const id=String(o.id);
+      if(o.state!=='ACCEPTING')localAccepting.delete(id);
+      if(!touched[id]||mins[id]==null)mins[id]=o.suggestedMinutes;
+    }
+    lastOk=Date.now();
+    alerts();
+  }catch(e){/* offline يظهر بالمؤشر */}
+  finally{busy=false}
+  render();
+}
+function needAction(){return orders.filter(o=>o.state==='PENDING'||o.state==='FAILED')}
+function alerts(){
+  const need=needAction();let fresh=null;
+  for(const o of need){const id=String(o.id);if(!seen.has(id)){seen.add(id);fresh=fresh||o}}
+  const now=Date.now();
+  if(fresh){playFor(fresh.source);lastBeep=now;return}
+  const rs=repeatSec();
+  if(need.length&&rs>0&&now-lastBeep>=rs*1000){playFor(need[0].source);lastBeep=now}
+}
+
+// ───── العرض ─────
+function cardHtml(o){
+  const id=String(o.id),pc=PC[o.source]||'#37474f',st=o.state==='FAILED'?'FAILED':(o.state==='ACCEPTING'||localAccepting.has(id)?'ACCEPTING':'PENDING');
+  const items=(o.items||[]).map(i=>'<li><span>'+(Number(i.quantity)||1)+'× '+esc(P(i.name))+'</span>'
+    +(i.options||[]).map(x=>'<div class="opt">+ '+esc(P(x.name))+((x.quantity||1)>1?' ×'+x.quantity:'')+'</div>').join('')
+    +(i.note?'<div class="note">📝 '+esc(i.note)+'</div>':'')+'</li>').join('');
+  const when=o.asap?t('asap'):t('at')+' '+fmt(o.requestedAt);
+  const meta=[o.type==='pickup'?t('pickup'):t('delivery'),o.city?esc(o.city):'',o.payment&&o.payment.method==='CASH'?t('cash'):t('online'),'🕒 '+esc(when)].filter(Boolean).join(' · ');
+  const m=mins[id]!=null?mins[id]:o.suggestedMinutes;
+  const busyNow=st==='ACCEPTING';
+  return '<article class="card '+st+'" style="--pc:'+pc+'" data-id="'+esc(id)+'">'
+    +'<div class="top"><span class="badge">'+esc(PN[o.source]||o.source)+'</span>'+(o.brand?'<span class="badge brand">'+esc(o.brand)+'</span>':'')
+    +'<b class="code">#'+esc(o.displayCode)+'</b><span class="age" data-ts="'+esc(o.pendingSince||o.placedAt||'')+'">'+esc(agoOf(o.pendingSince||o.placedAt))+'</span></div>'
+    +'<div class="meta">'+meta+(o.customerName?' · '+esc(o.customerName):'')+'</div>'
+    +'<ul class="items">'+items+'</ul>'
+    +(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'')
+    +'<div class="time"><span class="lbl">'+t('prep')+'</span><div class="step"><button type="button" data-act="minus"'+(busyNow?' disabled':'')+'>−5</button><b>'+m+' '+t('min')+'</b><button type="button" data-act="plus"'+(busyNow?' disabled':'')+'>+5</button></div>'
+    +'<span class="qlen">'+t('queue',o.queue||0)+'</span></div>'
+    +((st==='FAILED'||localErr[id])?'<div class="err">⚠️ '+t('failed')+(o.error||localErr[id]?': '+esc(o.error||localErr[id]):'')+'</div>':'')
+    +'<button type="button" class="go'+(st==='FAILED'?' retry':'')+'" data-act="accept"'+(busyNow?' disabled':'')+'>'+(busyNow?t('accepting'):(st==='FAILED'?t('retry'):t('accept')))+'</button>'
+    +'</article>';
+}
+function render(force){
+  const need=needAction().length;
+  $('#cntN').textContent=orders.length;
+  $('#cnt').classList.toggle('hot',need>0);
+  document.title=(orders.length?'('+orders.length+') ':'')+BASE;
+  const sy=$('#sync'),off=Date.now()-lastOk>10000;sy.classList.toggle('off',off);
+  sy.querySelector('span').textContent=(off?t('offline'):t('live'))+' · '+new Date(lastOk||Date.now()).toLocaleTimeString('de-DE');
+  const sig=JSON.stringify([lang(),orders.map(o=>[o.id,o.state,o.error,o.queue,mins[String(o.id)],localAccepting.has(String(o.id)),localErr[String(o.id)]])]);
+  if(!force&&sig===lastSig)return;   // ما منعيد الرسم إذا ما تغيّر شي (كي ما تضيع كبسة على التابلت)
+  lastSig=sig;
+  $('#list').innerHTML=orders.length?orders.map(cardHtml).join(''):'<div class="empty">'+t('none')+'</div>';
+}
+function tickAges(){document.querySelectorAll('.age[data-ts]').forEach(e=>{e.textContent=agoOf(e.dataset.ts)})}
+
+$('#list').addEventListener('click',async e=>{
+  const b=e.target.closest&&e.target.closest('button[data-act]');if(!b||b.disabled)return;
+  const card=b.closest('.card'),id=card&&card.dataset.id;if(!id)return;
+  const o=orders.find(x=>String(x.id)===id);if(!o)return;
+  const act=b.dataset.act,cur=mins[id]!=null?mins[id]:o.suggestedMinutes;
+  if(act==='minus'||act==='plus'){touched[id]=true;mins[id]=clamp(cur+(act==='plus'?5:-5));render();return}
+  if(act==='accept'){
+    unlock();
+    delete localErr[id];localAccepting.add(id);render();
+    try{
+      const r=await fetch('/api/platform-orders/accept',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:id,minutes:cur})});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok&&r.status!==409)throw Error(j.error||r.status);
+    }catch(err){localAccepting.delete(id);localErr[id]=String(err.message||err);render();return}
+    load();
+  }
+});
+
+// ───── إعدادات الأصوات ─────
+function buildSettings(){
+  const toneOpts=sel=>Object.keys(TONES).concat(['off']).map(k=>'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+t(k==='off'?'mute':k)+'</option>').join('');
+  $('#setRows').innerHTML=Object.keys(PC).map(p=>'<div class="row"><label for="t-'+p+'">'+esc(PN[p])+'</label><select id="t-'+p+'" data-p="'+p+'">'+toneOpts(toneOf(p))+'</select><button type="button" class="tst" data-test="'+p+'">'+t('test')+'</button></div>').join('');
+  $('#vol').value=volume();
+  $('#rep').innerHTML=[0,5,10,20,30].map(n=>'<option value="'+n+'"'+(n===repeatSec()?' selected':'')+'>'+(n?t('sec',n):t('off'))+'</option>').join('');
+}
+$('#openSet').onclick=()=>{unlock();buildSettings();$('#set').style.display='flex'};
+$('#closeSet').onclick=()=>{$('#set').style.display='none'};
+$('#setRows').addEventListener('change',e=>{const s=e.target.closest('select[data-p]');if(s){lsSet('nara-sound-'+s.dataset.p,s.value);playStyle(s.value)}});
+$('#setRows').addEventListener('click',e=>{const b=e.target.closest('button[data-test]');if(b){unlock();playFor(b.dataset.test)}});
+$('#vol').oninput=e=>{lsSet('nara-sound-volume',e.target.value)};
+$('#vol').onchange=()=>{unlock();playStyle('short')};
+$('#rep').onchange=e=>lsSet('nara-reception-repeat',e.target.value);
+
+function applyStatic(){document.querySelectorAll('[data-t]').forEach(e=>{e.textContent=t(e.dataset.t)});document.documentElement.lang=lang()}
+window.addEventListener('nara-lang',()=>{applyStatic();tickAges();render(true)});
+applyStatic();syncBanner();
+load();
+setInterval(()=>{load()},3000);
+setInterval(()=>{if(orders.some(o=>o.state==='ACCEPTING'||localAccepting.has(String(o.id))))load()},1000);
+setInterval(tickAges,20000);
+})();
+</script>
+</body>
+</html>

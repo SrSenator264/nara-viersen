@@ -16,6 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { renderLines, toText, toEscPos, printTcp } from './nara-receipt.mjs';
+import acceptLib from './platform-accept.js';
 
 const env = (k, d) => process.env[k] ?? d;
 const CFG = {
@@ -39,6 +40,8 @@ const CFG = {
   safetyMin: Number(env('NARA_SAFETY_MIN', '5')),
   rawKeepDays: Number(env('NARA_RAW_KEEP_DAYS', '30')),
   debugWs: !!env('NARA_DEBUG_WS', ''),
+  // اسم العلامة (لجسر مطعم/علامة ثانية على Lieferando). فاضي = الجسر الأساسي
+  brand: env('NARA_BRAND', ''),
 };
 
 // ───────────── أدوات عامة ─────────────
@@ -235,6 +238,9 @@ function normalize(x, st) {
     liveStage: st.stage,
     status: st.stage === 'CANCELLED' ? 'CANCELLED' : st.stage === 'DONE' ? 'DONE' : 'OPEN',
     platformStatus: st.raw,
+    // منتظر موافقة على المنصة؟ (التابلت بيعرضه وبيستنى كبسة استلام)
+    needsAccept: acceptLib.lieferandoNeedsAccept(st.stage, st.raw, confirmedAt),
+    ...(CFG.brand ? { brand: CFG.brand, brandName: CFG.brand } : {}),
     orderType: /pick|collect|abhol/i.test(S(x.delivery_type)) ? 'PICKUP' : 'DELIVERY',
     customerName, customerPhone, verificationCode,
     delivery: { address: fullStreet, street, houseNumber, house: houseNumber, postalCode, postal: postalCode, city, floor, notes: dnotes, lat, lng, name: customerName, phone: customerPhone },
@@ -359,11 +365,14 @@ function dumpShape(x) {
 }
 
 let lastOkAt = 0;
+let lastList = [];      // آخر قائمة طلبات وصلت من Lieferando (للتحقق من الاستلام)
+let acting = false;     // الجسر عم ينفّذ استلام: ممنوع إعادة تحميل الصفحة هلق
 let chain = Promise.resolve();
 const processList = list => (chain = chain.then(() => handleList(list)).catch(e => console.error('[NARA] handleList failed:', e)));
 
 async function handleList(list) {
   lastOkAt = Date.now();
+  lastList = list;
   for (const x of list) {
     if (!x || x.id == null) continue;
     const id = String(x.id);
@@ -383,7 +392,7 @@ async function handleList(list) {
     const rec = buildReceipt(o);
     o.receiptText = rec.text;
 
-    const sig = sha(JSON.stringify([o.liveStage, o.totalCents, o.cart, o.delivery, o.payment, o.requestedAt, o.readyForKitchen, o.remarks, o.customerPhone, o.deliveryQrUrl, o.platformPickupAt, o.platformDeliveredAt]));
+    const sig = sha(JSON.stringify([o.liveStage, o.totalCents, o.cart, o.delivery, o.payment, o.requestedAt, o.readyForKitchen, o.needsAccept, o.remarks, o.customerPhone, o.deliveryQrUrl, o.platformPickupAt, o.platformDeliveredAt]));
     if (state.sent[id] !== sig) {
       fs.writeFileSync(P(`raw/${id}.json`), JSON.stringify(x));
       const body = { source: 'LIEFERANDO', order: o };
@@ -420,6 +429,8 @@ function selftest() {
   console.log('--- ESC/POS bytes:', toEscPos(rec.lines).length);
   const cash = normalize({ ...x, payment_type: 'cash' }, mapStatus('kitchen'));
   console.log('--- cash method:', cash.payment.method, 'cashDue:', cash.cashDueCents);
+  const fresh = normalize({ ...x, status: 'new', confirmed_at: null }, mapStatus('new'));
+  console.log('--- needsAccept (new):', fresh.needsAccept, '| (kitchen, confirmed):', o.needsAccept);
 }
 
 // ───────────── التشغيل ─────────────
@@ -494,7 +505,7 @@ ctx.on('request', req => {
 
 let reloading = false, wsTimer = null, loadedAt = Date.now();
 async function refresh() {
-  if (reloading) return;
+  if (reloading || acting) return;
   reloading = true;
   try { await page.reload({ waitUntil: 'domcontentloaded' }); loadedAt = Date.now(); }
   catch (e) { console.error('[NARA] refresh failed: ' + e.message); }
@@ -512,6 +523,80 @@ page.on('websocket', ws => {
   });
 });
 
+// ───────────── استلام الطلب من التابلت: الجسر بيكبس Accept جوّا Lieferando ─────────────
+// السيرفر بيحط أمر بالطابور لما الموظف يكبس ✅ استلام. الجسر بيسحبه، بيكبس الزر بنفس صفحة Lieferando،
+// وبعدين بيتأكد من بيانات Lieferando نفسها (confirmed) قبل ما يقول "تم". وبيرجّع النتيجة للسيرفر.
+// أسماء الأزرار الافتراضية تخمين عام؛ الضبط الدقيق بملف اختياري (ما بيحتاج تعديل كود):
+//   <NARA_DATA_DIR>/accept-selectors.json = { "acceptButton": "accept|annehmen", "timeButton": "{min} min", "printButton": "print|drucken", "autoQr": false }
+// autoQr=true: بعد الاستلام بيكبس Print order (مع منع نافذة الطباعة) ليلقط QR "Zum Liefern scannen". مطفي افتراضياً.
+const authHeaders = () => ({ ...(CFG.token ? { authorization: `Bearer ${CFG.token}` } : {}), ...(CFG.serviceKey ? { 'x-nara-service-key': CFG.serviceKey } : {}) });
+function loadSelectors() {
+  const d = { acceptButton: 'accept|annehmen|bestätigen|confirm', timeButton: '', printButton: 'print|drucken', autoQr: false };
+  try { return { ...d, ...JSON.parse(fs.readFileSync(P('accept-selectors.json'), 'utf8')) }; } catch { return d; }
+}
+const rx = src => new RegExp(src, 'i');
+const entryOf = ext => lastList.find(x => String(x.id) === String(ext));
+const confirmedNow = x => !!x && !acceptLib.lieferandoNeedsAccept(mapStatus(x.status).stage, x.status, iso(x.confirmed_at));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+async function waitConfirmed(ext, ms) {
+  const end = Date.now() + ms; let reloadedAt = 0;
+  while (Date.now() < end) {
+    if (Date.now() - reloadedAt > 5000) { reloadedAt = Date.now(); try { await page.reload({ waitUntil: 'domcontentloaded' }); loadedAt = Date.now(); } catch { /* نعيد */ } }
+    await sleep(1500);
+    if (confirmedNow(entryOf(ext))) return true;
+  }
+  return false;
+}
+async function grabQr(ref, sel) {
+  try {
+    await page.getByText(ref, { exact: false }).first().click({ timeout: 8000 });
+    await page.evaluate(() => { window.print = () => {}; });
+    await page.getByRole('button', { name: rx(sel.printButton) }).first().click({ timeout: 6000 });
+    for (let i = 0; i < 8; i++) { await sleep(500); const u = state.qr[ref.toUpperCase()]; if (u) return u; }
+  } catch (e) { log('autoQr failed: ' + String(e.message).split('\n')[0]); }
+  return state.qr[ref.toUpperCase()] || '';
+}
+async function acceptOrder(cmd) {
+  const sel = loadSelectors();
+  const known = entryOf(cmd.externalOrderCode);
+  if (confirmedNow(known)) return { ok: true, already: true };            // انقبل قبل (مرة وحدة بس)
+  if (!known) return { ok: false, error: 'Bestellung nicht in der Lieferando-Liste (Bridge hat sie nicht gesehen)' };
+  acting = true;
+  try {
+    if (!/live-orders\.takeaway\.com/.test(page.url())) await page.goto('https://live-orders.takeaway.com/orders', { waitUntil: 'domcontentloaded' });
+    const ref = S(known.public_reference);
+    await page.getByText(ref, { exact: false }).first().click({ timeout: 10000 });
+    if (sel.timeButton) {
+      try { await page.getByRole('button', { name: rx(String(sel.timeButton).replace('{min}', String(cmd.minutes))) }).first().click({ timeout: 4000 }); }
+      catch { log(`time button for ${cmd.minutes} min not found - continuing without it`); }
+    }
+    await page.getByRole('button', { name: rx(sel.acceptButton) }).first().click({ timeout: 10000 });
+    if (!(await waitConfirmed(cmd.externalOrderCode, 25000))) return { ok: false, error: 'Accept geklickt, aber Lieferando hat die Bestellung nicht bestätigt' };
+    const qrUrl = sel.autoQr ? await grabQr(ref, sel) : '';
+    return { ok: true, qrUrl };
+  } catch (e) {
+    return { ok: false, error: String(e.message || e).split('\n')[0].slice(0, 140) };
+  } finally { acting = false; }
+}
+let cmdBusy = false;
+async function pollCommands() {
+  if (cmdBusy) return;
+  cmdBusy = true;
+  try {
+    const r = await fetch(`${CFG.base}/api/platform-orders/commands?source=LIEFERANDO&brand=${encodeURIComponent(CFG.brand)}`, { headers: authHeaders(), signal: AbortSignal.timeout(6000) });
+    if (!r.ok) return;
+    for (const cmd of (await r.json()).commands || []) {
+      log(`accept command ${cmd.displayCode} (${cmd.minutes} min)`);
+      const res = await acceptOrder(cmd);
+      log(`accept ${cmd.displayCode}: ${res.ok ? 'OK' : 'FAILED - ' + res.error}`);
+      await tryPost('/api/platform-orders/command-result', { id: cmd.id, orderId: cmd.orderId, ...res });
+    }
+  } catch { /* السيرفر مش متاح: الدورة الجاية */ }
+  finally { cmdBusy = false; }
+}
+setInterval(pollCommands, 2500);
+
 await page.goto('https://live-orders.takeaway.com/orders', { waitUntil: 'domcontentloaded' });
 setInterval(refresh, CFG.refreshMs);
 setInterval(() => flushOutbox().catch(e => console.error('[NARA] outbox:', e.message)), 30000);
@@ -522,7 +607,7 @@ async function beat() {
   const silentMs = Date.now() - (lastOkAt || Date.now());
   if (lastOkAt && silentMs > Math.max(CFG.refreshMs * 4, 120000)) await alertServer('NO_DATA', { silentSeconds: Math.round(silentMs / 1000) });
   // ما عم يوصل شي: إعادة التحميل العادية ما عم تكفي، فمنفتح صفحة الطلبات من جديد (كل 5 دقايق بالأكتر)
-  if (lastOkAt && silentMs > Math.max(CFG.refreshMs * 3, 360000) && !reloading && Date.now() - (beat.lastGoto || 0) > 300000) {
+  if (lastOkAt && silentMs > Math.max(CFG.refreshMs * 3, 360000) && !reloading && !acting && Date.now() - (beat.lastGoto || 0) > 300000) {
     beat.lastGoto = Date.now(); reloading = true;
     log('no data for ' + Math.round(silentMs / 60000) + ' min, reopening the orders page');
     try { await page.goto('https://live-orders.takeaway.com/orders', { waitUntil: 'domcontentloaded' }); loadedAt = Date.now(); }

@@ -132,7 +132,8 @@ function isClosedForOps(o, now = Date.now()) {
 }
 
 // طلب كاشير لسا عم ينكتب (ما انكبس "المطبخ")
-function isDraft(o) { return sourceOf(o) === 'NARA' && !isOtherStation(o) && !o.kitchenPrintedAt && !o.kitchenSentAt && !str(o.kitchenStatus); }
+const awaitingAccept = o => ['PENDING', 'ACCEPTING', 'FAILED'].includes(str(o && o.acceptState).toUpperCase());
+function isDraft(o) { return awaitingAccept(o) || sourceOf(o) === 'NARA' && !isOtherStation(o) && !o.kitchenPrintedAt && !o.kitchenSentAt && !str(o.kitchenStatus); }
 
 function isKitchenOrder(o, now = Date.now()) {
   if (!o || isClosedForOps(o, now)) return false;
@@ -185,4 +186,4 @@ function applyKitchenStatus(order, next, user, now = new Date().toISOString()) {
   return { from, to };
 }
 
-module.exports = { isDraft, kitchenStatusOf, isClosedForOps, STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };
+module.exports = { awaitingAccept, isDraft, kitchenStatusOf, isClosedForOps, STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };
