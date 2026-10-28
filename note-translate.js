@@ -83,7 +83,9 @@ async function run(jobs, opts, now = Date.now()) {
     try {
       const tr = await translateNote(job.text, opts);
       results.push({ id: job.id, rec: { src: job.hash, en: tr.en, ar: tr.ar, at: now } });
+      console.log('[note-translate] ok', job.id, tr.en ? 'en' : '-', tr.ar ? 'ar' : '-');
     } catch (e) {
+      console.log('[note-translate] FAILED', job.id, 'status=' + (e && e.status), String(e && e.message).replace(/AIza[\w-]+/g, '[REDACTED]').slice(0, 200));
       results.push({ id: job.id, rec: { src: job.hash, en: '', ar: '', failedAt: now } });
       if (e && e.status === 429) return { results, quota: true };
     }
