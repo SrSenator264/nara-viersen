@@ -45,3 +45,16 @@ test('view: only when the translation matches the current note text', () => {
   assert.equal(NT.view(o, 'Anderer Text'), null);
   assert.equal(NT.view({}, t), null);
 });
+
+test('503 (high demand) is retried once immediately, then retried again after 1 minute (not 10)', async () => {
+  let n = 0;
+  const f = async () => (++n === 1 ? { ok: false, status: 503, json: async () => ({}) } : reply({ en: 'Hi', ar: 'مرحبا' }));
+  const ok = await NT.run([{ id: 'a', text: 'Hallo', hash: 'h' }], { ...opts(f), retryDelayMs: 0 }, 5);
+  assert.equal(ok.results[0].rec.en, 'Hi');
+  const down = async () => ({ ok: false, status: 503, json: async () => ({}) });
+  const bad = await NT.run([{ id: 'b', text: 'Hallo', hash: 'h2' }], { ...opts(down), retryDelayMs: 0 }, 1000);
+  assert.equal(bad.results[0].rec.retryAt, 1000 + 60000);
+  const items = [{ order: { id: 'b', noteI18n: { ...bad.results[0].rec, src: NT.hashOf('Hallo') } }, text: 'Hallo' }];
+  assert.equal(NT.pending(items, 1000 + 30000).length, 0);
+  assert.equal(NT.pending(items, 1000 + 61000).length, 1);
+});

@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const str = v => String(v == null ? '' : v).trim();
 const MAX_LEN = 600;
 const RETRY_AFTER_MS = 10 * 60000;
+const RETRY_BUSY_MS = 60000; // 500/503 = ضغط مؤقت عند Google: منعيد بعد دقيقة
 const QUOTA_PAUSE_MS = 5 * 60000;
 
 const cleanText = t => str(t).slice(0, MAX_LEN);
@@ -72,7 +73,7 @@ function pending(items, now = Date.now(), max = 3) {
     if (!t || !/[\p{L}]/u.test(t)) continue;
     const h = hashOf(t), rec = order.noteI18n;
     if (rec && rec.src === h && (rec.en || rec.ar)) continue;
-    if (rec && rec.src === h && rec.failedAt && now - rec.failedAt < RETRY_AFTER_MS) continue;
+    if (rec && rec.src === h && rec.failedAt && now < (rec.retryAt || rec.failedAt + RETRY_AFTER_MS)) continue;
     out.push({ id: order.id, text: t, hash: h });
     if (out.length >= max) break;
   }
@@ -84,12 +85,17 @@ async function run(jobs, opts, now = Date.now()) {
   const results = [];
   for (const job of jobs) {
     try {
-      const tr = await translateNote(job.text, opts);
+      let tr;
+      try { tr = await translateNote(job.text, opts); }
+      catch (e1) { // ضغط مؤقت (500/503): محاولة تانية بعد ثواني
+        if (e1 && (e1.status === 503 || e1.status === 500)) { await new Promise(r => setTimeout(r, opts.retryDelayMs == null ? 3000 : opts.retryDelayMs)); tr = await translateNote(job.text, opts); }
+        else throw e1;
+      }
       results.push({ id: job.id, rec: { src: job.hash, en: tr.en, ar: tr.ar, at: now } });
       console.log('[note-translate] ok', job.id, tr.en ? 'en' : '-', tr.ar ? 'ar' : '-');
     } catch (e) {
       console.log('[note-translate] FAILED', job.id, 'status=' + (e && e.status), String(e && e.message).replace(/AIza[\w-]+/g, '[REDACTED]').slice(0, 200));
-      results.push({ id: job.id, rec: { src: job.hash, en: '', ar: '', failedAt: now } });
+      results.push({ id: job.id, rec: { src: job.hash, en: '', ar: '', failedAt: now, ...(e && (e.status === 503 || e.status === 500) ? { retryAt: now + RETRY_BUSY_MS } : {}) } });
       if (e && e.status === 429) return { results, quota: true };
     }
   }
