@@ -23,6 +23,7 @@ header .sp{flex:1}
 .cnt.sel,.tab.sel{border-color:var(--ink)}
 .tab.sel{background:var(--ink);color:#fff}
 .hbtn{height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:#fff;font-weight:700}
+.hbtn.muted{background:var(--late);color:#fff;border-color:var(--late)}
 .sync{color:var(--mute);font-size:.85rem}
 .sync b{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-inline-end:6px}
 .sync.off b{background:var(--late)}
@@ -112,6 +113,7 @@ main{padding:12px 12px 40px}
   </div>
   <span class="sp"></span>
   <span class="sync" id="sync"><b></b><span>…</span></span>
+  <button class="hbtn" id="muteBtn" type="button" aria-label="mute">🔊</button>
   <button class="hbtn" id="openSet" type="button" data-t="sounds"></button>
   <span id="langsw"></span>
 </header>
@@ -215,7 +217,9 @@ function playNow(c,style){
   }
 }
 const vib=()=>{try{if(navigator.vibrate)navigator.vibrate([300,150,300,150,300])}catch(e){/* ignore */}};
+const muted=()=>lsGet('nara-sound-muted','0')==='1';
 const playFor=p=>{vib();playStyle(toneOf(p))};
+const alertFor=p=>{if(muted()){vib();return}playFor(p)};
 function unlock(){const c=audio();if(!c)return;if(c.state==='suspended')c.resume().then(syncBanner).catch(()=>{});try{const b=c.createBuffer(1,1,22050),n=c.createBufferSource();n.buffer=b;n.connect(c.destination);n.start(0)}catch(e){/* ignore */}syncBanner()}
 function syncBanner(){const c=audio();$('#banner').style.display=(c&&c.state==='running')?'none':'block'}
 document.addEventListener('pointerdown',unlock);
@@ -263,9 +267,9 @@ function alerts(){
   const need=needAction();let fresh=null;
   for(const o of need){const id=String(o.id);if(!seen.has(id)){seen.add(id);fresh=fresh||o}}
   const now=Date.now();
-  if(fresh){playFor(fresh.source);lastBeep=now;tab='WAIT';return}
+  if(fresh){alertFor(fresh.source);lastBeep=now;tab='WAIT';return}
   const rs=repeatSec();
-  if(need.length&&rs>0&&now-lastBeep>=rs*1000){playFor(need[0].source);lastBeep=now}
+  if(need.length&&rs>0&&now-lastBeep>=rs*1000){alertFor(need[0].source);lastBeep=now}
 }
 
 // ───── العرض ─────
@@ -428,6 +432,9 @@ function buildSettings(){
   $('#vol').value=volume();
   $('#rep').innerHTML=[0,5,10,20,30].map(n=>'<option value="'+n+'"'+(n===repeatSec()?' selected':'')+'>'+(n?t('sec',n):t('off'))+'</option>').join('');
 }
+function syncMute(){const b=$('#muteBtn');if(!b)return;b.textContent=muted()?'🔇':'🔊';if(b.classList)b.classList.toggle('muted',muted())}
+if($('#muteBtn'))$('#muteBtn').onclick=()=>{lsSet('nara-sound-muted',muted()?'0':'1');unlock();syncMute();if(!muted())playStyle('short')};
+syncMute();
 $('#openSet').onclick=()=>{unlock();buildSettings();$('#set').style.display='flex'};
 $('#closeSet').onclick=()=>{$('#set').style.display='none'};
 $('#setRows').addEventListener('change',e=>{const s=e.target.closest('select[data-p]');if(s){lsSet('nara-sound-'+s.dataset.p,s.value);playStyle(s.value)}});
