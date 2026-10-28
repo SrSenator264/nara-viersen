@@ -14,10 +14,10 @@ class El {
 }
 
 function boot({ lang = 'de', orders = [] } = {}) {
-  const state = { orders, posts: [], tones: 0, lang, acceptStatus: 200 };
-  const els = {}, intervals = [], winHandlers = {};
+  const state = { orders, posts: [], times: [], stages: [], tones: 0, lang, acceptStatus: 200 };
+  const els = {}, intervals = [], winHandlers = {}, docHandlers = {};
   const $ = s => (els[s] ||= new El());
-  const document = { title: 'Plattformen · Flamo', documentElement: { lang: 'de' }, querySelector: s => $(s), querySelectorAll: () => [], addEventListener() {} };
+  const document = { title: 'Plattformen · Flamo', documentElement: { lang: 'de' }, querySelector: s => $(s), querySelectorAll: () => [], addEventListener: (t, f) => { (docHandlers[t] ||= []).push(f); } };
   const store = {};
   const win = {
     document, localStorage: { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } },
@@ -28,20 +28,29 @@ function boot({ lang = 'de', orders = [] } = {}) {
   };
   win.window = win;
   const fetchStub = async (url, opts) => {
-    if (String(url).includes('/pending')) return { ok: true, status: 200, json: async () => ({ ok: true, count: state.orders.length, orders: state.orders }) };
-    if (String(url).includes('/accept')) { state.posts.push(JSON.parse(opts.body)); if (state.acceptStatus < 400) { const o = state.orders.find(x => x.id === state.posts[state.posts.length - 1].orderId); if (o) o.state = 'ACCEPTING'; } return { ok: state.acceptStatus < 400, status: state.acceptStatus, json: async () => (state.acceptStatus < 400 ? { ok: true, state: 'ACCEPTING' } : { error: 'Wird bereits angenommen' }) }; }
-    return { ok: false, status: 404, json: async () => ({}) };
+    const u = String(url), body = opts && opts.body ? JSON.parse(opts.body) : {};
+    const find = id => state.orders.find(x => x.id === id);
+    const res = (ok, status, json) => ({ ok, status, json: async () => json });
+    if (u.includes('/board')) {
+      const counts = { WAIT: 0, PREPARE: 0, HANDOVER: 0, DONE: 0 }; for (const o of state.orders) counts[o.stage || 'WAIT']++;
+      return res(true, 200, { ok: true, counts, count: counts.WAIT, orders: state.orders.map(o => ({ stage: 'WAIT', ...o })) });
+    }
+    if (u.includes('/accept')) { state.posts.push(body); if (state.acceptStatus < 400) { const o = find(body.orderId); if (o) o.state = 'ACCEPTING'; } return res(state.acceptStatus < 400, state.acceptStatus, state.acceptStatus < 400 ? { ok: true, state: 'ACCEPTING' } : { error: 'Wird bereits angenommen' }); }
+    if (u.includes('/times')) { state.times.push(body); const o = find(body.orderId); if (o) { o.prepMinutes = body.prepMinutes; o.deliveryMinutes = body.deliveryMinutes; } return res(true, 200, { ok: true }); }
+    if (u.includes('/stage')) { state.stages.push(body); const o = find(body.orderId); if (o) o.stage = body.stage; return res(true, 200, { ok: true }); }
+    return res(false, 404, {});
   };
   const ctx = vm.createContext({ ...win, window: win, localStorage: win.localStorage, fetch: fetchStub, console, Date, JSON, Math, Number, String, Object, Array, Set, Promise,
-    setInterval: f => { intervals.push(f); return intervals.length; }, setTimeout, clearInterval() {}, AudioContext: win.AudioContext });
+    setInterval: f => { intervals.push(f); return intervals.length; }, setTimeout, clearTimeout, clearInterval() {}, AudioContext: win.AudioContext });
   vm.runInContext(script, ctx);
   const click = async (act, id = 'o1') => {
     const card = { dataset: { id } }, btn = { dataset: { act }, disabled: false, closest: () => card };
     for (const h of $('#list').handlers.click || []) await h({ target: { closest: s => (s === 'button[data-act]' ? btn : null) } });
   };
+  const tab = t => { for (const h of docHandlers.click || []) h({ target: { closest: sel => (sel === '[data-tab]' ? { dataset: { tab: t } } : null) } }); };
   const poll = async () => { intervals[0](); await new Promise(r => setTimeout(r, 15)); };
   const tick = () => new Promise(r => setTimeout(r, 15));
-  return { state, $, click, poll, tick, win, winHandlers, store };
+  return { state, $, click, poll, tick, tab, win, winHandlers, store };
 }
 const order = (over = {}) => ({ id: 'o1', displayCode: 'B68HFC', source: 'LIEFERANDO', brand: '', type: 'delivery', state: 'PENDING', error: '', suggestedMinutes: 25, queue: 3,
   placedAt: new Date().toISOString(), pendingSince: new Date().toISOString(), asap: true, customerName: 'Max', city: '41747 Viersen', notes: 'Zweite Klingel',
@@ -65,7 +74,7 @@ test('Seite: ±5 Min, Wert bleibt nach dem nächsten Abruf; Annehmen schickt die
   for (let i = 0; i < 60; i++) await p.click('plus'); assert.match(p.$('#list').innerHTML, /<b>240 Min<\/b>/);
   for (let i = 0; i < 44; i++) await p.click('minus'); // 240 → 20
   await p.click('accept'); await p.tick();
-  assert.deepEqual(p.state.posts, [{ orderId: 'o1', minutes: 20 }]);
+  assert.deepEqual(p.state.posts, [{ orderId: 'o1', minutes: 20, deliveryMinutes: 15 }]);
   assert.match(p.$('#list').innerHTML, /disabled[^>]*>Wird angenommen/);
 });
 
@@ -110,4 +119,42 @@ test('App-Modus: eigenes Manifest (Start ?app=1) und keine Seitenleiste', () => 
   const m = JSON.parse(fs.readFileSync(path.join(root, 'icons', 'platforms.webmanifest'), 'utf8'));
   assert.equal(m.start_url, '/reception.html?app=1'); assert.equal(m.display, 'standalone'); assert.equal(m.scope, '/reception.html');
   assert.match(fs.readFileSync(path.join(root, 'flamo-nav.js'), 'utf8'), /reception\.html' && \/\[\?&\]app=1/);
+});
+
+const acc = (over = {}) => order({ stage: 'PREPARE', state: 'ACCEPTED', prepMinutes: 25, deliveryMinutes: 15, dueAt: new Date(Date.now() + 22 * 60000).toISOString(), acceptedAt: new Date().toISOString(), stageAt: new Date().toISOString(), ...over });
+
+test('Seite: Reiter mit Zählern; Zubereitung zeigt Restminuten-Ring und Zeiten; Standard-Reiter ohne wartende = Zubereitung', async () => {
+  const p = boot({ orders: [acc(), acc({ id: 'o2', displayCode: 'H2', stage: 'HANDOVER' }), acc({ id: 'o3', displayCode: 'D3', stage: 'DONE' })] }); await p.tick();
+  assert.deepEqual([p.$('#cntN').textContent, p.$('#cntP').textContent, p.$('#cntH').textContent, p.$('#cntD').textContent].map(String), ['0', '1', '1', '1']);
+  let h = p.$('#list').innerHTML;
+  assert.match(h, /#B68HFC/); assert.doesNotMatch(h, /#H2/); assert.match(h, /class="ring/); assert.match(h, /<b>2[12]<\/b><small>Min/);
+  assert.match(h, /<b>25 Min<\/b>/); assert.match(h, /<b>15 Min<\/b>/); assert.match(h, /Handover<\/button>/);
+  p.tab('HANDOVER'); h = p.$('#list').innerHTML; assert.match(h, /#H2/); assert.match(h, /Fertig<\/button>/);
+  p.tab('DONE'); h = p.$('#list').innerHTML; assert.match(h, /#D3/); assert.doesNotMatch(h, /data-act="next"/); assert.doesNotMatch(h, /class="ring/);
+});
+
+test('Seite: Zubereitungs- und Lieferzeit ±5 werden gespeichert (entprellt, genau eine Anfrage)', async () => {
+  const p = boot({ orders: [acc()] }); await p.tick();
+  await p.click('plus'); await p.click('plus'); await p.click('dminus');
+  assert.match(p.$('#list').innerHTML, /<b>35 Min<\/b>/); assert.match(p.$('#list').innerHTML, /<b>10 Min<\/b>/);
+  assert.equal(p.state.times.length, 0, 'noch nicht gesendet (entprellt)');
+  await new Promise(r => setTimeout(r, 1100));
+  assert.deepEqual(p.state.times, [{ orderId: 'o1', prepMinutes: 35, deliveryMinutes: 10 }]);
+  assert.match(p.$('#list').innerHTML, /gespeichert/);
+});
+
+test('Seite: Handover-Knopf ändert die Stufe; Karte wandert in den nächsten Reiter; Fehler vom Plattform-Abgleich sichtbar', async () => {
+  const p = boot({ orders: [acc(), acc({ id: 'o2', displayCode: 'S2', sync: { state: 'FAILED', error: 'HTTP 401' } })] }); await p.tick();
+  assert.match(p.$('#list').innerHTML, /Auf der Plattform nicht übernommen: HTTP 401/);
+  await p.click('next'); await p.tick();
+  assert.deepEqual(p.state.stages, [{ orderId: 'o1', stage: 'HANDOVER' }]);
+  assert.equal(String(p.$('#cntP').textContent), '1'); assert.equal(String(p.$('#cntH').textContent), '1');
+  p.tab('HANDOVER'); await p.click('next'); await p.tick();
+  assert.deepEqual(p.state.stages[1], { orderId: 'o1', stage: 'DONE' });
+});
+
+test('Seite: neue wartende Bestellung schaltet auf den Reiter „Wartend“ um', async () => {
+  const p = boot({ orders: [acc()] }); await p.tick();
+  p.state.orders.push(order({ id: 'n1', displayCode: 'NEW1' })); await p.poll();
+  assert.match(p.$('#list').innerHTML, /#NEW1/); assert.ok(p.$('#cnt').cls.has('hot'));
 });

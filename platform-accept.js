@@ -37,6 +37,26 @@ function holdInternally(order, now) {
   return !LATE_STATUS.test(str(order.platformStatus));
 }
 
+const DEFAULT_DELIVERY_MIN = 15;   // نفس إعداد Lieferando الافتراضي (Delivery takes 15 min)
+const isPickup = o => /pick|abhol|collect/i.test(str(o && (o.type || o.fulfillment || o.deliveryType)));
+const clampMin = (v, lo, hi, def) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : def; };
+// الوعد للزبون = وقت القبول + تحضير + توصيل (نفس حقول /api/platform-orders/promise)
+function applyPromise(o, now) {
+  const prep = Number(o.acceptMinutes), del = Number(o.acceptDeliveryMinutes) || 0;
+  if (!(prep > 0)) return;
+  const base = Date.parse(o.acceptedAt || o.confirmedAt || o.placedAt || o.createdAt || '') || now;
+  o.promisedMin = prep + del;
+  o.promisedDueAt = iso(base + (prep + del) * MIN);
+}
+// مرحلة الطلب متل Lieferando: WAIT → PREPARE → HANDOVER → DONE
+function stageOf(o) {
+  if (isWaiting(o)) return 'WAIT';
+  const st = str(o && o.status).toUpperCase(), ls = str(o && o.liveStage).toUpperCase();
+  if (st === 'CANCELLED' || st === 'STORNIERT' || st === 'COMPLETED' || ls === 'DONE') return 'DONE';
+  if (ls === 'HANDOVER') return 'HANDOVER';
+  return 'PREPARE';
+}
+
 let queue = [];
 let seq = 0;
 function reset() { queue = []; seq = 0; }
@@ -60,6 +80,7 @@ function onImport(order, isNew, now = Date.now()) {
     order.acceptedAt = iso(now);
     order.acceptError = '';
     dropQueued(order.id);
+    applyPromise(order, now);
     return 'PRINT';
   }
   return 'NONE';
@@ -82,11 +103,12 @@ function sweep(data, now = Date.now()) {
 }
 
 // الموظف كبس ✅ استلام
-function requestAccept(data, orderId, minutes, user, now = Date.now()) {
+function requestAccept(data, orderId, minutes, user, now = Date.now(), deliveryMinutes) {
   const o = ((data && data.orders) || []).find(x => String(x.id) === String(orderId));
   if (!o) throw httpError(404, 'Bestellung nicht gefunden');
   const min = Math.round(Number(minutes));
   if (!(min >= 5 && min <= 240)) throw httpError(422, 'Minuten 5–240');
+  const del = isPickup(o) ? 0 : clampMin(deliveryMinutes, 0, 180, DEFAULT_DELIVERY_MIN);
   sweep(data, now);
   const st = stateOf(o);
   if (st === 'ACCEPTED') return { state: 'ACCEPTED', already: true };   // مرة وحدة بس: كبسة مكررة ما بتعمل شي
@@ -94,12 +116,13 @@ function requestAccept(data, orderId, minutes, user, now = Date.now()) {
   if (st !== 'PENDING' && st !== 'FAILED') throw httpError(422, 'Bestellung wartet nicht auf Annahme');
   if (!isOpen(o)) throw httpError(409, 'Bestellung ist nicht mehr offen');
   if (o.acceptInternal || isInternalSource(o)) {      // المنصة قبلته لحالها: قبول داخلي فوري
-    o.acceptState = 'ACCEPTED'; o.acceptedVia = 'NARA'; o.acceptedAt = iso(now); o.acceptMinutes = min;
-    o.acceptBy = str(user && user.name); o.acceptError = ''; o.updatedAt = iso(now);
+    o.acceptState = 'ACCEPTED'; o.acceptedVia = 'NARA'; o.acceptedAt = iso(now); o.acceptMinutes = min; o.acceptDeliveryMinutes = del;
+    o.acceptBy = str(user && user.name); o.acceptError = ''; o.updatedAt = iso(now); applyPromise(o, now);
     return { state: 'ACCEPTED', internal: true, printNow: true };
   }
   o.acceptState = 'ACCEPTING';
   o.acceptMinutes = min;
+  o.acceptDeliveryMinutes = del;
   o.acceptRequestedAt = iso(now);
   o.acceptBy = str(user && user.name);
   o.acceptError = '';
@@ -114,6 +137,7 @@ function requestAccept(data, orderId, minutes, user, now = Date.now()) {
     externalOrderCode: str(o.externalOrderCode),
     displayCode: str(o.displayCode),
     minutes: min,
+    deliveryMinutes: del,
     createdAt: iso(now),
     claimedAt: null,
   });
@@ -138,6 +162,11 @@ function complete(data, p, now = Date.now()) {
   const id = str(p && p.orderId);
   const o = ((data && data.orders) || []).find(x => String(x.id) === id);
   if (!o) return { orderId: id, printNow: false, missing: true };
+  if (str(p.type).toUpperCase() === 'STAGE') {       // نتيجة تغيير المرحلة على المنصة
+    o.platformSync = p.ok ? { state: 'OK', stage: str(p.stage), at: iso(now) } : { state: 'FAILED', stage: str(p.stage), error: str(p.error).slice(0, 160) || 'Fehler', at: iso(now) };
+    o.updatedAt = iso(now);
+    return { orderId: o.id, printNow: false };
+  }
   dropQueued(o.id);
   if (stateOf(o) === 'ACCEPTED') return { orderId: o.id, printNow: false };
   if (p.ok) {
@@ -149,6 +178,7 @@ function complete(data, p, now = Date.now()) {
     o.confirmedAt = o.confirmedAt || iso(now);
     if (QR_RE.test(str(p.qrUrl))) o.deliveryQrUrl = str(p.qrUrl);
     o.updatedAt = iso(now);
+    applyPromise(o, now);
     return { orderId: o.id, printNow: true };
   }
   o.acceptState = 'FAILED';
@@ -208,4 +238,86 @@ function pending(data, now, deps) {
   return { changed, orders, count: orders.length, needAction: orders.filter(x => x.state !== 'ACCEPTING').length };
 }
 
-module.exports = { printJobs, isWaiting, lieferandoNeedsAccept, onImport, requestAccept, claim, complete, sweep, pending, suggest, reset, TIMEOUT_MS };
+// تعديل وقت التحضير/التوصيل لطلب مقبول (عنّا: وعد الزبون، المطبخ، السواقين). Lieferando ما فيها نداء لتعديل الوقت بعد القبول.
+function setTimes(data, orderId, prepMinutes, deliveryMinutes, user, now = Date.now()) {
+  const o = ((data && data.orders) || []).find(x => String(x.id) === String(orderId));
+  if (!o) throw httpError(404, 'Bestellung nicht gefunden');
+  const prep = Math.round(Number(prepMinutes));
+  if (!(prep >= 5 && prep <= 240)) throw httpError(422, 'Minuten 5–240');
+  const stage = stageOf(o);
+  if (stage !== 'PREPARE' && stage !== 'HANDOVER') throw httpError(409, 'Zeit nur für laufende Bestellungen änderbar');
+  const del = isPickup(o) ? 0 : clampMin(deliveryMinutes, 0, 180, DEFAULT_DELIVERY_MIN);
+  o.acceptMinutes = prep; o.acceptDeliveryMinutes = del;
+  o.acceptedAt = o.acceptedAt || o.confirmedAt || iso(now);
+  applyPromise(o, now);
+  o.promisedBy = str(user && user.name); o.timesEditedAt = iso(now); o.updatedAt = iso(now);
+  return { prepMinutes: prep, deliveryMinutes: del, promisedDueAt: o.promisedDueAt };
+}
+
+// تغيير المرحلة من التابلت. محلياً دايماً؛ Lieferando كمان بالجسر (in_delivery / delivered).
+const STAGE_ORDER = ['PREPARE', 'HANDOVER', 'DONE'];
+const LIEF_STATUS = { HANDOVER: 'in_delivery', DONE: 'delivered' };
+function requestStage(data, orderId, stage, user, now = Date.now()) {
+  const o = ((data && data.orders) || []).find(x => String(x.id) === String(orderId));
+  if (!o) throw httpError(404, 'Bestellung nicht gefunden');
+  const to = str(stage).toUpperCase();
+  if (!STAGE_ORDER.includes(to)) throw httpError(422, 'Ungültige Stufe');
+  const from = stageOf(o);
+  if (from === 'WAIT') throw httpError(409, 'Bestellung ist noch nicht angenommen');
+  if (from === 'DONE' && str(o.status).toUpperCase() === 'CANCELLED') throw httpError(409, 'Bestellung ist storniert');
+  if (from === to) return { stage: to, already: true, pushed: false, from };
+  o.liveStage = to; o.liveStageSource = 'NARA'; o.liveStageUpdatedAt = iso(now);
+  if (to === 'DONE') { o.status = 'COMPLETED'; o.completedAt = iso(now); }
+  else if (str(o.status).toUpperCase() === 'COMPLETED') { o.status = 'OPEN'; delete o.completedAt; }
+  o.updatedAt = iso(now);
+  let pushed = false;
+  const src = str(o.source || o.platform).toUpperCase();
+  if (src === 'LIEFERANDO' && LIEF_STATUS[to] && from !== 'DONE') {
+    queue = queue.filter(c => !(c.orderId === String(o.id) && c.type === 'STAGE'));
+    queue.push({ id: 'stg_' + (++seq) + '_' + now.toString(36), type: 'STAGE', orderId: String(o.id), source: src, brand: str(o.brand || o.brandName),
+      externalOrderCode: str(o.externalOrderCode), displayCode: str(o.displayCode), stage: to, status: LIEF_STATUS[to], createdAt: iso(now), claimedAt: null });
+    o.platformSync = { state: 'PENDING', stage: to, at: iso(now) };
+    pushed = true;
+  }
+  return { stage: to, from, pushed };
+}
+
+// لوحة التابلت: كل مراحل الطلب. WAIT من pending()، والباقي من الطلبات المقبولة.
+const PLATFORM_RE = /^(LIEFERANDO|UBER|WOLT|LANCH|SIDES)/i;
+function board(data, now, deps) {
+  const base = pending(data, now, deps);
+  const waitIds = new Set(base.orders.map(x => String(x.id)));
+  const wait = base.orders.map(x => ({ ...x, stage: 'WAIT', deliveryMinutes: x.type === 'pickup' ? 0 : DEFAULT_DELIVERY_MIN }));
+  const DAY = 24 * 60 * MIN, DONE_KEEP = 3 * 60 * MIN;
+  const rest = [];
+  for (const o of ((data && data.orders) || [])) {
+    if (waitIds.has(String(o.id)) || isWaiting(o)) continue;
+    if (!PLATFORM_RE.test(str(o.source || o.platform)) || o.isTest) continue;
+    const placed = Date.parse(o.placedAt || o.createdAt || '') || 0;
+    if (!placed || now - placed > DAY) continue;
+    const stage = stageOf(o);
+    if (stage === 'DONE' && str(o.status).toUpperCase() === 'CANCELLED') continue;
+    const doneAt = Date.parse(o.completedAt || o.liveStageUpdatedAt || o.updatedAt || '') || placed;
+    if (stage === 'DONE' && now - doneAt > DONE_KEEP) continue;
+    const v = deps.view(o);
+    const due = Date.parse(o.promisedDueAt || o.dueAt || o.etaAt || '') || 0;
+    const pm = str(o.payment && o.payment.method || o.paymentMethod).toUpperCase();
+    rest.push({
+      id: o.id, displayCode: v.displayCode, source: str(o.source || o.platform).toUpperCase(), brand: str(o.brand || o.brandName), type: v.type,
+      stage, state: stateOf(o), error: '', placedAt: o.placedAt || o.createdAt || null, acceptedAt: o.acceptedAt || o.confirmedAt || null,
+      stageAt: o.liveStageUpdatedAt || o.acceptedAt || o.confirmedAt || o.placedAt || null,
+      dueAt: due ? iso(due) : null, minutesLeft: due ? Math.round((due - now) / MIN) : null,
+      prepMinutes: Number(o.acceptMinutes) || null, deliveryMinutes: o.acceptDeliveryMinutes != null ? Number(o.acceptDeliveryMinutes) : (isPickup(o) ? 0 : DEFAULT_DELIVERY_MIN),
+      customerName: v.customerName, city: v.city, notes: v.notes, items: v.items,
+      payment: { method: pm === 'CASH' ? 'CASH' : 'ONLINE', cashDueCents: pm === 'CASH' ? Number(o.cashDueCents || o.totalCents) || 0 : 0 },
+      sync: o.platformSync && o.platformSync.state ? { state: o.platformSync.state, error: o.platformSync.error || '' } : null,
+    });
+  }
+  rest.sort((a, b) => (Date.parse(a.dueAt || '') || Infinity) - (Date.parse(b.dueAt || '') || Infinity));
+  const orders = wait.concat(rest);
+  const counts = { WAIT: 0, PREPARE: 0, HANDOVER: 0, DONE: 0 };
+  for (const o of orders) counts[o.stage]++;
+  return { changed: base.changed, orders, counts, count: wait.length, needAction: base.needAction };
+}
+
+module.exports = { stageOf, board, setTimes, requestStage, printJobs, isWaiting, lieferandoNeedsAccept, onImport, requestAccept, claim, complete, sweep, pending, suggest, reset, TIMEOUT_MS };

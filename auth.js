@@ -90,6 +90,8 @@ const RULES = [
   ['POST', /^\/api\/platform-orders\/promise$/, CASH],
   ['GET', /^\/api\/platform-orders\/pending$/, KITCH],
   ['POST', /^\/api\/platform-orders\/accept$/, KITCH],
+  ['GET', /^\/api\/platform-orders\/board$/, KITCH],
+  ['POST', /^\/api\/platform-orders\/(times|stage)$/, KITCH],
   ['GET', /^\/api\/platform-orders\/commands$/, 'service'],
   ['POST', /^\/api\/platform-orders\/command-result$/, 'service'],
   ['GET', /^\/api\/printing\/config$/, KITCH],

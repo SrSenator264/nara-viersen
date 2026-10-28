@@ -204,6 +204,34 @@ test.describe('End-to-End', () => {
     assert.equal((await pend()).json.orders.some(o => o.displayCode === 'T9003'), false);
     assert.ok((await call('GET', '/api/kitchen/orders', null, cookie)).json.orders.some(o => o.id === row.id));
   });
+
+  test('Reiter-Board: Zubereitung → Handover (Befehl an die Bridge) → Fertig; Zeiten ändern verschiebt die Fälligkeit', async () => {
+    await imp('9101'); const id = (await pend()).json.orders.find(o => o.displayCode === 'T9101').id;
+    await call('POST', '/api/platform-orders/accept', { orderId: id, minutes: 25, deliveryMinutes: 15 }, cookie);
+    const cmd = (await call('GET', '/api/platform-orders/commands?source=LIEFERANDO')).json.commands.find(c => c.orderId === id);
+    assert.equal(cmd.type, 'ACCEPT'); assert.equal(cmd.deliveryMinutes, 15);
+    await call('POST', '/api/platform-orders/command-result', { id: cmd.id, orderId: id, ok: true });
+    let b = (await call('GET', '/api/platform-orders/board', null, cookie)).json; let row = b.orders.find(o => o.id === id);
+    assert.equal(row.stage, 'PREPARE'); assert.equal(row.prepMinutes, 25); assert.equal(row.deliveryMinutes, 15); assert.ok(row.minutesLeft >= 38 && row.minutesLeft <= 40, 'left ' + row.minutesLeft);
+    assert.ok(b.counts.PREPARE >= 1);
+    // Zeiten ändern
+    assert.equal((await call('POST', '/api/platform-orders/times', { orderId: id, prepMinutes: 35, deliveryMinutes: 10 }, cookie)).status, 200);
+    row = (await call('GET', '/api/platform-orders/board', null, cookie)).json.orders.find(o => o.id === id); assert.equal(row.prepMinutes, 35); assert.ok(row.minutesLeft >= 43 && row.minutesLeft <= 45);
+    assert.equal((await call('POST', '/api/platform-orders/times', { orderId: id, prepMinutes: 1, deliveryMinutes: 10 }, cookie)).status, 422);
+    // Handover: lokal sofort + Befehl für Lieferando
+    assert.equal((await call('POST', '/api/platform-orders/stage', { orderId: id, stage: 'HANDOVER' }, cookie)).json.pushed, true);
+    assert.equal((await call('GET', '/api/platform-orders/board', null, cookie)).json.orders.find(o => o.id === id).stage, 'HANDOVER');
+    const st = (await call('GET', '/api/platform-orders/commands?source=LIEFERANDO')).json.commands.find(c => c.type === 'STAGE');
+    assert.deepEqual([st.orderId, st.status], [id, 'in_delivery']);
+    await call('POST', '/api/platform-orders/command-result', { id: st.id, orderId: id, type: 'STAGE', stage: 'HANDOVER', ok: false, error: 'HTTP 401' });
+    assert.deepEqual((await call('GET', '/api/platform-orders/board', null, cookie)).json.orders.find(o => o.id === id).sync, { state: 'FAILED', error: 'HTTP 401' });
+    // Fertig
+    assert.equal((await call('POST', '/api/platform-orders/stage', { orderId: id, stage: 'DONE' }, cookie)).status, 200);
+    assert.equal((await call('GET', '/api/platform-orders/board', null, cookie)).json.orders.find(o => o.id === id).stage, 'DONE');
+    assert.equal((await call('POST', '/api/platform-orders/times', { orderId: id, prepMinutes: 30, deliveryMinutes: 10 }, cookie)).status, 409, 'erledigt: keine Zeitänderung');
+    assert.equal((await call('POST', '/api/platform-orders/stage', { orderId: 'nope', stage: 'DONE' }, cookie)).status, 404);
+    assert.equal((await call('POST', '/api/platform-orders/stage', { orderId: id, stage: 'XX' }, cookie)).status, 422);
+  });
 });
 
 test('Uber/Loco: neue frische Bestellung wird gehalten; Annahme ist intern (kein Bridge-Befehl) und druckt sofort; alte/späte werden nicht gehalten', () => {
@@ -220,4 +248,20 @@ test('Uber/Loco: neue frische Bestellung wird gehalten; Annahme ist intern (kein
   assert.equal(r.state, 'ACCEPTED'); assert.equal(r.printNow, true); assert.equal(u.acceptState, 'ACCEPTED');
   assert.deepEqual(A.claim('UBER_EATS', '', NOW), [], 'kein Befehl an die Bridge');
   assert.equal(A.requestAccept(data, 'u1', 20, { name: 'K' }, NOW).already, true);
+});
+
+test('Board/Zeiten/Stufe: Wartende zuerst, Uber intern, Abholung ohne Lieferzeit, wartende Bestellung nicht per Stufe änderbar', () => {
+  const view = o => ({ displayCode: o.displayCode, type: o.type || 'delivery', customerName: '', city: '', notes: '', items: [] });
+  const w = pendingOrder({ id: 'w1', displayCode: 'W1' });
+  const p = mk({ id: 'p1', displayCode: 'P1', source: 'UBER_EATS', platform: 'UBER_EATS', needsAccept: undefined, type: 'pickup' });
+  const data = { orders: [w, p] };
+  A.requestAccept({ orders: [pendingOrder({ id: 'zz' })] }, 'zz', 20, null, NOW);
+  p.acceptState = 'ACCEPTED'; p.acceptedAt = new Date(NOW - 5 * 60000).toISOString();
+  const r = A.setTimes(data, 'p1', 20, 15, { name: 'K' }, NOW);
+  assert.equal(r.deliveryMinutes, 0, 'Abholung hat keine Lieferzeit'); assert.equal(Date.parse(r.promisedDueAt), NOW - 5 * 60000 + 20 * 60000);
+  const b = A.board(data, NOW, { forecast: () => ({ extra: { readyAt: new Date(NOW + 20 * 60000).toISOString() }, queue: 2 }), view });
+  assert.deepEqual(b.orders.map(o => [o.id, o.stage]), [['w1', 'WAIT'], ['p1', 'PREPARE']]); assert.deepEqual(b.counts, { WAIT: 1, PREPARE: 1, HANDOVER: 0, DONE: 0 });
+  assert.throws(() => A.requestStage(data, 'w1', 'HANDOVER', null, NOW), e => e.status === 409);
+  const s1 = A.requestStage(data, 'p1', 'HANDOVER', null, NOW); assert.deepEqual([s1.from, s1.stage, s1.pushed], ['PREPARE', 'HANDOVER', false], 'Nicht-Lieferando: nur intern');
+  assert.equal(A.requestStage(data, 'p1', 'HANDOVER', null, NOW).already, true);
 });

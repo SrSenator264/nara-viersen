@@ -22,7 +22,7 @@ const HUB_PATHS = [
   /^\/(reception\.html|nara-lang\.js|nara-auth\.js|flamo-nav\.js|flamo-nav\.css|sw\.js|nara-shell\.css)$/,
   /^\/icons\/[A-Za-z0-9_.-]+$/,
   /^\/api\/auth\/(login|logout|me|employees)$/,
-  /^\/api\/platform-orders\/(pending|accept)$/,
+  /^\/api\/platform-orders\/(pending|accept|board|times|stage)$/,
 ];
 const hubPathAllowed = p => HUB_PATHS.some(re => re.test(String(p || '')));
 function hubGate(req, env = process.env) {

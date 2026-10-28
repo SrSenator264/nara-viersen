@@ -589,7 +589,8 @@ async function acceptViaApi(cmd, known, sel) {
   if (!/live-orders\.takeaway\.com/.test(page.url())) await page.goto('https://live-orders.takeaway.com/orders', { waitUntil: 'domcontentloaded' });
   const prep = Math.round(Number(cmd.minutes));
   const isDelivery = !/pick/i.test(S(known.delivery_type));
-  const del = isDelivery ? Math.max(0, Math.round(Number(sel.deliveryMinutes ?? 15))) : null;
+  const delWanted = Number.isFinite(Number(cmd.deliveryMinutes)) && cmd.deliveryMinutes !== null ? Number(cmd.deliveryMinutes) : Number(sel.deliveryMinutes ?? 15);
+  const del = isDelivery ? Math.max(0, Math.round(delWanted)) : null;
   const eta = new Date(Date.now() + (prep + (del || 0)) * 60000).toISOString().split('.')[0] + 'Z';
   const body = { food_preparation_duration: prep, delivery_time_duration: del, estimated_delivery_time: eta };
   const url = `https://live-orders-api.takeaway.com/api/orders/${encodeURIComponent(known.id)}/confirm-order`;
@@ -606,6 +607,24 @@ async function acceptViaApi(cmd, known, sel) {
   if (!(await waitConfirmed(cmd.externalOrderCode, 25000))) return { ok: false, error: 'confirm-order gesendet, aber Lieferando zeigt die Bestellung noch nicht als bestätigt' };
   const qrUrl = sel.autoQr ? await grabQr(S(known.public_reference), sel) : '';
   return { ok: true, qrUrl };
+}
+// تغيير المرحلة (Handover/Done): نفس نداء Live Orders → PATCH /api/orders/{id} {status: in_delivery | delivered}
+async function stageViaApi(cmd) {
+  const known = entryOf(cmd.externalOrderCode);
+  if (!known) return { ok: false, error: 'Bestellung nicht in der Lieferando-Liste' };
+  if (!['in_delivery', 'delivered'].includes(cmd.status)) return { ok: false, error: 'Unbekannter Status' };
+  if (S(known.status).toLowerCase() === cmd.status) return { ok: true, already: true };
+  if (!lastAuth || Date.now() - lastAuthAt > 10 * 60000) return { ok: false, error: 'Keine Anmeldung von Lieferando erfasst (Seite kurz neu laden)' };
+  if (!/live-orders\.takeaway\.com/.test(page.url())) await page.goto('https://live-orders.takeaway.com/orders', { waitUntil: 'domcontentloaded' });
+  const url = `https://live-orders-api.takeaway.com/api/orders/${encodeURIComponent(known.id)}`;
+  const r = await page.evaluate(async ({ url, auth, status }) => {
+    try {
+      const x = await fetch(url, { method: 'PATCH', headers: { 'content-type': 'application/json', accept: 'application/json', authorization: auth }, body: JSON.stringify({ status }) });
+      return { status: x.status, text: (await x.text()).slice(0, 160) };
+    } catch (e) { return { status: 0, text: String(e && e.message || e) }; }
+  }, { url, auth: lastAuth, status: cmd.status });
+  if (r.status < 200 || r.status >= 300) return { ok: false, error: `[${cmd.status}] HTTP ${r.status} ${String(r.text).replace(/\s+/g, ' ').slice(0, 90)}` };
+  return { ok: true };
 }
 async function acceptOrder(cmd) {
   const sel = loadSelectors();
@@ -643,10 +662,11 @@ async function pollCommands() {
     const r = await fetch(`${CFG.base}/api/platform-orders/commands?source=LIEFERANDO&brand=${encodeURIComponent(CFG.brand)}`, { headers: authHeaders(), signal: AbortSignal.timeout(6000) });
     if (!r.ok) return;
     for (const cmd of (await r.json()).commands || []) {
-      log(`accept command ${cmd.displayCode} (${cmd.minutes} min)`);
-      const res = await acceptOrder(cmd);
-      log(`accept ${cmd.displayCode}: ${res.ok ? 'OK' : 'FAILED - ' + res.error}`);
-      await tryPost('/api/platform-orders/command-result', { id: cmd.id, orderId: cmd.orderId, ...res });
+      log(`${cmd.type || 'ACCEPT'} command ${cmd.displayCode} (${cmd.minutes ?? cmd.status})`);
+      const isStage = cmd.type === 'STAGE';
+      const res = isStage ? await stageViaApi(cmd).catch(e => ({ ok: false, error: String(e.message || e).split('\n')[0].slice(0, 140) })) : await acceptOrder(cmd);
+      log(`${isStage ? 'stage ' + cmd.status : 'accept'} ${cmd.displayCode}: ${res.ok ? 'OK' : 'FAILED - ' + res.error}`);
+      await tryPost('/api/platform-orders/command-result', { id: cmd.id, orderId: cmd.orderId, type: cmd.type, stage: cmd.stage, ...res });
     }
   } catch { /* السيرفر مش متاح: الدورة الجاية */ }
   finally { cmdBusy = false; }

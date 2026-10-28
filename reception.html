@@ -14,9 +14,13 @@ button{font:inherit;cursor:pointer;touch-action:manipulation}
 header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;min-height:68px;padding:8px 20px;background:#fff;box-shadow:0 1px 0 var(--line);flex-wrap:wrap}
 header h1{margin:0;font-size:1.35rem;color:var(--brand)}
 header .sp{flex:1}
-.cnt{display:flex;align-items:center;gap:10px;padding:6px 18px;border-radius:999px;background:var(--ok);color:#fff;font-weight:800}
-.cnt b{font-size:1.9rem;line-height:1}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.cnt,.tab{display:flex;align-items:center;gap:8px;padding:6px 16px;border:2px solid transparent;border-radius:999px;background:#fff;color:var(--ink);font-weight:800;box-shadow:inset 0 0 0 1px var(--line)}
+.cnt b,.tab b{font-size:1.5rem;line-height:1}
+.cnt{background:var(--ok);color:#fff}
 .cnt.hot{background:var(--brand)}
+.cnt.sel,.tab.sel{border-color:var(--ink)}
+.tab.sel{background:var(--ink);color:#fff}
 .hbtn{height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:#fff;font-weight:700}
 .sync{color:var(--mute);font-size:.85rem}
 .sync b{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-inline-end:6px}
@@ -45,6 +49,28 @@ main{padding:18px 20px 40px}
 .step button{width:56px;height:52px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:800;font-size:1.1rem}
 .step b{min-width:74px;text-align:center;font-size:1.3rem}
 .qlen{width:100%;color:var(--mute);font-size:.85rem}
+.ring{position:relative;width:62px;height:62px;flex:none}
+.ring svg{width:62px;height:62px;transform:rotate(-90deg)}
+.ring .bg{fill:none;stroke:#e7e3de;stroke-width:6}
+.ring .fg{fill:none;stroke:var(--ok);stroke-width:6;stroke-linecap:round}
+.ring.warn .fg{stroke:var(--brand)}
+.ring.late .fg{stroke:var(--late)}
+.ring .tx{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;line-height:1.05}
+.ring .tx b{font-size:1.15rem}
+.ring .tx small{font-size:.7rem;font-weight:600;color:var(--mute)}
+.ring.late .tx b{color:var(--late)}
+.head{display:flex;align-items:center;gap:12px}
+.head .top{flex:1}
+.timerow{display:flex;align-items:center;gap:10px;margin:8px 0 2px;flex-wrap:wrap}
+.timerow .lbl{font-weight:700;min-width:96px}
+.timerow .step{margin-inline-start:auto}
+.timerow .step button{width:50px;height:46px}
+.timerow .step b{min-width:66px;font-size:1.15rem}
+.saved{width:100%;color:var(--mute);font-size:.82rem;text-align:end}
+.sync2{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:#fff1d6;color:#7a5200;font-weight:700;font-size:.9rem}
+.card.DONE{opacity:.78}
+.go.next{background:var(--brand)}
+.go.fin{background:var(--ink)}
 .go{width:100%;height:64px;margin-top:10px;border:0;border-radius:16px;background:var(--ok);color:#fff;font-weight:800;font-size:1.25rem}
 .go:disabled{background:#9aa5a0}
 .go.retry{background:var(--late)}
@@ -62,7 +88,12 @@ main{padding:18px 20px 40px}
 <body>
 <header>
   <h1>📥 <span data-t="title"></span></h1>
-  <div class="cnt" id="cnt"><b id="cntN">0</b><span data-t="waiting"></span></div>
+  <div class="tabs">
+    <button type="button" class="cnt" id="cnt" data-tab="WAIT"><b id="cntN">0</b><span data-t="waiting"></span></button>
+    <button type="button" class="tab" data-tab="PREPARE">🍳 <span data-t="tabPrepare"></span> <b id="cntP">0</b></button>
+    <button type="button" class="tab" data-tab="HANDOVER">🚗 <span data-t="tabHandover"></span> <b id="cntH">0</b></button>
+    <button type="button" class="tab" data-tab="DONE">✅ <span data-t="tabDone"></span> <b id="cntD">0</b></button>
+  </div>
   <span class="sp"></span>
   <span class="sync" id="sync"><b></b><span>…</span></span>
   <button class="hbtn" id="openSet" type="button" data-t="sounds"></button>
@@ -86,15 +117,18 @@ const T={
   de:{title:'Plattformen',waiting:'warten auf Annahme',none:'Keine Bestellung wartet ✅',accept:'✅ Annehmen',accepting:'Wird angenommen …',retry:'🔁 Nochmal versuchen',failed:'Annahme fehlgeschlagen',
     prep:'Zubereitungszeit',min:'Min',delivery:'🛵 Lieferung',pickup:'🛍 Abholung',cash:'💶 Barzahlung',online:'💳 Online bezahlt',asap:'So schnell wie möglich',at:'um',now:'jetzt',ago:'vor {n} Min',
     queue:'🍳 Küche aktuell: {n}',sounds:'⚙️ Töne',enableSound:'🔊 Tippen, um den Ton zu aktivieren',volume:'Lautstärke',repeat:'Wiederholen alle',off:'aus',test:'Test',close:'Schließen',offline:'Keine Verbindung',live:'Live',
-    short:'Kurz',double:'Doppelt',long:'Lang',triple:'Dreifach',rising:'Steigend',falling:'Fallend',bell:'Glocke',siren:'Sirene',mute:'Stumm',web:'Website',sec:'{n} Sek',errGeneric:'Fehler: '},
+    short:'Kurz',double:'Doppelt',long:'Lang',triple:'Dreifach',rising:'Steigend',falling:'Fallend',bell:'Glocke',siren:'Sirene',mute:'Stumm',web:'Website',sec:'{n} Sek',errGeneric:'Fehler: ',
+    tabPrepare:'Zubereitung',tabHandover:'Übergabe',tabDone:'Erledigt',deliveryTime:'Lieferzeit',toHandover:'🚗 Handover',toDone:'✅ Fertig',noneStage:'Keine Bestellungen',saving:'wird gespeichert …',saved:'✓ gespeichert',leftMin:'Min',lateMin:'überfällig',platformFail:'Auf der Plattform nicht übernommen',doneAgo:'erledigt vor {n} Min'},
   ar:{title:'تجميع المنصات',waiting:'بانتظار الموافقة',none:'ما في طلبات بانتظار الموافقة ✅',accept:'✅ استلام',accepting:'عم ينقبل …',retry:'🔁 جرّب مرة ثانية',failed:'فشل الاستلام',
     prep:'وقت التحضير',min:'د',delivery:'🛵 توصيل',pickup:'🛍 استلام من المحل',cash:'💶 دفع كاش',online:'💳 مدفوع أونلاين',asap:'بأسرع وقت',at:'الساعة',now:'هلق',ago:'قبل {n} د',
     queue:'🍳 بالمطبخ هلق: {n}',sounds:'⚙️ الأصوات',enableSound:'🔊 اضغط لتفعيل الصوت',volume:'مستوى الصوت',repeat:'كرّر كل',off:'بلا',test:'جرّب',close:'سكّر',offline:'ما في اتصال',live:'Live',
-    short:'قصير',double:'مرتين',long:'طويل',triple:'ثلاث مرات',rising:'صاعد',falling:'نازل',bell:'جرس',siren:'صفّارة',mute:'بلا صوت',web:'الموقع',sec:'{n} ث',errGeneric:'غلط: '},
+    short:'قصير',double:'مرتين',long:'طويل',triple:'ثلاث مرات',rising:'صاعد',falling:'نازل',bell:'جرس',siren:'صفّارة',mute:'بلا صوت',web:'الموقع',sec:'{n} ث',errGeneric:'غلط: ',
+    tabPrepare:'قيد التحضير',tabHandover:'تسليم',tabDone:'خلصت',deliveryTime:'وقت التوصيل',toHandover:'🚗 جاهز للتسليم',toDone:'✅ تم التسليم',noneStage:'ما في طلبات',saving:'عم ينحفظ …',saved:'✓ انحفظ',leftMin:'د',lateMin:'متأخر',platformFail:'ما انتقل عند المنصة',doneAgo:'خلص قبل {n} د'},
   en:{title:'Platform hub',waiting:'waiting for acceptance',none:'No orders waiting ✅',accept:'✅ Accept',accepting:'Accepting …',retry:'🔁 Try again',failed:'Accept failed',
     prep:'Prep time',min:'min',delivery:'🛵 Delivery',pickup:'🛍 Pickup',cash:'💶 Cash',online:'💳 Paid online',asap:'As soon as possible',at:'at',now:'now',ago:'{n} min ago',
     queue:'🍳 In kitchen now: {n}',sounds:'⚙️ Sounds',enableSound:'🔊 Tap to enable sound',volume:'Volume',repeat:'Repeat every',off:'off',test:'Test',close:'Close',offline:'No connection',live:'Live',
-    short:'Short',double:'Double',long:'Long',triple:'Triple',rising:'Rising',falling:'Falling',bell:'Bell',siren:'Siren',mute:'Mute',web:'Website',sec:'{n} s',errGeneric:'Error: '}
+    short:'Short',double:'Double',long:'Long',triple:'Triple',rising:'Rising',falling:'Falling',bell:'Bell',siren:'Siren',mute:'Mute',web:'Website',sec:'{n} s',errGeneric:'Error: ',
+    tabPrepare:'Preparing',tabHandover:'Handover',tabDone:'Done',deliveryTime:'Delivery time',toHandover:'🚗 Handover',toDone:'✅ Done',noneStage:'No orders',saving:'saving …',saved:'✓ saved',leftMin:'min',lateMin:'late',platformFail:'Not applied on the platform',doneAgo:'done {n} min ago'}
 };
 const lang=()=>{try{return window.NARA_LANG?NARA_LANG.get():'de'}catch(e){return 'de'}};
 const t=(k,n)=>{const v=((T[lang()]||T.de)[k]);const s=v!=null?v:(T.de[k]!=null?T.de[k]:k);return n==null?s:s.replace('{n}',n)};
@@ -134,91 +168,182 @@ document.addEventListener('pointerdown',unlock);
 $('#enableSound').onclick=()=>{unlock();setTimeout(()=>playStyle('short'),150)};
 
 // ───── البيانات ─────
-let orders=[],lastOk=0,lastSig='',seen=new Set(),lastBeep=0,busy=false;
-const mins={},touched={},localErr={},localAccepting=new Set();
+let orders=[],counts={WAIT:0,PREPARE:0,HANDOVER:0,DONE:0},tab=null,lastOk=0,lastSig='',seen=new Set(),lastBeep=0,busy=false;
+const mins={},dels={},touched={},localErr={},localAccepting=new Set(),localStage={},ed={},savedAt={};
 const BASE=document.title;
 const clamp=n=>Math.min(240,Math.max(5,n));
+const clampD=n=>Math.min(180,Math.max(0,n));
 const fmt=iso=>{const d=Date.parse(iso||'');return d?new Date(d).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):''};
 const agoOf=iso=>{const d=Date.parse(iso||'');if(!d)return '';const m=Math.floor((Date.now()-d)/60000);return m<1?t('now'):t('ago',m)};
+const minsLeft=o=>{const d=Date.parse(o.dueAt||'');return d?Math.round((d-Date.now())/60000):null};
+const stageOf=o=>localStage[String(o.id)]||o.stage;
 
 async function load(){
   if(busy)return;busy=true;
   try{
-    const r=await fetch('/api/platform-orders/pending',{cache:'no-store'});
+    const r=await fetch('/api/platform-orders/board',{cache:'no-store'});
     if(!r.ok)throw Error(r.status);
     const j=await r.json();
     orders=j.orders||[];
+    counts=j.counts||{WAIT:orders.filter(o=>o.stage==='WAIT').length,PREPARE:0,HANDOVER:0,DONE:0};
     for(const o of orders){
       const id=String(o.id);
       if(o.state!=='ACCEPTING')localAccepting.delete(id);
-      if(!touched[id]||mins[id]==null)mins[id]=o.suggestedMinutes;
+      if(localStage[id]&&o.stage===localStage[id])delete localStage[id];
+      if(o.stage==='WAIT'){
+        if(!touched[id]||mins[id]==null)mins[id]=o.suggestedMinutes;
+        if(!touched[id+'d']||dels[id]==null)dels[id]=o.deliveryMinutes!=null?o.deliveryMinutes:15;
+      }
+      const e=ed[id];
+      if(e&&!e.timer&&e.state==='ok'&&o.prepMinutes===e.prep&&o.deliveryMinutes===e.del)delete ed[id];
     }
+    if(tab==null)tab=(counts.WAIT>0)?'WAIT':'PREPARE';
     lastOk=Date.now();
     alerts();
   }catch(e){/* offline يظهر بالمؤشر */}
   finally{busy=false}
   render();
 }
-function needAction(){return orders.filter(o=>o.state==='PENDING'||o.state==='FAILED')}
+function needAction(){return orders.filter(o=>o.stage==='WAIT'&&(o.state==='PENDING'||o.state==='FAILED'))}
 function alerts(){
   const need=needAction();let fresh=null;
   for(const o of need){const id=String(o.id);if(!seen.has(id)){seen.add(id);fresh=fresh||o}}
   const now=Date.now();
-  if(fresh){playFor(fresh.source);lastBeep=now;return}
+  if(fresh){playFor(fresh.source);lastBeep=now;tab='WAIT';return}
   const rs=repeatSec();
   if(need.length&&rs>0&&now-lastBeep>=rs*1000){playFor(need[0].source);lastBeep=now}
 }
 
 // ───── العرض ─────
-function cardHtml(o){
-  const id=String(o.id),pc=PC[o.source]||'#37474f',st=o.state==='FAILED'?'FAILED':(o.state==='ACCEPTING'||localAccepting.has(id)?'ACCEPTING':'PENDING');
-  const items=(o.items||[]).map(i=>'<li><span>'+(Number(i.quantity)||1)+'× '+esc(P(i.name))+'</span>'
+function itemsHtml(o){
+  return (o.items||[]).map(i=>'<li><span>'+(Number(i.quantity)||1)+'× '+esc(P(i.name))+'</span>'
     +(i.options||[]).map(x=>'<div class="opt">+ '+esc(P(x.name))+((x.quantity||1)>1?' ×'+x.quantity:'')+'</div>').join('')
     +(i.note?'<div class="note">📝 '+esc(i.note)+'</div>':'')+'</li>').join('');
-  const when=o.asap?t('asap'):t('at')+' '+fmt(o.requestedAt);
-  const meta=[o.type==='pickup'?t('pickup'):t('delivery'),o.city?esc(o.city):'',o.payment&&o.payment.method==='CASH'?t('cash'):t('online'),'🕒 '+esc(when)].filter(Boolean).join(' · ');
-  const m=mins[id]!=null?mins[id]:o.suggestedMinutes;
-  const busyNow=st==='ACCEPTING';
-  return '<article class="card '+st+'" style="--pc:'+pc+'" data-id="'+esc(id)+'">'
-    +'<div class="top"><span class="badge">'+esc(PN[o.source]||o.source)+'</span>'+(o.brand?'<span class="badge brand">'+esc(o.brand)+'</span>':'')
-    +'<b class="code">#'+esc(o.displayCode)+'</b><span class="age" data-ts="'+esc(o.pendingSince||o.placedAt||'')+'">'+esc(agoOf(o.pendingSince||o.placedAt))+'</span></div>'
-    +'<div class="meta">'+meta+(o.customerName?' · '+esc(o.customerName):'')+'</div>'
-    +'<ul class="items">'+items+'</ul>'
-    +(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'')
-    +'<div class="time"><span class="lbl">'+t('prep')+'</span><div class="step"><button type="button" data-act="minus"'+(busyNow?' disabled':'')+'>−5</button><b>'+m+' '+t('min')+'</b><button type="button" data-act="plus"'+(busyNow?' disabled':'')+'>+5</button></div>'
-    +'<span class="qlen">'+t('queue',o.queue||0)+'</span></div>'
-    +((st==='FAILED'||localErr[id])?'<div class="err">⚠️ '+t('failed')+(o.error||localErr[id]?': '+esc(o.error||localErr[id]):'')+'</div>':'')
-    +'<button type="button" class="go'+(st==='FAILED'?' retry':'')+'" data-act="accept"'+(busyNow?' disabled':'')+'>'+(busyNow?t('accepting'):(st==='FAILED'?t('retry'):t('accept')))+'</button>'
-    +'</article>';
+}
+function metaHtml(o){
+  const when=o.asap===false?t('at')+' '+fmt(o.requestedAt):t('asap');
+  return [o.type==='pickup'?t('pickup'):t('delivery'),o.city?esc(o.city):'',o.payment&&o.payment.method==='CASH'?t('cash'):t('online'),'🕒 '+esc(when)].filter(Boolean).join(' · ')+(o.customerName?' · '+esc(o.customerName):'');
+}
+function ringHtml(o){
+  const ml=minsLeft(o),total=Math.max(1,(o.prepMinutes||25)+(o.deliveryMinutes!=null?o.deliveryMinutes:15));
+  const cls=ml==null?'':(ml<0?'late':(ml<=10?'warn':''));
+  const C=2*Math.PI*26,frac=ml==null?0:Math.min(1,Math.max(0,ml/total));
+  return '<div class="ring '+cls+'" data-due="'+esc(o.dueAt||'')+'" data-total="'+total+'"><svg viewBox="0 0 62 62"><circle class="bg" cx="31" cy="31" r="26"/><circle class="fg" cx="31" cy="31" r="26" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-frac)).toFixed(1)+'"/></svg>'
+    +'<div class="tx"><b>'+(ml==null?'–':Math.abs(ml))+'</b><small>'+(ml!=null&&ml<0?t('lateMin'):t('leftMin'))+'</small></div></div>';
+}
+function stepHtml(lbl,val,a,b,dis){
+  return '<div class="timerow"><span class="lbl">'+lbl+'</span><div class="step"><button type="button" data-act="'+a+'"'+(dis?' disabled':'')+'>−5</button><b>'+val+' '+t('min')+'</b><button type="button" data-act="'+b+'"'+(dis?' disabled':'')+'>+5</button></div></div>';
+}
+function cardHtml(o){
+  const id=String(o.id),pc=PC[o.source]||'#37474f',stg=stageOf(o);
+  const badges='<span class="badge">'+esc(PN[o.source]||o.source)+'</span>'+(o.brand?'<span class="badge brand">'+esc(o.brand)+'</span>':'')+'<b class="code">#'+esc(o.displayCode)+'</b>';
+  const pick=o.type==='pickup';
+  if(stg==='WAIT'){
+    const st=o.state==='FAILED'?'FAILED':(o.state==='ACCEPTING'||localAccepting.has(id)?'ACCEPTING':'PENDING'),busyNow=st==='ACCEPTING';
+    const m=mins[id]!=null?mins[id]:o.suggestedMinutes,d=dels[id]!=null?dels[id]:15;
+    return '<article class="card '+st+'" style="--pc:'+pc+'" data-id="'+esc(id)+'">'
+      +'<div class="top">'+badges+'<span class="age" data-ts="'+esc(o.pendingSince||o.placedAt||'')+'">'+esc(agoOf(o.pendingSince||o.placedAt))+'</span></div>'
+      +'<div class="meta">'+metaHtml(o)+'</div><ul class="items">'+itemsHtml(o)+'</ul>'
+      +(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'')
+      +stepHtml(t('prep'),m,'minus','plus',busyNow)
+      +(pick?'':stepHtml(t('deliveryTime'),d,'dminus','dplus',busyNow))
+      +'<div class="saved">'+t('queue',o.queue||0)+'</div>'
+      +((st==='FAILED'||localErr[id])?'<div class="err">⚠️ '+t('failed')+(o.error||localErr[id]?': '+esc(o.error||localErr[id]):'')+'</div>':'')
+      +'<button type="button" class="go'+(st==='FAILED'?' retry':'')+'" data-act="accept"'+(busyNow?' disabled':'')+'>'+(busyNow?t('accepting'):(st==='FAILED'?t('retry'):t('accept')))+'</button>'
+      +'</article>';
+  }
+  const e=ed[id],prep=e?e.prep:(o.prepMinutes||25),del=e?e.del:(o.deliveryMinutes!=null?o.deliveryMinutes:15);
+  const stateTxt=e?(e.state==='ok'?t('saved'):(e.state==='err'?'⚠️ '+esc(e.msg||''):t('saving'))):(Date.now()-(savedAt[id]||0)<3000?t('saved'):'');
+  const syncTxt=o.sync&&o.sync.state==='FAILED'?'<div class="sync2">⚠️ '+t('platformFail')+(o.sync.error?': '+esc(o.sync.error):'')+'</div>':'';
+  let head='<div class="head">'+(stg==='DONE'?'':ringHtml(o))+'<div class="top">'+badges+'<span class="age" data-ts="'+esc(o.stageAt||o.acceptedAt||o.placedAt||'')+'">'+esc(agoOf(o.stageAt||o.acceptedAt||o.placedAt))+'</span></div></div>';
+  let body='<div class="meta">'+metaHtml(o)+'</div><ul class="items">'+itemsHtml(o)+'</ul>'+(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'');
+  let times='',btn='';
+  if(stg!=='DONE'){
+    times=stepHtml(t('prep'),prep,'minus','plus',false)+(pick?'':stepHtml(t('deliveryTime'),del,'dminus','dplus',false))+'<div class="saved">'+stateTxt+'</div>';
+    btn=stg==='PREPARE'?'<button type="button" class="go next" data-act="next">'+t('toHandover')+'</button>':'<button type="button" class="go fin" data-act="next">'+t('toDone')+'</button>';
+  }
+  return '<article class="card '+stg+'" style="--pc:'+pc+'" data-id="'+esc(id)+'">'+head+body+times+syncTxt+(localErr[id]?'<div class="err">⚠️ '+esc(localErr[id])+'</div>':'')+btn+'</article>';
 }
 function render(force){
   const need=needAction().length;
-  $('#cntN').textContent=orders.length;
+  $('#cntN').textContent=counts.WAIT;$('#cntP').textContent=counts.PREPARE;$('#cntH').textContent=counts.HANDOVER;$('#cntD').textContent=counts.DONE;
   $('#cnt').classList.toggle('hot',need>0);
-  document.title=(orders.length?'('+orders.length+') ':'')+BASE;
+  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('sel',b.dataset.tab===tab));
+  document.title=(counts.WAIT?'('+counts.WAIT+') ':'')+BASE;
   const sy=$('#sync'),off=Date.now()-lastOk>10000;sy.classList.toggle('off',off);
   sy.querySelector('span').textContent=(off?t('offline'):t('live'))+' · '+new Date(lastOk||Date.now()).toLocaleTimeString('de-DE');
-  const sig=JSON.stringify([lang(),orders.map(o=>[o.id,o.state,o.error,o.queue,mins[String(o.id)],localAccepting.has(String(o.id)),localErr[String(o.id)]])]);
+  const shown=orders.filter(o=>stageOf(o)===(tab||'WAIT'));
+  const sig=JSON.stringify([lang(),tab,counts,shown.map(o=>{const id=String(o.id),e=ed[id];return [o.id,stageOf(o),o.state,o.error,o.queue,o.prepMinutes,o.deliveryMinutes,o.dueAt,o.sync&&o.sync.state,mins[id],dels[id],localAccepting.has(id),localErr[id],e&&[e.prep,e.del,e.state],Date.now()-(savedAt[id]||0)<3000]})]);
   if(!force&&sig===lastSig)return;   // ما منعيد الرسم إذا ما تغيّر شي (كي ما تضيع كبسة على التابلت)
   lastSig=sig;
-  $('#list').innerHTML=orders.length?orders.map(cardHtml).join(''):'<div class="empty">'+t('none')+'</div>';
+  $('#list').innerHTML=shown.length?shown.map(cardHtml).join(''):'<div class="empty">'+((tab||'WAIT')==='WAIT'?t('none'):t('noneStage'))+'</div>';
 }
-function tickAges(){document.querySelectorAll('.age[data-ts]').forEach(e=>{e.textContent=agoOf(e.dataset.ts)})}
+function tickAges(){
+  document.querySelectorAll('.age[data-ts]').forEach(e=>{e.textContent=agoOf(e.dataset.ts)});
+  document.querySelectorAll('.ring[data-due]').forEach(r=>{
+    const d=Date.parse(r.dataset.due||'');if(!d)return;
+    const ml=Math.round((d-Date.now())/60000),total=Math.max(1,Number(r.dataset.total)||1),C=2*Math.PI*26;
+    r.classList.toggle('late',ml<0);r.classList.toggle('warn',ml>=0&&ml<=10);
+    const b=r.querySelector('.tx b'),sm=r.querySelector('.tx small'),fg=r.querySelector('.fg');
+    if(b)b.textContent=Math.abs(ml);if(sm)sm.textContent=ml<0?t('lateMin'):t('leftMin');
+    if(fg)fg.setAttribute('stroke-dashoffset',(C*(1-Math.min(1,Math.max(0,ml/total)))).toFixed(1));
+  });
+}
 
+async function saveTimes(id){
+  const e=ed[id];if(!e)return;e.timer=null;e.state='saving';render();
+  try{
+    const r=await fetch('/api/platform-orders/times',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:id,prepMinutes:e.prep,deliveryMinutes:e.del})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok)throw Error(j.error||r.status);
+    e.state='ok';savedAt[id]=Date.now();setTimeout(()=>render(true),3200);
+  }catch(err){e.state='err';e.msg=String(err.message||err)}
+  render();load();
+}
+function editTimes(o,dp,dd){
+  const id=String(o.id);
+  const e=ed[id]||(ed[id]={prep:o.prepMinutes||25,del:o.deliveryMinutes!=null?o.deliveryMinutes:15,state:'saving',timer:null});
+  e.prep=clamp(e.prep+dp);e.del=clampD(e.del+dd);e.state='saving';
+  clearTimeout(e.timer);e.timer=setTimeout(()=>saveTimes(id),900);
+  render();
+}
+
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-tab]');if(b&&b.dataset.tab){tab=b.dataset.tab;render(true)}});
 $('#list').addEventListener('click',async e=>{
   const b=e.target.closest&&e.target.closest('button[data-act]');if(!b||b.disabled)return;
   const card=b.closest('.card'),id=card&&card.dataset.id;if(!id)return;
   const o=orders.find(x=>String(x.id)===id);if(!o)return;
-  const act=b.dataset.act,cur=mins[id]!=null?mins[id]:o.suggestedMinutes;
-  if(act==='minus'||act==='plus'){touched[id]=true;mins[id]=clamp(cur+(act==='plus'?5:-5));render();return}
+  const act=b.dataset.act,stg=stageOf(o);
+  if(act==='minus'||act==='plus'||act==='dminus'||act==='dplus'){
+    const dp=act==='plus'?5:(act==='minus'?-5:0),dd=act==='dplus'?5:(act==='dminus'?-5:0);
+    if(stg==='WAIT'){
+      if(dp){touched[id]=true;mins[id]=clamp((mins[id]!=null?mins[id]:o.suggestedMinutes)+dp)}
+      if(dd){touched[id+'d']=true;dels[id]=clampD((dels[id]!=null?dels[id]:15)+dd)}
+      render();
+    }else editTimes(o,dp,dd);
+    return;
+  }
   if(act==='accept'){
     unlock();
     delete localErr[id];localAccepting.add(id);render();
     try{
-      const r=await fetch('/api/platform-orders/accept',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:id,minutes:cur})});
+      const body={orderId:id,minutes:mins[id]!=null?mins[id]:o.suggestedMinutes};
+      if(o.type!=='pickup')body.deliveryMinutes=dels[id]!=null?dels[id]:15;
+      const r=await fetch('/api/platform-orders/accept',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       const j=await r.json().catch(()=>({}));
       if(!r.ok&&r.status!==409)throw Error(j.error||r.status);
     }catch(err){localAccepting.delete(id);localErr[id]=String(err.message||err);render();return}
+    load();
+    return;
+  }
+  if(act==='next'){
+    const to=stg==='PREPARE'?'HANDOVER':'DONE';
+    delete localErr[id];localStage[id]=to;render();
+    try{
+      const r=await fetch('/api/platform-orders/stage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:id,stage:to})});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok)throw Error(j.error||r.status);
+    }catch(err){delete localStage[id];localErr[id]=String(err.message||err);render();return}
     load();
   }
 });
