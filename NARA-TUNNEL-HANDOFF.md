@@ -26,3 +26,9 @@
 - Cloudflare-Schritte: DNS-Route `cloudflared tunnel route dns <Tunnel> kasse.flamo.co.de`; Zero Trust → Access → Applications → Self-hosted → Domain kasse.flamo.co.de → Policy „Allow“ nur deine Mail, Session 1 Monat.
 - Config übernehmen: `Tunnel-Config-Aktualisieren.ps1` (Admin-PowerShell) – schreibt in `%USERPROFILE%\.cloudflared\config.yml` und startet den Dienst `cloudflared` neu.
 - Kasse als App auf dem Handy: Chrome → ⋮ → „Zum Startbildschirm“ (Manifest `icons/kasse.webmanifest`).
+
+## Plattformen-Tablet über den Tunnel (hub.flamo.co.de) – Stand 28.10.2026
+- Eigener Host `hub.flamo.co.de` (Regel in `tunnel/config.example.yml`), Cloudflare Access (nur deine Mail) + Server-Sperre `kasse-gate.js` (403 ohne Access-Mail). Auf diesem Host liefert der Server NUR `reception.html`, nötige Skripte/Icons, `/api/auth/(login|logout|me|employees)` und `/api/platform-orders/(pending|accept)`; alles andere 404.
+- `.env`: `NARA_HUB_HOST=hub.flamo.co.de` (Mails: `NARA_HUB_EMAILS`, sonst `NARA_KASSE_EMAILS`) → NARA neu starten.
+- Cloudflare: `cloudflared tunnel route dns <Tunnel> hub.flamo.co.de`; Zero Trust → Access → Applications → Self-hosted → hub.flamo.co.de → Allow nur deine Mail, Session 1 Monat; Config mit `Tunnel-Config-Aktualisieren.ps1` übernehmen.
+- Tablet: Chrome → `https://hub.flamo.co.de/reception.html` → Anmelden → ⋮ → App installieren (Manifest `icons/platforms.webmanifest`).

@@ -3,7 +3,7 @@
 const test = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), http = require('node:http'), { spawn } = require('node:child_process');
 const { kasseGate } = require('../kasse-gate.js');
-const ENV = { NARA_KASSE_HOST: 'kasse.flamo.co.de', NARA_KASSE_EMAILS: 'Me@Example.com, other@example.com' };
+const ENV = { NARA_HUB_HOST: 'hub.flamo.co.de', NARA_KASSE_HOST: 'kasse.flamo.co.de', NARA_KASSE_EMAILS: 'Me@Example.com, other@example.com' };
 const rq = (host, headers = {}, sock = '127.0.0.1') => ({ headers: { host, ...headers }, socket: { remoteAddress: sock } });
 const GOOD = { 'cf-connecting-ip': '1.2.3.4', 'cf-access-authenticated-user-email': 'me@example.com' };
 
@@ -65,4 +65,23 @@ test('kasse.html: Manifest + Icon für Startbildschirm', () => {
 test('Tunnel-Beispiel: kasse-Host vor dem 404-Catch-all', () => {
   const y = fs.readFileSync(path.join(root, 'tunnel', 'config.example.yml'), 'utf8');
   assert.ok(y.indexOf('hostname: kasse.flamo.co.de') > 0 && y.indexOf('hostname: kasse.flamo.co.de') < y.lastIndexOf('http_status:404'));
+});
+
+const { hubGate, hubPathAllowed } = require('../kasse-gate.js');
+test('Hub-Host: nur mit Access-Mail (HUB- oder Kasse-Liste), nur erlaubte Pfade', () => {
+  const env = { NARA_HUB_HOST: 'hub.flamo.co.de', NARA_KASSE_EMAILS: 'me@example.com' };
+  assert.equal(hubGate(rq('hub.flamo.co.de', GOOD), {}).gated, false);
+  assert.equal(hubGate(rq('app.flamo.co.de', GOOD), env).gated, false);
+  assert.deepEqual([hubGate(rq('hub.flamo.co.de', GOOD), env).gated, hubGate(rq('hub.flamo.co.de', GOOD), env).ok], [true, true]);
+  assert.equal(hubGate(rq('hub.flamo.co.de'), env).ok, false);
+  assert.equal(hubGate(rq('hub.flamo.co.de', GOOD, '192.168.1.5'), env).ok, false);
+  assert.equal(hubGate(rq('hub.flamo.co.de', GOOD), { ...env, NARA_HUB_EMAILS: 'x@y.de' }).ok, false);
+  for (const p of ['/reception.html', '/nara-lang.js', '/icons/platforms.webmanifest', '/api/auth/login', '/api/platform-orders/pending', '/api/platform-orders/accept']) assert.equal(hubPathAllowed(p), true, p);
+  for (const p of ['/kasse.html', '/api/kasse-state', '/api/platform-orders/commands', '/api/platform-orders/command-result', '/admin-foundation.html', '/icons/../server.js', '/api/platform-orders/import']) assert.equal(hubPathAllowed(p), false, p);
+});
+test('Server: hub-Host – ohne Mail 403, mit Mail nur erlaubte Pfade (sonst 404)', async () => {
+  assert.equal((await get('hub.flamo.co.de', '/reception.html', { 'cf-connecting-ip': '1.2.3.4' })).status, 403);
+  assert.equal((await get('hub.flamo.co.de', '/reception.html', GOOD)).status, 200);
+  for (const p of ['/kasse.html', '/api/kasse-state', '/api/platform-orders/commands']) assert.equal((await get('hub.flamo.co.de', p, GOOD)).status, 404, p);
+  assert.notEqual((await get('hub.flamo.co.de', '/api/platform-orders/pending', GOOD)).status, 404);
 });

@@ -25,5 +25,9 @@ ingress:
   # Der Server prüft zusätzlich selbst (kasse-gate.js) und lehnt alles ohne gültige Access-Mail mit 403 ab.
   - hostname: kasse.flamo.co.de
     service: http://127.0.0.1:4185
+  # Plattformen-Tablet im Lokal: eigener Host, Cloudflare Access (deine Mail) + NARA_HUB_HOST im .env.
+  # Der Server lässt auf diesem Host nur reception.html + die nötigen APIs durch (kasse-gate.js, sonst 404).
+  - hostname: hub.flamo.co.de
+    service: http://127.0.0.1:4185
   # Alles andere (Kasse, Admin, Buchhaltung, Küche, Live Orders, Dispatch, bootstrap ...) -> 404
   - service: http_status:404
