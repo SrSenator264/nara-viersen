@@ -529,6 +529,7 @@ const loyversePrices={
  227:380, // Rich Chocolate Muffin
  228:380, // Blue Berry Muffin
  230:215, // Crispy Caramel-gefüllte Donut
+ 202:499, // Hummus
  232:185, // White Donut
  266:99, // Aioli
  269:99, // Chillicheese Sauce
