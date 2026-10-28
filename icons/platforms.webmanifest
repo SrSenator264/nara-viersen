@@ -1,0 +1,16 @@
+{
+  "id": "/reception.html",
+  "name": "Flamo Plattformen",
+  "short_name": "Plattformen",
+  "description": "Flamo – Plattformen (Bestellannahme)",
+  "start_url": "/reception.html?app=1",
+  "scope": "/reception.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1d2327",
+  "theme_color": "#1d2327",
+  "icons": [
+    { "src": "/icons/flamo-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/flamo-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

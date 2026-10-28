@@ -104,3 +104,10 @@ test('Seite: Ton wiederholt sich solange etwas wartet (nach der eingestellten Ze
   try { await p.poll(); assert.ok(p.state.tones > t0, 'Wiederholung nach 10 s'); const t1 = p.state.tones; p.state.orders[0].state = 'ACCEPTING'; Date.now = () => realNow() + 30000; await p.poll(); assert.equal(p.state.tones, t1, 'kein Ton während ACCEPTING'); }
   finally { Date.now = realNow; }
 });
+
+test('App-Modus: eigenes Manifest (Start ?app=1) und keine Seitenleiste', () => {
+  assert.ok(/rel="manifest" href="icons\/platforms\.webmanifest"/.test(html));
+  const m = JSON.parse(fs.readFileSync(path.join(root, 'icons', 'platforms.webmanifest'), 'utf8'));
+  assert.equal(m.start_url, '/reception.html?app=1'); assert.equal(m.display, 'standalone'); assert.equal(m.scope, '/reception.html');
+  assert.match(fs.readFileSync(path.join(root, 'flamo-nav.js'), 'utf8'), /reception\.html' && \/\[\?&\]app=1/);
+});

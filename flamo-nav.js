@@ -100,6 +100,8 @@
 
   function init() {
     if (document.body.dataset.flamoNav === '1') return;
+    // Plattformen-Tablet als eigene App (?app=1): keine Seitenleiste/Leiste, kein Zugang zu anderen Bereichen
+    try { if (file === 'reception.html' && /[?&]app=1\b/.test(location.search)) return; } catch (e) { /* ignore */ }
     document.body.dataset.flamoNav = '1';
     const compact = COMPACT.has(file);
     document.body.classList.add('fn-on', compact ? 'fn-compact' : 'fn-full');
