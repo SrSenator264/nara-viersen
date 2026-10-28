@@ -207,6 +207,23 @@ function suggest(readyAtIso, now = Date.now()) {
   return Math.min(240, Math.max(10, Math.ceil(m / 5) * 5));
 }
 
+// بيانات التواصل مع الزبون (للرد على اتصاله): العنوان الكامل + الهاتف + رمز الوسيط
+function contactOf(o) {
+  const d = (o && o.delivery) || {};
+  const house = str(d.houseNumber || d.house);
+  let addr = str(d.address) || str(d.street);
+  if (addr && house && !addr.includes(house)) addr += ' ' + house;
+  return {
+    name: str(o.customerName || d.name),
+    phone: str(o.customerPhone || d.phone),
+    code: str(o.verificationCode),
+    street: addr,
+    city: [str(d.postalCode || d.postal), str(d.city)].filter(Boolean).join(' '),
+    floor: str(d.floor),
+    note: str(d.notes),
+  };
+}
+
 // قائمة الطلبات المنتظرة للتابلت. deps.forecast(data, now, cart) و deps.view(order) بيجوا من السيرفر.
 function pending(data, now, deps) {
   const changed = sweep(data, now);
@@ -233,6 +250,7 @@ function pending(data, now, deps) {
       requestedAt: o.requestedAt || null,
       customerName: v.customerName,
       city: v.city,
+      contact: contactOf(o),
       notes: v.notes,
       items: v.items,
       payment: { method: pm === 'CASH' ? 'CASH' : 'ONLINE', cashDueCents: pm === 'CASH' ? Number(o.cashDueCents || o.totalCents) || 0 : 0 },
@@ -311,7 +329,7 @@ function board(data, now, deps) {
       stageAt: o.liveStageUpdatedAt || o.acceptedAt || o.confirmedAt || o.placedAt || null,
       dueAt: due ? iso(due) : null, minutesLeft: due ? Math.round((due - now) / MIN) : null,
       prepMinutes: Number(o.acceptMinutes) || null, deliveryMinutes: o.acceptDeliveryMinutes != null ? Number(o.acceptDeliveryMinutes) : (isPickup(o) ? 0 : DEFAULT_DELIVERY_MIN),
-      customerName: v.customerName, city: v.city, notes: v.notes, items: v.items,
+      customerName: v.customerName, city: v.city, contact: contactOf(o), notes: v.notes, items: v.items,
       payment: { method: pm === 'CASH' ? 'CASH' : 'ONLINE', cashDueCents: pm === 'CASH' ? Number(o.cashDueCents || o.totalCents) || 0 : 0 },
       sync: o.platformSync && o.platformSync.state ? { state: o.platformSync.state, error: o.platformSync.error || '' } : null,
     });

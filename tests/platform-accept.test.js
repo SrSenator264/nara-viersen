@@ -261,6 +261,14 @@ test('Loco: nach interner Annahme bleibt die Bestellung in PREPARE, auch wenn Si
   assert.equal(b.counts.PREPARE, 1); assert.equal(b.counts.WAIT, 0);
 });
 
+test('Board: Kontaktblock mit voller Adresse, Telefon und Code', () => {
+  const view = o => ({ displayCode: o.displayCode, type: 'delivery', customerName: '', city: '', notes: '', items: [] });
+  const o = mk({ id: 'c1', source: 'LIEFERANDO', customerPhone: '+491701234567', verificationCode: '4821', delivery: { address: 'Musterweg', houseNumber: '6', postalCode: '41749', city: 'Viersen', floor: '2. OG' } });
+  A.onImport(o, true, NOW);
+  const b = A.board({ orders: [o] }, NOW + 1000, { forecast: () => { throw new Error('x'); }, view });
+  assert.deepEqual(b.orders[0].contact, { name: '', phone: '+491701234567', code: '4821', street: 'Musterweg 6', city: '41749 Viersen', floor: '2. OG', note: '' });
+});
+
 test('Board/Zeiten/Stufe: Wartende zuerst, Uber intern, Abholung ohne Lieferzeit, wartende Bestellung nicht per Stufe änderbar', () => {
   const view = o => ({ displayCode: o.displayCode, type: o.type || 'delivery', customerName: '', city: '', notes: '', items: [] });
   const w = pendingOrder({ id: 'w1', displayCode: 'W1' });

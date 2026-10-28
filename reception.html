@@ -48,6 +48,11 @@ main{padding:12px 12px 40px}
 .sum{margin:4px 0;font-weight:700;font-size:1rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tog{display:block;width:100%;height:36px;margin:2px 0;border:0;border-radius:10px;background:#f0ede9;color:var(--mute);font-weight:700}
 .items .note{font-weight:600;color:#7a5200;font-size:.92rem;padding-inline-start:1.6em}
+.contact{margin:6px 0;padding:8px 10px;border-radius:10px;background:#eef3f7;font-size:.95rem;line-height:1.35}
+.contact .addr{font-weight:800;font-size:1.1rem}
+.contact .row2{color:var(--ink)}
+.contact a{color:#0b5cad;font-weight:800;text-decoration:none;font-size:1.05rem}
+.contact .code{background:#fff;border-radius:6px;padding:1px 6px;font-weight:800}
 .notes{margin:6px 0;padding:8px 10px;border-radius:10px;background:#fff0c2;border:2px solid #f0b400;color:#5c3d00;font-weight:800;font-size:1.02rem}
 .time{display:flex;align-items:center;gap:10px;margin:10px 0 4px;flex-wrap:wrap}
 .time .lbl{font-weight:700}
@@ -114,6 +119,7 @@ main{padding:12px 12px 40px}
   <div id="setRows"></div>
   <div class="row"><label for="vol" data-t="volume"></label><input type="range" id="vol" min="10" max="100" step="5"></div>
   <div class="row"><label for="rep" data-t="repeat"></label><select id="rep"></select></div>
+  <div id="diag" style="margin-top:10px;color:#6b7378;font-size:.85rem"></div>
   <button class="close" id="closeSet" type="button" data-t="close"></button>
 </div></div>
 <script>
@@ -158,8 +164,37 @@ const repeatSec=()=>{const v=Number(lsGet('nara-reception-repeat','10'));return 
 // ───── الصوت ─────
 let ctx=null;
 function audio(){if(ctx)return ctx;const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;try{ctx=new C()}catch(e){ctx=null}return ctx}
+// الطريقة الأساسية: ملف WAV بيتولّد ويتشغّل بعنصر Audio (نفس طريقة يوتيوب، أضمن على أندرويد)؛ WebAudio احتياط
+const wavUrls={};
+function wavUrl(style){
+  if(wavUrls[style])return wavUrls[style];
+  const R=22050,seq=TONES[style]||TONES.short,gap=Math.round(R*0.07);
+  let n=0;for(const [,d] of seq)n+=Math.round(R*d)+gap;
+  const buf=new ArrayBuffer(44+n*2),v=new DataView(buf);
+  const w=(o,str)=>{for(let i=0;i<str.length;i++)v.setUint8(o+i,str.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,R,true);v.setUint32(28,R*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  let o=44;
+  for(const [f,d] of seq){
+    const len=Math.round(R*d);
+    for(let i=0;i<len;i++){const e=Math.min(1,i/(R*0.015),(len-i)/(R*0.03));v.setInt16(o,Math.round(Math.sin(2*Math.PI*f*i/R)*e*0.9*32767),true);o+=2}
+    o+=gap*2;
+  }
+  return (wavUrls[style]=URL.createObjectURL(new Blob([buf],{type:'audio/wav'})));
+}
+function diag(msg){const e=$('#diag');if(e)e.textContent=msg}
 function playStyle(style){
   if(style==='off')return;
+  try{
+    if(typeof Audio==='function'&&typeof URL!=='undefined'&&URL.createObjectURL){
+      const a=new Audio(wavUrl(style));a.volume=Math.min(1,volume()/100);
+      const pr=a.play();
+      if(pr&&pr.then)pr.then(()=>diag('🔊 OK ('+style+')')).catch(err=>{diag('⚠️ '+(err&&err.name||'Fehler'));playWeb(style)});
+      return;
+    }
+  }catch(err){diag('⚠️ '+(err&&err.name||'Fehler'))}
+  playWeb(style);
+}
+function playWeb(style){
   const c=audio();if(!c)return;
   if(c.state!=='running'){      // أندرويد: resume غير فوري، فنستنى لحد ما يشتغل ثم نشغّل
     try{c.resume().then(()=>{if(c.state==='running')playNow(c,style)}).catch(()=>{})}catch(e){/* ignore */}
@@ -243,8 +278,19 @@ function itemsBlock(o,id,stg){
 }
 function stepsHtml(a,b,pick){return '<div class="times'+(pick?' one':'')+'">'+a+(pick?'':b)+'</div>'}
 function metaHtml(o){
-  const when=o.asap===false?t('at')+' '+fmt(o.requestedAt):t('asap');
-  return [o.type==='pickup'?t('pickup'):t('delivery'),o.city?esc(o.city):'',o.payment&&o.payment.method==='CASH'?t('cash'):t('online'),'🕒 '+esc(when)].filter(Boolean).join(' · ')+(o.customerName?' · '+esc(o.customerName):'');
+  const when=o.asap===false?'🕒 '+t('at')+' '+fmt(o.requestedAt):'';
+  return [o.type==='pickup'?t('pickup'):t('delivery'),o.payment&&o.payment.method==='CASH'?t('cash'):t('online'),when].filter(Boolean).join(' · ');
+}
+function contactHtml(o){
+  const c=o.contact||{},pick=o.type==='pickup',rows=[];
+  if(!pick&&c.street)rows.push('<div class="addr">📍 '+esc(c.street)+'</div>');
+  if(!pick&&c.city)rows.push('<div class="row2">'+esc(c.city)+(c.floor?' · 🏢 '+esc(c.floor):'')+'</div>');
+  else if(!pick&&c.floor)rows.push('<div class="row2">🏢 '+esc(c.floor)+'</div>');
+  if(c.name)rows.push('<div class="row2">👤 '+esc(c.name)+'</div>');
+  if(c.phone)rows.push('<div class="row2">📞 <a href="tel:'+esc(c.phone.replace(/[^+\d]/g,''))+'">'+esc(c.phone)+'</a>'+(c.code?' · 🔑 <span class="code">'+esc(c.code)+'</span>':'')+'</div>');
+  else if(c.code)rows.push('<div class="row2">🔑 <span class="code">'+esc(c.code)+'</span></div>');
+  if(!pick&&c.note&&c.note!==o.notes)rows.push('<div class="row2">📝 '+esc(c.note)+'</div>');
+  return rows.length?'<div class="contact">'+rows.join('')+'</div>':'';
 }
 function ringHtml(o){
   const ml=minsLeft(o),total=Math.max(1,(o.prepMinutes||25)+(o.deliveryMinutes!=null?o.deliveryMinutes:15));
@@ -265,7 +311,7 @@ function cardHtml(o){
     const m=mins[id]!=null?mins[id]:o.suggestedMinutes,d=dels[id]!=null?dels[id]:15;
     return '<article class="card '+st+'" style="--pc:'+pc+'" data-id="'+esc(id)+'">'
       +'<div class="top">'+badges+'<span class="age" data-ts="'+esc(o.pendingSince||o.placedAt||'')+'">'+esc(agoOf(o.pendingSince||o.placedAt))+'</span></div>'
-      +'<div class="meta">'+metaHtml(o)+'</div>'+itemsBlock(o,id,'WAIT')
+      +'<div class="meta">'+metaHtml(o)+'</div>'+contactHtml(o)+itemsBlock(o,id,'WAIT')
       +(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'')
       +stepsHtml(stepHtml(t('prep'),m,'minus','plus',busyNow),stepHtml(t('deliveryTime'),d,'dminus','dplus',busyNow),pick)
       +'<div class="saved">'+t('queue',o.queue||0)+'</div>'
@@ -277,7 +323,7 @@ function cardHtml(o){
   const stateTxt=e?(e.state==='ok'?t('saved'):(e.state==='err'?'⚠️ '+esc(e.msg||''):t('saving'))):(Date.now()-(savedAt[id]||0)<3000?t('saved'):'');
   const syncTxt=o.sync&&o.sync.state==='FAILED'?'<div class="sync2">⚠️ '+t('platformFail')+(o.sync.error?': '+esc(o.sync.error):'')+'</div>':'';
   let head='<div class="head">'+(stg==='DONE'?'':ringHtml(o))+'<div class="top">'+badges+'<span class="age" data-ts="'+esc(o.stageAt||o.acceptedAt||o.placedAt||'')+'">'+esc(agoOf(o.stageAt||o.acceptedAt||o.placedAt))+'</span></div></div>';
-  let body='<div class="meta">'+metaHtml(o)+'</div>'+(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'')+itemsBlock(o,id,stg);
+  let body='<div class="meta">'+metaHtml(o)+'</div>'+contactHtml(o)+(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'')+itemsBlock(o,id,stg);
   let times='',btn='';
   if(stg!=='DONE'){
     times=stepsHtml(stepHtml(t('prep'),prep,'minus','plus',false),stepHtml(t('deliveryTime'),del,'dminus','dplus',false),pick)+'<div class="saved">'+stateTxt+'</div>';
