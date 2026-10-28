@@ -118,6 +118,9 @@ function requestAccept(data, orderId, minutes, user, now = Date.now(), deliveryM
   if (o.acceptInternal || isInternalSource(o)) {      // المنصة قبلته لحالها: قبول داخلي فوري
     o.acceptState = 'ACCEPTED'; o.acceptedVia = 'NARA'; o.acceptedAt = iso(now); o.acceptMinutes = min; o.acceptDeliveryMinutes = del;
     o.acceptBy = str(user && user.name); o.acceptError = ''; o.updatedAt = iso(now); applyPromise(o, now);
+    // من هون المرحلة بإيد التابلت: إعادة استيراد المنصة (Loco بتحسب مرحلتها من جهازها) ما بتنقل الطلب لـ DONE وتخفيه
+    o.liveStage = 'PREPARE'; o.liveStageSource = 'NARA'; o.liveStageUpdatedAt = iso(now);
+    if (str(o.status).toUpperCase() === 'COMPLETED') { o.status = 'OPEN'; delete o.completedAt; }
     return { state: 'ACCEPTED', internal: true, printNow: true };
   }
   o.acceptState = 'ACCEPTING';

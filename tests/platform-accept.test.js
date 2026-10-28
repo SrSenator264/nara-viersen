@@ -250,6 +250,17 @@ test('Uber/Loco: neue frische Bestellung wird gehalten; Annahme ist intern (kein
   assert.equal(A.requestAccept(data, 'u1', 20, { name: 'K' }, NOW).already, true);
 });
 
+test('Loco: nach interner Annahme bleibt die Bestellung in PREPARE, auch wenn Sides sie beim Re-Import als DONE meldet', () => {
+  const view = o => ({ displayCode: o.displayCode, type: 'delivery', customerName: '', city: '', notes: '', items: [] });
+  const s = mk({ id: 's9', source: 'SIDES', platform: 'SIDES', brand: 'Loco Chicken', needsAccept: undefined, platformStatus: '1', placedAt: new Date(NOW - 60000).toISOString() });
+  assert.equal(A.onImport(s, true, NOW), 'HOLD');
+  const data = { orders: [s] };
+  A.requestAccept(data, 's9', 20, { name: 'K' }, NOW);
+  assert.equal(s.liveStage, 'PREPARE'); assert.equal(s.liveStageSource, 'NARA');
+  const b = A.board(data, NOW + 1000, { forecast: () => { throw new Error('x'); }, view });
+  assert.equal(b.counts.PREPARE, 1); assert.equal(b.counts.WAIT, 0);
+});
+
 test('Board/Zeiten/Stufe: Wartende zuerst, Uber intern, Abholung ohne Lieferzeit, wartende Bestellung nicht per Stufe änderbar', () => {
   const view = o => ({ displayCode: o.displayCode, type: o.type || 'delivery', customerName: '', city: '', notes: '', items: [] });
   const w = pendingOrder({ id: 'w1', displayCode: 'W1' });
