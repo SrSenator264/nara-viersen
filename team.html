@@ -84,7 +84,7 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
       var cl=document.createElement('label');cl.style.cssText='display:flex;gap:6px;align-items:center;font-size:.85rem';var ck=document.createElement('input');ck.type='checkbox';ck.checked=!!t.customers;ck.disabled=t.role==='OWNER';ck.onchange=function(){save(t,{customers:ck.checked})};cl.appendChild(ck);cl.appendChild(document.createTextNode(tt('custHist')));
       var wb=document.createElement('button');wb.textContent='📲 WhatsApp';wb.title=APPL[2];wb.hidden=t.role!=='DRIVER'||!t.active;wb.onclick=function(){sendApp(t.name)};
       db.hidden=!ME.canDelete;
-      var dl=document.createElement('label');dl.style.cssText=cl.style.cssText;var dk=document.createElement('input');dk.type='checkbox';dk.checked=!!t.canDelete;dk.disabled=t.role==='OWNER';dk.onchange=function(){save(t,{canDelete:dk.checked})};dl.appendChild(dk);dl.appendChild(document.createTextNode(tt('delPerm')));dl.hidden=!ME.owner||t.role==='OWNER';
+      var dl=document.createElement('label');dl.style.cssText=cl.style.cssText;var dk=document.createElement('input');dk.type='checkbox';dk.checked=!!t.canDelete;dk.disabled=t.role==='OWNER';dk.onchange=function(){save(t,{canDelete:dk.checked})};dl.appendChild(dk);dl.appendChild(document.createTextNode(tt('delPerm')));if(!ME.owner||t.role==='OWNER')dl.style.display='none';
       [n,s,cl,dl,pb,ab,db,wb].forEach(function(x){r.appendChild(x)});box.appendChild(r)
     });
   }
