@@ -2,13 +2,17 @@
    الفكرة: المنيو بكل الشاشة، وشريط سفلي ثابت «🛒 عدد · مجموع»، والسلة بتنزلق من تحت. التابلت ما بيتأثر. */
 @media screen and (max-width:640px){
   body{overflow:hidden}
-  body header{gap:8px;padding:4px 10px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  body header{gap:6px;padding:2px 8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
   body header::-webkit-scrollbar{display:none}
-  body header .brand img{height:30px!important}
+  body header .brand img{height:24px!important}
   body header strong[data-i18n=cashier]{display:none}
   body header .header-actions{width:auto;margin-inline-start:auto;flex:none;gap:6px;flex-wrap:nowrap}
   body header .language-switcher button{min-height:40px;padding:6px 8px;font-size:.85rem}
-  body header button,body header a{min-height:40px;font-size:.85rem;flex:none}
+  body header button,body header a{min-height:36px;font-size:.8rem;flex:none}
+  body .fn-bar{min-height:38px;padding:2px 8px;gap:6px}
+  body .fn-bar .fn-burger{height:34px}
+  body .fn-bar .fn-back{height:32px;padding:0 10px}
+  body .fn-bar .fn-menu{height:34px}
 
   /* التخطيط: عمود واحد، المنتجات هي يلي بتسكرول */
   body main{display:flex;flex-direction:column;gap:8px;padding:8px 8px calc(78px + env(safe-area-inset-bottom,0px))}
