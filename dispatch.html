@@ -57,6 +57,9 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
 #msg{position:fixed;bottom:14px;inset-inline-start:14px;background:#101820;color:#fff;padding:10px 14px;border-radius:10px;display:none;z-index:999}
 .pin{width:26px;height:26px;border-radius:50%;color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px #0006}
 .car{font-size:24px;filter:drop-shadow(0 1px 2px #0008)}
+.pin.sm{width:18px;height:18px;font-size:11px;border-width:1px}
+.arw{font-size:15px;line-height:16px;width:16px;height:16px;text-align:center;text-shadow:0 0 3px #fff,0 0 3px #fff}
+.tour.focus{outline:3px solid var(--c,#2563eb);outline-offset:-3px;background:#f8fafc}
 @media (max-width:900px){.wrap{grid-template-columns:1fr;height:auto}#map{height:55vh}aside{border:0}}
 </style>
 </head>
@@ -91,7 +94,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       noDrivers:'Keine Fahrer im System. Lege sie auf der Team-Seite (team.html) mit der Rolle „Fahrer“ an.',
       out:'🛵 Unterwegs · zurück ca. {t}',sentWait:'📦 Tour geschickt, noch nicht losgefahren',freeNow:'✅ Jetzt frei',freeAt:'Frei ab {t}',
       onWay:'Unterwegs',sent:'Geschickt',leftOf:'{a} von {b} offen',cancelSend:'Senden abbrechen',next:'Nächste Tour',after:'Danach',
-      depart:'Los {a} · zurück {b}',late:'{n} zu spät',sendTo:'📤 An {n} senden',route:'🗺️ Route',noOrders:'Gerade keine Bestellungen für ihn',
+      depart:'Los {a} · zurück {b}',late:'{n} zu spät',sendTo:'📤 An {n} senden',route:'🗺️ Google Maps',noOrders:'Gerade keine Bestellungen für ihn',
       unplaced:'Bestellungen ohne Position auf der Karte',unplacedHint:'Adresse fehlt oder ist falsch, oder wird noch gesucht (dauert bis zu einer Minute). Adresse an der Kasse korrigieren.',
       noAddr:'Ohne Adresse',waiting:'Wartet auf einen Fahrer',waitingHint:'Diese Bestellungen haben eine Position, aber es gibt noch keinen Fahrer, dem das System sie geben kann.',noOpen:'Keine offenen Lieferungen.',sentToast:'📤 An {n} geschickt',updated:'Aktualisiert {t}',login:'Bitte zuerst anmelden',loadErr:'Plan konnte nicht geladen werden: ',cancelled:'Senden abgebrochen'},
     ar:{title:'التوزيع',autoT:'بيبعت أول جولة لكل سواق لحاله لما يجي وقتها',auto:'بعت أوتوماتيك',
@@ -101,7 +104,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       noDrivers:'ما في سواقين بالنظام. ضيفهم من صفحة الفريق (team.html) بدور "سواق".',
       out:'🛵 طالع · بيرجع تقريباً {t}',sentWait:'📦 عنده جولة مبعوتة لسا ما طلع',freeNow:'✅ فاضي هلق',freeAt:'بيفضى الساعة {t}',
       onWay:'بالطريق',sent:'مبعوتة',leftOf:'{a} باقي من {b}',cancelSend:'لغي البعت',next:'الجولة الجاية',after:'بعدها',
-      depart:'طلوع {a} · رجعة {b}',late:'{n} متأخر',sendTo:'📤 بعت لـ{n}',route:'🗺️ المسار',noOrders:'ما في طلبات إله هلق',
+      depart:'طلوع {a} · رجعة {b}',late:'{n} متأخر',sendTo:'📤 بعت لـ{n}',route:'🗺️ Google Maps',noOrders:'ما في طلبات إله هلق',
       unplaced:'طلبات بدون موقع على الخريطة',unplacedHint:'العنوان ناقص أو غلط، أو لسا عم يندوّر عليه (بياخد لحد دقيقة). صلّح العنوان بالكاشير.',
       noAddr:'بدون عنوان',waiting:'ناطرة سواق',waitingHint:'هالطلبات إلها موقع، بس ما في سواق لحتى البرنامج يعطيه ياها.',noOpen:'ما في طلبات توصيل مفتوحة.',sentToast:'📤 انبعتت لـ {n}',updated:'تحديث {t}',login:'سجّل دخول أول',loadErr:'ما قدرت حمّل الخطة: ',cancelled:'انلغى البعت'},
     en:{title:'Driver dispatch',autoT:'Sends the first tour to each driver automatically when it is time',auto:'Auto send',
@@ -111,11 +114,11 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       noDrivers:'No drivers in the system. Add them on the team page (team.html) with the role "Driver".',
       out:'🛵 Out · back around {t}',sentWait:'📦 Tour sent, not left yet',freeNow:'✅ Free now',freeAt:'Free at {t}',
       onWay:'On the way',sent:'Sent',leftOf:'{a} of {b} left',cancelSend:'Cancel sending',next:'Next tour',after:'After that',
-      depart:'Leave {a} · back {b}',late:'{n} late',sendTo:'📤 Send to {n}',route:'🗺️ Route',noOrders:'No orders for this driver right now',
+      depart:'Leave {a} · back {b}',late:'{n} late',sendTo:'📤 Send to {n}',route:'🗺️ Google Maps',noOrders:'No orders for this driver right now',
       unplaced:'Orders without a map position',unplacedHint:'Address missing or wrong, or still being looked up (takes up to a minute). Fix the address at the till.',
       noAddr:'No address',waiting:'Waiting for a driver',waitingHint:'These orders have a position, but there is no driver yet for the system to give them to.',noOpen:'No open delivery orders.',sentToast:'📤 Sent to {n}',updated:'Updated {t}',login:'Please log in first',loadErr:'Could not load the plan: ',cancelled:'Sending cancelled'}
   };
-  Object.assign(T.de,{finish:'Tour beenden',finished:'Tour beendet',others:'Weitere offene Touren',menu:'Optionen',moveTo:'Zu anderem Fahrer verschieben',swapWith:'Mit Bestellung tauschen',prefs:'Einstellungen für diese Bestellung',pin:'🔒 Nur dieser Fahrer',pinNone:'— egal —',avoid:'🚫 Nicht diesen Fahrern geben',hold:'⏸ Zurückhalten (noch nicht verplanen)',urgent:'⚡ Dringend (zuerst)',solo:'1️⃣ Allein fahren (nicht mit anderen)',clearPrefs:'Alles zurücksetzen',pause:'⏸ Pause',resume:'▶ Weiter',maxS:'Max. Stopps',maxAuto:'Auto',held:'Zurückgehaltene Bestellungen',release:'Freigeben',close:'Schließen',paused:'Fahrer in Pause',moved:'Verschoben',swapped:'Getauscht',saved:'Gespeichert',noSwap:'Keine Bestellung zum Tauschen (nur Touren, die noch nicht losgefahren sind).',planNote:'Noch nicht gesendet: „Verschieben“ merkt sich den Fahrer für die Planung.',noMove:'Kein anderer Fahrer verfügbar.',up:'Nach oben',down:'Nach unten'});Object.assign(T.ar,{finish:'إنهاء الجولة',finished:'انتهت الجولة',others:'جولات مفتوحة تانية',menu:'خيارات',moveTo:'نقل لسائق تاني',swapWith:'تبديل مع طلب',prefs:'تفضيلات هالطلب',pin:'🔒 لهالسائق بس',pinNone:'— أي سائق —',avoid:'🚫 لا تعطيه لهدول السواقين',hold:'⏸ استنى (لا تخطّطه هلق)',urgent:'⚡ مستعجل (قدّمه)',solo:'1️⃣ لحاله (مو مع طلبات تانية)',clearPrefs:'رجّع كل شي للافتراضي',pause:'⏸ استراحة',resume:'▶ كمّل',maxS:'أقصى محطات',maxAuto:'أوتو',held:'طلبات موقوفة',release:'فكّ',close:'سكّر',paused:'سواقين بالاستراحة',moved:'اننقل',swapped:'انبدلوا',saved:'انحفظ',noSwap:'ما في طلب للتبديل (بس الجولات اللي لسا ما طلعت).',planNote:'لسا ما انبعت: "نقل" بيثبّت السائق بالخطة.',noMove:'ما في سائق تاني متاح.',up:'فوق',down:'تحت'});Object.assign(T.en,{finish:'End tour',finished:'Tour ended',others:'Other open tours',menu:'Options',moveTo:'Move to another driver',swapWith:'Swap with order',prefs:'Preferences for this order',pin:'🔒 Only this driver',pinNone:'— any —',avoid:'🚫 Never give to these drivers',hold:'⏸ Hold (do not plan yet)',urgent:'⚡ Urgent (first)',solo:'1️⃣ Ride alone (not with others)',clearPrefs:'Reset all',pause:'⏸ Break',resume:'▶ Resume',maxS:'Max stops',maxAuto:'Auto',held:'Held orders',release:'Release',close:'Close',paused:'Drivers on break',moved:'Moved',swapped:'Swapped',saved:'Saved',noSwap:'No order to swap with (only tours that have not left yet).',planNote:'Not sent yet: “Move” pins the driver for the plan.',noMove:'No other driver available.',up:'Up',down:'Down'});
+  Object.assign(T.de,{focusBtn:'🎯 Auf Karte',showAll:'👁 Alle zeigen',finish:'Tour beenden',finished:'Tour beendet',others:'Weitere offene Touren',menu:'Optionen',moveTo:'Zu anderem Fahrer verschieben',swapWith:'Mit Bestellung tauschen',prefs:'Einstellungen für diese Bestellung',pin:'🔒 Nur dieser Fahrer',pinNone:'— egal —',avoid:'🚫 Nicht diesen Fahrern geben',hold:'⏸ Zurückhalten (noch nicht verplanen)',urgent:'⚡ Dringend (zuerst)',solo:'1️⃣ Allein fahren (nicht mit anderen)',clearPrefs:'Alles zurücksetzen',pause:'⏸ Pause',resume:'▶ Weiter',maxS:'Max. Stopps',maxAuto:'Auto',held:'Zurückgehaltene Bestellungen',release:'Freigeben',close:'Schließen',paused:'Fahrer in Pause',moved:'Verschoben',swapped:'Getauscht',saved:'Gespeichert',noSwap:'Keine Bestellung zum Tauschen (nur Touren, die noch nicht losgefahren sind).',planNote:'Noch nicht gesendet: „Verschieben“ merkt sich den Fahrer für die Planung.',noMove:'Kein anderer Fahrer verfügbar.',up:'Nach oben',down:'Nach unten'});Object.assign(T.ar,{focusBtn:'🎯 بيّنها عالخريطة',showAll:'👁 بيّن الكل',finish:'إنهاء الجولة',finished:'انتهت الجولة',others:'جولات مفتوحة تانية',menu:'خيارات',moveTo:'نقل لسائق تاني',swapWith:'تبديل مع طلب',prefs:'تفضيلات هالطلب',pin:'🔒 لهالسائق بس',pinNone:'— أي سائق —',avoid:'🚫 لا تعطيه لهدول السواقين',hold:'⏸ استنى (لا تخطّطه هلق)',urgent:'⚡ مستعجل (قدّمه)',solo:'1️⃣ لحاله (مو مع طلبات تانية)',clearPrefs:'رجّع كل شي للافتراضي',pause:'⏸ استراحة',resume:'▶ كمّل',maxS:'أقصى محطات',maxAuto:'أوتو',held:'طلبات موقوفة',release:'فكّ',close:'سكّر',paused:'سواقين بالاستراحة',moved:'اننقل',swapped:'انبدلوا',saved:'انحفظ',noSwap:'ما في طلب للتبديل (بس الجولات اللي لسا ما طلعت).',planNote:'لسا ما انبعت: "نقل" بيثبّت السائق بالخطة.',noMove:'ما في سائق تاني متاح.',up:'فوق',down:'تحت'});Object.assign(T.en,{focusBtn:'🎯 On map',showAll:'👁 Show all',finish:'End tour',finished:'Tour ended',others:'Other open tours',menu:'Options',moveTo:'Move to another driver',swapWith:'Swap with order',prefs:'Preferences for this order',pin:'🔒 Only this driver',pinNone:'— any —',avoid:'🚫 Never give to these drivers',hold:'⏸ Hold (do not plan yet)',urgent:'⚡ Urgent (first)',solo:'1️⃣ Ride alone (not with others)',clearPrefs:'Reset all',pause:'⏸ Break',resume:'▶ Resume',maxS:'Max stops',maxAuto:'Auto',held:'Held orders',release:'Release',close:'Close',paused:'Drivers on break',moved:'Moved',swapped:'Swapped',saved:'Saved',noSwap:'No order to swap with (only tours that have not left yet).',planNote:'Not sent yet: “Move” pins the driver for the plan.',noMove:'No other driver available.',up:'Up',down:'Down'});
   const lang=window.NARA_LANG?NARA_LANG.get():'de';
   const t=(k,v)=>String((T[lang]||T.de)[k]??T.de[k]??k).replace(/\{(\w+)\}/g,(m,x)=>v&&v[x]!=null?v[x]:m);
   const tr=t; // للأماكن اللي فيها متغير اسمه t (جولة)
@@ -124,7 +127,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
   document.querySelectorAll('[data-tt]').forEach(e=>e.title=t(e.dataset.tt));
   if(window.NARA_LANG)NARA_LANG.mountSwitcher(document.getElementById('langsw'),{buttonStyle:'min-width:34px;height:30px;border-radius:8px;border:1px solid #ffffff40;background:#ffffff1a;color:#fff;font-weight:800;cursor:pointer'});
   const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-  let plan=null,busy=false,colorOf={},map=null,layer=null,fitted=false;
+  let plan=null,busy=false,colorOf={},map=null,layer=null,fitted=false,focus=null;
   $('#auto').checked=store.get('nara-dispatch-auto','0')==='1';
   $('#auto').onchange=()=>store.set('nara-dispatch-auto',$('#auto').checked?'1':'0');
 
@@ -151,25 +154,41 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
     layer=L.layerGroup().addTo(map);
     if($('#showCust').checked)showCustomers(true);
   }
-  const pin=(n,c)=>L.divIcon({className:'',html:'<div class="pin" style="background:'+c+'">'+esc(n)+'</div>',iconSize:[26,26],iconAnchor:[13,13]});
+  const pin=(n,c,sm)=>{const z=sm?18:26;return L.divIcon({className:'',html:'<div class="pin'+(sm?' sm':'')+'" style="background:'+c+'">'+esc(n)+'</div>',iconSize:[z,z],iconAnchor:[z/2,z/2]})};
 
-  function drawMap(){
+  // أسهم اتجاه على منتصف كل مقطع من الخط
+  function arrows(line,c){
+    for(let i=0;i<line.length-1;i++){
+      const a=line[i],b=line[i+1],pa=map.project(a,15),pb=map.project(b,15);
+      if(Math.hypot(pb.x-pa.x,pb.y-pa.y)<40)continue;
+      const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI;
+      L.marker([(a[0]+b[0])/2,(a[1]+b[1])/2],{interactive:false,keyboard:false,icon:L.divIcon({className:'',html:'<div class="arw" style="color:'+c+';transform:rotate('+ang+'deg)">➤</div>',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(layer);
+    }
+  }
+  const keysNow=()=>{const k=new Set();for(const r of plan.active||[])k.add('a:'+r.routeId);for(const d of plan.drivers||[])d.tours.forEach((_,i)=>k.add('p:'+d.driverId+':'+i));return k};
+
+  function drawMap(refit){
     if(!map||!plan)return;layer.clearLayers();
-    const shop=[plan.shop.lat,plan.shop.lng],pts=[shop];
+    const shop=[plan.shop.lat,plan.shop.lng],pts=[shop],tp={};
     L.marker(shop,{icon:L.divIcon({className:'',html:'<div class="pin" style="background:#101820">🏠</div>',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(layer).bindTooltip(esc(t('shop')));
-    for(const r of plan.active||[]){
-      const c=color(r.driverId),line=[shop];
-      r.stops.filter(s=>Number.isFinite(s.lat)).forEach((s,i)=>{line.push([s.lat,s.lng]);pts.push([s.lat,s.lng]);L.marker([s.lat,s.lng],{icon:pin(s.delivered?'✓':i+1,c),opacity:s.delivered?.5:1}).addTo(layer).bindTooltip(esc(s.code)+' · '+esc(s.address))});
-      L.polyline(line,{color:c,weight:4}).addTo(layer);
+    // جولة وحدة بتنرسم بوضوح: المختارة (focus) أو، إذا ما في اختيار، الجولة الأساسية لكل سواق. الباقي باهت أو مخفي.
+    function drawTour(key,c,stops,o){
+      const on=focus?focus===key:o.primary;
+      if(focus&&!on)return;
+      const line=[shop];
+      stops.forEach((s,i)=>{const pt=[s.lat,s.lng];line.push(pt);pts.push(pt);L.marker(pt,{icon:pin(s.delivered?'✓':i+1,c,!on),opacity:s.delivered?.5:(on?1:.4)}).addTo(layer).bindTooltip(o.tip(s))});
+      if(o.back)line.push(shop);
+      L.polyline(line,{color:c,weight:on?5:2,opacity:on?.95:.35,dashArray:(o.back||!on)?'6 8':null}).addTo(layer);
+      if(on)arrows(line,c);
+      tp[key]=line;
     }
-    for(const d of plan.drivers||[])for(const t of d.tours){
-      const c=color(d.driverId),line=[shop];
-      t.stops.forEach((s,i)=>{line.push([s.lat,s.lng]);pts.push([s.lat,s.lng]);L.marker([s.lat,s.lng],{icon:pin(i+1,c),opacity:.85}).addTo(layer).bindTooltip(esc(s.code)+' · '+esc(d.name)+' · '+hm(s.etaAt))});
-      line.push(shop);L.polyline(line,{color:c,weight:3,dashArray:'6 8',opacity:.8}).addTo(layer);
-    }
+    const hasAct=new Set((plan.active||[]).map(r=>r.driverId));
+    for(const r of plan.active||[])drawTour('a:'+r.routeId,color(r.driverId),r.stops.filter(s=>Number.isFinite(s.lat)),{primary:true,tip:s=>esc(s.code)+' · '+esc(s.address)});
+    for(const d of plan.drivers||[])d.tours.forEach((tt,i)=>drawTour('p:'+d.driverId+':'+i,color(d.driverId),tt.stops.filter(s=>Number.isFinite(s.lat)),{primary:i===0&&!hasAct.has(d.driverId),back:true,tip:s=>esc(s.code)+' · '+esc(d.name)+' · '+hm(s.etaAt)}));
     for(const u of plan.unplaced||[])if(Number.isFinite(u.lat)){L.marker([u.lat,u.lng],{icon:pin('•','#8a8f98'),opacity:.9}).addTo(layer).bindTooltip(esc(u.code||'')+' · '+esc(u.address||''));pts.push([u.lat,u.lng])}
     for(const p of plan.positions||[])if(Number.isFinite(p.lat)){const age=Math.max(0,Math.round((Date.now()-Date.parse(p.at))/60000)),old=age>=3;L.marker([p.lat,p.lng],{opacity:old?.45:1,icon:L.divIcon({className:'',html:'<div class="car">🛵'+(old?'<sup>?</sup>':'')+'</div>',iconSize:[28,28],iconAnchor:[14,14]})}).addTo(layer).bindTooltip(esc(p.name||'')+' · '+hm(p.at)+(old?' · '+age+' min':''),{permanent:true,direction:'top'});pts.push([p.lat,p.lng])}
-    if(!fitted&&pts.length>1){map.fitBounds(pts,{padding:[30,30]});fitted=true}
+    if(refit&&focus&&tp[focus]&&tp[focus].length>1)map.fitBounds(tp[focus],{padding:[50,50]});
+    else if((!fitted||refit)&&pts.length>1){map.fitBounds(pts,{padding:[30,30]});fitted=true}
   }
 
   const pf=id=>((plan&&plan.prefs&&plan.prefs.orders)||{})[String(id)]||{};
@@ -182,6 +201,7 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
     let h='';
     if(plan.assumedDrivers)h+='<div class="box warn">'+esc(t('assumed'))+'</div>';
     if(!plan.ok&&plan.reason==='NO_DRIVERS')h+='<div class="box warn">'+esc(t('noDrivers'))+'</div>';
+    const fb=key=>'<button class="btn sec" data-focus="'+esc(key)+'">'+(focus===key?t('showAll'):t('focusBtn'))+'</button>';
     const byDriver={};for(const r of plan.active||[])(byDriver[r.driverId]??=[]).push(r);
     for(const d of plan.drivers||[]){
       const c=color(d.driverId),act=byDriver[d.driverId]||[],out=act.some(r=>r.startedAt);
@@ -190,15 +210,16 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       h+='<section class="drv" style="--c:'+c+'"><h2>'+esc(d.name||d.driverId)+'</h2><div class="st">'+st+'</div><div class="dh"><button class="mini" data-pause="'+esc(d.driverId)+'">'+t('pause')+'</button><span class="muted">'+t('maxS')+'</span><select data-maxs="'+esc(d.driverId)+'"><option value="0">'+t('maxAuto')+'</option>'+[1,2,3,4,5,6,7,8].map(n=>'<option value="'+n+'"'+(dp.maxStops===n?' selected':'')+'>'+n+'</option>').join('')+'</select></div>';
       for(const r of act){
         const left=r.stops.filter(s=>!s.delivered).length;
-        h+='<div class="tour"><div class="hd">'+(r.startedAt?t('onWay'):t('sent'))+' <span class="t">'+t('leftOf',{a:left,b:r.stops.length})+'</span></div>'
+        h+='<div class="tour'+(focus==='a:'+r.routeId?' focus':'')+'"><div class="hd">'+(r.startedAt?t('onWay'):t('sent'))+' <span class="t">'+t('leftOf',{a:left,b:r.stops.length})+'</span></div>'
           +r.stops.map((s,i)=>'<div class="stop'+(s.delivered?' done':'')+'"><span class="n">'+(i+1)+'</span><span class="c">'+esc(s.code)+badges(s.orderId)+'</span><span class="a">'+esc(s.address)+'</span>'+(r.startedAt||r.canEdit===false||s.delivered?'':'<button class="mini" title="'+esc(t('up'))+'" data-up="'+esc(r.routeId)+'" data-i="'+i+'"'+(i?'':' disabled')+'>⬆️</button><button class="mini" title="'+esc(t('down'))+'" data-down="'+esc(r.routeId)+'" data-i="'+i+'"'+(i<r.stops.length-1?'':' disabled')+'>⬇️</button>'+menuBtn(s.orderId,true))+'</div>').join('')
-          +(r.startedAt?'<div class="btns"><button class="btn sec" data-finish="'+esc(r.routeId)+'">'+t('finish')+'</button></div>':'<div class="btns"><button class="btn red" data-cancel="'+esc(r.routeId)+'">'+t('cancelSend')+'</button></div>')+'</div>';
+          +(r.startedAt?'<div class="btns">'+fb('a:'+r.routeId)+'<button class="btn sec" data-finish="'+esc(r.routeId)+'">'+t('finish')+'</button></div>':'<div class="btns">'+fb('a:'+r.routeId)+'<button class="btn red" data-cancel="'+esc(r.routeId)+'">'+t('cancelSend')+'</button></div>')+'</div>';
       }
       d.tours.forEach((t,i)=>{
         const late=t.stops.map(s=>plan.assignments.find(a=>a.orderId===s.orderId)).filter(a=>a&&a.lateMin);
-        h+='<div class="tour"><div class="hd">'+(i===0&&!act.length?tr('next'):tr('after'))+' <span class="t">'+tr('depart',{a:hm(t.departAt),b:hm(t.backAt)})+'</span>'+(late.length?'<span class="late-b">'+tr('late',{n:late.length})+'</span>':'')+'</div>'
+        const key='p:'+d.driverId+':'+i;
+        h+='<div class="tour'+(focus===key?' focus':'')+'"><div class="hd">'+(i===0&&!act.length?tr('next'):tr('after'))+' <span class="t">'+tr('depart',{a:hm(t.departAt),b:hm(t.backAt)})+'</span>'+(late.length?'<span class="late-b">'+tr('late',{n:late.length})+'</span>':'')+'</div>'
           +t.stops.map((s,k)=>{const a=plan.assignments.find(x=>x.orderId===s.orderId)||{};return '<div class="stop'+(a.lateMin?' late':'')+'"><span class="n">'+(k+1)+'</span><span class="c">'+esc(s.code)+badges(s.orderId)+'</span><span class="a">'+esc(s.address||s.name||'')+'</span><span class="e">'+hm(s.etaAt)+(a.lateMin?' (+'+a.lateMin+')':'')+'</span>'+menuBtn(s.orderId,false)+'</div>'}).join('')
-          +(i===0?'<div class="btns"><button class="btn" data-send="'+esc(d.driverId)+'" data-tour="0">'+tr('sendTo',{n:esc(d.name||'')})+'</button>'+(t.googleMapsUrl?'<a class="btn sec" target="_blank" rel="noopener" href="'+esc(t.googleMapsUrl)+'">'+tr('route')+'</a>':'')+'</div>':'')+'</div>';
+          +'<div class="btns">'+(i===0?'<button class="btn" data-send="'+esc(d.driverId)+'" data-tour="0">'+tr('sendTo',{n:esc(d.name||'')})+'</button>':'')+fb(key)+(i===0&&t.googleMapsUrl?'<a class="btn sec" target="_blank" rel="noopener" href="'+esc(t.googleMapsUrl)+'">'+tr('route')+'</a>':'')+'</div></div>';
       });
       if(!d.tours.length&&!act.length)h+='<div class="tour muted">'+t('noOrders')+'</div>';
       h+='</section>';
@@ -276,11 +297,13 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
         for(const d of plan.drivers||[])if(d.tours[0]&&!sent.has(d.driverId)&&Date.parse(d.tours[0].departAt)<=Date.now()+60000){try{await send(d.driverId);any=true}catch(e){toast(e.message)}}
         if(any)plan=await api('GET','/api/delivery/auto-plan');
       }
+      if(focus&&!keysNow().has(focus))focus=null;
       render();drawMap();$('#upd').textContent=t('updated',{t:hm(Date.now())});
     }catch(e){$('#side').innerHTML='<div class="box warn">'+esc(e.message==='401'?t('login'):t('loadErr')+e.message)+'</div>'}
     finally{busy=false}
   }
   $('#side').addEventListener('click',async e=>{
+    const fo=e.target.closest('[data-focus]');if(fo){focus=focus===fo.dataset.focus?null:fo.dataset.focus;render();drawMap(true);return}
     const m=e.target.closest('[data-menu]');if(m)return openMenu(m.dataset.menu);
     const up=e.target.closest('[data-up]'),dn=e.target.closest('[data-down]'),ps=e.target.closest('[data-pause]'),rs=e.target.closest('[data-resume]'),rl=e.target.closest('[data-release]');
     if(up||dn){const b=up||dn,r=(plan.active||[]).find(x=>x.routeId===(up?b.dataset.up:b.dataset.down));if(!r)return;const i=Number(b.dataset.i),j=up?i-1:i+1,ids=r.stops.map(x=>x.orderId);[ids[i],ids[j]]=[ids[j],ids[i]];b.disabled=true;try{await api('POST','/api/delivery/reorder',{routeId:r.routeId,orderIds:ids})}catch(err){toast(err.message)}return load()}
