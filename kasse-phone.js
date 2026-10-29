@@ -24,6 +24,26 @@
     if(t!==lastTotal&&lastTotal!==''){bar.classList.remove('bump');void bar.offsetWidth;bar.classList.add('bump')}
     lastTotal=t;
   }
+  // معلومات الطلب المطوية: سطر ملخّص (طاولة · طلب مفتوح) بينفتح/بينطوي
+  const strip=document.querySelector('.order-strip'),types=strip&&strip.querySelector('.order-types');
+  if(strip&&types){
+    const tg=document.createElement('button');tg.id='phone-strip-toggle';tg.type='button';
+    tg.innerHTML='<span class="pst-sum"></span><span class="pst-arrow">⌄</span>';
+    types.after(tg);
+    const sum=tg.querySelector('.pst-sum');
+    const selTxt=id=>{const s=document.querySelector(id);return s&&s.selectedOptions&&s.selectedOptions[0]?s.selectedOptions[0].textContent.trim():''};
+    const upd=()=>{
+      const t=document.querySelector('.table-picker');
+      const parts=[];
+      if(t&&!t.hidden){const x=selTxt('#table-number');if(x)parts.push(x)}
+      const o=selTxt('#open-order');if(o)parts.push(o);
+      const v=parts.join(' · ')||'⋯';if(sum.textContent!==v)sum.textContent=v;
+    };
+    tg.addEventListener('click',()=>document.body.classList.toggle('phone-strip-open'));
+    strip.addEventListener('change',upd);
+    new MutationObserver(upd).observe(strip,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','selected']});
+    upd();setTimeout(upd,1500);
+  }
   const open=()=>document.body.classList.add('phone-cart-open');
   const close=()=>document.body.classList.remove('phone-cart-open');
   bar.addEventListener('click',open);

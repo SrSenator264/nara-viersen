@@ -14,6 +14,12 @@
   body main{display:flex;flex-direction:column;gap:8px;padding:8px 8px calc(78px + env(safe-area-inset-bottom,0px))}
   body .nara-kasse-monitor{display:none}
   body .order-strip{padding:8px;gap:6px;border-radius:16px}
+  /* معلومات الطلب (طاولة / طلبات مفتوحة / مصدر): مطوية، بتنفتح بالضغط على السطر */
+  body #phone-strip-toggle{flex:1 1 100%;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:0 14px;border-radius:14px;background:#f2f4ef;color:var(--t-ink);font-size:.95rem;font-weight:700;text-align:start}
+  body #phone-strip-toggle .pst-sum{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  body #phone-strip-toggle .pst-arrow{flex:none;transition:transform .2s}
+  body.phone-strip-open #phone-strip-toggle .pst-arrow{transform:rotate(180deg)}
+  body:not(.phone-strip-open) .order-strip>:not(.order-types):not(#phone-strip-toggle){display:none!important}
   body .order-types{width:100%;gap:6px}
   body .order-types button{flex:1 1 0;min-width:0;min-height:48px;padding:0 6px;font-size:.95rem;border-radius:14px}
   body .table-picker,body .open-orders{flex:1 1 100%;min-width:0}
