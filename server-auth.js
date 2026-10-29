@@ -40,7 +40,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     if (!s || s.exp < Date.now()) return null;
     const acc = store.accounts[s.employeeId];
     if (!acc || acc.active === false) return null;
-    return { id: s.employeeId, name: s.name, role: acc.role, customers: acc.role === 'OWNER' || acc.customers === true };
+    return { id: s.employeeId, name: s.name, role: acc.role, customers: acc.role === 'OWNER' || acc.customers === true, canDelete: acc.role === 'OWNER' || acc.canDelete === true };
   }
   function serviceOk(req) {
     const key = process.env.NARA_SERVICE_KEY;
@@ -67,7 +67,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     const tok = A.newToken();
     store.sessions[A.tokenHash(tok)] = { employeeId, name, exp: Date.now() + SESSION_MS };
     save();
-    replyC(res, 200, { ok: true, user: { id: employeeId, name, role, customers: role === 'OWNER' || store.accounts[employeeId]?.customers === true } }, cookieHeader(req, tok, SESSION_MS / 1000));
+    replyC(res, 200, { ok: true, user: { id: employeeId, name, role, customers: role === 'OWNER' || store.accounts[employeeId]?.customers === true, canDelete: role === 'OWNER' || store.accounts[employeeId]?.canDelete === true } }, cookieHeader(req, tok, SESSION_MS / 1000));
   }
 
   // يرجع true إذا الطلب انتهى (مرفوض أو endpoint دخول)
@@ -180,11 +180,12 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
     if (p === '/api/auth/team' && m === 'GET') {
       const data = readAdminData();
       const ids = new Set([...(data.employees || []).filter(e => !e.archivedAt).map(e => e.id), ...Object.keys(store.accounts)]);
-      const team = [...ids].map(id => { const a = store.accounts[id]; const e = (data.employees || []).find(x => x.id === id); return { id, name: nameOf(data, id), role: a?.role || null, active: a ? a.active !== false : false, hasPin: !!a?.pin, customers: a?.role === 'OWNER' || a?.customers === true, employeeActive: e ? e.active !== false : false, empRole: e ? A.normalizeRole(e.role) : null }; });
-      replyC(res, 200, { ok: true, team, roles: A.ROLES }); return true;
+      const team = [...ids].map(id => { const a = store.accounts[id]; const e = (data.employees || []).find(x => x.id === id); return { id, name: nameOf(data, id), role: a?.role || null, active: a ? a.active !== false : false, hasPin: !!a?.pin, customers: a?.role === 'OWNER' || a?.customers === true, canDelete: a?.role === 'OWNER' || a?.canDelete === true, employeeActive: e ? e.active !== false : false, empRole: e ? A.normalizeRole(e.role) : null }; });
+      replyC(res, 200, { ok: true, team, roles: A.ROLES, me: { owner: req.naraUser.role === 'OWNER', canDelete: !!req.naraUser.canDelete } }); return true;
     }
     if (p === '/api/auth/staff/delete' && m === 'POST') {
       readJson(req, res, 2000, b => {
+        if (!req.naraUser.canDelete) return reply(res, 403, { error: 'Löschen darf nur der Inhaber oder wer die Berechtigung vom Inhaber bekommt.', code: 'FORBIDDEN' });
         const id = String(b.id || ''), acc = store.accounts[id], data = readAdminData();
         const emp = (data.employees || []).find(e => e.id === id);
         if (!acc && !emp) return reply(res, 404, { error: 'Mitarbeiter nicht gefunden.' });
@@ -233,7 +234,8 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
         else { emp.name = name; emp.role = role; emp.active = active; emp.updatedAt = now; }
         writeAdminData(data);
         const custGrant = req.naraUser.role === 'OWNER' && b.customers !== undefined ? b.customers === true : prev?.customers === true;
-        store.accounts[id] = { role, active, pin: b.pin ? A.hashPin(b.pin) : prev?.pin, ...(custGrant ? { customers: true } : {}) };
+        const delGrant = req.naraUser.role === 'OWNER' && b.canDelete !== undefined ? b.canDelete === true : prev?.canDelete === true;
+        store.accounts[id] = { role, active, pin: b.pin ? A.hashPin(b.pin) : prev?.pin, ...(custGrant ? { customers: true } : {}), ...(delGrant && role !== 'OWNER' ? { canDelete: true } : {}) };
         if (b.pin || !active || (prev && prev.role !== role)) revoke(id);
         save();
         replyC(res, 200, { ok: true, id });

@@ -356,3 +356,20 @@ test('staff delete: removes login, keeps record archived, protects self / last m
   assert.ok(!team.json.team.some(t => t.id === id));
   const lg = await call('POST', '/api/auth/login', { employeeId: id, pin: '7351' }); assert.notEqual(lg.status, 200);
 });
+
+test('staff delete permission: only owner or whoever the owner grants (manager without grant gets 403)', async () => {
+  const mg = await call('POST', '/api/auth/staff', { name: 'mgr-del', role: 'MANAGER', pin: '618204' }, S.owner); assert.equal(mg.status, 200, JSON.stringify(mg.json));
+  const lg = await login(mg.json.id, '618204'); assert.equal(lg.status, 200); const M = lg.cookie;
+  assert.equal(lg.json.user.canDelete, false);
+  const v = await call('POST', '/api/auth/staff', { name: 'victim', role: 'CASHIER', pin: '7351' }, S.owner); const vid = v.json.id;
+  assert.equal((await call('POST', '/api/auth/staff/delete', { id: vid }, M)).status, 403);        // Manager ohne Recht
+  assert.equal((await call('POST', '/api/auth/staff', { id: mg.json.id, name: 'mgr-del', role: 'MANAGER', canDelete: true }, M)).status, 200); // Manager kann sich nichts geben
+  assert.equal((await call('POST', '/api/auth/staff/delete', { id: vid }, M)).status, 403);
+  assert.equal((await call('GET', '/api/auth/team', null, M)).json.me.canDelete, false);
+  assert.equal((await call('POST', '/api/auth/staff', { id: mg.json.id, name: 'mgr-del', role: 'MANAGER', canDelete: true }, S.owner)).status, 200); // Inhaber vergibt
+  const t = await call('GET', '/api/auth/team', null, S.owner);
+  assert.equal(t.json.team.find(x => x.id === mg.json.id).canDelete, true); assert.equal(t.json.me.owner, true);
+  assert.equal((await call('GET', '/api/auth/team', null, M)).json.me.canDelete, true);
+  assert.equal((await call('POST', '/api/auth/staff/delete', { id: vid }, M)).status, 200);        // jetzt erlaubt
+  assert.equal((await call('POST', '/api/auth/staff/delete', { id: vid }, S.cashier)).status, 403); // Kasse weiterhin nie
+});
