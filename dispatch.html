@@ -152,18 +152,37 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
     map=L.map('map',{zoomControl:true}).setView([51.2556,6.3936],13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
     layer=L.layerGroup().addTo(map);
+    map.on('zoomend',()=>drawMap());
     if($('#showCust').checked)showCustomers(true);
   }
   const pin=(n,c,sm)=>{const z=sm?18:26;return L.divIcon({className:'',html:'<div class="pin'+(sm?' sm':'')+'" style="background:'+c+'">'+esc(n)+'</div>',iconSize:[z,z],iconAnchor:[z/2,z/2]})};
 
-  // أسهم اتجاه على منتصف كل مقطع من الخط
-  function arrows(line,c){
-    for(let i=0;i<line.length-1;i++){
-      const a=line[i],b=line[i+1],pa=map.project(a,15),pb=map.project(b,15);
-      if(Math.hypot(pb.x-pa.x,pb.y-pa.y)<40)continue;
+  // أسهم اتجاه موزّعة على طول الخط (كل ~90 بكسل)
+  function arrows(path,c){
+    const z=map.getZoom();let acc=60;
+    for(let i=0;i<path.length-1;i++){
+      const a=path[i],b=path[i+1],pa=map.project(a,z),pb=map.project(b,z),d=Math.hypot(pb.x-pa.x,pb.y-pa.y);
+      acc+=d;if(acc<90||d<6)continue;acc=0;
       const ang=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI;
       L.marker([(a[0]+b[0])/2,(a[1]+b[1])/2],{interactive:false,keyboard:false,icon:L.divIcon({className:'',html:'<div class="arw" style="color:'+c+';transform:rotate('+ang+'deg)">➤</div>',iconSize:[16,16],iconAnchor:[8,8]})}).addTo(layer);
     }
+  }
+  // مسار الشوارع من OSRM (مجاني). بنحفظه بالذاكرة؛ إذا فشل بنضل على الخط المستقيم.
+  const roadCache=new Map(),RETRY_MS=300000;
+  let redrawT=null;
+  function roadFor(line){
+    const key=line.map(p=>p[0].toFixed(5)+','+p[1].toFixed(5)).join(';'),e=roadCache.get(key);
+    if(e&&e.path)return e.path;
+    if(e&&(e.pending||Date.now()-e.at<RETRY_MS))return null;
+    if(roadCache.size>60)roadCache.delete(roadCache.keys().next().value);
+    const ent={pending:true,at:Date.now()};roadCache.set(key,ent);
+    const ac=window.AbortController?new AbortController():null,to=setTimeout(()=>ac&&ac.abort(),8000);
+    fetch('https://router.project-osrm.org/route/v1/driving/'+line.map(p=>p[1]+','+p[0]).join(';')+'?overview=full&geometries=geojson',{signal:ac?ac.signal:undefined})
+      .then(r=>r.ok?r.json():Promise.reject(new Error(r.status)))
+      .then(j=>{const g=j&&j.routes&&j.routes[0]&&j.routes[0].geometry&&j.routes[0].geometry.coordinates;if(!g||g.length<2)throw Error('empty');ent.path=g.map(c=>[c[1],c[0]])})
+      .catch(()=>{})
+      .finally(()=>{clearTimeout(to);ent.pending=false;ent.at=Date.now();if(ent.path){clearTimeout(redrawT);redrawT=setTimeout(()=>drawMap(),150)}});
+    return null;
   }
   const keysNow=()=>{const k=new Set();for(const r of plan.active||[])k.add('a:'+r.routeId);for(const d of plan.drivers||[])d.tours.forEach((_,i)=>k.add('p:'+d.driverId+':'+i));return k};
 
@@ -178,8 +197,9 @@ aside{overflow:auto;padding:10px;border-inline-end:1px solid var(--line)}
       const line=[shop];
       stops.forEach((s,i)=>{const pt=[s.lat,s.lng];line.push(pt);pts.push(pt);L.marker(pt,{icon:pin(s.delivered?'✓':i+1,c,!on),opacity:s.delivered?.5:(on?1:.4)}).addTo(layer).bindTooltip(o.tip(s))});
       if(o.back)line.push(shop);
-      L.polyline(line,{color:c,weight:on?5:2,opacity:on?.95:.35,dashArray:(o.back||!on)?'6 8':null}).addTo(layer);
-      if(on)arrows(line,c);
+      const road=on&&line.length>1?roadFor(line):null,path=road||line;
+      L.polyline(path,{color:c,weight:on?5:2,opacity:on?.95:.35,dashArray:(!road&&(o.back||!on))||(!on)?'6 8':null}).addTo(layer);
+      if(on)arrows(path,c);
       tp[key]=line;
     }
     const hasAct=new Set((plan.active||[]).map(r=>r.driverId));
