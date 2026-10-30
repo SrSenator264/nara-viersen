@@ -35,12 +35,15 @@ main{max-width:640px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
 <main>
   <section class="card" id="c-bread"></section>
   <section class="card" id="c-loco"></section>
+  <section class="card" id="c-meat"></section>
   <section class="card">
     <h2>⚙️ <span data-t="settings"></span></h2>
     <div class="set">
       <label><span data-t="time"></span><input id="s-time" type="time"></label>
       <label><span data-t="locoDays"></span><input id="s-loco" type="number" min="1" max="14"></label>
       <label><span data-t="weekly"></span><input id="s-week" type="number" min="1" max="7"></label>
+      <label><span data-t="meatTime"></span><input id="s-mtime" type="time"></label>
+      <label><span data-t="meatDays"></span><input id="s-mdays" type="number" min="1" max="14"></label>
     </div>
     <button class="btn ghost" id="save" type="button">💾 <span data-t="save"></span></button>
     <div class="mute" style="margin-top:10px" id="tg"></div>
@@ -53,6 +56,10 @@ FT.init({
   title:{de:'Erinnerungen',ar:'تنبيهات',en:'Reminders'},
   bread:{de:'Brot',ar:'الخبز',en:'Bread'},
   loco:{de:'Loco',ar:'Loco',en:'Loco'},
+  meat:{de:'Fleisch',ar:'اللحم',en:'Meat'},
+  meat_hint:{de:'Prüfen, ob wir Fleisch bestellen müssen.',ar:'شيّك إذا بدنا لحم.',en:'Check whether we need to order meat.'},
+  meatTime:{de:'Fleisch: Uhrzeit',ar:'اللحم: وقت التذكير',en:'Meat: reminder time'},
+  meatDays:{de:'Fleisch: Pause (Tage)',ar:'اللحم: سكوت (أيام)',en:'Meat: pause (days)'},
   due:{de:'Heute noch nicht bestellt!',ar:'لسا ما انطلب اليوم!',en:'Not ordered yet today!'},
   doneToday:{de:'Heute bestellt ✅',ar:'انطلب اليوم ✅',en:'Ordered today ✅'},
   waitTime:{de:'Erinnerung kommt ab {t} Uhr',ar:'التذكير بيجي من الساعة {t}',en:'Reminder starts at {t}'},
@@ -83,7 +90,7 @@ function when(a){return a?((a.by?a.by+' · ':'')+new Date(a.at).toLocaleDateStri
 function card(id,icon,x,extra){
   const el=$('c-'+id);if(!x){el.textContent='';return}
   const state=x.orderedToday?'<div class="big ok">'+t('doneToday')+'</div>':x.due?'<div class="big warn">'+t('due')+'</div>'
-    :(id==='loco'&&!x.eligible)?'<div class="big mute">'+t('waitDays',{n:x.nextEligibleIn})+'</div>':'<div class="big mute">'+t('waitTime',{t:S.time})+'</div>';
+    :(id!=='bread'&&!x.eligible)?'<div class="big mute">'+t('waitDays',{n:x.nextEligibleIn})+'</div>':'<div class="big mute">'+t('waitTime',{t:id==='meat'?S.settings.meatTime:S.time})+'</div>';
   el.className='card'+(x.due?' due':'');
   el.innerHTML='<h2>'+icon+' '+t(id)+'</h2>'+state+(extra||'')+'<div class="mute">'+t('last',{w:when(x.last)})+'</div>'
     +'<button class="btn" type="button" data-id="'+id+'">✅ '+t('ordered')+'</button>';
@@ -93,7 +100,8 @@ function draw(){
   const b=S.bread,dots='<div class="dots">'+Array.from({length:b.weekTarget},(_,i)=>i<b.weekCount?'✅':'⬜').join('')+'</div>';
   card('bread','🍞',b,dots+'<div class="mute">'+t('week',{n:b.weekCount,m:b.weekTarget})+'</div>');
   card('loco','🧊',S.loco,'<div class="mute">'+t('loco_hint')+'</div>');
-  $('s-time').value=S.settings.time;$('s-loco').value=S.settings.locoDays;$('s-week').value=S.settings.breadWeekly;
+  card('meat','🥩',S.meat,'<div class="mute">'+t('meat_hint')+'</div>');
+  $('s-time').value=S.settings.time;$('s-loco').value=S.settings.locoDays;$('s-week').value=S.settings.breadWeekly;$('s-mtime').value=S.settings.meatTime;$('s-mdays').value=S.settings.meatDays;
   $('tg').textContent=t(S.telegram?'tgOn':'tgOff');
 }
 async function load(){try{const r=await fetch('/api/reminders',{cache:'no-store'});if(!r.ok)throw 0;S=await r.json();draw()}catch(e){say($('msg'),'err')}}
@@ -104,7 +112,7 @@ document.addEventListener('click',async e=>{
   try{S=Object.assign(S||{},await post('/api/reminders/done',{id:b.dataset.id}));draw()}catch(x){say($('msg'),'err')}
   b.disabled=false;
 });
-$('save').onclick=async()=>{try{S=Object.assign(S||{},await post('/api/reminders/settings',{time:$('s-time').value,locoDays:$('s-loco').value,breadWeekly:$('s-week').value}));draw();say($('msg'),'saved')}catch(e){say($('msg'),'err')}};
+$('save').onclick=async()=>{try{S=Object.assign(S||{},await post('/api/reminders/settings',{time:$('s-time').value,locoDays:$('s-loco').value,breadWeekly:$('s-week').value,meatTime:$('s-mtime').value,meatDays:$('s-mdays').value}));draw();say($('msg'),'saved')}catch(e){say($('msg'),'err')}};
 $('test').onclick=async()=>{try{const r=await post('/api/reminders/test');say($('msg'),r.sent?'testOk':'testFail')}catch(e){say($('msg'),'err')}};
 load();setInterval(load,30000);
 </script>

@@ -2,9 +2,9 @@
 // kasse-reminders.js — بوب-أب تذكير الخبز/Loco على الكاشير (بدون زر ثابت). بيطلع لما التذكير مستحق، "لاحقاً" بيخبّيه 30 دقيقة.
 (function () {
   const TXT = {
-    de: { bread: '🍞 Brot bestellen!', loco: '🧊 Loco: Kühlschränke prüfen und bestellen', done: 'Bestellt ✅', later: 'Später', week: 'Diese Woche: {n} von {m}' },
-    ar: { bread: '🍞 اطلبوا الخبز!', loco: '🧊 Loco: شيّكوا البرادات واعملوا جرد واطلبوا', done: 'انطلب ✅', later: 'لاحقاً', week: 'هالأسبوع: {n} من {m}' },
-    en: { bread: '🍞 Order bread!', loco: '🧊 Loco: check fridges, count stock and order', done: 'Ordered ✅', later: 'Later', week: 'This week: {n} of {m}' },
+    de: { bread: '🍞 Brot bestellen!', loco: '🧊 Loco: Kühlschränke prüfen und bestellen', meat: '🥩 Fleisch: prüfen, ob wir bestellen müssen', done: 'Bestellt ✅', later: 'Später', week: 'Diese Woche: {n} von {m}' },
+    ar: { bread: '🍞 اطلبوا الخبز!', loco: '🧊 Loco: شيّكوا البرادات واعملوا جرد واطلبوا', meat: '🥩 اللحم: شيّكوا إذا بدنا نطلب', done: 'انطلب ✅', later: 'لاحقاً', week: 'هالأسبوع: {n} من {m}' },
+    en: { bread: '🍞 Order bread!', loco: '🧊 Loco: check fridges, count stock and order', meat: '🥩 Meat: check whether we need to order', done: 'Ordered ✅', later: 'Later', week: 'This week: {n} of {m}' },
   };
   const lang = () => { try { if (window.NARA_LANG) return window.NARA_LANG.get(); const l = localStorage.getItem('nara-kasse-language'); return TXT[l] ? l : 'de'; } catch (e) { return 'de'; } };
   const tx = (k, v) => String((TXT[lang()] || TXT.de)[k] || '').replace(/\{(\w+)\}/g, (_, x) => (v && v[x] != null ? v[x] : ''));
@@ -15,7 +15,7 @@
 
   function close() { if (box) { box.remove(); box = null; } }
   function render(s) {
-    const items = ['bread', 'loco'].filter(id => s[id] && s[id].due && !snoozed(id));
+    const items = ['bread', 'loco', 'meat'].filter(id => s[id] && s[id].due && !snoozed(id));
     if (!items.length) return close();
     const key = items.join(',') + '|' + lang();
     if (box && box.dataset.k === key) return;

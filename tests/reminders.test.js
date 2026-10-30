@@ -91,3 +91,19 @@ test('load/write: كتابة ذرّية وملف تالف بيرجّع حالة 
   assert.equal(R.load(f).log.bread[0].by, 'Ali'); assert.ok(!fs.existsSync(f + '.tmp'));
   fs.writeFileSync(f, '{bad'); assert.deepEqual(R.load(f), R.emptyState());
 });
+
+test('اللحم: وقتو 15:00 لحالو، وبعد "انطلب" بيسكت meatDays وبيرجع', async () => {
+  const s0 = R.emptyState();
+  assert.equal(R.status(s0, at(30, 14, 30)).meat.due, false);
+  assert.equal(R.status(s0, at(30, 15, 0)).meat.due, true);
+  const s1 = R.markDone(s0, 'meat', 'Ali', at(30, 15, 5)).state;
+  assert.equal(R.status(s1, at(30, 18)).meat.due, false);
+  assert.equal(R.status(s1, at(31, 15)).meat.due, true); // الافتراضي يوم واحد
+  const s2 = R.setSettings(s1, { meatDays: 3 });
+  assert.equal(R.status(s2, at(31, 15)).meat.due, false);
+  assert.equal(R.status(s2, new Date(2026, 10, 2, 15).getTime()).meat.due, true);
+  const sent = [];
+  const alerts = { send: async (k, t) => { sent.push(t); return { sent: true }; } };
+  await R.tick({ state: R.markDone(R.markDone(R.emptyState(), 'bread', 'a', at(30, 10)).state, 'loco', 'a', at(30, 10)).state, alerts, now: at(30, 15, 1) });
+  assert.equal(sent.length, 1); assert.ok(sent[0].includes('اللحم'));
+});

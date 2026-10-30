@@ -7,8 +7,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const IDS = ['bread', 'loco'];
-const DEFAULTS = { time: '14:00', locoDays: 3, breadWeekly: 3 };
+const IDS = ['bread', 'loco', 'meat'];
+const DEFAULTS = { time: '14:00', locoDays: 3, breadWeekly: 3, meatTime: '15:00', meatDays: 1 };
 const LOG_KEEP = 60;
 const pad = n => String(n).padStart(2, '0');
 const ymd = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
@@ -16,18 +16,18 @@ const dayNum = s => { const [y, m, d] = s.split('-').map(Number); return Math.ro
 const weekStart = ms => { const d = new Date(ms); const back = (d.getDay() + 6) % 7; return ymd(new Date(d.getFullYear(), d.getMonth(), d.getDate() - back).getTime()); };
 const str = v => (v == null ? '' : String(v));
 
-function emptyState() { return { version: 1, settings: { ...DEFAULTS }, log: { bread: [], loco: [] }, sent: {} }; }
+function emptyState() { return { version: 1, settings: { ...DEFAULTS }, log: { bread: [], loco: [], meat: [] }, sent: {} }; }
 function cleanSettings(s) {
   const o = s && typeof s === 'object' ? s : {};
-  const m = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(str(o.time).trim());
+  const hm = (v, def) => { const m = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(str(v).trim()); return m ? `${pad(Number(m[1]))}:${m[2]}` : def; };
   const int = (v, lo, hi, def) => { const n = Number(v); return Number.isInteger(n) && n >= lo && n <= hi ? n : def; };
-  return { time: m ? `${pad(Number(m[1]))}:${m[2]}` : DEFAULTS.time, locoDays: int(o.locoDays, 1, 14, DEFAULTS.locoDays), breadWeekly: int(o.breadWeekly, 1, 7, DEFAULTS.breadWeekly) };
+  return { time: hm(o.time, DEFAULTS.time), locoDays: int(o.locoDays, 1, 14, DEFAULTS.locoDays), breadWeekly: int(o.breadWeekly, 1, 7, DEFAULTS.breadWeekly), meatTime: hm(o.meatTime, DEFAULTS.meatTime), meatDays: int(o.meatDays, 1, 14, DEFAULTS.meatDays) };
 }
 function normalize(st) {
   const o = st && typeof st === 'object' ? st : {};
   const lg = o.log && typeof o.log === 'object' ? o.log : {};
   const clean = a => (Array.isArray(a) ? a.filter(x => x && Number.isFinite(Date.parse(x.at))).map(x => ({ at: new Date(x.at).toISOString(), by: str(x.by).slice(0, 60) })).slice(-LOG_KEEP) : []);
-  return { version: 1, settings: cleanSettings(o.settings), log: { bread: clean(lg.bread), loco: clean(lg.loco) }, sent: o.sent && typeof o.sent === 'object' ? o.sent : {} };
+  return { version: 1, settings: cleanSettings(o.settings), log: { bread: clean(lg.bread), loco: clean(lg.loco), meat: clean(lg.meat) }, sent: o.sent && typeof o.sent === 'object' ? o.sent : {} };
 }
 function load(file) { try { return normalize(JSON.parse(fs.readFileSync(file, 'utf8'))); } catch (e) { return emptyState(); } }
 function write(file, st) {
@@ -39,8 +39,9 @@ function write(file, st) {
 // حالة كل تذكير بهاللحظة
 function status(state, now = Date.now()) {
   const st = normalize(state), s = st.settings, today = ymd(now);
-  const [hh, mm] = s.time.split(':').map(Number), d = new Date(now);
-  const afterTime = d.getHours() * 60 + d.getMinutes() >= hh * 60 + mm;
+  const d = new Date(now), minNow = d.getHours() * 60 + d.getMinutes();
+  const after = t => { const [hh, mm] = t.split(':').map(Number); return minNow >= hh * 60 + mm; };
+  const afterTime = after(s.time), afterMeat = after(s.meatTime);
   const last = id => st.log[id][st.log[id].length - 1] || null;
   const lastDay = id => (last(id) ? ymd(Date.parse(last(id).at)) : null);
 
@@ -55,7 +56,13 @@ function status(state, now = Date.now()) {
   loco.eligible = lastL == null || loco.daysSince >= s.locoDays; // انتهت فترة السكوت
   loco.due = afterTime && !loco.orderedToday && loco.eligible;
   loco.nextEligibleIn = loco.eligible ? 0 : s.locoDays - loco.daysSince;
-  return { today, time: s.time, afterTime, bread, loco, settings: s };
+  const lastM = lastDay('meat');
+  const meat = { id: 'meat', orderedToday: lastM === today, last: last('meat'), intervalDays: s.meatDays, time: s.meatTime };
+  meat.daysSince = lastM ? dayNum(today) - dayNum(lastM) : null;
+  meat.eligible = lastM == null || meat.daysSince >= s.meatDays;
+  meat.due = afterMeat && !meat.orderedToday && meat.eligible;
+  meat.nextEligibleIn = meat.eligible ? 0 : s.meatDays - meat.daysSince;
+  return { today, time: s.time, afterTime, bread, loco, meat, settings: s };
 }
 
 const fmtWhen = a => (a ? `${a.by ? a.by + ' · ' : ''}${ymd(Date.parse(a.at))}` : 'ما انسجلت طلبية قبل');
@@ -63,6 +70,10 @@ function message(id, stt) {
   if (id === 'bread') {
     const b = stt.bread;
     return `🍞 تذكير الخبز: لسا ما انطلب خبز اليوم.\nطلبيات هالأسبوع: ${b.weekCount} من ${b.weekTarget}\nلما تطلبوا اضغطوا "انطلب ✅" بالكاشير أو بصفحة التنبيهات.`;
+  }
+  if (id === 'meat') {
+    const m = stt.meat;
+    return `🥩 تذكير اللحم: شيّكوا إذا بدنا لحم.\n${m.daysSince == null ? 'ما انسجلت طلبية قبل' : `مرّ ${m.daysSince} أيام على آخر طلبية`}\nآخر طلبية: ${fmtWhen(m.last)}\nلما تطلبوا اضغطوا "انطلب ✅".`;
   }
   const l = stt.loco;
   return `🧊 تذكير Loco: ${l.daysSince == null ? 'ما انسجلت طلبية قبل' : `مرّ ${l.daysSince} أيام على آخر طلبية`}.\nشيّكوا البرادات واعملوا جرد، وبعدين اطلبوا.\nآخر طلبية: ${fmtWhen(l.last)}\nلما تطلبوا اضغطوا "انطلب ✅".`;
