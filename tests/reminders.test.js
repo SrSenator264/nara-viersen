@@ -125,3 +125,8 @@ test('tick: الرسالة بتنبعت مع أزرار انطلب/لسا', asyn
   await R.tick({ state: R.emptyState(), alerts: { send: async (k, t, o) => { opts = o; return { sent: true }; } }, now: at(30, 14, 1) });
   assert.equal(opts.buttons[0].length, 2);
 });
+
+test('زر التجربة: بيردّ بدون ما يسجّل شي', () => {
+  for (const d of ['rem:test:done', 'rem:test:later']) { const r = R.handleCallback(R.emptyState(), d, 'x'); assert.equal(r.state, undefined); assert.ok(r.answer); }
+  assert.equal(R.testButtons()[0].length, 2);
+});

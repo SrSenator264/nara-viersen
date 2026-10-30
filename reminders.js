@@ -83,6 +83,7 @@ function message(id, stt) {
 const buttons = id => [[{ text: 'انطلب ✅', callback_data: `rem:done:${id}` }, { text: 'لسا ⏳', callback_data: `rem:later:${id}` }]];
 // ضغطة زر من تلغرام. بيرجّع { state?, answer, edit? } — state جديد بس إذا انسجل "انطلب"
 function handleCallback(state, data, who = '', now = Date.now()) {
+  if (/^rem:test:(done|later)$/.test(str(data))) return { answer: 'الزر شغال ✅ (تجربة، ما تسجل شي)', edit: '✅ الزر شغال (تجربة)' };
   const m = /^rem:(done|later):(\w+)$/.exec(str(data));
   if (!m || !IDS.includes(m[2])) return null;
   if (m[1] === 'later') return { answer: 'تمام، بنذكّركم 👍' };
@@ -118,4 +119,5 @@ async function tick({ state, alerts, now = Date.now() }) {
   return { state: st, changed };
 }
 
-module.exports = { buttons, handleCallback, IDS, DEFAULTS, emptyState, normalize, load, write, status, message, markDone, setSettings, tick, ymd, weekStart };
+const testButtons = () => [[{ text: 'انطلب ✅', callback_data: 'rem:test:done' }, { text: 'لسا ⏳', callback_data: 'rem:test:later' }]];
+module.exports = { testButtons, buttons, handleCallback, IDS, DEFAULTS, emptyState, normalize, load, write, status, message, markDone, setSettings, tick, ymd, weekStart };
