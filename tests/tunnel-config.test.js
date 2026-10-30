@@ -25,7 +25,7 @@ test('Tunnel-Config: erlaubte Pfade (Fahrer + Kunde) sind offen', () => {
 
 test('Tunnel-Config: Kasse/Admin/Buchhaltung/Küche/Live Orders/Dispatch/Geheimes -> gesperrt (404)', () => {
   for (const p of ['/', '/index.html', '/kasse.html', '/kasse.js', '/kasse-settlement.html', '/admin.html', '/admin-foundation.html', '/admin.js', '/accounting.html', '/live-orders.html', '/kitchen.html',
-    '/dispatch.html', '/team.html', '/staff.html', '/banking.html', '/reports.html', '/customers.html', '/driver-app.html', '/driver-app-v2.html', '/delivery-print.html',
+    '/dispatch.html', '/team.html', '/staff.html', '/banking.html', '/reports.html', '/customers.html', '/customer-book.html', '/driver-app.html', '/driver-app-v2.html', '/delivery-print.html',
     '/vendor/', '/vendor/other.js', '/vendor/qrcode.bundle.js.map', '/vendor/../server.js', '/server.js', '/auth.js', '/package.json', '/.env', '/data/nara-auth.json', '/data/nara-admin.json', '/tests/auth-server.test.js', '/tunnel/config.example.yml',
     '/api/auth/bootstrap', '/api/auth/staff', '/api/auth/set-pin', '/api/admin-data', '/api/kasse-state', '/api/customers', '/api/kitchen/orders', '/api/live-orders/stage',
     '/api/accounting/accounts', '/api/accounting/bank-transactions', '/api/delivery/config', '/api/delivery/assign', '/api/delivery/driver-pay', '/api/delivery/auto-plan',

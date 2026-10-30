@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="de" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flamo · Kundenkartei</title>
+<script src="nara-lang.js?v=20261009b" data-section="customers"></script>
+<script src="flamo-t.js"></script>
+<style>
+:root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--bad:#d1342f}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Segoe UI",system-ui,Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:#fff;box-shadow:0 1px 0 var(--line)}
+header h1{margin:0;font-size:1.25rem;color:var(--brand)}
+.chip{background:#eef0ea;border-radius:999px;padding:4px 12px;font-size:.85rem;font-weight:700;white-space:nowrap}
+.sp{flex:1}
+.btn{min-height:44px;padding:0 16px;border:0;border-radius:14px;background:var(--brand);color:#fff;font-weight:800;cursor:pointer}
+.btn.ghost{background:#eef0ea;color:var(--ink)}
+.tools{display:flex;flex-direction:column;gap:8px;padding:10px 14px}
+.tools input,.tools select{width:100%;min-height:46px;padding:0 14px;border:2px solid var(--line);border-radius:14px;background:#fff}
+.tools input:focus{outline:0;border-color:var(--brand)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.seg{min-height:40px;padding:0 14px;border:2px solid transparent;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);font-weight:700;cursor:pointer}
+.seg.on{background:var(--ink);color:#fff}
+.tablewrap{padding:0 14px 90px}
+table{width:100%;border-collapse:separate;border-spacing:0 8px}
+th{text-align:start;font-size:.8rem;color:var(--mute);padding:0 12px;font-weight:700}
+td{background:#fff;padding:12px;vertical-align:middle}
+td:first-child{border-start-start-radius:14px;border-end-start-radius:14px}
+td:last-child{border-start-end-radius:14px;border-end-end-radius:14px}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:#fffaf5}
+tbody tr.sel td{background:#fff3e6}
+.nm{font-weight:800}
+.sub{color:var(--mute);font-size:.85rem}
+.ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+.badge{display:inline-block;border-radius:8px;padding:1px 8px;font-size:.75rem;font-weight:800;background:#eef0ea;margin-inline-start:6px}
+.b-REGULAR{background:#dcfce7;color:#166534}.b-RETURNING{background:#fef3c7;color:#92400e}.b-NEW{background:#cffafe;color:#155e75}.b-SLEEPING{background:#e5e7eb;color:#374151}.b-CANCELLED_ONLY{background:#fee2e2;color:#991b1b}.b-MANUAL{background:#ede9fe;color:#5b21b6}
+.empty{text-align:center;color:var(--mute);padding:40px 10px}
+#scrim{display:none;position:fixed;inset:0;z-index:60;background:#0006}
+#scrim.on{display:block}
+#detail{position:fixed;z-index:61;top:var(--fn-bar-h,46px);bottom:0;inset-inline-end:0;width:min(440px,100%);background:#fff;box-shadow:-6px 0 30px #0003;overflow-y:auto;padding:16px 16px 40px;transform:translateX(105%);visibility:hidden;transition:transform .22s,visibility 0s .22s}
+html[dir=rtl] #detail{box-shadow:6px 0 30px #0003;transform:translateX(-105%)}
+#detail.on{transform:none;visibility:visible;transition:transform .22s}
+html[dir=rtl] #detail.on{transform:none}
+#detail h2{margin:0 0 4px;font-size:1.2rem;padding-inline-end:44px}
+.x{position:absolute;top:10px;inset-inline-end:12px;width:40px;height:40px;border:0;border-radius:12px;background:#eef0ea;font-size:20px;cursor:pointer}
+.status{min-height:24px;font-size:.9rem;font-weight:700;margin:4px 0 8px}
+.status.ok{color:var(--ok)}.status.bad{color:var(--bad)}.status.wait{color:var(--mute)}
+.fld{display:block;margin:8px 0}
+.fld span{display:block;font-size:.8rem;color:var(--mute);font-weight:700;margin-bottom:2px}
+.fld input,.fld textarea{width:100%;min-height:46px;padding:8px 12px;border:2px solid var(--line);border-radius:12px;background:#fff}
+.fld input:focus,.fld textarea:focus{outline:0;border-color:var(--brand)}
+.g2{display:grid;grid-template-columns:1fr 110px;gap:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.warn{background:#fff7d6;border:1px solid #f3d36b;border-radius:10px;padding:8px 10px;margin:8px 0;font-size:.9rem}
+.info{background:#eef0ea;border-radius:10px;padding:8px 10px;margin:8px 0;font-size:.85rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}
+.stat{background:var(--bg);border-radius:12px;padding:8px;text-align:center}
+.stat b{display:block;font-size:1.05rem;font-variant-numeric:tabular-nums}
+.stat small{color:var(--mute);font-size:.75rem}
+h3{font-size:.95rem;margin:16px 0 6px}
+.line{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;padding:4px 0;border-bottom:1px dashed var(--line)}
+@media (max-width:800px){
+  .tablewrap{padding-inline:10px}
+  thead{display:none}
+  table,tbody,tr,td{display:block;width:100%}
+  tbody tr{background:#fff;border-radius:14px;margin-bottom:8px;padding:10px 12px}
+  td{background:transparent!important;padding:2px 0;border-radius:0!important}
+  td[data-l]::before{content:attr(data-l) ": ";color:var(--mute);font-size:.8rem}
+  td.nm::before{content:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>📒 <span data-t="title"></span></h1>
+  <span class="chip" id="cnt"></span>
+  <span class="sp"></span>
+  <a class="btn ghost" href="customers.html" style="display:inline-flex;align-items:center;text-decoration:none">🗺️ <span data-t="map"></span></a>
+  <button class="btn" id="add" type="button">➕ <span data-t="add"></span></button>
+  <span id="langsw"></span>
+</header>
+<div class="tools">
+  <input id="q" type="search" autocomplete="off" data-t-ph="search">
+  <div class="row" id="segs"></div>
+  <select id="sort"></select>
+</div>
+<div class="tablewrap"><table><thead><tr id="thr"></tr></thead><tbody id="rows"></tbody></table><div id="empty" class="empty"></div></div>
+<div id="scrim"></div>
+<aside id="detail" aria-live="polite"></aside>
+<script>
+FT.init({
+  title:{de:'Kundenkartei',ar:'سجل الزباين',en:'Customer book'},
+  map:{de:'Karte',ar:'الخريطة',en:'Map'},
+  add:{de:'Neuer Kunde',ar:'زبون جديد',en:'New customer'},
+  search:{de:'Name, Straße oder Telefon suchen …',ar:'دوّر بالاسم أو الشارع أو التلفون …',en:'Search name, street or phone …'},
+  count:{de:'{n} Kunden',ar:'{n} زبون',en:'{n} customers'},
+  all:{de:'Alle',ar:'الكل',en:'All'},
+  REGULAR:{de:'Stammkunde',ar:'زبون دايم',en:'Regular'},
+  RETURNING:{de:'Wiederkehrend',ar:'رجع طلب',en:'Returning'},
+  NEW:{de:'Neu',ar:'جديد',en:'New'},
+  SLEEPING:{de:'Lange nicht bestellt',ar:'صارلو زمان ما طلب',en:'Not ordered in a while'},
+  CANCELLED_ONLY:{de:'Nur storniert',ar:'كلها ملغية',en:'Cancelled only'},
+  MANUAL:{de:'Manuell',ar:'يدوي',en:'Manual'},
+  sLast:{de:'Letzte Bestellung',ar:'آخر طلب',en:'Last order'},
+  sName:{de:'Name A–Z',ar:'الاسم أ–ي',en:'Name A–Z'},
+  sOrders:{de:'Meiste Bestellungen',ar:'أكتر طلبات',en:'Most orders'},
+  sTotal:{de:'Höchster Umsatz',ar:'أكتر مبيعات',en:'Highest spend'},
+  cName:{de:'Name',ar:'الاسم',en:'Name'},
+  cPhone:{de:'Telefon',ar:'التلفون',en:'Phone'},
+  cAddr:{de:'Adresse',ar:'العنوان',en:'Address'},
+  cOrders:{de:'Bestellungen',ar:'طلبات',en:'Orders'},
+  cTotal:{de:'Umsatz',ar:'المجموع',en:'Spend'},
+  cLast:{de:'Letzte Bestellung',ar:'آخر طلب',en:'Last order'},
+  cSrc:{de:'Quelle',ar:'المصدر',en:'Source'},
+  avgS:{de:'Ø Bestellung',ar:'متوسط الطلب',en:'Avg order'},
+  street:{de:'Straße',ar:'الشارع',en:'Street'},
+  house:{de:'Nr.',ar:'الرقم',en:'No.'},
+  postal:{de:'PLZ',ar:'الرمز البريدي',en:'Postcode'},
+  city:{de:'Ort',ar:'المدينة',en:'City'},
+  floor:{de:'Etage',ar:'الطابق',en:'Floor'},
+  bell:{de:'Klingel',ar:'الجرس',en:'Bell'},
+  note:{de:'Notizen',ar:'ملاحظات',en:'Notes'},
+  newTitle:{de:'Neuer Kunde',ar:'زبون جديد',en:'New customer'},
+  hint:{de:'Änderungen werden automatisch gespeichert.',ar:'التعديلات بتتحفظ أوتوماتيك.',en:'Changes are saved automatically.'},
+  typing:{de:'Wird gleich gespeichert …',ar:'رح يتحفظ بعد شوي …',en:'Saving in a moment …'},
+  saving:{de:'Speichert …',ar:'عم يتحفظ …',en:'Saving …'},
+  saved:{de:'✓ Gespeichert',ar:'✓ اتحفظ',en:'✓ Saved'},
+  err:{de:'Speichern fehlgeschlagen – neuer Versuch …',ar:'ما اتحفظ — عم أعيد المحاولة …',en:'Save failed – retrying …'},
+  errStop:{de:'Konnte nicht gespeichert werden. Bitte Eingabe prüfen.',ar:'ما قدرت أحفظ. راجع اللي كتبته.',en:'Could not be saved. Please check the input.'},
+  needName:{de:'Bitte zuerst einen Namen eingeben.',ar:'اكتب الاسم أول.',en:'Please enter a name first.'},
+  noAccess:{de:'Kein Zugriff: nur Inhaber oder mit Freigabe.',ar:'ما في صلاحية: للمالك أو اللي بتعطيه الفتح.',en:'No access: owner or granted staff only.'},
+  dup:{de:'Gleiche Nummer bei: {names}',ar:'نفس الرقم عند: {names}',en:'Same number as: {names}'},
+  hist:{de:'Letzte Bestellungen',ar:'آخر الطلبات',en:'Recent orders'},
+  noHist:{de:'Noch keine Bestellungen.',ar:'ما في طلبات لساتها.',en:'No orders yet.'},
+  favs:{de:'Bestellt am liebsten',ar:'أكتر شي بيطلبه',en:'Favourite items'},
+  orderNote:{de:'Hinweis aus Bestellungen',ar:'ملاحظة من الطلبات',en:'Note from orders'},
+  kitchenNote:{de:'Küchen-Notiz',ar:'ملاحظة المطبخ',en:'Kitchen note'},
+  platform:{de:'Plattform-Kunde: Daten nur für die Lieferung verwenden, nicht für Werbung.',ar:'زبون منصة: بياناته للتوصيل بس، مو للإعلانات.',en:'Platform customer: use the data for delivery only, not for marketing.'},
+  none:{de:'Keine Kunden gefunden.',ar:'ما في زباين.',en:'No customers found.'},
+  loading:{de:'Lade Kunden …',ar:'عم حمّل الزباين …',en:'Loading customers …'},
+  loadErr:{de:'Kundenkartei konnte nicht geladen werden: ',ar:'ما قدرت حمّل السجل: ',en:'Could not load the customer book: '},
+  close:{de:'Schließen',ar:'سكّر',en:'Close'}
+}, { onChange(){ if(typeof renderAll==='function') renderAll(); } });
+
+(function(){
+  const t=(k,v)=>FT.t(k,v);
+  const $=s=>document.querySelector(s);
+  const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const eur=c=>(Number(c||0)/100).toLocaleString(FT.locale(),{style:'currency',currency:'EUR'});
+  const dt=v=>{const d=new Date(v);return !v||isNaN(d)?'—':d.toLocaleDateString(FT.locale(),{day:'2-digit',month:'2-digit',year:'2-digit'})};
+  const SRC={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',LOCO:'Loco (Sides)',LANCH:'Lanch',WEB:'Website',KASSE:'Kasse',DINE_IN:'Dine-in',MANUAL:''};
+  const PLATFORM=new Set(['LIEFERANDO','UBER_EATS','LOCO','LANCH']);
+  const SEGS=['REGULAR','RETURNING','NEW','SLEEPING','MANUAL'];
+  const FIELDS=['name','phone','street','house','postal','city','floor','bell','note'];
+  const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+  let rows=[],loaded=false,seg=store.get('nara-cbook-seg','all'),sel=null,cur=null;
+  let chain=Promise.resolve();
+
+  const sorts={
+    last:(a,b)=>(b.lastAt||'').localeCompare(a.lastAt||'')||(b.updatedAt||'').localeCompare(a.updatedAt||''),
+    name:(a,b)=>String(a.name||'').localeCompare(String(b.name||''),FT.locale()),
+    orders:(a,b)=>b.orders-a.orders||(b.lastAt||'').localeCompare(a.lastAt||''),
+    total:(a,b)=>b.totalCents-a.totalCents
+  };
+  function addr(r){return [[r.street,r.house].filter(Boolean).join(' '),[r.postal,r.city].filter(Boolean).join(' ')].filter(Boolean).join(', ')}
+  function segOf(r){return r.manual?'MANUAL':r.segment}
+  function filtered(){
+    const q=$('#q').value.trim().toLowerCase(),qd=q.replace(/\D/g,'');
+    return rows.filter(r=>{
+      if(seg!=='all'&&segOf(r)!==seg)return false;
+      if(!q)return true;
+      return [r.name,r.street,r.city,r.postal,r.note].join(' ').toLowerCase().includes(q)||(qd.length>=3&&String(r.phone||'').replace(/\D/g,'').includes(qd));
+    }).sort(sorts[$('#sort').value]||sorts.last);
+  }
+  function renderChrome(){
+    $('#thr').innerHTML=['cName','cPhone','cAddr','cOrders','cTotal','cLast','cSrc'].map(k=>'<th>'+esc(t(k))+'</th>').join('');
+    $('#segs').innerHTML=['all'].concat(SEGS).map(s=>'<button type="button" class="seg'+(seg===s?' on':'')+'" data-seg="'+s+'">'+esc(s==='all'?t('all'):t(s))+'</button>').join('');
+    const cur=$('#sort').value||store.get('nara-cbook-sort','last');
+    $('#sort').innerHTML=[['last','sLast'],['name','sName'],['orders','sOrders'],['total','sTotal']].map(([v,k])=>'<option value="'+v+'">'+esc(t(k))+'</option>').join('');
+    $('#sort').value=sorts[cur]?cur:'last';
+  }
+  function renderRows(){
+    const list=filtered();
+    $('#cnt').textContent=t('count',{n:rows.length});
+    $('#rows').innerHTML=list.slice(0,500).map(r=>
+      '<tr data-id="'+esc(r.id)+'" class="'+(sel===r.id?'sel':'')+'">'+
+      '<td class="nm">'+esc(r.name||'—')+'<span class="badge b-'+esc(segOf(r))+'">'+esc(t(segOf(r)))+'</span></td>'+
+      '<td data-l="'+esc(t('cPhone'))+'"><span class="ltr">'+esc(r.phone||'—')+'</span></td>'+
+      '<td data-l="'+esc(t('cAddr'))+'">'+esc(addr(r)||'—')+'</td>'+
+      '<td data-l="'+esc(t('cOrders'))+'">'+esc(r.orders)+'</td>'+
+      '<td data-l="'+esc(t('cTotal'))+'"><span class="ltr">'+esc(eur(r.totalCents))+'</span></td>'+
+      '<td data-l="'+esc(t('cLast'))+'">'+esc(dt(r.lastAt))+'</td>'+
+      '<td data-l="'+esc(t('cSrc'))+'">'+esc((SRC[r.mainSource]!=null?SRC[r.mainSource]:r.mainSource)||'—')+'</td></tr>').join('');
+    $('#empty').textContent=!loaded?t('loading'):(list.length?'':t('none'));
+  }
+  function renderAll(){renderChrome();renderRows();if(cur)paintDetailLabels()}
+  window.renderAll=renderAll;
+
+  /* ───── detail card + autosave ───── */
+  const fld=(k,label,val,cls)=>'<label class="fld"'+(cls?' style="'+cls+'"':'')+'><span data-lbl="'+k+'">'+esc(label)+'</span>'+
+    (k==='note'?'<textarea data-f="note" rows="3">'+esc(val||'')+'</textarea>':'<input data-f="'+k+'" value="'+esc(val||'')+'"'+(k==='phone'?' type="tel" inputmode="tel" dir="ltr"':'')+' autocomplete="off">')+'</label>';
+  function openDetail(r){
+    cur={id:r?r.id:null,draft:{},dirty:{},timer:null};
+    sel=cur.id;renderRows();
+    const row=r||{};
+    const info=[];
+    if(r&&!r.manual){
+      info.push('<div class="stats"><div class="stat"><b>'+esc(r.orders)+'</b><small>'+esc(t('cOrders'))+'</small></div><div class="stat"><b class="ltr">'+esc(eur(r.totalCents))+'</b><small>'+esc(t('cTotal'))+'</small></div><div class="stat"><b class="ltr">'+esc(eur(r.avgCents))+'</b><small>'+esc(t('avgS'))+'</small></div></div>');
+      if(PLATFORM.has(r.mainSource))info.push('<div class="warn">'+esc(t('platform'))+'</div>');
+      if(r.orderNote)info.push('<div class="info"><b>'+esc(t('orderNote'))+':</b> '+esc(r.orderNote)+'</div>');
+      if(r.kitchenNote)info.push('<div class="info"><b>'+esc(t('kitchenNote'))+':</b> '+esc(r.kitchenNote)+'</div>');
+      if((r.favourites||[]).length)info.push('<h3>'+esc(t('favs'))+'</h3>'+r.favourites.map(f=>'<div class="line"><span>'+esc(f.name)+'</span><b>×'+esc(f.n!=null?f.n:f.count)+'</b></div>').join(''));
+      info.push('<h3>'+esc(t('hist'))+'</h3><div id="hist"></div>');
+    }
+    $('#detail').innerHTML='<button class="x" type="button" id="dx" aria-label="'+esc(t('close'))+'">✕</button><h2 id="dh"></h2>'+
+      '<div class="sub" id="dhint"></div><div class="status" id="dst"></div><div id="dwarn"></div>'+
+      fld('name',t('cName'),row.name)+fld('phone',t('cPhone'),row.phone)+
+      '<div class="g2">'+fld('street',t('street'),row.street)+fld('house',t('house'),row.house)+'</div>'+
+      '<div class="g2">'+fld('city',t('city'),row.city)+fld('postal',t('postal'),row.postal)+'</div>'+
+      '<div class="g3">'+fld('floor',t('floor'),row.floor)+fld('bell',t('bell'),row.bell)+'</div>'+
+      fld('note',t('note'),row.note)+info.join('');
+    paintDetailLabels();
+    $('#detail').classList.add('on');$('#scrim').classList.add('on');
+    if(!r)setTimeout(()=>{const n=$('#detail [data-f=name]');if(n)n.focus()},60);
+    if(r&&!r.manual)loadHistory(r.id);
+  }
+  function paintDetailLabels(){
+    const h=$('#dh');if(!h)return;
+    h.textContent=cur&&cur.id?(rowById(cur.id)||{}).name||'—':t('newTitle');
+    $('#dhint').textContent=t('hint');
+    document.querySelectorAll('#detail [data-lbl]').forEach(el=>{const k=el.dataset.lbl;el.textContent=t(k==='name'?'cName':k==='phone'?'cPhone':k)});
+  }
+  const rowById=id=>rows.find(r=>r.id===id);
+  function setStatus(kind,msg){const s=$('#dst');if(!s)return;s.className='status '+kind;s.textContent=msg||''}
+  async function loadHistory(id){
+    try{
+      const r=await fetch('/api/customer-book/history?id='+encodeURIComponent(id),{credentials:'same-origin',cache:'no-store'});
+      const j=await r.json().catch(()=>({}));
+      const box=$('#hist');if(!box||!cur||cur.id!==id)return;
+      const list=j.orders||[];
+      box.innerHTML=list.length?list.map(o=>'<div class="line"><span>'+esc(dt(o.at))+' · '+esc(SRC[o.source]!=null?SRC[o.source]:o.source)+'</span><b class="ltr">'+esc(eur(o.totalCents))+'</b></div>').join(''):'<div class="sub">'+esc(t('noHist'))+'</div>';
+    }catch(e){}
+  }
+  function closeDetail(){
+    const tg=cur;
+    flush(tg).then(()=>{
+      if(tg&&Object.keys(tg.dirty).length)return; // unsaved edits left: keep the card open so the error stays visible
+      $('#detail').classList.remove('on');$('#scrim').classList.remove('on');cur=null;sel=null;renderRows();
+    });
+  }
+  function onInput(e){
+    const k=e.target&&e.target.dataset&&e.target.dataset.f;if(!k||!cur)return;
+    const tg=cur;tg.dirty[k]=e.target.value;setStatus('wait',t('typing'));
+    clearTimeout(tg.timer);tg.timer=setTimeout(()=>flush(tg),700);
+  }
+  function flush(target){
+    target=target||cur;
+    if(!target)return chain;
+    clearTimeout(target.timer);
+    const keys=Object.keys(target.dirty);if(!keys.length)return chain;
+    const patch={};keys.forEach(k=>{patch[k]=target.dirty[k];delete target.dirty[k]});
+    chain=chain.then(()=>send(target,patch));
+    return chain;
+  }
+  async function send(target,patch){
+    setStatus('wait',t('saving'));
+    let body;
+    if(!target.id){
+      Object.assign(target.draft,patch);
+      if(!String(target.draft.name||'').trim()){setStatus('bad',t('needName'));return}
+      body={patch:target.draft};
+    }else body={id:target.id,patch};
+    try{
+      const r=await fetch('/api/customer-book/save',{method:'POST',credentials:'same-origin',keepalive:true,headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+      const j=await r.json().catch(()=>({}));
+      if(r.status===403){if(cur===target)setStatus('bad',t('noAccess'));return}
+      if(r.status>=400&&r.status<500){if(cur===target)setStatus('bad',j.error==='name-required'?t('needName'):t('errStop'));return}
+      if(!r.ok||!j.ok)throw new Error('http '+r.status);
+      const c=j.customer;
+      if(!target.id){target.id=c.id;target.draft={};rows.push(c)}
+      else{const i=rows.findIndex(x=>x.id===c.id);if(i>=0)rows[i]=c}
+      if(cur===target){
+        sel=target.id;paintDetailLabels();
+        const w=$('#dwarn');if(w)w.innerHTML=(j.samePhone||[]).length?'<div class="warn">'+esc(t('dup',{names:j.samePhone.join(', ')}))+'</div>':'';
+        setStatus(Object.keys(target.dirty).length?'wait':'ok',Object.keys(target.dirty).length?t('typing'):t('saved'));
+      }
+      renderRows();
+    }catch(e){
+      // network/server problem: put the edit back and retry, unless a newer value was typed
+      for(const k of Object.keys(patch))if(!(k in target.dirty))target.dirty[k]=patch[k];
+      if(cur===target)setStatus('bad',t('err'));
+      clearTimeout(target.timer);target.timer=setTimeout(()=>flush(target),4000);
+    }
+  }
+
+  /* ───── events ───── */
+  $('#rows').addEventListener('click',e=>{const tr=e.target.closest('tr[data-id]');if(!tr)return;const r=rowById(tr.dataset.id);if(r)flush().then(()=>{if(cur&&Object.keys(cur.dirty).length)return;openDetail(r)})});
+  $('#add').addEventListener('click',()=>flush().then(()=>{if(cur&&Object.keys(cur.dirty).length)return;openDetail(null)}));
+  $('#segs').addEventListener('click',e=>{const b=e.target.closest('[data-seg]');if(!b)return;seg=b.dataset.seg;store.set('nara-cbook-seg',seg);renderChrome();renderRows()});
+  $('#q').addEventListener('input',renderRows);
+  $('#sort').addEventListener('change',()=>{store.set('nara-cbook-sort',$('#sort').value);renderRows()});
+  $('#detail').addEventListener('input',onInput);
+  $('#detail').addEventListener('click',e=>{if(e.target.id==='dx')closeDetail()});
+  $('#scrim').addEventListener('click',closeDetail);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&cur)closeDetail()});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush()});
+  window.addEventListener('pagehide',()=>{flush()});
+  if(window.NARA_LANG&&NARA_LANG.mountSwitcher)NARA_LANG.mountSwitcher($('#langsw'),{buttonStyle:'min-width:34px;height:34px;border-radius:8px;border:1px solid #dcdcd5;background:#fff;font-weight:800;cursor:pointer'});
+
+  async function load(){
+    try{
+      const r=await fetch('/api/customer-book',{credentials:'same-origin',cache:'no-store'});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok)throw new Error(j.error||r.status);
+      rows=j.customers||[];loaded=true;renderAll();
+    }catch(e){loaded=true;$('#empty').textContent=t('loadErr')+e.message}
+  }
+  renderAll();load();
+})();
+</script>
+</body>
+</html>

@@ -21,6 +21,7 @@
     { k: 'reception', f: 'reception.html', i: '📥', g: 'today', n: L('Plattformen', 'تجميع المنصات', 'Platform hub') },
     { k: 'kitchen', f: 'kitchen.html', i: '👨‍🍳', g: 'today', n: L('Küche', 'المطبخ', 'Kitchen') },
     { k: 'customers', f: 'customers.html', i: '👥', g: 'today', n: L('Kunden', 'الزباين', 'Customers') },
+    { k: 'customer-book', f: 'customer-book.html', i: '📒', g: 'today', n: L('Kundenkartei', 'سجل الزباين', 'Customer book') },
     { k: 'dispatch', f: 'dispatch.html', i: '🛵', g: 'delivery', n: L('Fahrer-Plan', 'توزيع السواقين', 'Dispatch') },
     { k: 'delivery', f: 'driver-app-v2.html', i: '📦', g: 'delivery', n: L('Lieferaufträge', 'طلبات التوصيل', 'Delivery orders') },
     { k: 'delivery-print', f: 'delivery-print.html', i: '🖨️', g: 'delivery', n: L('Lieferzettel drucken', 'طباعة طلب توصيل', 'Print delivery slip') },
