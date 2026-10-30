@@ -87,6 +87,8 @@ function handleCallback(state, data, who = '', now = Date.now()) {
   const m = /^rem:(done|later):(\w+)$/.exec(str(data));
   if (!m || !IDS.includes(m[2])) return null;
   if (m[1] === 'later') return { answer: 'تمام، بنذكّركم 👍' };
+  const cur = status(state, now)[m[2]];
+  if (cur.orderedToday) return { answer: 'تسجلت قبل ✅', edit: `✅ انطلب${cur.last && cur.last.by ? ' — ' + cur.last.by : ''}` }; // شخص ثاني ضغط قبلك: ما بنسجّل مرتين
   const r = markDone(state, m[2], who, now);
   if (!r.ok) return null;
   return { state: r.state, answer: 'تم ✅', edit: `✅ انطلب${who ? ' — ' + who : ''}` };

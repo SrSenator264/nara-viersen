@@ -78,3 +78,9 @@ test('Wächter: Login nötig wird als eigener Fall gemeldet', () => {
   evaluate(snap({ bridges: [b] }), st, 0); const r = evaluate(snap({ bridges: [b] }), st, 4 * 60000);
   assert.deepEqual(keys(r), ['bridge-SIDES-login']); assert.match(r[0].text, /تسجيل دخول/);
 });
+
+test('alerts: TELEGRAM_CHAT_ID بفاصلة = بيبعت لكل الشاتات، ونجاح واحد يكفي', async () => {
+  const A = require('../alerts.js'); const sent = [];
+  const a = A.create({ env: { TELEGRAM_BOT_TOKEN: 'T', TELEGRAM_CHAT_ID: '1, 2' }, log: () => {}, fetchFn: async (u, o) => { const b = JSON.parse(o.body); sent.push(b.chat_id); if (b.chat_id === '1') throw new Error('x'); return { ok: true }; } });
+  const r = await a.send('k', 'hi'); assert.deepEqual(sent, ['1', '2']); assert.equal(r.sent, true);
+});

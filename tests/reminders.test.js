@@ -130,3 +130,9 @@ test('زر التجربة: بيردّ بدون ما يسجّل شي', () => {
   for (const d of ['rem:test:done', 'rem:test:later']) { const r = R.handleCallback(R.emptyState(), d, 'x'); assert.equal(r.state, undefined); assert.ok(r.answer); }
   assert.equal(R.testButtons()[0].length, 2);
 });
+
+test('زر انطلب من شخص ثاني بعد ما انسجل اليوم: ما بيتسجل مرتين', () => {
+  const s1 = R.markDone(R.emptyState(), 'bread', 'Ali', at(30, 14, 5)).state;
+  const r = R.handleCallback(s1, 'rem:done:bread', 'Sami', at(30, 14, 9));
+  assert.equal(r.state, undefined); assert.ok(r.edit.includes('Ali'));
+});

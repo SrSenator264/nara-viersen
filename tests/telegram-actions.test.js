@@ -37,3 +37,19 @@ test('pollOnce: بيتقدّم الـoffset، وبدون إعدادات تلغر
   assert.equal(bodies[1].offset, 43);
   assert.equal(TG.create({ env: {}, onAction() {} }).configured(), false);
 });
+
+test('/id: البوت بيردّ برقم الشات من أي شات، ومن غير تنفيذ شي', async () => {
+  const calls = [];
+  const t = mk(async () => { throw new Error('no'); }, calls);
+  assert.equal(await t.handle({ update_id: 1, message: { text: '/id', chat: { id: 555 } } }), true);
+  assert.equal(calls[0].m, 'sendMessage'); assert.equal(calls[0].b.chat_id, 555); assert.ok(calls[0].b.text.includes('555'));
+  assert.equal(await t.handle({ update_id: 2, message: { text: 'Hallo', chat: { id: 555 } } }), false);
+});
+
+test('أكتر من شات مضبوط (123,-100): ضغطات الاتنين مقبولة وغيرهم لا', async () => {
+  const calls = [];
+  const t = TG.create({ env: { TELEGRAM_BOT_TOKEN: 'T', TELEGRAM_CHAT_ID: '123, -100' }, onAction: async () => ({ answer: 'ok' }), fetchFn: async (u, o) => { calls.push(1); return { ok: true, json: async () => ({}) }; } });
+  assert.equal(await t.handle(cq(123, 'rem:done:bread')), true);
+  assert.equal(await t.handle(cq(-100, 'rem:done:bread')), true);
+  assert.equal(await t.handle(cq(77, 'rem:done:bread')), false);
+});
