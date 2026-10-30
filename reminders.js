@@ -79,6 +79,18 @@ function message(id, stt) {
   return `🧊 تذكير Loco: ${l.daysSince == null ? 'ما تسجلت طلبية قبل' : `مرّ ${l.daysSince} أيام على آخر طلبية`}.\nشيّكوا البرادات واعملوا جرد، وبعدين اطلبوا.\nآخر طلبية: ${fmtWhen(l.last)}\nلما تطلبوا اضغطوا "انطلب ✅".`;
 }
 
+// أزرار تلغرام تحت كل تذكير: انطلب / لسا
+const buttons = id => [[{ text: 'انطلب ✅', callback_data: `rem:done:${id}` }, { text: 'لسا ⏳', callback_data: `rem:later:${id}` }]];
+// ضغطة زر من تلغرام. بيرجّع { state?, answer, edit? } — state جديد بس إذا انسجل "انطلب"
+function handleCallback(state, data, who = '', now = Date.now()) {
+  const m = /^rem:(done|later):(\w+)$/.exec(str(data));
+  if (!m || !IDS.includes(m[2])) return null;
+  if (m[1] === 'later') return { answer: 'تمام، بنذكّركم 👍' };
+  const r = markDone(state, m[2], who, now);
+  if (!r.ok) return null;
+  return { state: r.state, answer: 'تم ✅', edit: `✅ انطلب${who ? ' — ' + who : ''}` };
+}
+
 // تسجيل "انطلب". بيرجّع { ok, state, error }
 function markDone(state, id, user = '', now = Date.now()) {
   if (!IDS.includes(id)) return { ok: false, error: 'bad-id' };
@@ -99,11 +111,11 @@ async function tick({ state, alerts, now = Date.now() }) {
   let changed = false;
   for (const id of IDS) {
     if (!stt[id].due || st.sent[id] === stt.today) continue;
-    const r = await alerts.send(`reminder-${id}-${stt.today}`, message(id, stt), { level: 'warn', force: true });
+    const r = await alerts.send(`reminder-${id}-${stt.today}`, message(id, stt), { level: 'warn', force: true, buttons: buttons(id) });
     // not-configured = ما في تلغرام: الكاشير بيعرض البوب-أب، فما في داعي نعيد كل دقيقة
     if (r && (r.sent || r.reason === 'not-configured')) { st.sent[id] = stt.today; changed = true; }
   }
   return { state: st, changed };
 }
 
-module.exports = { IDS, DEFAULTS, emptyState, normalize, load, write, status, message, markDone, setSettings, tick, ymd, weekStart };
+module.exports = { buttons, handleCallback, IDS, DEFAULTS, emptyState, normalize, load, write, status, message, markDone, setSettings, tick, ymd, weekStart };

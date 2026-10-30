@@ -6,7 +6,7 @@ function create({ env = process.env, fetchFn = (...a) => fetch(...a), now = () =
   const last = new Map(), recent = [];
   const configured = () => !!(env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID);
 
-  async function send(key, text, { level = 'warn', force = false } = {}) {
+  async function send(key, text, { level = 'warn', force = false, buttons = null } = {}) {
     const t = now(), prev = last.get(key);
     if (!force && prev != null && t - prev < dedupeMs) return { sent: false, reason: 'deduped' };
     last.set(key, t);
@@ -17,7 +17,7 @@ function create({ env = process.env, fetchFn = (...a) => fetch(...a), now = () =
       const base = String(env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
       const r = await fetchFn(`${base}/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: String(text).slice(0, 3500), disable_web_page_preview: true }),
+        body: JSON.stringify(Object.assign({ chat_id: env.TELEGRAM_CHAT_ID, text: String(text).slice(0, 3500), disable_web_page_preview: true }, buttons ? { reply_markup: { inline_keyboard: buttons } } : {})),
         signal: AbortSignal.timeout(8000),
       });
       if (!r.ok) { log('[NARA][ALERT] Telegram HTTP', r.status); entry.error = 'HTTP ' + r.status; return { sent: false, reason: 'http-' + r.status }; }

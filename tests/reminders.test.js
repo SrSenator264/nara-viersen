@@ -107,3 +107,21 @@ test('اللحم: وقتو 15:00 لحالو، وبعد "انطلب" بيسكت m
   await R.tick({ state: R.markDone(R.markDone(R.emptyState(), 'bread', 'a', at(30, 10)).state, 'loco', 'a', at(30, 10)).state, alerts, now: at(30, 15, 1) });
   assert.equal(sent.length, 1); assert.ok(sent[0].includes('اللحم'));
 });
+
+test('أزرار تلغرام: انطلب بيسجّل باسم الضاغط، لسا ما بيغيّر شي، وبيانات غريبة بتترفض', () => {
+  const s0 = R.emptyState(), now = at(30, 15);
+  const d = R.handleCallback(s0, 'rem:done:meat', 'Sami', now);
+  assert.equal(d.answer, 'تم ✅'); assert.equal(R.status(d.state, now).meat.orderedToday, true); assert.equal(d.state.log.meat[0].by, 'Sami');
+  assert.ok(d.edit.includes('Sami'));
+  const l = R.handleCallback(s0, 'rem:later:bread', 'Sami', now);
+  assert.equal(l.state, undefined); assert.ok(l.answer);
+  assert.equal(R.handleCallback(s0, 'rem:done:milk', 'x'), null);
+  assert.equal(R.handleCallback(s0, 'x', 'x'), null);
+  assert.equal(R.buttons('bread')[0][0].callback_data, 'rem:done:bread');
+});
+
+test('tick: الرسالة بتنبعت مع أزرار انطلب/لسا', async () => {
+  let opts = null;
+  await R.tick({ state: R.emptyState(), alerts: { send: async (k, t, o) => { opts = o; return { sent: true }; } }, now: at(30, 14, 1) });
+  assert.equal(opts.buttons[0].length, 2);
+});
