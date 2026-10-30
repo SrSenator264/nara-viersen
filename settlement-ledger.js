@@ -45,6 +45,31 @@
     if (name === 'month') return { from: today.slice(0, 8) + '01', to: today };
     return null;
   }
-  const api = { rows, rowsRange, preset, addDays, FEES };
+  // Plattformen mit Umsatz im Zeitraum (nach Umsatz sortiert)
+  function keysIn(byDay, from, to) {
+    const t = {};
+    for (const d of byDay || []) { if (!d || d.day < from || d.day > to) continue; for (const [k, v] of Object.entries(d.byPlat || {})) t[k] = (t[k] || 0) + (Number(v.cents) || 0); }
+    return Object.keys(t).filter(k => t[k] > 0).sort((a, b) => t[b] - t[a]);
+  }
+  // detail(byDay, from, to, key, fees): key 'ALL' = alle Quellen zusammen. Liefert Summen, Ø, Anteil und Tage (mit Umsatz).
+  function detail(byDay, from, to, key, fees) {
+    const f = Object.assign({}, FEES, fees || {}), all = key == null || key === 'ALL';
+    const out = { key: all ? 'ALL' : key, gross: 0, count: 0, avg: 0, fee: 0, totalGross: 0, share: 0, days: [], maxDay: 0, parts: {} };
+    if (!ISO.test(from || '') || !ISO.test(to || '') || from > to) return out;
+    for (const d of byDay || []) {
+      if (!d || d.day < from || d.day > to) continue;
+      let cents = 0, count = 0;
+      for (const [k, v] of Object.entries(d.byPlat || {})) {
+        const c = Number(v.cents) || 0, n = Number(v.count) || 0;
+        out.totalGross += c; out.parts[k] = (out.parts[k] || 0) + c;
+        if (all || k === key) { cents += c; count += n; out.fee += Math.round(c * (f[k] != null ? f[k] : 0) / 100); }
+      }
+      if (cents > 0 || count > 0) { out.days.push({ day: d.day, cents, count }); out.gross += cents; out.count += count; if (cents > out.maxDay) out.maxDay = cents; }
+    }
+    out.avg = out.count ? Math.round(out.gross / out.count) : 0;
+    out.share = out.totalGross ? Math.round(out.gross / out.totalGross * 1000) / 10 : 0;
+    return out;
+  }
+  const api = { rows, rowsRange, preset, addDays, keysIn, detail, FEES };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.NARA_SETTLEMENT_LEDGER = api;
 })(typeof window !== 'undefined' ? window : globalThis);

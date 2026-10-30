@@ -56,3 +56,20 @@ test('preset: heute / gestern / Woche (ab Montag) / Monat', () => {
   assert.deepEqual(SLG.preset('month', '2026-10-20'), { from: '2026-10-01', to: '2026-10-20' });
   assert.equal(SLG.preset('nope', '2026-10-20'), null); assert.equal(SLG.preset('today', ''), null);
 });
+
+test('keysIn: nur Quellen mit Umsatz im Zeitraum, nach Umsatz sortiert', () => {
+  const b = [{ day: '2026-10-17', byPlat: { A: { cents: 100, count: 1 }, B: { cents: 0, count: 0 } } }, { day: '2026-10-18', byPlat: { C: { cents: 500, count: 2 }, A: { cents: 50, count: 1 } } }, { day: '2026-10-25', byPlat: { Z: { cents: 9, count: 1 } } }];
+  assert.deepEqual(SLG.keysIn(b, '2026-10-17', '2026-10-18'), ['C', 'A']);
+});
+test('detail: Quelle gewählt = nur ihre Summen/Tage/Ø/Anteil; ALL = alles', () => {
+  const b = [{ day: '2026-10-17', byPlat: { LIEFERANDO: { cents: 3000, count: 2 }, KASSE: { cents: 1000, count: 1 } } }, { day: '2026-10-18', byPlat: { LIEFERANDO: { cents: 1000, count: 1 } } }, { day: '2026-10-19', byPlat: { KASSE: { cents: 500, count: 1 } } }];
+  const l = SLG.detail(b, '2026-10-17', '2026-10-19', 'LIEFERANDO');
+  assert.equal(l.gross, 4000); assert.equal(l.count, 3); assert.equal(l.avg, 1333); assert.equal(l.days.length, 2); assert.equal(l.maxDay, 3000);
+  assert.equal(l.fee, 1000); assert.equal(l.totalGross, 5500); assert.equal(l.share, 72.7);
+  const a = SLG.detail(b, '2026-10-17', '2026-10-19', 'ALL');
+  assert.equal(a.gross, 5500); assert.equal(a.days.length, 3); assert.equal(a.share, 100); assert.equal(a.fee, 1000);
+  const k = SLG.detail(b, '2026-10-17', '2026-10-19', 'KASSE'); assert.equal(k.fee, 0); assert.equal(k.days.length, 2);
+});
+test('detail: ungültige Daten / leer -> Nullen, kein NaN', () => {
+  for (const d of [SLG.detail([], '2026-10-17', '2026-10-17', 'X'), SLG.detail([{ day: '2026-10-17', byPlat: {} }], 'bad', 'bad', 'ALL'), SLG.detail(null, '2026-10-19', '2026-10-17', 'ALL')]) { assert.equal(d.gross, 0); assert.equal(d.avg, 0); assert.equal(d.share, 0); assert.equal(d.days.length, 0); }
+});
