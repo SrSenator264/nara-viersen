@@ -3,7 +3,7 @@
 // und außerhalb des Wörterbuchs darf kein arabischer Text mehr im Code stehen.
 const test = require('node:test'), assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path');
 const root = path.join(__dirname, '..');
-const PAGES = { 'customer-book.html': [], 'sales.html': [], 'reports.html': ['reports.js'], 'banking.html': [], 'delivery-print.html': [], 'driver-app-v2.html': [], 'dashboard.html': [], 'admin-foundation.html': ['admin-foundation.js','admin-menu-translations.js'], 'accounting.html': ['accounting.js'] };
+const PAGES = { 'customer-book.html': [], 'reminders.html': [], 'sales.html': [], 'reports.html': ['reports.js'], 'banking.html': [], 'delivery-print.html': [], 'driver-app-v2.html': [], 'dashboard.html': [], 'admin-foundation.html': ['admin-foundation.js','admin-menu-translations.js'], 'accounting.html': ['accounting.js'] };
 const S = "'((?:\\\\'|[^'])*)'";
 const ENTRY = new RegExp(`(\\w+):\\{de:${S},ar:${S},en:${S}\\}`, 'g');
 

@@ -112,6 +112,9 @@ const RULES = [
   ['GET', /^\/api\/customer-db$/, KITCH], // الصلاحية الفعلية (مالك أو ممنوحة) بتنفحص بالـhandler
   ['GET', /^\/api\/customer-book(\/history)?$/, KITCH], // سجل الزباين: نفس الصلاحية الفعلية (مالك أو ممنوحة) بالـhandler
   ['POST', /^\/api\/customer-book\/save$/, KITCH],
+  ['GET', /^\/api\/reminders$/, KITCH],
+  ['POST', /^\/api\/reminders\/done$/, KITCH],
+  ['POST', /^\/api\/reminders\/(settings|test)$/, MANAGERS],
   ['GET', /^\/api\/cashier\/employee-lookup$/, CASH],
   ['*', /^\/api\/kitchen\/orders$/, KITCH],
   ['GET', /^\/api\/delivery\/auto-plan$/, CASH],
@@ -148,7 +151,7 @@ const allowed = (access, role) => Array.isArray(access) && access.includes(role)
 
 // ───────── ملفات ثابتة مسموحة ─────────
 const BLOCKED_DIRS = new Set(['data', 'logs', 'node_modules', 'tests', 'scripts', 'checkpoint', 'local-ocr-output']);
-const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'push.js', 'customer-db.js', 'customer-book.js', 'platform-trips.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-accept.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'bank-pay.js', 'qonto-sync.js', 'flamo-ai.js', 'sides-login-save.ps1',
+const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'push.js', 'customer-db.js', 'customer-book.js', 'reminders.js', 'platform-trips.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-accept.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'bank-pay.js', 'qonto-sync.js', 'flamo-ai.js', 'sides-login-save.ps1',
   // 2a) Server-only (nur per require geladen, in keiner .html / keinem Frontend-Skript referenziert):
   'alerts.js', 'monitor.js', 'data-guard.js', 'delivery-rules.js', 'local-invoice-hybrid.js', 'option-library.js', 'sales-ledger.js', 'customers-sync.js', 'menu-translations-lib.js', 'kasse-window.js', 'body-reader.js', 'system-update.js',
   // Dev-/Benchmark-/CLI-Tools (kein Frontend)
@@ -160,7 +163,7 @@ const FRONTEND_JS = new Set([
   'accounting.js', 'admin-foundation.js', 'admin-menu-translations.js', 'ai-manager-cashier-agents.js', 'ai-manager-command-center.js',
   'ai-manager-i18n-fix.js', 'ai-manager.js', 'allergen-data.js', 'app.js', 'business-day.js', 'catalog.js', 'customer-chef.js',
   'customer-sidebar.js', 'flamo-nav.js', 'flamo-t.js', 'inventory-foundation.js', 'invoice-review-model.js', 'kasse-agent-suite.js',
-  'kasse-customer-directory.js', 'kasse-delivery-fee.js', 'kasse-domain.js', 'kasse-external-payment-guard.js', 'kasse-header-tidy.js',
+  'kasse-customer-directory.js', 'kasse-reminders.js', 'kasse-delivery-fee.js', 'kasse-domain.js', 'kasse-external-payment-guard.js', 'kasse-header-tidy.js',
   'kasse-helpers.js', 'kasse-lanch-file-preview.js', 'kasse-lanch-import.js', 'kasse-lieferando-bridge.js', 'kasse-live-orders-link.js',
   'kasse-monitor.js', 'kasse-open-orders.js', 'kasse-order-hub.js', 'kasse-payment.js', 'kasse-phone-lookup.js', 'kasse-phone.js', 'kasse-platform-sync.js', 'kasse-print-lifecycle.js',
   'kasse-print-sound.js', 'kasse-printer-panel.js', 'kasse-product-dialog.js', 'kasse-quick-extras.js', 'kasse-receipt.js',
@@ -193,7 +196,7 @@ function staticAllowed(rel) {
 const PAGE_ROLES = {
   'kasse.html': CASH, 'live-orders.html': KITCH, 'kitchen.html': KITCH, 'reception.html': KITCH, 'nara-app.html': STAFF,
   'driver-app-v2.html': STAFF, 'driver.html': STAFF, 'dispatch.html': CASH, 'connect.html': CASH, 'delivery.html': STAFF, 'delivery-print.html': STAFF,
-  'staff.html': MANAGERS, 'customers.html': KITCH, 'customer-book.html': KITCH, 'team.html': MANAGERS, 'admin.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'dashboard.html': MANAGERS, 'status.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
+  'staff.html': MANAGERS, 'customers.html': KITCH, 'customer-book.html': KITCH, 'reminders.html': KITCH, 'team.html': MANAGERS, 'admin.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'dashboard.html': MANAGERS, 'status.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
   'accounting.html': ACCT, 'banking.html': ACCT, 'reports.html': ACCT, 'sales.html': ACCT, 'kasse-settlement.html': ACCT,
   'update.html': MANAGERS,
 };

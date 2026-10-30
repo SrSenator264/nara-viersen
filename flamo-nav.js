@@ -31,6 +31,7 @@
     { k: 'banking', f: 'banking.html', i: '🏦', g: 'money', n: L('Bank', 'البنك', 'Bank') },
     { k: 'reports', f: 'reports.html', i: '📈', g: 'money', n: L('Gewinn & Verlust', 'الربح والخسارة', 'Profit & loss') },
     { k: 'documents', f: 'inventory-foundation.html#documents', i: '🗂️', g: 'money', n: L('Dokumente', 'الأوراق والمستندات', 'Documents') },
+    { k: 'reminders', f: 'reminders.html', i: '🔔', g: 'ops', n: L('Erinnerungen', 'تنبيهات', 'Reminders') },
     { k: 'menu', f: 'admin-foundation.html', i: '🍔', g: 'ops', n: L('Speisekarte', 'المنيو', 'Menu') },
     { k: 'stock', f: 'inventory-foundation.html#items', i: '🥬', g: 'ops', n: L('Lager', 'المخزن', 'Stock') },
     { k: 'suppliers', f: 'inventory-foundation.html#suppliers', i: '🚚', g: 'ops', n: L('Lieferanten', 'الموردين', 'Suppliers') },

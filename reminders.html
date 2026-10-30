@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="de" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flamo · Erinnerungen</title>
+<script src="nara-lang.js?v=20261009b" data-section="reminders"></script>
+<script src="flamo-t.js"></script>
+<style>
+:root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--bad:#d1342f}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Segoe UI",system-ui,Arial,sans-serif}
+button,input{font:inherit;color:inherit}
+header{padding:12px 14px;background:#fff;box-shadow:0 1px 0 var(--line)}
+header h1{margin:0;font-size:1.25rem;color:var(--brand)}
+main{max-width:640px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 1px 0 var(--line)}
+.card.due{box-shadow:inset 0 0 0 3px var(--brand)}
+.card h2{margin:0 0 6px;font-size:1.15rem}
+.big{font-size:1.05rem;font-weight:800}
+.ok{color:var(--ok)}.warn{color:var(--brand)}
+.mute{color:var(--mute);font-size:.9rem}
+.dots{display:flex;gap:6px;margin:8px 0;font-size:1.4rem}
+.btn{min-height:52px;width:100%;margin-top:12px;border:0;border-radius:14px;background:var(--brand);color:#fff;font-weight:800;font-size:1.05rem;cursor:pointer}
+.btn:disabled{opacity:.5}
+.btn.ghost{background:#eef0ea;color:var(--ink);min-height:44px}
+.set{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.set label{flex:1;min-width:140px;display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:.9rem}
+.set input{min-height:44px;padding:0 12px;border:2px solid var(--line);border-radius:12px;background:#fff}
+#msg{min-height:1.4em;margin-top:6px}
+</style>
+</head>
+<body>
+<header><h1>🔔 <span data-t="title"></span></h1></header>
+<main>
+  <section class="card" id="c-bread"></section>
+  <section class="card" id="c-loco"></section>
+  <section class="card">
+    <h2>⚙️ <span data-t="settings"></span></h2>
+    <div class="set">
+      <label><span data-t="time"></span><input id="s-time" type="time"></label>
+      <label><span data-t="locoDays"></span><input id="s-loco" type="number" min="1" max="14"></label>
+      <label><span data-t="weekly"></span><input id="s-week" type="number" min="1" max="7"></label>
+    </div>
+    <button class="btn ghost" id="save" type="button">💾 <span data-t="save"></span></button>
+    <div class="mute" style="margin-top:10px" id="tg"></div>
+    <button class="btn ghost" id="test" type="button">📨 <span data-t="test"></span></button>
+    <div id="msg" class="mute" role="status"></div>
+  </section>
+</main>
+<script>
+FT.init({
+  title:{de:'Erinnerungen',ar:'تنبيهات',en:'Reminders'},
+  bread:{de:'Brot',ar:'الخبز',en:'Bread'},
+  loco:{de:'Loco',ar:'Loco',en:'Loco'},
+  due:{de:'Heute noch nicht bestellt!',ar:'لسا ما انطلب اليوم!',en:'Not ordered yet today!'},
+  doneToday:{de:'Heute bestellt ✅',ar:'انطلب اليوم ✅',en:'Ordered today ✅'},
+  waitTime:{de:'Erinnerung kommt ab {t} Uhr',ar:'التذكير بيجي من الساعة {t}',en:'Reminder starts at {t}'},
+  waitDays:{de:'Nächste Erinnerung in {n} Tag(en)',ar:'التذكير الجاي بعد {n} يوم',en:'Next reminder in {n} day(s)'},
+  week:{de:'Diese Woche: {n} von {m}',ar:'هالأسبوع: {n} من {m}',en:'This week: {n} of {m}'},
+  last:{de:'Zuletzt bestellt: {w}',ar:'آخر طلبية: {w}',en:'Last order: {w}'},
+  never:{de:'noch nie eingetragen',ar:'ما انسجلت',en:'never logged'},
+  loco_hint:{de:'Kühlschränke prüfen und Inventur machen, dann bestellen.',ar:'شيّك البرادات واعمل جرد، وبعدين اطلب.',en:'Check the fridges and count stock, then order.'},
+  ordered:{de:'Bestellt',ar:'انطلب',en:'Ordered'},
+  settings:{de:'Einstellungen',ar:'الإعدادات',en:'Settings'},
+  time:{de:'Uhrzeit',ar:'وقت التذكير',en:'Reminder time'},
+  locoDays:{de:'Loco: Pause (Tage)',ar:'Loco: سكوت (أيام)',en:'Loco: pause (days)'},
+  weekly:{de:'Brot pro Woche',ar:'طلبيات الخبز بالأسبوع',en:'Bread orders per week'},
+  save:{de:'Speichern',ar:'احفظ',en:'Save'},
+  saved:{de:'Gespeichert ✅',ar:'انحفظ ✅',en:'Saved ✅'},
+  tgOn:{de:'Telegram ist verbunden.',ar:'التلغرام مفعّل.',en:'Telegram is connected.'},
+  tgOff:{de:'Telegram nicht eingerichtet (nur Popup an der Kasse).',ar:'التلغرام مو مفعّل (بس بوب-أب بالكاشير).',en:'Telegram not set up (till popup only).'},
+  test:{de:'Testnachricht senden',ar:'جرّب الإرسال',en:'Send test message'},
+  testOk:{de:'Gesendet ✅',ar:'انبعتت ✅',en:'Sent ✅'},
+  testFail:{de:'Nicht gesendet (Telegram prüfen).',ar:'ما انبعتت (شيّك التلغرام).',en:'Not sent (check Telegram).'},
+  err:{de:'Fehler oder kein Zugriff.',ar:'صار خطأ أو ما عندك صلاحية.',en:'Error or no access.'}
+},{onChange(){draw()}});
+const t=(k,v)=>FT.t(k,v);
+const $=id=>document.getElementById(id);
+let S=null;
+function say(el,k){el.textContent=t(k);el.className='mute'}
+function when(a){return a?((a.by?a.by+' · ':'')+new Date(a.at).toLocaleDateString()):t('never')}
+function card(id,icon,x,extra){
+  const el=$('c-'+id);if(!x){el.textContent='';return}
+  const state=x.orderedToday?'<div class="big ok">'+t('doneToday')+'</div>':x.due?'<div class="big warn">'+t('due')+'</div>'
+    :(id==='loco'&&!x.eligible)?'<div class="big mute">'+t('waitDays',{n:x.nextEligibleIn})+'</div>':'<div class="big mute">'+t('waitTime',{t:S.time})+'</div>';
+  el.className='card'+(x.due?' due':'');
+  el.innerHTML='<h2>'+icon+' '+t(id)+'</h2>'+state+(extra||'')+'<div class="mute">'+t('last',{w:when(x.last)})+'</div>'
+    +'<button class="btn" type="button" data-id="'+id+'">✅ '+t('ordered')+'</button>';
+}
+function draw(){
+  if(!S)return;
+  const b=S.bread,dots='<div class="dots">'+Array.from({length:b.weekTarget},(_,i)=>i<b.weekCount?'✅':'⬜').join('')+'</div>';
+  card('bread','🍞',b,dots+'<div class="mute">'+t('week',{n:b.weekCount,m:b.weekTarget})+'</div>');
+  card('loco','🧊',S.loco,'<div class="mute">'+t('loco_hint')+'</div>');
+  $('s-time').value=S.settings.time;$('s-loco').value=S.settings.locoDays;$('s-week').value=S.settings.breadWeekly;
+  $('tg').textContent=t(S.telegram?'tgOn':'tgOff');
+}
+async function load(){try{const r=await fetch('/api/reminders',{cache:'no-store'});if(!r.ok)throw 0;S=await r.json();draw()}catch(e){say($('msg'),'err')}}
+async function post(u,b){const r=await fetch(u,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b||{})});if(!r.ok)throw new Error(r.status);return r.json()}
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('button[data-id]');if(!b)return;
+  b.disabled=true;
+  try{S=Object.assign(S||{},await post('/api/reminders/done',{id:b.dataset.id}));draw()}catch(x){say($('msg'),'err')}
+  b.disabled=false;
+});
+$('save').onclick=async()=>{try{S=Object.assign(S||{},await post('/api/reminders/settings',{time:$('s-time').value,locoDays:$('s-loco').value,breadWeekly:$('s-week').value}));draw();say($('msg'),'saved')}catch(e){say($('msg'),'err')}};
+$('test').onclick=async()=>{try{const r=await post('/api/reminders/test');say($('msg'),r.sent?'testOk':'testFail')}catch(e){say($('msg'),'err')}};
+load();setInterval(load,30000);
+</script>
+</body>
+</html>
