@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NARA · المطبخ</title>
+<title>Flamo · المطبخ</title>
 <script src="/nara-lang.js?v=20261009b" data-section="kitchen"></script><script src="/nara-emoji.js?v=20261010a"></script>
 <link rel="stylesheet" href="/kasse-print-lifecycle.css?v=20261014c">
 <style>
@@ -160,7 +160,7 @@ button:disabled{opacity:.5}
   function layout(){document.body.classList.toggle('wide',window.innerWidth>=1300)}
   function applyLang(){
     document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
-    document.title='NARA · '+t('title');$('#title').textContent=t('title');
+    document.title='Flamo · '+t('title');$('#title').textContent=t('title');
     const nx=LANGS[(LANGS.indexOf(lang)+1)%LANGS.length];$('#lang').textContent={de:'DE',ar:'ع',en:'EN'}[nx];$('#lang').title=t('langT');
     $('#expand').title=t('expandT');$('#sound').title=t('soundT');$('#autoprint').title=t('autoprintT');
     $$('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));

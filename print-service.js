@@ -100,7 +100,7 @@ async function rasterize(o, kind, printer, cfg, extra = {}) {
     await page.addScriptTag({ content: 'window.NARA_PROMO=' + JSON.stringify({ url: cfg.promo.url, percent: cfg.promo.percent, days: cfg.promo.days }) + ';' + read('kasse-receipt.js').replace(/import\('\/nara-receipt-core\.mjs'\)/, 'Promise.reject(new Error("offline"))') });
     const sheets = await page.evaluate(({ o, kind, promo }) => {
       const R = window.NARA_RECEIPT, out = [];
-      if (kind === 'test') out.push('<div class="nara-rc"><div class="rc-brand">NARA</div><div class="rc-type">TESTDRUCK</div><div class="rc-c">' + new Date().toLocaleString('de-DE') + '</div><div class="rc-c rc-small">Drucker funktioniert ✓</div></div>');
+      if (kind === 'test') out.push('<div class="nara-rc"><div class="rc-brand">Flamo</div><div class="rc-type">TESTDRUCK</div><div class="rc-c">' + new Date().toLocaleString('de-DE') + '</div><div class="rc-c rc-small">Drucker funktioniert ✓</div></div>');
       else if (kind === 'kitchen') out.push(R.kitchenHtml(o));
       else out.push(R.html(o, kind === 'driver' ? 'driver' : 'customer'));
       if (promo) out.push(R.promoHtml(o));

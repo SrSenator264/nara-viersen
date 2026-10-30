@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NARA · الزباين</title>
+<title>Flamo · الزباين</title>
 <script src="nara-lang.js?v=20261009b" data-section="customers"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
@@ -121,7 +121,7 @@ h3{font-size:14px;margin:12px 0 4px}
   const dt=v=>{const d=new Date(v);return !v||isNaN(d)?'—':d.toLocaleDateString(lang==='en'?'en-GB':'de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'})};
   const $=s=>document.querySelector(s);
   const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-  document.title='NARA · '+t('title');
+  document.title='Flamo · '+t('title');
   document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
   $('#q').placeholder=t('search');
   if(window.NARA_LANG)NARA_LANG.mountSwitcher(document.getElementById('langsw'),{buttonStyle:'min-width:34px;height:30px;border-radius:8px;border:1px solid #ffffff40;background:#ffffff1a;color:#fff;font-weight:800;cursor:pointer'});

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title data-t="title">NARA · Mitarbeiter &amp; Schichten</title>
+  <title data-t="title">Flamo · Mitarbeiter &amp; Schichten</title>
   <script src="nara-lang.js?v=20261009b" data-section="app"></script>
   <link rel="stylesheet" href="nara-shell.css">
   <link rel="stylesheet" href="staff.css">
@@ -13,7 +13,7 @@
   <main class="staff-page">
     <header class="staff-header">
       <div><p class="eyebrow" data-t="eyebrow">Betrieb &amp; Abrechnung</p><h1 data-t="h1">Mitarbeiter &amp; Schichten</h1><p data-t="lead">Kommen &amp; Gehen, Schichten und Löhne an einem Ort.</p></div>
-      <div class="staff-header-actions"><span id="lang-switch"></span><a class="back-link" href="ai-control.html" data-t="back">Zurück zum NARA-Manager</a></div>
+      <div class="staff-header-actions"><span id="lang-switch"></span><a class="back-link" href="ai-control.html" data-t="back">Zurück zum Flamo-Manager</a></div>
     </header>
     <section class="summary-grid">
       <article><span data-t="sumEmp">Mitarbeiter</span><strong id="summary-employees">—</strong><small data-t="sumEmpSub">aktuell angelegt</small></article>
@@ -26,7 +26,7 @@
         <form id="employee-form"><input id="employee-id" type="hidden">
           <label><span data-t="name">Name</span><input id="name" required placeholder="z. B. Ahmad Müller" data-tp="namePh"></label>
           <label><span data-t="role">Rolle</span><select id="role"><option value="CASHIER" data-t="CASHIER">Kasse</option><option value="KITCHEN" data-t="KITCHEN">Küche</option><option value="MANAGER" data-t="MANAGER">Manager</option><option value="DRIVER" data-t="DRIVER">Fahrer</option><option value="ACCOUNTANT" data-t="ACCOUNTANT">Buchhaltung</option></select></label>
-          <label><span data-t="pin">Login-PIN</span><input id="login-pin" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]*" placeholder="Kasse/Küche/Fahrer: 4 Ziffern · Manager/Buchhaltung: 6" data-tp="pinPh"><small id="pin-hint" data-t="pinHint">Der Mitarbeiter meldet sich mit seinem Namen und dieser PIN bei NARA an. Leer lassen, wenn sie gleich bleiben soll.</small></label>
+          <label><span data-t="pin">Login-PIN</span><input id="login-pin" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]*" placeholder="Kasse/Küche/Fahrer: 4 Ziffern · Manager/Buchhaltung: 6" data-tp="pinPh"><small id="pin-hint" data-t="pinHint">Der Mitarbeiter meldet sich mit seinem Namen und dieser PIN bei Flamo an. Leer lassen, wenn sie gleich bleiben soll.</small></label>
           <label><span data-t="rate">Stundenlohn (€)</span><input id="hourly-rate" type="number" min="0" step="0.01" required placeholder="z. B. 12.50" data-tp="ratePh"></label>
           <label><span data-t="contract">Vertragsart</span><select id="contract-type"><option value="HOURLY" data-t="hourly">Stundenlohn</option><option value="MONTHLY" data-t="monthly">Monatsgehalt</option></select></label>
           <fieldset class="profile-switches"><legend data-t="profiles">Mitarbeiterprofile</legend><label><input id="profile-internal" type="checkbox" checked> <span data-t="profInternal">Internes Profil — Betrieb &amp; Einarbeitung</span></label><label><input id="profile-official" type="checkbox"> <span data-t="profOfficial">Offizielles Profil — Buchhaltung &amp; Export</span></label></fieldset>

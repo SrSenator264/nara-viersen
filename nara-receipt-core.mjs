@@ -6,7 +6,7 @@
 // - toEscPos(lines)     : بايتات ESC/POS جاهزة للطابعة الحرارية
 // - printTcp(...)       : إرسال البايتات للطابعة على الشبكة (المنفذ 9100)
 
-export const DEFAULT_HEADER = 'FLAMO, Gereonstraße 1, 41747 Viersen, Tel.: 02162 5013538';
+export const DEFAULT_HEADER = 'Flamo, Gereonstraße 1, 41747 Viersen, Tel.: 02162 5013538';
 const TZ = 'Europe/Berlin';
 
 const TXT = {
