@@ -65,7 +65,7 @@ function status(state, now = Date.now()) {
   return { today, time: s.time, afterTime, bread, loco, meat, settings: s };
 }
 
-const fmtWhen = a => (a ? `${a.by ? a.by + ' · ' : ''}${ymd(Date.parse(a.at))}` : 'ما انسجلت طلبية قبل');
+const fmtWhen = a => (a ? `${a.by ? a.by + ' · ' : ''}${ymd(Date.parse(a.at))}` : 'ما تسجلت طلبية قبل');
 function message(id, stt) {
   if (id === 'bread') {
     const b = stt.bread;
@@ -73,10 +73,10 @@ function message(id, stt) {
   }
   if (id === 'meat') {
     const m = stt.meat;
-    return `🥩 تذكير اللحم: شيّكوا إذا بدنا لحم.\n${m.daysSince == null ? 'ما انسجلت طلبية قبل' : `مرّ ${m.daysSince} أيام على آخر طلبية`}\nآخر طلبية: ${fmtWhen(m.last)}\nلما تطلبوا اضغطوا "انطلب ✅".`;
+    return `🥩 تذكير اللحم: شيّكوا إذا بدنا لحم.\n${m.daysSince == null ? 'ما تسجلت طلبية قبل' : `مرّ ${m.daysSince} أيام على آخر طلبية`}\nآخر طلبية: ${fmtWhen(m.last)}\nلما تطلبوا اضغطوا "انطلب ✅".`;
   }
   const l = stt.loco;
-  return `🧊 تذكير Loco: ${l.daysSince == null ? 'ما انسجلت طلبية قبل' : `مرّ ${l.daysSince} أيام على آخر طلبية`}.\nشيّكوا البرادات واعملوا جرد، وبعدين اطلبوا.\nآخر طلبية: ${fmtWhen(l.last)}\nلما تطلبوا اضغطوا "انطلب ✅".`;
+  return `🧊 تذكير Loco: ${l.daysSince == null ? 'ما تسجلت طلبية قبل' : `مرّ ${l.daysSince} أيام على آخر طلبية`}.\nشيّكوا البرادات واعملوا جرد، وبعدين اطلبوا.\nآخر طلبية: ${fmtWhen(l.last)}\nلما تطلبوا اضغطوا "انطلب ✅".`;
 }
 
 // تسجيل "انطلب". بيرجّع { ok, state, error }
