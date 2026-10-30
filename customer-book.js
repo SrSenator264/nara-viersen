@@ -84,14 +84,14 @@ function merge(dbCustomers, book) {
       name: c.name || '', phone: c.phone || '', street: c.street || '', house: c.house || '', postal: c.postal || '', city: c.city || '',
       floor: c.floor || '', bell: c.bell || '', note: '',
       orders: c.orders || 0, totalCents: c.totalCents || 0, avgCents: c.avgCents || 0, lastAt: c.lastAt || null,
-      mainSource: c.mainSource || '', segment: c.segment || 'NEW', orderNote: c.notes || '', kitchenNote: c.kitchenNote || '',
+      mainSource: c.mainSource || '', sources: Object.keys(c.sources || {}).filter(Boolean), segment: c.segment || 'NEW', orderNote: c.notes || '', kitchenNote: c.kitchenNote || '',
       favourites: (c.favourites || []).slice(0, 5).map(f => ({ name: f.name, n: f.n != null ? f.n : f.count })),
     };
     if (e) { for (const k of SHOW.concat('note')) if (e[k] !== undefined) r[k] = e[k]; r.updatedAt = e.updatedAt || null; r.updatedBy = e.updatedBy || ''; }
     rows.push(r);
   }
   for (const [id, m] of Object.entries(b.manual)) {
-    const r = { id, manual: true, edited: false, orders: 0, totalCents: 0, avgCents: 0, lastAt: null, mainSource: 'MANUAL', segment: 'NEW', orderNote: '', kitchenNote: '', favourites: [] };
+    const r = { id, manual: true, edited: false, orders: 0, totalCents: 0, avgCents: 0, lastAt: null, mainSource: 'MANUAL', sources: ['MANUAL'], segment: 'NEW', orderNote: '', kitchenNote: '', favourites: [] };
     for (const k of SHOW.concat('note')) r[k] = m[k] || '';
     r.updatedAt = m.updatedAt || null; r.updatedBy = m.updatedBy || ''; r.createdAt = m.createdAt || null;
     rows.push(r);

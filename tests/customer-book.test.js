@@ -3,7 +3,7 @@ const test = require('node:test'), assert = require('node:assert/strict'), fs = 
 const B = require('../customer-book.js');
 
 const db = [
-  { id: 'C-aaaaaaaaaa', name: 'Ali', phone: '01701234567', street: 'Hauptstr', house: '5', postal: '41747', city: 'Viersen', orders: 3, totalCents: 4500, avgCents: 1500, lastAt: '2026-10-29T18:00:00Z', mainSource: 'LIEFERANDO', segment: 'REGULAR', favourites: [{ name: 'Cheese Burger', count: 4 }] },
+  { id: 'C-aaaaaaaaaa', name: 'Ali', phone: '01701234567', street: 'Hauptstr', house: '5', postal: '41747', city: 'Viersen', orders: 3, totalCents: 4500, avgCents: 1500, lastAt: '2026-10-29T18:00:00Z', mainSource: 'LIEFERANDO', sources: { LIEFERANDO: 2, UBER_EATS: 1 }, segment: 'REGULAR', favourites: [{ name: 'Cheese Burger', count: 4 }] },
   { id: 'C-bbbbbbbbbb', name: 'Sara', phone: '', street: 'Ring', house: '2', postal: '41747', city: 'Viersen', orders: 1, totalCents: 999, avgCents: 999, lastAt: null, mainSource: 'WEB', segment: 'NEW' },
 ];
 
@@ -68,4 +68,12 @@ test('load/write: كتابة ذرّية، وملف تالف أو ناقص بير
   assert.ok(!fs.existsSync(f + '.tmp'));
   fs.writeFileSync(f, '{broken');
   assert.deepEqual(B.load(f), B.emptyBook());
+});
+
+test('merge: كل منصة طلب منها الزبون بتنرجع بـ sources (للفلتر)، واليدوي = MANUAL', () => {
+  const c = B.create(B.emptyBook(), { name: 'Zaid' }, { rand: () => '0123456789' });
+  const rows = B.merge(db, c.book);
+  assert.deepEqual(rows.find(x => x.id === 'C-aaaaaaaaaa').sources.sort(), ['LIEFERANDO', 'UBER_EATS']);
+  assert.deepEqual(rows.find(x => x.id === 'C-bbbbbbbbbb').sources, []);
+  assert.deepEqual(rows.find(x => x.manual).sources, ['MANUAL']);
 });

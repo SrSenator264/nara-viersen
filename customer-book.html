@@ -85,7 +85,7 @@ h3{font-size:.95rem;margin:16px 0 6px}
 <div class="tools">
   <input id="q" type="search" autocomplete="off" data-t-ph="search">
   <div class="row" id="segs"></div>
-  <select id="sort"></select>
+  <div class="row"><select id="src" style="flex:1"></select><select id="sort" style="flex:1"></select></div>
 </div>
 <div class="tablewrap"><table><thead><tr id="thr"></tr></thead><tbody id="rows"></tbody></table><div id="empty" class="empty"></div></div>
 <div id="scrim"></div>
@@ -98,6 +98,7 @@ FT.init({
   search:{de:'Name, Straße oder Telefon suchen …',ar:'دوّر بالاسم أو الشارع أو التلفون …',en:'Search name, street or phone …'},
   count:{de:'{n} Kunden',ar:'{n} زبون',en:'{n} customers'},
   all:{de:'Alle',ar:'الكل',en:'All'},
+  allSrc:{de:'Alle Quellen',ar:'كل المصادر',en:'All sources'},
   REGULAR:{de:'Stammkunde',ar:'زبون دايم',en:'Regular'},
   RETURNING:{de:'Wiederkehrend',ar:'رجع طلب',en:'Returning'},
   NEW:{de:'Neu',ar:'جديد',en:'New'},
@@ -157,7 +158,7 @@ FT.init({
   const FIELDS=['name','phone','street','house','postal','city','floor','bell','note'];
   const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 
-  let rows=[],loaded=false,seg=store.get('nara-cbook-seg','all'),sel=null,cur=null;
+  let rows=[],loaded=false,seg=store.get('nara-cbook-seg','all'),src=store.get('nara-cbook-src','all'),sel=null,cur=null;
   let chain=Promise.resolve();
 
   const sorts={
@@ -172,6 +173,7 @@ FT.init({
     const q=$('#q').value.trim().toLowerCase(),qd=q.replace(/\D/g,'');
     return rows.filter(r=>{
       if(seg!=='all'&&segOf(r)!==seg)return false;
+      if(src!=='all'&&!(r.sources&&r.sources.length?r.sources:[r.mainSource]).includes(src))return false;
       if(!q)return true;
       return [r.name,r.street,r.city,r.postal,r.note].join(' ').toLowerCase().includes(q)||(qd.length>=3&&String(r.phone||'').replace(/\D/g,'').includes(qd));
     }).sort(sorts[$('#sort').value]||sorts.last);
@@ -179,13 +181,19 @@ FT.init({
   function renderChrome(){
     $('#thr').innerHTML=['cName','cPhone','cAddr','cOrders','cTotal','cLast','cSrc'].map(k=>'<th>'+esc(t(k))+'</th>').join('');
     $('#segs').innerHTML=['all'].concat(SEGS).map(s=>'<button type="button" class="seg'+(seg===s?' on':'')+'" data-seg="'+s+'">'+esc(s==='all'?t('all'):t(s))+'</button>').join('');
+    const present=[...new Set(rows.flatMap(r=>r.sources&&r.sources.length?r.sources:(r.mainSource?[r.mainSource]:[])))];
+    const label=k=>k==='MANUAL'?t('MANUAL'):(SRC[k]||k);
+    present.sort((a,b)=>label(a).localeCompare(label(b)));
+    if(src!=='all'&&!present.includes(src))src='all';
+    $('#src').innerHTML='<option value="all">'+esc(t('allSrc'))+'</option>'+present.map(k=>'<option value="'+esc(k)+'">'+esc(label(k))+'</option>').join('');
+    $('#src').value=src;
     const cur=$('#sort').value||store.get('nara-cbook-sort','last');
     $('#sort').innerHTML=[['last','sLast'],['name','sName'],['orders','sOrders'],['total','sTotal']].map(([v,k])=>'<option value="'+v+'">'+esc(t(k))+'</option>').join('');
     $('#sort').value=sorts[cur]?cur:'last';
   }
   function renderRows(){
     const list=filtered();
-    $('#cnt').textContent=t('count',{n:rows.length});
+    $('#cnt').textContent=t('count',{n:list.length});
     $('#rows').innerHTML=list.slice(0,500).map(r=>
       '<tr data-id="'+esc(r.id)+'" class="'+(sel===r.id?'sel':'')+'">'+
       '<td class="nm">'+esc(r.name||'—')+'<span class="badge b-'+esc(segOf(r))+'">'+esc(t(segOf(r)))+'</span></td>'+
@@ -302,6 +310,7 @@ FT.init({
   $('#add').addEventListener('click',()=>flush().then(()=>{if(cur&&Object.keys(cur.dirty).length)return;openDetail(null)}));
   $('#segs').addEventListener('click',e=>{const b=e.target.closest('[data-seg]');if(!b)return;seg=b.dataset.seg;store.set('nara-cbook-seg',seg);renderChrome();renderRows()});
   $('#q').addEventListener('input',renderRows);
+  $('#src').addEventListener('change',()=>{src=$('#src').value;store.set('nara-cbook-src',src);renderRows()});
   $('#sort').addEventListener('change',()=>{store.set('nara-cbook-sort',$('#sort').value);renderRows()});
   $('#detail').addEventListener('input',onInput);
   $('#detail').addEventListener('click',e=>{if(e.target.id==='dx')closeDetail()});
