@@ -3,7 +3,9 @@
    الورقة ألمانية دايماً (للمحاسب والـFinanzamt). بتعرض الحقائق بس: بدون تحذيرات وبدون علامات تدريب.
    سجل جديد = أصل؛ copyNumber >= 2 بيطبع "Kopie n". Nachtrag = ورقة فرق مربوطة بالأصل. */
 (function (root) {
-  const DEFAULT_HEADER = 'Flamo, Gereonstraße 1, 41747 Viersen, Tel.: 02162 5013538';
+  // مؤقتاً: الورقة بتنطبع باسم المحل القانوني الحالي (IU GENE) لحد ما نغيّر الفورمة رسمياً. لتغييره: بدّل PRINT_NAME بس.
+  const PRINT_NAME = 'IU GENE';
+  const DEFAULT_HEADER = PRINT_NAME + ', Gereonstraße 1, 41747 Viersen, Tel.: 02162 5013538';
   const LABELS = { LIEFERANDO: 'Lieferando', WOLT: 'Wolt', UBER_EATS: 'Uber Eats', LANCH: 'Lanch', LOCO: 'Loco Chicken' };
   const eur = c => { const n = Math.round(Number(c) || 0), a = Math.abs(n); return (n < 0 ? '-' : '') + String(Math.floor(a / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + String(a % 100).padStart(2, '0'); };
   const dmy = d => /^\d{4}-\d{2}-\d{2}$/.test(d || '') ? d.slice(8) + '.' + d.slice(5, 7) + '.' + d.slice(0, 4) : String(d || '');
@@ -98,7 +100,7 @@
     const v = R.revenue || {}, n = R.net || {}, st = R.storno || {}, cn = R.counts || {}, c = R.cash;
     const tr = (l, r, cls) => '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td>' + esc(l) + '</td><td class="n">' + esc(r) + '</td></tr>';
     const table = (title, rows) => '<h2>' + esc(title) + '</h2><table>' + rows + '</table>';
-    let body = '<div class="top"><div><div class="brand">Flamo</div><div class="addr">' + esc(header) + '</div></div><div class="meta"><div class="title">' + (nach ? 'Nachtrag' : 'Tagesabschluss') + '</div>' + (rec.number ? '<div class="num">' + esc(rec.number) + '</div>' : '') + (copy > 1 ? '<div class="copy">Kopie ' + copy + '</div>' : '') + '</div></div>';
+    let body = '<div class="top"><div><div class="brand">' + esc(PRINT_NAME) + '</div><div class="addr">' + esc(header) + '</div></div><div class="meta"><div class="title">' + (nach ? 'Nachtrag' : 'Tagesabschluss') + '</div>' + (rec.number ? '<div class="num">' + esc(rec.number) + '</div>' : '') + (copy > 1 ? '<div class="copy">Kopie ' + copy + '</div>' : '') + '</div></div>';
     body += '<div class="sub">Geschäftstag <b>' + esc(dmy(rec.day)) + '</b>' + (rec.closedAt ? ' · Erstellt ' + esc(stamp(rec.closedAt)) + (who(rec) ? ' · ' + esc(who(rec)) : '') : '') + (nach ? ' · zum Abschluss ' + esc(String(rec.number || '').replace(/-N\d+$/, '')) : '') + '</div>';
 
     let rows = tr('Bestellungen', cn.orders || 0) + tr('Umsatz brutto', eur(n.grossCents), 'tot') + tr('davon Bar', eur(n.cashCents), 'sub') + tr('davon Karte', eur(n.cardCents), 'sub');

@@ -147,3 +147,8 @@ test('زر الرئيسية 🏠: على كل الصفحات (حتى موقع ا
   for (const f of skip) assert.ok(!fs.readFileSync(path.join(root, f), 'utf8').includes('flamo-home.js'), f);
   const js = fs.readFileSync(path.join(root, 'flamo-home.js'), 'utf8'); assert.match(js, /\/api\/auth\/me/); assert.match(js, /nara-app\.html/); assert.equal(A.staticAllowed('flamo-home.js'), true);
 });
+
+test('ترويسة مؤقتة: IU GENE على الإيصال وA4 (بدون Flamo)', () => {
+  const r = rec(data()), t = P.receiptLines(r).map(l => l.text).join('\n'), h = P.a4Html(r);
+  assert.match(t, /IU GENE/); assert.match(h, /class="brand">IU GENE</); assert.doesNotMatch(t, /Flamo/); assert.doesNotMatch(h.replace(/<style[\s\S]*?<\/style>/, ''), /Flamo/);
+});
