@@ -76,7 +76,7 @@ const methodSplit = ps => {
   return { cash, card, other: total - cash - card };
 };
 
-const settlementsOf = (data, day) => (data.dailySettlements || []).filter(s => s && s.mode !== 'TRAINING' && s.day === day).sort((a, b) => ms(a.closedAt) - ms(b.closedAt));
+const settlementsOf = (data, day) => (data.dayClosings || []).filter(s => s && s.mode !== 'TRAINING' && s.day === day).sort((a, b) => ms(a.closedAt) - ms(b.closedAt));
 
 // ── الحساب الأساسي ─────────────────────────────────────────────────────────────
 // opts: { mode:'REAL'|'TRAINING', sinceIso (للـNachtrag), openingCents, countedCents, leaveCents }
@@ -156,7 +156,7 @@ function build(data, day, opts = {}) {
   if (finite(opts.openingCents)) { opening = int(opts.openingCents); source = 'INPUT'; }
   else if (!training && book('OPENING').length) { opening = sum(book('OPENING'), x => int(x.inCents)); source = 'CASHBOOK'; }
   else if (!training) {
-    const prev = (data.dailySettlements || []).filter(s => s && s.mode !== 'TRAINING' && s.type === 'CLOSING' && s.day < day).sort((a, b) => (a.day < b.day ? 1 : -1))[0];
+    const prev = (data.dayClosings || []).filter(s => s && s.mode !== 'TRAINING' && s.type === 'CLOSING' && s.day < day).sort((a, b) => (a.day < b.day ? 1 : -1))[0];
     if (prev && prev.count) { opening = int(prev.count.leaveCents != null ? prev.count.leaveCents : prev.count.countedCents); source = 'PREVIOUS'; }
   }
   const cash = { openingCents: opening, openingSource: source, salesCents: revenue.cashCents, tipCents: tipCashC, refundsCents: stCash, depositsCents: deposits, withdrawalsCents: withdrawals };
@@ -194,7 +194,7 @@ function build(data, day, opts = {}) {
 // ── الترقيم والحالة ────────────────────────────────────────────────────────────
 function nextNumber(data, day) {
   const year = String(day).slice(0, 4), re = new RegExp('^Z-' + year + '-(\\d{4})$');
-  const max = Math.max(0, ...(data.dailySettlements || []).filter(s => s && s.mode !== 'TRAINING' && s.type === 'CLOSING').map(s => { const m = re.exec(String(s.number || '')); return m ? Number(m[1]) : 0; }));
+  const max = Math.max(0, ...(data.dayClosings || []).filter(s => s && s.mode !== 'TRAINING' && s.type === 'CLOSING').map(s => { const m = re.exec(String(s.number || '')); return m ? Number(m[1]) : 0; }));
   return 'Z-' + year + '-' + String(max + 1).padStart(4, '0');
 }
 
@@ -214,7 +214,7 @@ function status(data, day, opts = {}) {
   return { day, closed: !!closing, closing: closing ? { id: closing.id, number: closing.number, closedAt: closing.closedAt } : null, lateSales: late, missedDays: missed, nextNumber: nextNumber(data, day) };
 }
 
-// ── إنشاء سجل ثابت (السيرفر بيدفعو لـ dailySettlements) ─────────────────────────
+// ── إنشاء سجل ثابت (السيرفر بيدفعو لـ dayClosings) ─────────────────────────
 // input: { countedCents, leaveCents, openingCents, denominations:{"2000":3}, note, nachtrag:true, mode }
 function makeRecord(data, { day, input = {}, user = null, now, newId }) {
   if (!ISO.test(day || '')) throw new ClosingError(422, 'Ungültiger Tag.', 'BAD_DAY');

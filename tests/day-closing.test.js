@@ -4,7 +4,7 @@ const DC = require('../day-closing.js');
 
 const DAY = '2026-10-31', AT = '2026-10-31T12:00:00.000Z' /* 13:00 Berlin */, NOW = '2026-10-31T20:00:00.000Z';
 let seq = 0; const newId = p => p + '-' + (++seq);
-const mkData = (x = {}) => ({ orders: [], payments: [], receipts: [], fiscalTransactions: [], auditEvents: [], cashbooks: [], dailySettlements: [], categories: [], settings: {},
+const mkData = (x = {}) => ({ orders: [], payments: [], receipts: [], fiscalTransactions: [], auditEvents: [], cashbooks: [], dayClosings: [], categories: [], settings: {},
   products: [{ id: 'p1', name: 'Burger', category: 'Burger' }, { id: 'd1', name: 'Cola', category: 'Getränke' }], ...x });
 const it = (pid, name, cents, q = 1) => ({ id: pid + '-1730000000000', name, unitCents: cents, quantity: q });
 const burger = c => it('p1', 'Burger', c), cola = c => it('d1', 'Cola', c);
@@ -128,7 +128,7 @@ test('عدّ الصندوق: المتوقع، الفرق، الحالة، وال
 test('رصيد البداية: يدوي ← Cashbook OPENING ← تقفيلة سابقة ← صفر', () => {
   const d = mkData();
   assert.deepEqual([DC.build(d, DAY).cash.openingCents, DC.build(d, DAY).cash.openingSource], [0, 'NONE']);
-  d.dailySettlements.push({ id: 's0', mode: 'REAL', type: 'CLOSING', day: '2026-10-30', closedAt: '2026-10-30T20:00:00.000Z', count: { countedCents: 9000, leaveCents: 4000 } });
+  d.dayClosings.push({ id: 's0', mode: 'REAL', type: 'CLOSING', day: '2026-10-30', closedAt: '2026-10-30T20:00:00.000Z', count: { countedCents: 9000, leaveCents: 4000 } });
   assert.deepEqual([DC.build(d, DAY).cash.openingCents, DC.build(d, DAY).cash.openingSource], [4000, 'PREVIOUS']);
   d.cashbooks.push({ date: DAY, type: 'OPENING', inCents: 3000, outCents: 0 });
   assert.deepEqual([DC.build(d, DAY).cash.openingCents, DC.build(d, DAY).cash.openingSource], [3000, 'CASHBOOK']);
@@ -165,7 +165,7 @@ test('إنشاء التقفيلة: رقم Z، سجل REAL، تقفيلة ثان�
   const rec = DC.makeRecord(d, { day: DAY, input: { countedCents: 2000, denominations: { 1000: 2 } }, user, now: NOW, newId });
   assert.equal(rec.number, 'Z-2026-0001'); assert.equal(rec.type, 'CLOSING'); assert.equal(rec.mode, 'REAL'); assert.equal(rec.closedBy.role, 'OWNER');
   assert.equal(rec.report.cash.countedCents, 2000); assert.equal(rec.count.leaveCents, 2000); assert.deepEqual(rec.count.denominations, { 1000: 2 });
-  d.dailySettlements.push(rec);
+  d.dayClosings.push(rec);
   thrown(() => DC.makeRecord(d, { day: DAY, input: { countedCents: 2000 }, now: NOW, newId }), 'ALREADY_CLOSED', 409);
   const e = mkData();
   thrown(() => DC.makeRecord(e, { day: DAY, input: { mode: 'TRAINING', countedCents: 0 }, now: NOW, newId }), 'TRAINING_NOT_SAVED', 422);
@@ -177,7 +177,7 @@ test('إنشاء التقفيلة: رقم Z، سجل REAL، تقفيلة ثان�
 });
 
 test('ترقيم: يزيد بنفس السنة، يبدأ من جديد بالسنة الجاية، والتدريب ما بيدخل', () => {
-  const d = mkData({ dailySettlements: [
+  const d = mkData({ dayClosings: [
     { mode: 'REAL', type: 'CLOSING', day: '2026-10-30', number: 'Z-2026-0007' }, { mode: 'TRAINING', type: 'CLOSING', day: '2026-10-30', number: 'Z-2026-0099' },
     { mode: 'REAL', type: 'NACHTRAG', day: '2026-10-30', number: 'Z-2026-0007-N1' }] });
   assert.equal(DC.nextNumber(d, DAY), 'Z-2026-0008'); assert.equal(DC.nextNumber(d, '2027-01-02'), 'Z-2027-0001');
@@ -186,21 +186,21 @@ test('ترقيم: يزيد بنفس السنة، يبدأ من جديد بالس
 test('مبيعات بعد التقفيلة: تحذير ثم Nachtrag بالفرق بس، وبعدو ما في تحذير', () => {
   const d = mkData(); sale(d, { id: 'a', cart: [burger(1000)] });
   thrown(() => DC.makeRecord(d, { day: DAY, input: { nachtrag: true }, now: NOW, newId }), 'NO_CLOSING', 409);
-  d.dailySettlements.push(DC.makeRecord(d, { day: DAY, input: { countedCents: 1000 }, now: NOW, newId }));
+  d.dayClosings.push(DC.makeRecord(d, { day: DAY, input: { countedCents: 1000 }, now: NOW, newId }));
   assert.equal(DC.status(d, DAY).closed, true); assert.equal(DC.status(d, DAY).lateSales, null);
   thrown(() => DC.makeRecord(d, { day: DAY, input: { nachtrag: true }, now: '2026-10-31T22:00:00.000Z', newId }), 'NOTHING_NEW', 409);
   sale(d, { id: 'late', cart: [burger(250)], at: '2026-10-31T21:00:00.000Z' });
   assert.deepEqual(DC.status(d, DAY).lateSales, { count: 1, grossCents: 250, stornoCount: 0 });
   const n = DC.makeRecord(d, { day: DAY, input: { nachtrag: true }, now: '2026-10-31T22:00:00.000Z', newId });
-  assert.equal(n.number, 'Z-2026-0001-N1'); assert.equal(n.type, 'NACHTRAG'); assert.equal(n.report.revenue.grossCents, 250); assert.equal(n.refId, d.dailySettlements[0].id);
-  d.dailySettlements.push(n);
+  assert.equal(n.number, 'Z-2026-0001-N1'); assert.equal(n.type, 'NACHTRAG'); assert.equal(n.report.revenue.grossCents, 250); assert.equal(n.refId, d.dayClosings[0].id);
+  d.dayClosings.push(n);
   assert.equal(DC.status(d, DAY).lateSales, null);
 });
 
 test('أيام فاتت بدون تقفيلة', () => {
   const d = mkData(); sale(d, { id: 'old', cart: [burger(500)], at: '2026-10-29T12:00:00.000Z' });
   assert.deepEqual(DC.status(d, DAY).missedDays, ['2026-10-29']);
-  d.dailySettlements.push({ id: 's', mode: 'REAL', type: 'CLOSING', day: '2026-10-29', number: 'Z-2026-0001', closedAt: '2026-10-29T20:00:00.000Z' });
+  d.dayClosings.push({ id: 's', mode: 'REAL', type: 'CLOSING', day: '2026-10-29', number: 'Z-2026-0001', closedAt: '2026-10-29T20:00:00.000Z' });
   assert.deepEqual(DC.status(d, DAY).missedDays, []);
   assert.equal(DC.status(d, DAY).nextNumber, 'Z-2026-0002');
 });

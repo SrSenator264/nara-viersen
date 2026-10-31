@@ -127,6 +127,8 @@ const RULES = [
   ['POST', /^\/api\/live-orders\/stage$/, KITCH],
   ['POST', /^\/api\/live-orders\/archive-day$/, CASH],
   ['POST', /^\/api\/tse-demo\/receipt$/, CASH],
+  ['GET', /^\/api\/day-closing(\/|$)/, ACCT], // تقفيلة اليوم: عرض (المحاسب كمان)
+  ['POST', /^\/api\/day-closing(\/|$)/, MANAGERS], // إنشاء تقفيلة / Nachtrag / إعادة طباعة: مالك أو مدير بس
   ['GET', /^\/api\/delivery\/(scan|route-link|order-print)$/, STAFF],
   ['POST', /^\/api\/delivery\/(order-qr|route-qr)$/, STAFF],
   ['GET', /^\/api\/delivery\/(dispatch-plan|operations-plan)$/, CASH],
@@ -153,7 +155,7 @@ const allowed = (access, role) => Array.isArray(access) && access.includes(role)
 const BLOCKED_DIRS = new Set(['data', 'logs', 'node_modules', 'tests', 'scripts', 'checkpoint', 'local-ocr-output']);
 const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen.js', 'dispatch-engine.js', 'dispatch-service.js', 'push.js', 'customer-db.js', 'customer-book.js', 'reminders.js', 'telegram-actions.js', 'platform-trips.js', 'dispatch-learning.js', 'prep-learning.js', 'platform-accept.js', 'platform-status.js', 'payment-logic.js','delivery-quote.js','print-service.js', 'project-agent-tools.js', 'project-change-worker.js', 'local-ocr-worker-manager.js', 'invoice-extraction-provider.js', 'local-invoice-preparser.js', 'nara-agent-suite.js', 'nara-receipt.mjs', 'lieferando-playwright-bridge.mjs', 'sides-bridge.mjs', 'uber-discover.mjs', 'sides-normalize.mjs', 'uber-bridge.mjs', 'uber-normalize.mjs', 'web-order.js', 'bank-pay.js', 'qonto-sync.js', 'flamo-ai.js', 'sides-login-save.ps1',
   // 2a) Server-only (nur per require geladen, in keiner .html / keinem Frontend-Skript referenziert):
-  'alerts.js', 'monitor.js', 'data-guard.js', 'delivery-rules.js', 'local-invoice-hybrid.js', 'option-library.js', 'sales-ledger.js', 'customers-sync.js', 'menu-translations-lib.js', 'kasse-window.js', 'body-reader.js', 'system-update.js',
+  'alerts.js', 'monitor.js', 'data-guard.js', 'delivery-rules.js', 'local-invoice-hybrid.js', 'option-library.js', 'sales-ledger.js', 'day-closing.js', 'day-closing-routes.js', 'customers-sync.js', 'menu-translations-lib.js', 'kasse-window.js', 'body-reader.js', 'system-update.js',
   // Dev-/Benchmark-/CLI-Tools (kein Frontend)
   'deepseek-benchmark.js', 'local-coordinate-benchmark.js', 'local-preparser-diagnostic.js', 'run-local-ocr-generalization-controlled.js', 'discover.mjs']);
 // 2b) Whitelist für Skripte: .js/.mjs außerhalb von dist/ werden NUR ausgeliefert, wenn sie hier stehen (default-deny).
