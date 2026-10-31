@@ -158,3 +158,7 @@ test('الرئيسية: زر 🏠 مكان زر المنيو بالشريط ال
   assert.match(nav, /class="fn-menu" href="\$\{base\}\$\{HOME\.f\}">🏠/); assert.doesNotMatch(nav, /class="fn-menu"[^`]*menuPage/);
   assert.ok(app.includes("['admin','🍔','/admin-foundation.html',M]") && !app.includes("'/admin.html'"));
 });
+
+test('زر 🏠 العائم: ما بيتكرر مع زر الشريط العلوي (fn-menu)', () => {
+  assert.match(fs.readFileSync(path.join(__dirname, '..', 'flamo-home.js'), 'utf8'), /querySelector\('\.fn-menu'\)/);
+});
