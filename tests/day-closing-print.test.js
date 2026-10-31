@@ -134,3 +134,7 @@ test('وضع ليلي عام: ملفات الفرونت + مفعّل بصفحة 
 test('وضع ليلي: الجزء 2 (Live Orders، المطبخ، السواقين)', () => {
   for (const f of ['live-orders.html', 'kitchen.html', 'driver.html', 'driver-app-v2.html']) assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').includes('flamo-night.js'), f);
 });
+
+test('وضع ليلي: الجزء 3 (المحاسبة والأرقام)', () => {
+  for (const f of ['accounting.html', 'sales.html', 'reports.html', 'dashboard.html', 'banking.html', 'admin.html']) assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').includes('flamo-night.js'), f);
+});
