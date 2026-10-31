@@ -139,3 +139,11 @@ test('وضع ليلي: الجزء 2 (Live Orders، المطبخ، السواقي
 test('وضع ليلي: الجزء 3 (المحاسبة والأرقام)', () => {
   for (const f of ['accounting.html', 'sales.html', 'reports.html', 'dashboard.html', 'banking.html', 'admin.html']) assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').includes('flamo-night.js'), f);
 });
+
+test('زر الرئيسية 🏠: على كل الصفحات (حتى موقع الزبون) ما عدا الرئيسية نفسها، وبيظهر بس مع جلسة موظف', () => {
+  const root = path.join(__dirname, '..'), skip = new Set(['nara-app.html', 'index.html', 'delivery-print.html']);
+  for (const f of fs.readdirSync(root).filter(x => x.endsWith('.html') && !skip.has(x))) assert.ok(fs.readFileSync(path.join(root, f), 'utf8').includes('flamo-home.js'), f);
+  assert.ok(fs.readFileSync(path.join(root, 'web-prototype', 'c.html'), 'utf8').includes('../flamo-home.js'));
+  for (const f of skip) assert.ok(!fs.readFileSync(path.join(root, f), 'utf8').includes('flamo-home.js'), f);
+  const js = fs.readFileSync(path.join(root, 'flamo-home.js'), 'utf8'); assert.match(js, /\/api\/auth\/me/); assert.match(js, /nara-app\.html/); assert.equal(A.staticAllowed('flamo-home.js'), true);
+});

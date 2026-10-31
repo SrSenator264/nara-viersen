@@ -116,5 +116,5 @@ $('save').onclick=async()=>{try{S=Object.assign(S||{},await post('/api/reminders
 $('test').onclick=async()=>{try{const r=await post('/api/reminders/test');say($('msg'),r.sent?'testOk':'testFail')}catch(e){say($('msg'),'err')}};
 load();setInterval(load,30000);
 </script>
-</body>
+<script src="flamo-home.js?v=20261031a" defer></script></body>
 </html>
