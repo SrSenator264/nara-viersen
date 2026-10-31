@@ -132,7 +132,7 @@
     if(Array.isArray(o.items))return o;
     const d=o.delivery||{},r=toReceiptOrder(o,'kitchen'),created=o.acceptedAt||o.createdAt||o.placedAt||new Date().toISOString();
     const prep=Number(o.preparationMinutes||d.preparationMinutes||o.prepMinutes)||20,start=Date.parse(o.kitchenStartAt||created);
-    return {displayCode:r.displayCode,source:r.platform,type:o.type==='pickup'?'pickup':o.type==='local'?'local':'delivery',table:o.table||'',customerName:d.name||o.customerName||'',
+    return {displayCode:r.displayCode,billingNumber:String(o.billingNumber||r.billingNumber||''),source:r.platform,type:o.type==='pickup'?'pickup':o.type==='local'?'local':'delivery',table:o.table||'',customerName:d.name||o.customerName||'',
       notes:[d.notes,d.extra,o.remarks].filter(Boolean).join(' · '),createdAt:created,readyBy:isNaN(start)?'':new Date(start+prep*60000).toISOString(),
       items:r.cart.map(i=>({name:i.name,quantity:i.quantity,options:i.options,note:i.notes}))};
   }
@@ -149,6 +149,7 @@
     if(brandOf(o)!=='IU GENE')rows.push('<div class="rc-type">'+esc(brandOf(o))+'</div>');
     const pb=platBox(k.source);if(pb)rows.push(pb);
     rows.push('<div class="rc-code">'+esc(k.displayCode)+'</div>');
+    if(k.billingNumber&&k.billingNumber!==k.displayCode)rows.push('<div class="rc-c rc-small">'+esc(k.billingNumber)+'</div>');
     rows.push('<div class="rc-type">'+esc(type)+'</div>');
     rows.push('<div class="rc-c rc-small">'+esc(t.since)+' '+esc(hhmm(k.createdAt))+'</div>');
     if(hhmm(k.readyBy))rows.push('<div class="rc-c rc-when">'+esc(t.ready)+' '+esc(hhmm(k.readyBy))+'</div>');

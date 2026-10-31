@@ -221,6 +221,7 @@ export function renderKitchenLines(o, opt = {}) {
 
   big(t.kitchen, { align: 'center', bold: true });
   big(o.displayCode || o.externalOrderCode || '', { align: 'center', bold: true });
+  if (o.billingNumber && o.billingNumber !== o.displayCode) add(String(o.billingNumber), { align: 'center' });
   if (o.platform && o.platform !== 'NARA') add(o.platform, { align: 'center', bold: true });
   sep();
   big(o.orderType === 'PICKUP' ? t.pickup : o.orderType === 'DINE_IN' ? `${t.dineIn}${o.table ? ' ' + o.table : ''}` : t.delivery, { align: 'center', bold: true });

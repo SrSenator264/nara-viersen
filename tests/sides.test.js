@@ -63,3 +63,12 @@ test('Lieferando delivery QR (Zum Liefern scannen) goes on our receipt', async (
   const plain = core.renderLines({ displayCode: 'X1', platform: 'NARA', orderType: 'PICKUP', cart: [], totalCents: 0 }, { lang: 'de' });
   assert.ok(plain.some(l => l.qr === 'FLAMO|NARA|X1'));
 });
+
+test('Kitchen ticket shows the platform order number (billingNumber) under our code', async () => {
+  const { normalizeSides } = await import('../sides-normalize.mjs');
+  const core = await import('../nara-receipt-core.mjs');
+  const o = normalizeSides(detail, { id: 3891433 });
+  const txt = core.toText(core.renderKitchenLines(o, { lang: 'de' }));
+  assert.match(txt, /539L1512/);
+  assert.match(txt, /VMB9JY/);
+});
