@@ -29,8 +29,8 @@ test('القائمة: de/ar/en للتقفيلة، والمفتاح close ما ت
   assert.ok(line.includes('kasse-settlement.html'));
 });
 
-test('عنوان وعنوان رئيسي الصفحة بالعربي: تقفيلة اليوم', () => {
+test('عنوان وعنوان رئيسي الصفحة بالعربي: تقفيلة اليوم، والألماني/الإنجليزي متل ما هنّ', () => {
   const src = fs.readFileSync(path.join(root, 'kasse-settlement.js'), 'utf8');
-  assert.ok(src.includes("title:'Flamo · تقفيلة اليوم'") && src.includes("h1:'تقفيلة اليوم والحساب"));
-  assert.ok(src.includes("title:'Flamo · Tagesabschluss'") && src.includes("title:'Flamo · End of day'"));
+  assert.match(src, /title:\s*'Flamo · تقفيلة اليوم'/); assert.match(src, /h1:\s*'تقفيلة اليوم/);
+  assert.match(src, /title:\s*'Flamo · Tagesabschluss'/); assert.match(src, /title:\s*'Flamo · End of day'/);
 });
