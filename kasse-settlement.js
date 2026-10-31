@@ -50,7 +50,7 @@
  const denLabel = c => c >= 100 ? (c / 100) + ' €' : c + ' ct';
  const trainingOn = () => { try { return localStorage.getItem('nara-kasse-training') === '1'; } catch (e) { return false; } };
 
- const S = { day: '', today: '', mode: trainingOn() ? 'TRAINING' : 'REAL', report: null, status: null, record: null, nachtraege: [], user: null, counts: {}, manual: false, total: null, opening: null, leave: null, note: '', touched: false, msg: null, busy: false, seq: 0 };
+ const S = { day: '', today: '', mode: trainingOn() ? 'ALL' : 'REAL', report: null, status: null, record: null, nachtraege: [], user: null, counts: {}, manual: false, total: null, opening: null, leave: null, note: '', touched: false, msg: null, busy: false, seq: 0 };
  const canClose = () => !!S.user && (S.user.role === 'OWNER' || S.user.role === 'MANAGER');
  const tf = () => trainingOn();
 
@@ -102,7 +102,7 @@
  function barHtml() {
   const closed = S.status && S.status.closed;
   const chip = S.mode !== 'REAL' ? '' : closed ? `<span class="sd-chip green">${esc(tr('closedAs')(S.status.closing.number))}</span>` : `<span class="sd-chip amber">🟢 ${tr('open')}</span>`;
-  const seg = tf() ? `<select class="sd-sel${S.mode === 'TRAINING' ? ' train' : ''}" id="sd-mode" aria-label="mode"><option value="REAL"${S.mode === 'REAL' ? ' selected' : ''}>${tr('real')}</option><option value="TRAINING"${S.mode === 'TRAINING' ? ' selected' : ''}>${tr('train')}</option><option value="ALL"${S.mode === 'ALL' ? ' selected' : ''}>${tr('all')}</option></select>` : '';
+  const seg = ''; // بدون خيارات وبدون تسمية: وضع التدريب مفعّل = تقفيلة كاملة (فعلي + تدريب)، غير هيك = فعلي
   return weekHtml() + `<button class="sd-btn ghost" type="button" data-day="-1" aria-label="-1">◀</button><input class="sd-in" id="sd-day" type="date" value="${esc(S.day)}"${S.today ? ` max="${esc(S.today)}"` : ''}><button class="sd-btn ghost" type="button" data-day="1" aria-label="+1">▶</button><button class="sd-btn ghost" type="button" data-day="0">${tr('today')}</button>${seg}${chip}`;
  }
 
@@ -244,7 +244,7 @@
  }
 
  function render() {
-  document.body.classList.toggle('nara-training', S.mode === 'TRAINING');
+  document.body.classList.toggle('nara-training', S.mode !== 'REAL');
   $('#bar').innerHTML = barHtml();
   const root = $('#app');
   if (!S.report) { root.innerHTML = S.msg && S.msg.err ? `<div class="msg err">${esc(S.msg.err)}</div>` : `<p class="muted">${tr('loading')}</p>`; return; }
@@ -296,8 +296,7 @@
     S.msg = null; load(true);
    }
   });
-  bar.addEventListener('change', e => {
-   if (e.target.id === 'sd-mode') { S.mode = ['TRAINING', 'ALL'].includes(e.target.value) ? e.target.value : 'REAL'; S.msg = null; return load(true); } if (e.target.id === 'sd-day' && /^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) { S.day = e.target.value; S.msg = null; load(true); } });
+  bar.addEventListener('change', e => { if (e.target.id === 'sd-day' && /^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) { S.day = e.target.value; S.msg = null; load(true); } });
   app.addEventListener('click', e => {
    const a = e.target.closest('[data-act]'), g = e.target.closest('[data-goto]');
    if (g) { S.day = g.dataset.goto; S.msg = null; return load(true); }
@@ -334,7 +333,7 @@
   api('GET', '/api/auth/me').then(r => { S.user = (r.json && r.json.user) || null; return load(true); });
   // وضع التدريب على هالجهاز: إذا انطفى وإحنا بالتدريب → فعلي. إذا اشتغل → خيار التدريب بيظهر.
   let last = trainingOn();
-  setInterval(() => { const now = trainingOn(); if (now === last) return; last = now; S.mode = now ? 'TRAINING' : 'REAL'; load(true); }, 2000);
+  setInterval(() => { const now = trainingOn(); if (now === last) return; last = now; S.mode = now ? 'ALL' : 'REAL'; load(true); }, 2000);
  }
  document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', boot) : boot();
 })();

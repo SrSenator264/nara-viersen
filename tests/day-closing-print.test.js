@@ -170,3 +170,9 @@ test('كاشير الموبايل: لا تعارك مؤقّتات (رمش) ول�
   assert.match(fs.readFileSync(path.join(root, 'kasse.html'), 'utf8'), /interactive-widget=resizes-content/);
   assert.match(fs.readFileSync(path.join(root, 'kasse-phone.css'), 'utf8'), /body \.cart-panel\{max-width:100vw;overflow-x:hidden\}/);
 });
+
+test('تقفيلة اليوم: وضع التدريب مفعّل = تقفيلة كاملة (فعلي + تدريب) بدون قائمة اختيار ولا تسمية', () => {
+  const js = fs.readFileSync(path.join(__dirname, '..', 'kasse-settlement.js'), 'utf8');
+  assert.match(js, /mode: trainingOn\(\) \? 'ALL' : 'REAL'/); assert.ok(!js.includes('<select'), 'ما في قائمة اختيار'); assert.ok(!js.includes('sd-mode'));
+  assert.match(js, /classList\.toggle\('nara-training', S\.mode !== 'REAL'\)/);
+});
