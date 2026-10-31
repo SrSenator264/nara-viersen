@@ -8,8 +8,7 @@
     if (document.getElementById('flamo-home-btn') || !document.body) return;
     const a = document.createElement('a');
     a.id = 'flamo-home-btn'; a.href = HOME; a.setAttribute('aria-label', 'Startseite'); a.textContent = '🏠';
-    const night = document.getElementById('flamo-night-btn');
-    a.style.cssText = 'position:fixed;bottom:10px;inset-inline-start:' + (night ? '56px' : '10px') + ';z-index:2147483000;width:38px;height:38px;border-radius:50%;border:1px solid #0003;background:#fff;color:#000;font-size:1.1rem;line-height:38px;text-align:center;text-decoration:none;opacity:.55;box-shadow:0 2px 8px #0002;touch-action:manipulation';
+    a.style.cssText = 'position:fixed;bottom:10px;inset-inline-start:' + '10px' + ';z-index:2147483000;width:38px;height:38px;border-radius:50%;border:1px solid #0003;background:#fff;color:#000;font-size:1.1rem;line-height:38px;text-align:center;text-decoration:none;opacity:.55;box-shadow:0 2px 8px #0002;touch-action:manipulation';
     a.addEventListener('mouseenter', () => { a.style.opacity = '1'; }); a.addEventListener('mouseleave', () => { a.style.opacity = '.55'; });
     document.body.appendChild(a);
   }
