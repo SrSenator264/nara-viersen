@@ -155,6 +155,19 @@ function buildJob(images, printer) {
   return Buffer.concat(parts);
 }
 
+// ───────── طباعة نصية ESC/POS (بدون متصفح): أسطر {text, align, bold, size} — لتقفيلة اليوم ─────────
+const CP858 = { 'ä': 0x84, 'ö': 0x94, 'ü': 0x81, 'Ä': 0x8e, 'Ö': 0x99, 'Ü': 0x9a, 'ß': 0xe1, '€': 0xd5, 'é': 0x82, 'è': 0x8a, 'à': 0x85, '–': 0x2d, '—': 0x2d, '·': 0xfa, '→': 0x3e, '×': 0x78 };
+const enc858 = s => Buffer.from(Array.from(String(s)).map(ch => { const c = ch.codePointAt(0); return c < 128 ? c : (CP858[ch] || 0x3f); }));
+function buildTextJob(lines, printer) {
+  const parts = [Buffer.from([0x1b, 0x40, 0x1b, 0x74, 19])]; // init + Codepage PC858 (Umlaute, €)
+  for (const l of lines) {
+    const a = l.align === 'center' ? 1 : l.align === 'right' ? 2 : 0;
+    parts.push(Buffer.from([0x1b, 0x61, a, 0x1b, 0x45, l.bold ? 1 : 0, 0x1d, 0x21, l.size === 2 ? 0x11 : 0x00]), enc858(l.text), Buffer.from([0x0a]));
+  }
+  parts.push(Buffer.from([0x1b, 0x61, 0, 0x1b, 0x45, 0, 0x1d, 0x21, 0]), cutBytes(printer && printer.cut === 'none' ? 'none' : (printer && printer.cut === 'partial' ? 'partial' : 'full')));
+  return Buffer.concat(parts);
+}
+
 // ───────── الإرسال ─────────
 function sendTcp(host, port, buf, timeoutMs = 6000) {
   return new Promise((resolve, reject) => {
@@ -203,4 +216,16 @@ async function printOrder(data, o, kind, opts = {}) {
   return { ok: true, mode: printer.mode, printer: printer.id, role, promo, sheets: images.length };
 }
 
-module.exports = { defaults, config, sanitize, roleFor, printerFor, printOrder, rasterize, buildJob, escposRaster, windowsPrinters, ROLES };
+// طباعة تقفيلة اليوم (إيصال 80mm نصّي). طابعة على "browser": بيرجّع {mode:'browser'} والمتصفح بيطبع.
+async function printClosing(data, rec, opts = {}) {
+  const cfg = config(data);
+  const printer = opts.printerId ? (cfg.printers.find(p => p.id === opts.printerId) || printerFor(cfg, 'kasse')) : printerFor(cfg, 'kasse');
+  if (printer.mode === 'browser') return { ok: true, mode: 'browser', printer: printer.id };
+  const lines = require('./day-closing-print.js').receiptLines(rec, { copyNumber: opts.copyNumber, width: printer.width === 58 ? 32 : 42 });
+  const job = buildTextJob(lines, printer);
+  if (printer.mode === 'network') { if (!printer.ip) throw new Error('IP-Adresse fehlt'); await sendTcp(printer.ip, printer.port, job); }
+  else if (printer.mode === 'windows') { if (!printer.winName) throw new Error('Windows-Drucker nicht gewählt'); await sendWindows(printer.winName, job); }
+  return { ok: true, mode: printer.mode, printer: printer.id };
+}
+
+module.exports = { defaults, config, sanitize, roleFor, printerFor, printOrder, printClosing, buildTextJob, rasterize, buildJob, escposRaster, windowsPrinters, ROLES };

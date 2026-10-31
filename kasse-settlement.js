@@ -177,8 +177,34 @@
   if (closed && S.status.lateSales) out += card('warn', tr('late')(S.status.lateSales.count, euro(S.status.lateSales.grossCents)), canClose() ? `<button class="sd-btn amber" type="button" data-act="nachtrag">${tr('nachtrag')}</button>` : '');
   return out;
  }
+ function printBtns(id) {
+  return `<span class="pr"><button class="sd-btn ghost sm" type="button" data-act="print" data-kind="a4" data-id="${esc(id || '')}">🖨️ A4</button> <button class="sd-btn ghost sm" type="button" data-act="print" data-kind="r80" data-id="${esc(id || '')}">🧾 80mm</button></span>`;
+ }
+ function printCard(closed) {
+  if (!canClose()) return '';
+  if (closed && S.record) return card('', '🖨️', printBtns(S.record.id));
+  if (S.mode === 'TRAINING' || (S.status && S.status.closed === false && S.mode === 'REAL')) return card('', '🖨️', printBtns(''));
+  return '';
+ }
+ // طباعة بإطار مخفي — الأصل مسجّل بالسيرفر؛ التدريب/المعاينة محلي بدون تسجيل
+ function printHtml(html) {
+  const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  f.srcdoc = html; f.onload = () => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {} setTimeout(() => f.remove(), 60000); };
+  document.body.appendChild(f);
+ }
+ async function doPrint(kind, id) {
+  const P = window.NARA_CLOSING_PRINT; if (!P) return;
+  let rec, copy = 0, printed = false;
+  if (id) {
+   const r = await api('POST', kind === 'r80' ? '/api/day-closing/print' : '/api/day-closing/reprint', { id });
+   if (!r.ok) { S.msg = { err: errText(r.json) }; return render(); }
+   rec = r.json.record; copy = r.json.copyNumber; printed = kind === 'r80' && r.json.mode && r.json.mode !== 'browser';
+  } else rec = { day: S.day, type: 'CLOSING', number: '', closedAt: new Date().toISOString(), report: S.report };
+  if (printed) { S.msg = { ok: '🖨️ OK' }; return render(); }
+  printHtml(kind === 'r80' ? P.receiptHtml(rec, { copyNumber: copy }) : P.a4Html(rec, { copyNumber: copy }));
+ }
  function nachtraegeCard() {
-  return S.nachtraege.length ? card('', tr('nachtraege'), S.nachtraege.map(n => row(esc(n.number) + ' · ' + esc(String(n.closedAt || '').slice(11, 16)), euro(n.grossCents))).join('')) : '';
+  return S.nachtraege.length ? card('', tr('nachtraege'), S.nachtraege.map(n => row(esc(n.number) + ' · ' + esc(String(n.closedAt || '').slice(11, 16)), euro(n.grossCents) + (canClose() ? ' ' + printBtns(n.id) : ''))).join('')) : '';
  }
 
  function render() {
@@ -190,7 +216,7 @@
   const msg = S.msg ? `<div class="msg ${S.msg.err ? 'err' : 'good'}">${esc(S.msg.err || S.msg.ok)}</div>` : '';
   let actions = '';
   if (!closed && S.mode === 'REAL' && canClose() && !(S.status && S.status.closed)) actions = `<button class="sd-btn go" type="button" data-act="close"${S.busy ? ' disabled' : ''}>${tr('closeDay')}</button>`;
-  root.innerHTML = msg + warnCard(closed) + salesCard(R) + vatCard(R) + platformCard(R) + tseCard(R) + cashCard(R, closed) + nachtraegeCard() + actions;
+  root.innerHTML = msg + warnCard(closed) + salesCard(R) + vatCard(R) + platformCard(R) + tseCard(R) + cashCard(R, closed) + nachtraegeCard() + printCard(closed) + actions;
   updateCash();
  }
 
@@ -230,6 +256,7 @@
    if (act === 'dp' || act === 'dm') { S.manual = false; S.touched = true; S.counts[c] = Math.max(0, (S.counts[c] || 0) + (act === 'dp' ? 1 : -1)); S.leave = null; updateCash(); }
    else if (act === 'close') doClose(false);
    else if (act === 'nachtrag') doClose(true);
+   else if (act === 'print') doPrint(a.dataset.kind, a.dataset.id);
   });
   app.addEventListener('input', e => {
    const id = e.target.id;

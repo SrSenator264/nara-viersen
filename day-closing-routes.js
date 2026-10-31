@@ -72,6 +72,19 @@ function handle(req, res, url, ctx) {
     return true;
   }
 
+  if (p === '/api/day-closing/print' && m === 'POST') {
+    naraJsonBody(req, res, 2000, body => {
+      const data = readAdminData(), rec = (data.dayClosings || []).find(s => s && s.id === String(body.id || ''));
+      if (!rec) return reply(res, 404, { error: 'Abschluss nicht gefunden.', code: 'NOT_FOUND' });
+      const audit = DC.reprintAudit(data, rec, user, new Date().toISOString(), adminId), copyNumber = audit.details.copyNumber;
+      const done = r => { data.auditEvents.push(audit); writeAdminData(data); reply(res, 200, { ok: true, mode: r.mode, copyNumber, record: rec }); };
+      if (!ctx.printService || !ctx.printService.printClosing) return done({ mode: 'browser' });
+      // أولاً الطباعة، وبعدين التدوين — إذا فشلت الطابعة ما بنحسب نسخة
+      Promise.resolve(ctx.printService.printClosing(data, rec, { copyNumber })).then(done, e => reply(res, 502, { error: 'Druck fehlgeschlagen: ' + (e && e.message || e), code: 'PRINT_FAILED' }));
+    });
+    return true;
+  }
+
   reply(res, 404, { error: 'Unknown day-closing route.' });
   return true;
 }

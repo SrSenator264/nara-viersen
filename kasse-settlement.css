@@ -49,3 +49,4 @@ textarea.sd-in{min-height:70px;resize:vertical}
 .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 [hidden]{display:none!important}
 @media (max-width:560px){.big{font-size:2rem}.vrow{grid-template-columns:48px 1fr 1fr 1fr;gap:4px}.sd-head h1{font-size:1.25rem}}
+.sd-btn.sm{min-height:34px;padding:6px 10px;font-size:.85rem}.pr{display:inline-flex;gap:6px}

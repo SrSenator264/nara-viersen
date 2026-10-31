@@ -89,6 +89,6 @@ test('الصلاحيات: عرض = المالك/المدير/المحاسب، إ
 test('التوصيل: الموديول سيرفر بس، والسيرفر بيستدعيه، والمجموعة الجديدة بالسكيما', () => {
   assert.equal(A.staticAllowed('day-closing.js'), false); assert.equal(A.staticAllowed('day-closing-routes.js'), false);
   const src = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
-  assert.ok(src.includes("require('./day-closing-routes.js').handle(req,res,url,{readAdminData,writeAdminData,adminId,reply,naraJsonBody,bizDay})"));
+  assert.ok(src.includes("require('./day-closing-routes.js').handle(req,res,url,{readAdminData,writeAdminData,adminId,reply,naraJsonBody,bizDay,printService:require('./print-service.js')})"));
   assert.ok(src.includes('dailySettlements:[],dayClosings:[]') && src.includes("'dailySettlements','dayClosings'"));
 });
