@@ -1,6 +1,6 @@
 'use strict';
 /* flamo-home.js — زر 🏠 عائم للرجوع للرئيسية (nara-app.html) على كل الصفحات، حتى موقع الزبون.
-   بيظهر بس إذا في جلسة موظف مفتوحة (/api/auth/me)، فالزبون العادي ما بيشوف شي. */
+   إذا الصفحة فيها الشريط العلوي (زر 🏠 جاهز) ما بيظهر لتفادي التكرار. بيظهر بس إذا في جلسة موظف مفتوحة (/api/auth/me)، فالزبون العادي ما بيشوف شي. */
 (function () {
   const HOME = '/nara-app.html', file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   if (['nara-app.html', 'index.html', 'delivery-print.html'].includes(file) || /[?&]app=1\b/.test(location.search)) return;
@@ -12,8 +12,9 @@
     a.addEventListener('mouseenter', () => { a.style.opacity = '1'; }); a.addEventListener('mouseleave', () => { a.style.opacity = '.55'; });
     document.body.appendChild(a);
   }
+  // الشريط العلوي (flamo-nav) فيه زر 🏠 → ما منكرّره
   function start() {
-    try { fetch('/api/auth/me', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.user) mount(); }).catch(() => {}); } catch (e) { /* ignore */ }
+    try { fetch('/api/auth/me', { cache: 'no-store', credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.user) setTimeout(() => { if (!document.querySelector('.fn-menu')) mount(); }, 1500); }).catch(() => {}); } catch (e) { /* ignore */ }
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', start) : start();
 })();
