@@ -50,3 +50,5 @@ textarea.sd-in{min-height:70px;resize:vertical}
 [hidden]{display:none!important}
 @media (max-width:560px){.big{font-size:2rem}.vrow{grid-template-columns:48px 1fr 1fr 1fr;gap:4px}.sd-head h1{font-size:1.25rem}}
 .sd-btn.sm{min-height:34px;padding:6px 10px;font-size:.85rem}.pr{display:inline-flex;gap:6px}
+.sd-sel{appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:none;border:1px solid #ccd3d8;border-radius:12px;background:#fff;color:#1d2327;padding:0 18px;min-height:46px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;text-align-last:center}
+.sd-sel.train{background:#f59e0b;color:#17202a;border-color:#f59e0b}

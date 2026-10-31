@@ -5,7 +5,7 @@
  const $ = s => document.querySelector(s);
  const lang = () => { try { if (window.NARA_LANG) return window.NARA_LANG.get(); const l = localStorage.getItem('nara-kasse-language'); return ['de', 'ar', 'en'].includes(l) ? l : 'de'; } catch (e) { return 'de'; } };
  const T = {
-  de: { title: 'Flamo · Tagesabschluss', h1: 'Tagesabschluss 📊', back: 'Zurück zur Kasse', refresh: 'Aktualisieren', loading: 'Lädt …', today: 'Heute', real: 'Echt', train: 'Übung',
+  de: { title: 'Flamo · Tagesabschluss', h1: 'Tagesabschluss 📊', back: 'Zurück zur Kasse', refresh: 'Aktualisieren', loading: 'Lädt …', today: 'Heute', real: 'Echt', train: 'Übung', all: 'Gesamt (Echt + Übung)',
    open: 'Offen', closedAs: n => `Abgeschlossen · ${n}`, noSales: 'Keine Umsätze an diesem Tag.',
    sales: '💶 Umsatz', orders: 'Bestellungen', avg: 'Ø Bestellung', cash: 'Bar', card: 'Karte', other: 'Sonstige', tip: 'Trinkgeld (nicht im Umsatz)', discount: 'Rabatte', storno: 'Storno', cancelled: 'Storniert vor Zahlung', netAfter: 'Umsatz nach Storno',
    vat: '🧾 Steuer', net: 'Netto', tax: 'Steuer', gross: 'Brutto', total: 'Gesamt',
@@ -16,7 +16,7 @@
    openOrders: n => `⚠️ ${n} offene Bestellungen`, missed: d => `⚠️ ${d} wurde nicht abgeschlossen`, late: (n, a) => `⚠️ Umsätze nach dem Abschluss: ${n} · ${a}`, needCount: 'Bitte zuerst die Kasse zählen.', badLeave: 'Betrag für „In der Kasse lassen“ ist ungültig.',
    closeDay: '✅ Tag abschließen', confirm: (d, g, c, df) => `Tag ${d} abschließen?\nUmsatz ${g}\nGezählt ${c}\nDifferenz ${df}\n\nDanach kann der Abschluss nicht mehr geändert werden.`, nachtrag: '📎 Nachtrag erstellen', nachtraege: '📎 Nachträge', saved: n => `Gespeichert: ${n}`,
    err: { ALREADY_CLOSED: 'Dieser Tag ist bereits abgeschlossen.', COUNT_REQUIRED: 'Gezählter Kassenbestand fehlt.', FUTURE_DAY: 'Der Tag liegt in der Zukunft.', NO_CLOSING: 'Für diesen Tag gibt es noch keinen Abschluss.', NOTHING_NEW: 'Keine neuen Umsätze seit dem Abschluss.', FORBIDDEN: 'Keine Berechtigung.', DENOMINATIONS_MISMATCH: 'Stückelung passt nicht zum Betrag.', BAD_LEAVE: 'Ungültiger Betrag für „In der Kasse lassen“.', gen: 'Fehler — bitte erneut versuchen.' } },
-  ar: { title: 'Flamo · تقفيلة اليوم', h1: 'تقفيلة اليوم 📊', back: 'رجوع عالكاشير', refresh: 'حدّث', loading: 'عم يحمّل …', today: 'اليوم', real: 'فعلي', train: 'تدريب',
+  ar: { title: 'Flamo · تقفيلة اليوم', h1: 'تقفيلة اليوم 📊', back: 'رجوع عالكاشير', refresh: 'حدّث', loading: 'عم يحمّل …', today: 'اليوم', real: 'فعلي', train: 'تدريب', all: 'مجموع (فعلي + تدريب)',
    open: 'مفتوحة', closedAs: n => `مقفولة · ${n}`, noSales: 'ما في مبيعات بهاليوم.',
    sales: '💶 المبيعات', orders: 'الطلبات', avg: 'متوسط الطلب', cash: 'كاش', card: 'كارت', other: 'أخرى', tip: 'بقشيش (مو بالمبيعات)', discount: 'الخصومات', storno: 'Storno', cancelled: 'ملغاة قبل الدفع', netAfter: 'المبيعات بعد الـStorno',
    vat: '🧾 الضريبة', net: 'صافي', tax: 'ضريبة', gross: 'إجمالي', total: 'المجموع',
@@ -27,7 +27,7 @@
    openOrders: n => `⚠️ في ${n} طلبات مفتوحة غير مدفوعة`, missed: d => `⚠️ يوم ${d} ما انقفل`, late: (n, a) => `⚠️ في مبيعات بعد التقفيلة: ${n} · ${a}`, needCount: 'عدّ الصندوق أول.', badLeave: 'مبلغ "بخلّي بالصندوق" غلط.',
    closeDay: '✅ قفّل اليوم', confirm: (d, g, c, df) => `نقفّل يوم ${d}؟\nالمبيعات ${g}\nالمعدود ${c}\nالفرق ${df}\n\nبعد التقفيل ما بتتعدّل.`, nachtrag: '📎 سجّل ما بعد التقفيلة (Nachtrag)', nachtraege: '📎 الـNachträge', saved: n => `انحفظت: ${n}`,
    err: { ALREADY_CLOSED: 'هاد اليوم مقفول من قبل.', COUNT_REQUIRED: 'لازم تعدّ الصندوق.', FUTURE_DAY: 'اليوم لسا ما إجا.', NO_CLOSING: 'هاد اليوم ما إلو تقفيلة.', NOTHING_NEW: 'ما في مبيعات جديدة بعد التقفيلة.', FORBIDDEN: 'ما عندك صلاحية.', DENOMINATIONS_MISMATCH: 'العدّ ما بيطابق المبلغ.', BAD_LEAVE: 'مبلغ "بخلّي بالصندوق" غلط.', gen: 'صار خطأ، جرّب مرة تانية.' } },
-  en: { title: 'Flamo · End of day', h1: 'End of day 📊', back: 'Back to cashier', refresh: 'Refresh', loading: 'Loading …', today: 'Today', real: 'Real', train: 'Practice',
+  en: { title: 'Flamo · End of day', h1: 'End of day 📊', back: 'Back to cashier', refresh: 'Refresh', loading: 'Loading …', today: 'Today', real: 'Real', train: 'Practice', all: 'Total (Real + Practice)',
    open: 'Open', closedAs: n => `Closed · ${n}`, noSales: 'No sales on this day.',
    sales: '💶 Sales', orders: 'Orders', avg: 'Avg. order', cash: 'Cash', card: 'Card', other: 'Other', tip: 'Tips (not in sales)', discount: 'Discounts', storno: 'Storno', cancelled: 'Cancelled before payment', netAfter: 'Sales after Storno',
    vat: '🧾 VAT', net: 'Net', tax: 'VAT', gross: 'Gross', total: 'Total',
@@ -70,7 +70,7 @@
   const r = await api('GET', '/api/day-closing/preview?' + qs);
   if (my !== S.seq) return;
   if (!r.ok) {
-   if (S.mode === 'TRAINING' && r.status === 403) { S.mode = 'REAL'; return load(true); }
+   if (S.mode !== 'REAL' && r.status === 403) { S.mode = 'REAL'; return load(true); }
    S.msg = { err: errText(r.json) }; S.report = null; return render();
   }
   if (!S.day) S.today = r.json.day;
@@ -92,8 +92,8 @@
 
  function barHtml() {
   const closed = S.status && S.status.closed;
-  const chip = S.mode === 'TRAINING' ? '' : closed ? `<span class="sd-chip green">${esc(tr('closedAs')(S.status.closing.number))}</span>` : `<span class="sd-chip amber">🟢 ${tr('open')}</span>`;
-  const seg = tf() ? `<div class="sd-seg"><button type="button" data-mode="REAL" class="${S.mode === 'REAL' ? 'on' : ''}">${tr('real')}</button><button type="button" data-mode="TRAINING" class="${S.mode === 'TRAINING' ? 'on train' : ''}">${tr('train')}</button></div>` : '';
+  const chip = S.mode !== 'REAL' ? '' : closed ? `<span class="sd-chip green">${esc(tr('closedAs')(S.status.closing.number))}</span>` : `<span class="sd-chip amber">🟢 ${tr('open')}</span>`;
+  const seg = tf() ? `<select class="sd-sel${S.mode === 'TRAINING' ? ' train' : ''}" id="sd-mode" aria-label="mode"><option value="REAL"${S.mode === 'REAL' ? ' selected' : ''}>${tr('real')}</option><option value="TRAINING"${S.mode === 'TRAINING' ? ' selected' : ''}>${tr('train')}</option><option value="ALL"${S.mode === 'ALL' ? ' selected' : ''}>${tr('all')}</option></select>` : '';
   return `<button class="sd-btn ghost" type="button" data-day="-1" aria-label="-1">◀</button><input class="sd-in" id="sd-day" type="date" value="${esc(S.day)}"${S.today ? ` max="${esc(S.today)}"` : ''}><button class="sd-btn ghost" type="button" data-day="1" aria-label="+1">▶</button><button class="sd-btn ghost" type="button" data-day="0">${tr('today')}</button>${seg}${chip}`;
  }
 
@@ -177,7 +177,7 @@
  function printCard(closed) {
   if (!canClose()) return '';
   if (closed && S.record) return card('', '🖨️', printBtns(S.record.id) + ' <button class="sd-btn ghost sm" type="button" data-act="csvall">📥 CSV · alle</button>');
-  if (S.mode === 'TRAINING' || (S.status && S.status.closed === false && S.mode === 'REAL')) return card('', '🖨️', printBtns(''));
+  if (S.mode !== 'REAL' || (S.status && S.status.closed === false && S.mode === 'REAL')) return card('', '🖨️', printBtns(''));
   return '';
  }
  // طباعة بإطار مخفي — الأصل مسجّل بالسيرفر؛ التدريب/المعاينة محلي بدون تسجيل
@@ -249,14 +249,14 @@
  function bind() {
   const bar = $('#bar'), app = $('#app');
   bar.addEventListener('click', e => {
-   const m = e.target.closest('[data-mode]'); if (m) { S.mode = m.dataset.mode; S.msg = null; return load(true); }
    const d = e.target.closest('[data-day]'); if (d) {
     const k = Number(d.dataset.day);
     if (k === 0) S.day = S.today; else { const t = new Date(S.day + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + k); const nd = t.toISOString().slice(0, 10); if (S.today && nd > S.today) return; S.day = nd; }
     S.msg = null; load(true);
    }
   });
-  bar.addEventListener('change', e => { if (e.target.id === 'sd-day' && /^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) { S.day = e.target.value; S.msg = null; load(true); } });
+  bar.addEventListener('change', e => {
+   if (e.target.id === 'sd-mode') { S.mode = ['TRAINING', 'ALL'].includes(e.target.value) ? e.target.value : 'REAL'; S.msg = null; return load(true); } if (e.target.id === 'sd-day' && /^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) { S.day = e.target.value; S.msg = null; load(true); } });
   app.addEventListener('click', e => {
    const a = e.target.closest('[data-act]'), g = e.target.closest('[data-goto]');
    if (g) { S.day = g.dataset.goto; S.msg = null; return load(true); }

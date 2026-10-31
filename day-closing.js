@@ -82,16 +82,16 @@ const settlementsOf = (data, day) => (data.dayClosings || []).filter(s => s && s
 // opts: { mode:'REAL'|'TRAINING', sinceIso (للـNachtrag), openingCents, countedCents, leaveCents }
 function build(data, day, opts = {}) {
   if (!ISO.test(day || '')) throw new ClosingError(422, 'Ungültiger Tag.', 'BAD_DAY');
-  const training = opts.mode === 'TRAINING', mode = training ? 'TRAINING' : 'REAL', since = opts.sinceIso ? ms(opts.sinceIso) : 0;
+  const training = opts.mode === 'TRAINING', all = opts.mode === 'ALL', mode = training ? 'TRAINING' : all ? 'ALL' : 'REAL', since = opts.sinceIso ? ms(opts.sinceIso) : 0;
   const orders = data.orders || [], byId = new Map(orders.map(o => [String(o.id), o]));
   const inRange = iso => bizDay.dayOf(iso) === day && (!since || ms(iso) > since);
-  const own = o => !SL.platformOf(o) && (training ? o.training === true : !o.isTest && !o.training);
+  const own = o => !SL.platformOf(o) && (all ? true : training ? o.training === true : !o.isTest && !o.training);
   const { rateOf, food } = rateResolver(data);
 
   const pays = (data.payments || []).filter(p => {
     if (p.status !== 'COMPLETED' || !inRange(p.createdAt)) return false;
     const o = byId.get(String(p.orderId));
-    return training ? !!o && own(o) : !p.isTest && own(o || {});
+    return training ? !!o && own(o) : all ? own(o || {}) : !p.isTest && own(o || {});
   });
 
   // المبيعات

@@ -210,3 +210,12 @@ test('إعادة الطباعة: رقم النسخة بيزيد من التدق�
   const a1 = DC.reprintAudit(d, s, { name: 'Omar' }, NOW, newId); assert.equal(a1.details.copyNumber, 1); d.auditEvents.push(a1);
   assert.equal(DC.reprintAudit(d, s, null, NOW, newId).details.copyNumber, 2); assert.equal(JSON.stringify(s), before);
 });
+
+test('وضع ALL (مجموع فعلي + تدريب): بيجمع الاثنين، REAL/TRAINING ما بيتغيّروا', () => {
+  const now = new Date().toISOString(), d = { orders: [], payments: [], receipts: [], fiscalTransactions: [], auditEvents: [], cashbooks: [], dayClosings: [], categories: [], settings: {}, products: [] };
+  const add = (id, c, training) => { d.orders.push({ id, status: 'COMPLETED', createdAt: now, training, cart: [{ id: 'p1-1730000000000', name: 'Burger', unitCents: c, quantity: 1 }] }); d.payments.push({ id: 'p' + id, orderId: id, method: 'CASH', paymentLines: [{ method: 'CASH', amountCents: c }], amountCents: c, grossAmountCents: c, tipCents: 0, status: 'COMPLETED', createdAt: now, isTest: training }); };
+  add('r', 1000, false); add('t', 450, true);
+  const day = require('../business-day.js').today(), g = m => DC.build(d, day, { mode: m });
+  assert.equal(g('REAL').net.grossCents, 1000); assert.equal(g('TRAINING').net.grossCents, 450);
+  const all = g('ALL'); assert.equal(all.net.grossCents, 1450); assert.equal(all.mode, 'ALL'); assert.equal(all.counts.orders, 2);
+});

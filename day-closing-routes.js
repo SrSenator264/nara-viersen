@@ -24,9 +24,9 @@ function handle(req, res, url, ctx) {
   const fail = e => { if (e instanceof DC.ClosingError) return reply(res, e.status, { error: e.message, code: e.code }); throw e; };
 
   if (p === '/api/day-closing/preview' && m === 'GET') {
-    const day = q('day') || bizDay.today(), mode = String(q('mode') || '').toUpperCase() === 'TRAINING' ? 'TRAINING' : 'REAL';
+    const day = q('day') || bizDay.today(), mode = (m0 => m0 === 'TRAINING' || m0 === 'ALL' ? m0 : 'REAL')(String(q('mode') || '').toUpperCase());
     if (!ISO.test(day)) return reply(res, 400, { error: 'Ungültiger Tag.', code: 'BAD_DAY' }), true;
-    if (mode === 'TRAINING' && !(user && MGR.has(user.role))) return reply(res, 403, { error: 'Keine Berechtigung.', code: 'FORBIDDEN' }), true;
+    if (mode !== 'REAL' && !(user && MGR.has(user.role))) return reply(res, 403, { error: 'Keine Berechtigung.', code: 'FORBIDDEN' }), true;
     const data = readAdminData();
     const report = DC.build(data, day, { mode, openingCents: num('opening'), countedCents: num('counted'), leaveCents: num('leave') });
     reply(res, 200, { ok: true, day, mode, report, status: mode === 'REAL' ? DC.status(data, day) : null });
