@@ -11,6 +11,8 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const who = rec => (rec.closedBy && (rec.closedBy.name || rec.closedBy)) || '';
   const label = k => LABELS[k] || k;
+  // TSE مخفية مؤقتاً (على الورقة وعلى الشاشة) لحد ما نربط الجهاز الحقيقي
+  const SHOW_TSE = false;
   const isNachtrag = rec => rec.type === 'NACHTRAG';
   const denLabel = c => Number(c) >= 100 ? (Number(c) / 100) + ' €' : Number(c) + ' ct';
 
@@ -73,7 +75,7 @@
         if (c.leaveCents != null) { row('In der Kasse gelassen', eur(c.leaveCents)); row('Entnahme', eur(c.takeOutCents || 0)); }
       }
     }
-    if (R.tse && R.tse.signed) {
+    if (SHOW_TSE && R.tse && R.tse.signed) {
       head('TSE'); row('Signierte Vorgänge', R.tse.signed);
       if (R.tse.serial) row('Seriennummer', R.tse.serial);
       if (R.receipts && R.receipts.first) { row('Erster Bon', R.receipts.first); row('Letzter Bon', R.receipts.last); }
@@ -135,7 +137,7 @@
           Object.keys(den).map(Number).sort((a, b) => b - a).map(d => '<tr><td>' + esc(denLabel(d)) + '</td><td class="n">' + den[d] + '</td><td class="n">' + eur(d * den[d]) + '</td></tr>').join('') + '</table>';
       }
     }
-    if (R.tse && R.tse.signed) {
+    if (SHOW_TSE && R.tse && R.tse.signed) {
       let t = tr('Signierte Vorgänge', R.tse.signed);
       if (R.tse.serial) t += tr('Seriennummer', R.tse.serial);
       if (R.receipts && R.receipts.first) t += tr('Bon-Nummern', R.receipts.first + ' – ' + R.receipts.last);
@@ -148,6 +150,29 @@
     return '<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Tagesabschluss ' + esc(rec.number || dmy(rec.day)) + '</title><style>' + css + '</style></head><body>' + body + '</body></html>';
   }
 
-  const api = { receiptLines, receiptHtml, a4Html, eur, dmy, DEFAULT_HEADER };
+
+  // ── CSV (Excel/DATEV-freundlich: Semikolon, Dezimalkomma, UTF-8 mit BOM) ──
+  const num = c => (Math.round(Number(c) || 0) / 100).toFixed(2).replace('.', ',');
+  const cell = v => { const t = String(v == null ? '' : v); return /[";\n\r]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+  const toCsv = rows => '\ufeff' + rows.map(r => r.map(cell).join(';')).join('\r\n') + '\r\n';
+  function closingCsv(rec) {
+    const R = rec.report || {}, v = R.revenue || {}, n = R.net || {}, st = R.storno || {}, c = R.cash, cn = R.counts || {};
+    const rows = [['Abschnitt', 'Posten', 'Wert'], ['Kopf', 'Geschäftstag', rec.day], ['Kopf', 'Abschlussnummer', rec.number || ''], ['Kopf', 'Art', isNachtrag(rec) ? 'Nachtrag' : 'Tagesabschluss'], ['Kopf', 'Erstellt', rec.closedAt || ''], ['Kopf', 'Erstellt von', who(rec)],
+      ['Umsatz', 'Anzahl Bestellungen', cn.orders || 0], ['Umsatz', 'Brutto vor Rabatt', num(v.grossBeforeDiscountCents)], ['Umsatz', 'Rabatte', num(v.discountCents)], ['Umsatz', 'Brutto', num(v.grossCents)], ['Umsatz', 'Bar', num(v.cashCents)], ['Umsatz', 'Karte', num(v.cardCents)], ['Umsatz', 'Sonstige', num(v.otherCents)], ['Umsatz', 'Trinkgeld', num(v.tipCents)],
+      ['Storno', 'Anzahl', st.count || 0], ['Storno', 'Betrag', num(st.amountCents)], ['Netto-Umsatz', 'Brutto', num(n.grossCents)], ['Netto-Umsatz', 'Bar', num(n.cashCents)], ['Netto-Umsatz', 'Karte', num(n.cardCents)]];
+    for (const r of (R.vat && R.vat.rows) || []) rows.push(['Steuer ' + r.rate + ' %', 'Netto', num(r.netCents)], ['Steuer ' + r.rate + ' %', 'Steuer', num(r.vatCents)], ['Steuer ' + r.rate + ' %', 'Brutto', num(r.grossCents)]);
+    for (const r of (R.platform && R.platform.rows) || []) rows.push(['Plattform ' + label(r.key), 'Anzahl', r.count], ['Plattform ' + label(r.key), 'Umsatz', num(r.grossCents)], ['Plattform ' + label(r.key), 'Provision', num(r.commissionCents)]);
+    if (c) {
+      rows.push(['Kasse', 'Anfangsbestand', num(c.openingCents)], ['Kasse', 'Barumsatz', num(c.salesCents)], ['Kasse', 'Trinkgeld bar', num(c.tipCents)], ['Kasse', 'Storno bar', num(c.refundsCents)], ['Kasse', 'Einlagen', num(c.depositsCents)], ['Kasse', 'Entnahmen', num(c.withdrawalsCents)], ['Kasse', 'Soll-Bestand', num(c.expectedCents)]);
+      if (c.countedCents != null) rows.push(['Kasse', 'Gezählt', num(c.countedCents)], ['Kasse', 'Differenz', num(c.differenceCents)], ['Kasse', 'Im Kassenfach gelassen', num(c.leaveCents)], ['Kasse', 'Entnommen', num(c.takeOutCents)]);
+    }
+    const note = (rec.count && rec.count.note) || ''; if (note) rows.push(['Notiz', '', note]);
+    return toCsv(rows);
+  }
+  // سطر لكل تقفيلة (للمحاسب): rows = ناتج /api/day-closing/list
+  function listCsv(rows) {
+    return toCsv([['Geschäftstag', 'Nummer', 'Art', 'Erstellt', 'Erstellt von', 'Brutto', 'Umsatzsteuer', 'Kassendifferenz']].concat((rows || []).map(r => [r.day, r.number, r.type === 'NACHTRAG' ? 'Nachtrag' : 'Tagesabschluss', r.closedAt, r.closedBy, num(r.grossCents), num(r.vatCents), r.differenceCents == null ? '' : num(r.differenceCents)])));
+  }
+  const api = { closingCsv, listCsv, receiptLines, receiptHtml, a4Html, eur, dmy, DEFAULT_HEADER };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.NARA_CLOSING_PRINT = api;
 })(typeof window !== 'undefined' ? window : globalThis);

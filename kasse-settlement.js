@@ -79,6 +79,7 @@
    const rr = await api('GET', '/api/day-closing/record?id=' + encodeURIComponent(S.status.closing.id));
    if (rr.ok) S.record = rr.json.record;
    const l = await api('GET', '/api/day-closing/list?limit=200');
+   if (l.ok) S.allRows = l.json.rows || [];
    if (l.ok) S.nachtraege = (l.json.rows || []).filter(x => x.day === S.day && x.type === 'NACHTRAG');
    if (my !== S.seq) return;
   }
@@ -121,13 +122,6 @@
   let b = `<p class="muted">${tr('platHint')}</p>` + R.platform.rows.map(r => row(`${esc(LABELS[r.key] || r.key)} · ${r.count}× · ${r.rate}% ${tr('commission')} ${euro(r.commissionCents)}${r.cashDueCents ? ` · ${tr('cashDue')} ${euro(r.cashDueCents)}` : ''}`, euro(r.grossCents))).join('');
   b += row(tr('total'), euro(R.platform.grossCents), 'strong');
   return card('', tr('plat'), b);
- }
- function tseCard(R) {
-  if (S.mode !== 'REAL' || !R.tse || (!R.tse.signed && !R.tse.unsigned)) return '';
-  let b = row('✅ ' + tr('signed'), R.tse.signed) + row((R.tse.unsigned ? '⚠️ ' : '') + tr('unsigned'), R.tse.unsigned);
-  if (R.tse.serial) b += row(tr('serial'), esc(R.tse.serial), 'sub');
-  if (R.receipts && R.receipts.first) b += row(tr('bons'), `${esc(R.receipts.first)} → ${esc(R.receipts.last)}`, 'sub');
-  return card(R.tse.unsigned ? 'warn' : '', tr('tse'), b);
  }
 
  const countedNow = () => S.manual ? (S.total == null ? 0 : S.total) : DEN.reduce((s, c) => s + c * (S.counts[c] || 0), 0);
@@ -178,11 +172,11 @@
   return out;
  }
  function printBtns(id) {
-  return `<span class="pr"><button class="sd-btn ghost sm" type="button" data-act="print" data-kind="a4" data-id="${esc(id || '')}">🖨️ A4</button> <button class="sd-btn ghost sm" type="button" data-act="print" data-kind="r80" data-id="${esc(id || '')}">🧾 80mm</button></span>`;
+  return `<span class="pr"><button class="sd-btn ghost sm" type="button" data-act="print" data-kind="a4" data-id="${esc(id || '')}">🖨️ A4</button> <button class="sd-btn ghost sm" type="button" data-act="print" data-kind="r80" data-id="${esc(id || '')}">🧾 80mm</button> <button class="sd-btn ghost sm" type="button" data-act="csv" data-id="${esc(id || '')}">📥 CSV</button></span>`;
  }
  function printCard(closed) {
   if (!canClose()) return '';
-  if (closed && S.record) return card('', '🖨️', printBtns(S.record.id));
+  if (closed && S.record) return card('', '🖨️', printBtns(S.record.id) + ' <button class="sd-btn ghost sm" type="button" data-act="csvall">📥 CSV · alle</button>');
   if (S.mode === 'TRAINING' || (S.status && S.status.closed === false && S.mode === 'REAL')) return card('', '🖨️', printBtns(''));
   return '';
  }
@@ -191,6 +185,21 @@
   const f = document.createElement('iframe'); f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
   f.srcdoc = html; f.onload = () => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {} setTimeout(() => f.remove(), 60000); };
   document.body.appendChild(f);
+ }
+ function download(name, text) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' })); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+ }
+ async function doCsv(id) {
+  const P = window.NARA_CLOSING_PRINT; if (!P) return;
+  let rec;
+  if (id) { const r = await api('GET', '/api/day-closing/record?id=' + encodeURIComponent(id)); if (!r.ok) { S.msg = { err: errText(r.json) }; return render(); } rec = r.json.record; }
+  else rec = { day: S.day, type: 'CLOSING', number: '', closedAt: new Date().toISOString(), report: S.report };
+  download('tagesabschluss-' + S.day + (rec.number ? '-' + rec.number : '') + '.csv', P.closingCsv(rec));
+ }
+ async function doCsvAll() {
+  const l = await api('GET', '/api/day-closing/list?limit=500'); if (!l.ok) { S.msg = { err: errText(l.json) }; return render(); }
+  download('tagesabschluesse.csv', window.NARA_CLOSING_PRINT.listCsv(l.json.rows || []));
  }
  async function doPrint(kind, id) {
   const P = window.NARA_CLOSING_PRINT; if (!P) return;
@@ -216,7 +225,7 @@
   const msg = S.msg ? `<div class="msg ${S.msg.err ? 'err' : 'good'}">${esc(S.msg.err || S.msg.ok)}</div>` : '';
   let actions = '';
   if (!closed && S.mode === 'REAL' && canClose() && !(S.status && S.status.closed)) actions = `<button class="sd-btn go" type="button" data-act="close"${S.busy ? ' disabled' : ''}>${tr('closeDay')}</button>`;
-  root.innerHTML = msg + warnCard(closed) + salesCard(R) + vatCard(R) + platformCard(R) + tseCard(R) + cashCard(R, closed) + nachtraegeCard() + printCard(closed) + actions;
+  root.innerHTML = msg + warnCard(closed) + salesCard(R) + vatCard(R) + platformCard(R) + cashCard(R, closed) + nachtraegeCard() + printCard(closed) + actions;
   updateCash();
  }
 
@@ -256,6 +265,8 @@
    if (act === 'dp' || act === 'dm') { S.manual = false; S.touched = true; S.counts[c] = Math.max(0, (S.counts[c] || 0) + (act === 'dp' ? 1 : -1)); S.leave = null; updateCash(); }
    else if (act === 'close') doClose(false);
    else if (act === 'nachtrag') doClose(true);
+   else if (act === 'csv') doCsv(a.dataset.id);
+   else if (act === 'csvall') doCsvAll();
    else if (act === 'print') doPrint(a.dataset.kind, a.dataset.id);
   });
   app.addEventListener('input', e => {

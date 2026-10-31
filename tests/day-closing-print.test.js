@@ -76,3 +76,17 @@ test('صلاحيات وتوصيل: print = OWNER/MANAGER بس، day-closing-prin
   assert.equal(A.staticAllowed('day-closing-print.js'), true);
   assert.ok(fs.readFileSync(path.join(__dirname, '..', 'kasse-settlement.html'), 'utf8').includes('day-closing-print.js'));
 });
+
+test('TSE مخفية مؤقتاً: لا ورقة ولا صفحة بتعرضها', () => {
+  const r = rec(data()); assert.ok(r.report.tse && r.report.tse.signed >= 0);
+  assert.doesNotMatch(P.receiptLines(r).map(l => l.text).join('\n'), /TSE|Signierte/); assert.doesNotMatch(P.a4Html(r), /TSE|Signierte/);
+  assert.doesNotMatch(fs.readFileSync(path.join(__dirname, '..', 'kasse-settlement.js'), 'utf8'), /tseCard/);
+});
+
+test('CSV: Semikolon + Dezimalkomma + BOM + Quotes؛ سطر لكل تقفيلة', () => {
+  const r = rec(data()); r.count.note = 'a;b "x"';
+  const c = P.closingCsv(r); assert.ok(c.startsWith('﻿Abschnitt;Posten;Wert\r\n'));
+  assert.match(c, /Umsatz;Brutto;17,00\r\n/); assert.match(c, /Steuer 7 %;Brutto;17,00/); assert.match(c, /Notiz;;"a;b ""x"""/); assert.doesNotMatch(c, /TSE/);
+  const l = P.listCsv([{ day: '2026-11-01', number: 'Z-2026-0001', type: 'CLOSING', closedAt: 'x', closedBy: 'Omar', grossCents: 123456, vatCents: 8000, differenceCents: -50 }]);
+  assert.match(l, /2026-11-01;Z-2026-0001;Tagesabschluss;x;Omar;1234,56;80,00;-0,50\r\n$/);
+});
