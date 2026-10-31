@@ -82,3 +82,11 @@
   body .delivery-card .section-head{margin:-12px -14px 12px;padding:10px 14px}
   body .delivery-grid{grid-template-columns:1fr!important}
 }
+
+/* لما تطلع لوحة المفاتيح ما بدنا الصفحة تنزاح أفقياً (الكتابة تروح بعيد): قصّ أي عرض زايد + السلة/النماذج ما بتطلع برّا الشاشة */
+@media screen and (max-width:640px){
+  html,body{max-width:100%;overflow-x:hidden}
+  body .cart-panel{max-width:100vw;overflow-x:hidden}
+  body .cart-panel .delivery-grid,body .cart-panel .delivery-grid>*{min-width:0;max-width:100%}
+  body .cart-panel input,body .cart-panel textarea,body .cart-panel select{max-width:100%;font-size:16px}
+}

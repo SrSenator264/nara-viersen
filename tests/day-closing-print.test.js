@@ -162,3 +162,11 @@ test('الرئيسية: زر 🏠 مكان زر المنيو بالشريط ال
 test('زر 🏠 العائم: ما بيتكرر مع زر الشريط العلوي (fn-menu)', () => {
   assert.match(fs.readFileSync(path.join(__dirname, '..', 'flamo-home.js'), 'utf8'), /querySelector\('\.fn-menu'\)/);
 });
+
+test('كاشير الموبايل: لا تعارك مؤقّتات (رمش) ولا إعادة بناء قائمة الطلبات كل 500ms', () => {
+  const root = path.join(__dirname, '..'), js = fs.readFileSync(path.join(root, 'kasse-customer-directory.js'), 'utf8');
+  assert.ok(!js.includes("grid.style.display=collapsed?'none':''"), 'مؤقّت يعاكس مؤقّت التاني على delivery-grid');
+  assert.match(js, /dataset\.ooHtml!==html/);
+  assert.match(fs.readFileSync(path.join(root, 'kasse.html'), 'utf8'), /interactive-widget=resizes-content/);
+  assert.match(fs.readFileSync(path.join(root, 'kasse-phone.css'), 'utf8'), /body \.cart-panel\{max-width:100vw;overflow-x:hidden\}/);
+});
