@@ -29,7 +29,7 @@
     else if(type==='DELIVERY')method='CASH';                              // طلب توصيل مباشر: بيتحصّل عند الزبون
     const noteParts=[d.bell&&('Klingel: '+d.bell),d.extra,d.notes,o.remarks].filter((x,i,a)=>x&&a.indexOf(x)===i);
     return {
-      deliveryQrUrl:o.ownDeliveryQrUrl||o.deliveryQrUrl||'',displayCode:code,externalOrderCode:code,placedAt:o.createdAt||o.placedAt||new Date().toISOString(),platform:plat,
+      deliveryQrUrl:o.deliveryQrUrl||o.ownDeliveryQrUrl||'', // QR المنصة (Scoober) أولاً: السواقين بيمسحوه بتطبيق Lieferando؛ QR تبعنا fallbackdisplayCode:code,externalOrderCode:code,placedAt:o.createdAt||o.placedAt||new Date().toISOString(),platform:plat,
       orderType:type,table:o.table||'',customerName:d.name||'',customerPhone:d.phone||'',
       delivery:{address:[d.street,d.house].filter(Boolean).join(' '),floor:d.floor||'',postalCode:d.postal||'',city:d.city||'',notes:noteParts.join(' · ')},
       cart:items.map(i=>({quantity:Number(i.quantity)||1,name:i.name,totalCents:(Number(i.unitCents)||0)*(Number(i.quantity)||0),discountCents:Number(i.discountCents)||0,
