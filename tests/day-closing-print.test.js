@@ -152,3 +152,9 @@ test('ترويسة مؤقتة: IU GENE على الإيصال وA4 (بدون Flam
   const r = rec(data()), t = P.receiptLines(r).map(l => l.text).join('\n'), h = P.a4Html(r);
   assert.match(t, /IU GENE/); assert.match(h, /class="brand">IU GENE</); assert.doesNotMatch(t, /Flamo/); assert.doesNotMatch(h.replace(/<style[\s\S]*?<\/style>/, ''), /Flamo/);
 });
+
+test('الرئيسية: زر 🏠 مكان زر المنيو بالشريط العلوي، وكرت المنيو بدل الإدارة', () => {
+  const root = path.join(__dirname, '..'), nav = fs.readFileSync(path.join(root, 'flamo-nav.js'), 'utf8'), app = fs.readFileSync(path.join(root, 'nara-app.html'), 'utf8');
+  assert.match(nav, /class="fn-menu" href="\$\{base\}\$\{HOME\.f\}">🏠/); assert.doesNotMatch(nav, /class="fn-menu"[^`]*menuPage/);
+  assert.ok(app.includes("['admin','🍔','/admin-foundation.html',M]") && !app.includes("'/admin.html'"));
+});

@@ -182,14 +182,14 @@
 
     function renderBar() {
       const cur = PAGES.find(p => p.k === keyOfCurrent());
-      const u = user(), menuPage = PAGES.find(p => p.k === 'menu' && allowedFor(p, u && u.role));
+      const u = user();
       const crumb = cur ? `<span class="fn-crumb">${esc(tr(GROUPS[cur.g]))} <em>›</em> <b>${esc(tr(cur.n))}</b></span>` : '';
       bar.setAttribute('dir', lang() === 'ar' ? 'rtl' : 'ltr');
       bar.innerHTML = `<button type="button" class="fn-burger" aria-label="${esc(tr(T.menu))}">☰</button>` +
         `<a class="fn-mini" href="${base}${HOME.f}" aria-label="Flamo"><img src="${base}brand/flamo-icon.svg" alt="Flamo"></a>` +
         (file === HOME.f ? '' : `<button type="button" class="fn-back"><span class="fn-arrow">←</span> ${esc(tr(T.back))}</button>`) +
         crumb + '<span class="fn-sp"></span>' +
-        (menuPage && file !== menuPage.f ? `<a class="fn-menu" href="${base}${menuPage.f}">🍔 <span>${esc(tr(menuPage.n))}</span></a>` : '') +
+        (file !== HOME.f ? `<a class="fn-menu" href="${base}${HOME.f}">🏠 <span>${esc(tr(HOME.n))}</span></a>` : '') +
         `<button type="button" class="fn-find" aria-label="${esc(tr(T.search))}">🔎 <span>${esc(tr(T.search))}</span> <kbd>${esc(tr(T.searchHint))}</kbd></button>` +
         (/\/kasse(\.html)?$/.test(location.pathname) ? '' : '<span class="fn-status" id="fn-status"></span>') +
         (u ? `<span class="fn-who"><b>${esc(u.name || '')}</b><button type="button" class="fn-out2">${esc(tr(T.logout))}</button></span>` : '');
