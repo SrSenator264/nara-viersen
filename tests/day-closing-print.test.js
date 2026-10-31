@@ -130,3 +130,7 @@ test('وضع ليلي عام: ملفات الفرونت + مفعّل بصفحة 
   assert.equal(A.staticAllowed('flamo-night.js'), true); assert.match(js, /flamo-night/); assert.match(css, /html\.flamo-night/); assert.match(css, /@media print/);
   assert.ok(fs.readFileSync(path.join(root, 'kasse.html'), 'utf8').includes('flamo-night.js'));
 });
+
+test('وضع ليلي: الجزء 2 (Live Orders، المطبخ، السواقين)', () => {
+  for (const f of ['live-orders.html', 'kitchen.html', 'driver.html', 'driver-app-v2.html']) assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').includes('flamo-night.js'), f);
+});
