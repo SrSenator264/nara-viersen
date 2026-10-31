@@ -124,3 +124,9 @@ test('حركة: احترام تقليل الحركة + الوضع الليلي �
   const css = fs.readFileSync(path.join(__dirname, '..', 'kasse-settlement.css'), 'utf8'), js = fs.readFileSync(path.join(__dirname, '..', 'kasse-settlement.js'), 'utf8');
   assert.match(css, /prefers-reduced-motion:\s*reduce/); assert.match(css, /body\.night/); assert.match(js, /flamo-night/); assert.match(js, /prefers-reduced-motion/);
 });
+
+test('وضع ليلي عام: ملفات الفرونت + مفعّل بصفحة الكاشير', () => {
+  const root = path.join(__dirname, '..'), js = fs.readFileSync(path.join(root, 'flamo-night.js'), 'utf8'), css = fs.readFileSync(path.join(root, 'flamo-night.css'), 'utf8');
+  assert.equal(A.staticAllowed('flamo-night.js'), true); assert.match(js, /flamo-night/); assert.match(css, /html\.flamo-night/); assert.match(css, /@media print/);
+  assert.ok(fs.readFileSync(path.join(root, 'kasse.html'), 'utf8').includes('flamo-night.js'));
+});
