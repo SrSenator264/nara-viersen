@@ -52,3 +52,14 @@ textarea.sd-in{min-height:70px;resize:vertical}
 .sd-btn.sm{min-height:34px;padding:6px 10px;font-size:.85rem}.pr{display:inline-flex;gap:6px}
 .sd-sel{appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:none;border:1px solid #ccd3d8;border-radius:12px;background:#fff;color:#1d2327;padding:0 18px;min-height:46px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;text-align-last:center}
 .sd-sel.train{background:#f59e0b;color:#17202a;border-color:#f59e0b}
+
+.card.sum{position:sticky;top:0;z-index:5;box-shadow:0 8px 24px #17202a14}
+.sum-main{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.sum-main span{font-weight:700;color:#5a6670}.sum-main b{font-size:2rem;font-weight:900}
+.card.sum .diff{margin:10px 0}.card.sum .go{margin-top:2px}
+.card.empty{background:#f8fafc}.empty-day{margin:0;font-size:1.15rem;font-weight:700;color:#5a6670}
+.diff{font-size:1.5rem;padding:18px 20px;border-radius:16px}
+.diff.ok{background:#16a34a;color:#fff}.diff.over{background:#f59e0b;color:#17202a}.diff.short{background:#dc2626;color:#fff}
+.vat-item{padding:10px 0;border-bottom:1px dashed #e1e6e8}.vat-top{display:flex;justify-content:space-between;font-size:1.15rem}
+.vat-bar{height:14px;border-radius:999px;background:#eef1f3;margin:8px 0;overflow:hidden}.vat-bar i{display:block;height:100%;border-radius:999px}
+.vat-bar i.g{background:#16a34a}.vat-bar i.b{background:#2563eb}.vat-bar i.x{background:#94a3b8}
+.vat-nums{display:flex;gap:16px;color:#5a6670;font-size:.9rem}

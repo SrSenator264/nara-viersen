@@ -5,7 +5,7 @@
  const $ = s => document.querySelector(s);
  const lang = () => { try { if (window.NARA_LANG) return window.NARA_LANG.get(); const l = localStorage.getItem('nara-kasse-language'); return ['de', 'ar', 'en'].includes(l) ? l : 'de'; } catch (e) { return 'de'; } };
  const T = {
-  de: { title: 'Flamo · Tagesabschluss', h1: 'Tagesabschluss 📊', back: 'Zurück zur Kasse', refresh: 'Aktualisieren', loading: 'Lädt …', today: 'Heute', real: 'Echt', train: 'Übung', all: 'Gesamt (Echt + Übung)',
+  de: { title: 'Flamo · Tagesabschluss', h1: 'Tagesabschluss 📊', back: 'Zurück zur Kasse', refresh: 'Aktualisieren', loading: 'Lädt …', today: 'Heute', real: 'Echt', coins: '🪙 + Münzen', train: 'Übung', all: 'Gesamt (Echt + Übung)',
    open: 'Offen', closedAs: n => `Abgeschlossen · ${n}`, noSales: 'Keine Umsätze an diesem Tag.',
    sales: '💶 Umsatz', orders: 'Bestellungen', avg: 'Ø Bestellung', cash: 'Bar', card: 'Karte', other: 'Sonstige', tip: 'Trinkgeld (nicht im Umsatz)', discount: 'Rabatte', storno: 'Storno', cancelled: 'Storniert vor Zahlung', netAfter: 'Umsatz nach Storno',
    vat: '🧾 Steuer', net: 'Netto', tax: 'Steuer', gross: 'Brutto', total: 'Gesamt',
@@ -16,7 +16,7 @@
    openOrders: n => `⚠️ ${n} offene Bestellungen`, missed: d => `⚠️ ${d} wurde nicht abgeschlossen`, late: (n, a) => `⚠️ Umsätze nach dem Abschluss: ${n} · ${a}`, needCount: 'Bitte zuerst die Kasse zählen.', badLeave: 'Betrag für „In der Kasse lassen“ ist ungültig.',
    closeDay: '✅ Tag abschließen', confirm: (d, g, c, df) => `Tag ${d} abschließen?\nUmsatz ${g}\nGezählt ${c}\nDifferenz ${df}\n\nDanach kann der Abschluss nicht mehr geändert werden.`, nachtrag: '📎 Nachtrag erstellen', nachtraege: '📎 Nachträge', saved: n => `Gespeichert: ${n}`,
    err: { ALREADY_CLOSED: 'Dieser Tag ist bereits abgeschlossen.', COUNT_REQUIRED: 'Gezählter Kassenbestand fehlt.', FUTURE_DAY: 'Der Tag liegt in der Zukunft.', NO_CLOSING: 'Für diesen Tag gibt es noch keinen Abschluss.', NOTHING_NEW: 'Keine neuen Umsätze seit dem Abschluss.', FORBIDDEN: 'Keine Berechtigung.', DENOMINATIONS_MISMATCH: 'Stückelung passt nicht zum Betrag.', BAD_LEAVE: 'Ungültiger Betrag für „In der Kasse lassen“.', gen: 'Fehler — bitte erneut versuchen.' } },
-  ar: { title: 'Flamo · تقفيلة اليوم', h1: 'تقفيلة اليوم 📊', back: 'رجوع عالكاشير', refresh: 'حدّث', loading: 'عم يحمّل …', today: 'اليوم', real: 'فعلي', train: 'تدريب', all: 'مجموع (فعلي + تدريب)',
+  ar: { title: 'Flamo · تقفيلة اليوم', h1: 'تقفيلة اليوم 📊', back: 'رجوع عالكاشير', refresh: 'حدّث', loading: 'عم يحمّل …', today: 'اليوم', real: 'فعلي', coins: '🪙 + فكّة', train: 'تدريب', all: 'مجموع (فعلي + تدريب)',
    open: 'مفتوحة', closedAs: n => `مقفولة · ${n}`, noSales: 'ما في مبيعات بهاليوم.',
    sales: '💶 المبيعات', orders: 'الطلبات', avg: 'متوسط الطلب', cash: 'كاش', card: 'كارت', other: 'أخرى', tip: 'بقشيش (مو بالمبيعات)', discount: 'الخصومات', storno: 'Storno', cancelled: 'ملغاة قبل الدفع', netAfter: 'المبيعات بعد الـStorno',
    vat: '🧾 الضريبة', net: 'صافي', tax: 'ضريبة', gross: 'إجمالي', total: 'المجموع',
@@ -27,7 +27,7 @@
    openOrders: n => `⚠️ في ${n} طلبات مفتوحة غير مدفوعة`, missed: d => `⚠️ يوم ${d} ما انقفل`, late: (n, a) => `⚠️ في مبيعات بعد التقفيلة: ${n} · ${a}`, needCount: 'عدّ الصندوق أول.', badLeave: 'مبلغ "بخلّي بالصندوق" غلط.',
    closeDay: '✅ قفّل اليوم', confirm: (d, g, c, df) => `نقفّل يوم ${d}؟\nالمبيعات ${g}\nالمعدود ${c}\nالفرق ${df}\n\nبعد التقفيل ما بتتعدّل.`, nachtrag: '📎 سجّل ما بعد التقفيلة (Nachtrag)', nachtraege: '📎 الـNachträge', saved: n => `انحفظت: ${n}`,
    err: { ALREADY_CLOSED: 'هاد اليوم مقفول من قبل.', COUNT_REQUIRED: 'لازم تعدّ الصندوق.', FUTURE_DAY: 'اليوم لسا ما إجا.', NO_CLOSING: 'هاد اليوم ما إلو تقفيلة.', NOTHING_NEW: 'ما في مبيعات جديدة بعد التقفيلة.', FORBIDDEN: 'ما عندك صلاحية.', DENOMINATIONS_MISMATCH: 'العدّ ما بيطابق المبلغ.', BAD_LEAVE: 'مبلغ "بخلّي بالصندوق" غلط.', gen: 'صار خطأ، جرّب مرة تانية.' } },
-  en: { title: 'Flamo · End of day', h1: 'End of day 📊', back: 'Back to cashier', refresh: 'Refresh', loading: 'Loading …', today: 'Today', real: 'Real', train: 'Practice', all: 'Total (Real + Practice)',
+  en: { title: 'Flamo · End of day', h1: 'End of day 📊', back: 'Back to cashier', refresh: 'Refresh', loading: 'Loading …', today: 'Today', real: 'Real', coins: '🪙 + Coins', train: 'Practice', all: 'Total (Real + Practice)',
    open: 'Open', closedAs: n => `Closed · ${n}`, noSales: 'No sales on this day.',
    sales: '💶 Sales', orders: 'Orders', avg: 'Avg. order', cash: 'Cash', card: 'Card', other: 'Other', tip: 'Tips (not in sales)', discount: 'Discounts', storno: 'Storno', cancelled: 'Cancelled before payment', netAfter: 'Sales after Storno',
    vat: '🧾 VAT', net: 'Net', tax: 'VAT', gross: 'Gross', total: 'Total',
@@ -99,6 +99,7 @@
 
  function salesCard(R) {
   const v = R.revenue, n = R.counts;
+  if (!n.orders && !R.storno.count && !R.cancelled.count) return card('empty', tr('sales'), `<p class="empty-day">${tr('noSales')} 🎉</p>`);
   let b = `<div class="big">${euro(R.net.grossCents)}</div><div class="muted">${tr('netAfter')}${R.storno.count ? '' : ''}</div>`;
   b += `<div class="tiles"><div class="tile"><span>🧾 ${tr('orders')}</span><b>${n.orders}</b></div><div class="tile"><span>📊 ${tr('avg')}</span><b>${euro(n.avgCents)}</b></div></div>`;
   b += row('💵 ' + tr('cash'), euro(v.cashCents)) + row('💳 ' + tr('card'), euro(v.cardCents));
@@ -112,9 +113,9 @@
  }
  function vatCard(R) {
   if (!R.vat.rows.length) return '';
-  let b = `<div class="vrow head"><span></span><span>${tr('net')}</span><span>${tr('tax')}</span><span>${tr('gross')}</span></div>`;
-  b += R.vat.rows.map(r => `<div class="vrow"><b>${r.rate} %</b><span>${euro(r.netCents)}</span><span>${euro(r.vatCents)}</span><span>${euro(r.grossCents)}</span></div>`).join('');
-  b += `<div class="vrow"><b>${tr('total')}</b><span>${euro(R.vat.netCents)}</span><span>${euro(R.vat.vatCents)}</span><span><b>${euro(R.vat.grossCents)}</b></span></div>`;
+  const tot = R.vat.grossCents || 1, ico = r => r === 7 ? '🍔' : r === 19 ? '🥤' : '🧾', col = r => r === 7 ? 'g' : r === 19 ? 'b' : 'x';
+  let b = R.vat.rows.map(r => `<div class="vat-item"><div class="vat-top"><b>${ico(r.rate)} ${r.rate} %</b><b>${euro(r.grossCents)}</b></div><div class="vat-bar"><i class="${col(r.rate)}" style="width:${Math.max(3, Math.round(r.grossCents * 100 / tot))}%"></i></div><div class="vat-nums"><span>${tr('net')} ${euro(r.netCents)}</span><span>${tr('tax')} ${euro(r.vatCents)}</span></div></div>`).join('');
+  b += row(tr('total'), euro(R.vat.grossCents), 'strong') + `<div class="vat-nums"><span>${tr('net')} ${euro(R.vat.netCents)}</span><span>${tr('tax')} ${euro(R.vat.vatCents)}</span></div>`;
   return card('', tr('vat'), b);
  }
  function platformCard(R) {
@@ -146,21 +147,24 @@
    if (rec.note) b += `<p class="muted">📝 ${esc(rec.note)}</p>`;
    return card('', tr('cashCard'), b);
   }
-  const grid = DEN.map(d => `<div class="den"><span>${denLabel(d)}</span><div class="stp"><button type="button" data-act="dm" data-c="${d}">−</button><b id="dn-${d}">${S.counts[d] || 0}</b><button type="button" data-act="dp" data-c="${d}">+</button></div></div>`).join('');
-  let b = `<div class="den-grid">${grid}</div><div class="fields"><label>${tr('opening')}<input class="sd-in" id="in-open" inputmode="decimal" value="${inEuro(openingNow())}"></label><label>${tr('total2')}<input class="sd-in" id="in-total" inputmode="decimal" value="${inEuro(countedNow())}"></label><label>${tr('leave')}<input class="sd-in" id="in-leave" inputmode="decimal" value="${inEuro(leaveNow())}"></label></div>`;
+  const isCoin = d => d <= 200, coinsUsed = DEN.some(d => isCoin(d) && S.counts[d]), showCoins = S.coins || coinsUsed;
+  const grid = DEN.filter(d => !isCoin(d) || showCoins).map(d => `<div class="den"><span>${denLabel(d)}</span><div class="stp"><button type="button" data-act="dm" data-c="${d}">−</button><b id="dn-${d}">${S.counts[d] || 0}</b><button type="button" data-act="dp" data-c="${d}">+</button></div></div>`).join('');
+  let b = `<div class="den-grid">${grid}</div>${showCoins ? '' : `<button class="sd-btn ghost sm" type="button" data-act="coins">${tr('coins')}</button>`}<div class="fields"><label>${tr('opening')}<input class="sd-in" id="in-open" inputmode="decimal" value="${inEuro(openingNow())}"></label><label>${tr('total2')}<input class="sd-in" id="in-total" inputmode="decimal" value="${inEuro(countedNow())}"></label><label>${tr('leave')}<input class="sd-in" id="in-leave" inputmode="decimal" value="${inEuro(leaveNow())}"></label></div>`;
   b += row(tr('expected'), `<span id="c-exp">${euro(expectedNow())}</span>`, 'strong');
   b += `<div class="diff" id="c-diff"></div>` + row(tr('takeOut'), `<span id="c-take"></span>`);
   b += `<label class="muted" style="display:block;margin-top:10px">${tr('note')}<textarea class="sd-in" id="in-note">${esc(S.note)}</textarea></label>`;
   return card('', tr('cashCard'), b);
  }
  function updateCash() {
-  if (!S.report || $('#c-diff') == null) return;
+  if (!S.report || $('#c-diff') == null) { const sd0 = S.report && $('#s-diff'); if (!sd0) return; }
+  if ($('#c-diff') == null) return;
   const cn = countedNow(), ex = expectedNow(), df = cn - ex, st = stateOf(df);
   for (const d of DEN) { const e = $('#dn-' + d); if (e) e.textContent = S.counts[d] || 0; }
   const t = $('#in-total'); if (t && !S.manual) t.value = inEuro(cn);
   const lv = $('#in-leave'); if (lv && S.leave == null) lv.value = inEuro(cn);
   $('#c-exp').textContent = euro(ex);
   const el = $('#c-diff'); el.className = 'diff ' + st; el.innerHTML = `<span>${tr('diff')}</span><span>${stateText(df, st)}</span>`;
+  const sd = $('#s-diff'); if (sd) { sd.className = 'diff ' + (S.touched ? st : ''); sd.innerHTML = S.touched ? `<span>${tr('diff')}</span><span>${stateText(df, st)}</span>` : `<span>${tr('needCount')}</span>`; }
   $('#c-take').textContent = euro(Math.max(0, cn - leaveNow()));
  }
  function warnCard(closed) {
@@ -170,6 +174,11 @@
   if (!closed && S.status && S.status.missedDays.length) out += card('warn', S.status.missedDays.map(d => `<button class="sd-btn ghost" type="button" data-goto="${esc(d)}">${tr('missed')(dmy(d))}</button>`).join(' '), '');
   if (closed && S.status.lateSales) out += card('warn', tr('late')(S.status.lateSales.count, euro(S.status.lateSales.grossCents)), canClose() ? `<button class="sd-btn amber" type="button" data-act="nachtrag">${tr('nachtrag')}</button>` : '');
   return out;
+ }
+ function summaryCard(closed, R) {
+  const sales = `<div class="sum-main"><span>${tr('sales')}</span><b>${euro(R.net.grossCents)}</b></div>`;
+  if (S.mode !== 'REAL' || closed || !canClose() || (S.status && S.status.closed)) return `<section class="card sum">${sales}</section>`;
+  return `<section class="card sum">${sales}<div class="diff" id="s-diff"></div><button class="sd-btn go" type="button" data-act="close"${S.busy ? ' disabled' : ''}>${tr('closeDay')}</button></section>`;
  }
  function printBtns(id) {
   return `<span class="pr"><button class="sd-btn ghost sm" type="button" data-act="print" data-kind="a4" data-id="${esc(id || '')}">🖨️ A4</button> <button class="sd-btn ghost sm" type="button" data-act="print" data-kind="r80" data-id="${esc(id || '')}">🧾 80mm</button> <button class="sd-btn ghost sm" type="button" data-act="csv" data-id="${esc(id || '')}">📥 CSV</button></span>`;
@@ -225,7 +234,7 @@
   const msg = S.msg ? `<div class="msg ${S.msg.err ? 'err' : 'good'}">${esc(S.msg.err || S.msg.ok)}</div>` : '';
   let actions = '';
   if (!closed && S.mode === 'REAL' && canClose() && !(S.status && S.status.closed)) actions = `<button class="sd-btn go" type="button" data-act="close"${S.busy ? ' disabled' : ''}>${tr('closeDay')}</button>`;
-  root.innerHTML = msg + warnCard(closed) + salesCard(R) + vatCard(R) + platformCard(R) + cashCard(R, closed) + nachtraegeCard() + printCard(closed) + actions;
+  root.innerHTML = msg + summaryCard(closed, R) + warnCard(closed) + salesCard(R) + vatCard(R) + platformCard(R) + cashCard(R, closed) + nachtraegeCard() + printCard(closed);
   updateCash();
  }
 
@@ -263,6 +272,7 @@
    if (!a) return;
    const act = a.dataset.act, c = Number(a.dataset.c);
    if (act === 'dp' || act === 'dm') { S.manual = false; S.touched = true; S.counts[c] = Math.max(0, (S.counts[c] || 0) + (act === 'dp' ? 1 : -1)); S.leave = null; updateCash(); }
+   else if (act === 'coins') { S.coins = true; render(); }
    else if (act === 'close') doClose(false);
    else if (act === 'nachtrag') doClose(true);
    else if (act === 'csv') doCsv(a.dataset.id);
