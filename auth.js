@@ -164,7 +164,7 @@ const SERVER_FILES = new Set(['server.js', 'server-auth.js', 'auth.js', 'kitchen
 const FRONTEND_JS = new Set([
   'accounting.js', 'admin-foundation.js', 'admin-menu-translations.js', 'ai-manager-cashier-agents.js', 'ai-manager-command-center.js',
   'ai-manager-i18n-fix.js', 'ai-manager.js', 'allergen-data.js', 'app.js', 'business-day.js', 'catalog.js', 'customer-chef.js',
-  'customer-sidebar.js', 'day-closing-print.js', 'flamo-nav.js', 'flamo-t.js', 'inventory-foundation.js', 'invoice-review-model.js', 'kasse-agent-suite.js',
+  'customer-sidebar.js', 'day-closing-print.js', 'flamo-icons.js', 'flamo-nav.js', 'flamo-t.js', 'inventory-foundation.js', 'invoice-review-model.js', 'kasse-agent-suite.js',
   'kasse-customer-directory.js', 'kasse-reminders.js', 'kasse-delivery-fee.js', 'kasse-domain.js', 'kasse-external-payment-guard.js', 'kasse-header-tidy.js',
   'kasse-helpers.js', 'kasse-lanch-file-preview.js', 'kasse-lanch-import.js', 'kasse-lieferando-bridge.js', 'kasse-live-orders-link.js',
   'kasse-monitor.js', 'kasse-open-orders.js', 'kasse-order-hub.js', 'kasse-payment.js', 'kasse-phone-lookup.js', 'kasse-phone.js', 'kasse-platform-sync.js', 'kasse-print-lifecycle.js',

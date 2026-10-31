@@ -90,3 +90,37 @@ test('CSV: Semikolon + Dezimalkomma + BOM + Quotes؛ سطر لكل تقفيلة'
   const l = P.listCsv([{ day: '2026-11-01', number: 'Z-2026-0001', type: 'CLOSING', closedAt: 'x', closedBy: 'Omar', grossCents: 123456, vatCents: 8000, differenceCents: -50 }]);
   assert.match(l, /2026-11-01;Z-2026-0001;Tagesabschluss;x;Omar;1234,56;80,00;-0,50\r\n$/);
 });
+
+// ── شريط الأيام / رموز / صور فلامو ──
+test('weekStrip: 7 أيام بالترتيب؛ closed / diff / open / empty', () => {
+  const d = data(), today = bizDay.today(), t = new Date(today + 'T00:00:00Z'); const prev = n => { const x = new Date(t); x.setUTCDate(x.getUTCDate() - n); return x.toISOString().slice(0, 10); };
+  const w0 = DC.weekStrip(d, today); assert.equal(w0.length, 7); assert.equal(w0[6].day, today); assert.equal(w0[0].day, prev(6));
+  assert.equal(w0[6].state, 'open'); assert.ok(w0.slice(0, 6).every(x => x.state === 'empty'));
+  const r = rec(d); d.dayClosings.push(r); assert.equal(DC.weekStrip(d, today)[6].state, r.report.cash.differenceCents ? 'diff' : 'closed');
+  const r2 = clone(r); r2.id = 'x2'; r2.day = prev(1); r2.report.cash.differenceCents = -500; d.dayClosings.push(r2);
+  assert.equal(DC.weekStrip(d, today)[5].state, 'diff');
+});
+
+test('/week: مسار صحيح + يوم غلط = 400', async () => {
+  const { call } = mkRoutes(null);
+  const ok = await new Promise(res => { const out = {}; R.handle({ method: 'GET', naraUser: { role: 'OWNER' } }, out, new URL('http://x/api/day-closing/week'), { readAdminData: () => data(), reply: (r, s, b) => { r.status = s; r.body = b; }, bizDay }); res(out); });
+  assert.equal(ok.status, 200); assert.equal(ok.body.days.length, 7);
+  const bad = {}; R.handle({ method: 'GET', naraUser: { role: 'OWNER' } }, bad, new URL('http://x/api/day-closing/week?end=oops'), { readAdminData: () => data(), reply: (r, s, b) => { r.status = s; r.body = b; }, bizDay }); assert.equal(bad.status, 400);
+  assert.equal(A.allowed(A.policyFor('GET', '/api/day-closing/week'), 'ACCOUNTANT'), true);
+});
+
+test('رموز موحّدة + صور فلامو الثلاث (PNG بشفافية) + الصفحة بتحمّلهم', () => {
+  const I = require('../flamo-icons.js'); for (const k of ['cash', 'card', 'tax', 'platform', 'tip']) assert.ok(I.get(k).icon && /^#/.test(I.get(k).color), k);
+  assert.match(I.html('cash'), /class="ic"/); assert.equal(A.staticAllowed('flamo-icons.js'), true);
+  for (const n of ['happy', 'worried', 'sleeping']) {
+    const b = fs.readFileSync(path.join(__dirname, '..', 'brand', 'flamo-' + n + '.png'));
+    assert.equal(b.slice(1, 4).toString(), 'PNG'); assert.equal(b[25], 6, n + ' لازم RGBA (colour type 6)');
+  }
+  const html = fs.readFileSync(path.join(__dirname, '..', 'kasse-settlement.html'), 'utf8');
+  assert.ok(html.includes('flamo-icons.js') && html.includes('id="sd-night"'));
+});
+
+test('حركة: احترام تقليل الحركة + الوضع الليلي موجود بالـCSS/JS', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'kasse-settlement.css'), 'utf8'), js = fs.readFileSync(path.join(__dirname, '..', 'kasse-settlement.js'), 'utf8');
+  assert.match(css, /prefers-reduced-motion:\s*reduce/); assert.match(css, /body\.night/); assert.match(js, /flamo-night/); assert.match(js, /prefers-reduced-motion/);
+});

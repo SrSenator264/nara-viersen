@@ -252,4 +252,18 @@ function reprintAudit(data, settlement, user, now, newId) {
   return { id: newId('audit'), type: 'CLOSING_REPRINT', createdAt: now, details: { settlementId: settlement.id, number: settlement.number, copyNumber: prior + 1, by: user ? (user.name || user.username || user.id || '') : '' } };
 }
 
-module.exports = { build, status, makeRecord, nextNumber, reprintAudit, rateResolver, allocate, isDrinkName, ClosingError };
+// شريط آخر n أيام: closed (مقفّل) | diff (مقفّل وفيه فرق صندوق) | open (فيه مبيعات وما انقفل) | empty
+function weekStrip(data, endDay, n = 7) {
+  const out = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const t = new Date(endDay + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() - i); const day = t.toISOString().slice(0, 10);
+    const cl = settlementsOf(data, day).find(x => x.type === 'CLOSING');
+    let state;
+    if (cl) { const df = cl.report && cl.report.cash ? cl.report.cash.differenceCents : 0; state = df ? 'diff' : 'closed'; }
+    else { const r = build(data, day, { mode: 'REAL' }); state = r.counts.payments > 0 ? 'open' : 'empty'; }
+    out.push({ day, state, number: cl ? cl.number : null });
+  }
+  return out;
+}
+
+module.exports = { weekStrip, build, status, makeRecord, nextNumber, reprintAudit, rateResolver, allocate, isDrinkName, ClosingError };

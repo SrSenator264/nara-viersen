@@ -83,44 +83,53 @@
    if (l.ok) S.nachtraege = (l.json.rows || []).filter(x => x.day === S.day && x.type === 'NACHTRAG');
    if (my !== S.seq) return;
   }
+  const wk = await api('GET', '/api/day-closing/week?end=' + encodeURIComponent(S.today || S.day));
+  S.week = wk.ok ? (wk.json.days || []) : [];
+  if (my !== S.seq) return;
   render();
  }
 
  // ── عرض ──
+ const ic = k => (window.FLAMO_ICONS ? window.FLAMO_ICONS.html(k) : '');
  const row = (label, val, cls) => `<div class="row ${cls || ''}"><span>${label}</span><b>${val}</b></div>`;
  const card = (cls, title, body) => `<section class="card ${cls || ''}"><h2>${title}</h2>${body}</section>`;
 
+ function weekHtml() {
+  if (!S.week || !S.week.length) return '';
+  const wd = d => { try { return new Date(d + 'T12:00:00Z').toLocaleDateString(lang() === 'ar' ? 'ar' : lang() === 'en' ? 'en-GB' : 'de-DE', { weekday: 'short', timeZone: 'UTC' }); } catch (e) { return ''; } };
+  return `<div class="wk">${S.week.map(x => `<button type="button" class="wk-d ${x.state}${x.day === S.day ? ' sel' : ''}" data-goto="${esc(x.day)}" title="${esc(dmy(x.day))}${x.number ? ' · ' + esc(x.number) : ''}"><small>${esc(wd(x.day))}</small><b>${x.day.slice(8)}</b></button>`).join('')}</div>`;
+ }
  function barHtml() {
   const closed = S.status && S.status.closed;
   const chip = S.mode !== 'REAL' ? '' : closed ? `<span class="sd-chip green">${esc(tr('closedAs')(S.status.closing.number))}</span>` : `<span class="sd-chip amber">🟢 ${tr('open')}</span>`;
   const seg = tf() ? `<select class="sd-sel${S.mode === 'TRAINING' ? ' train' : ''}" id="sd-mode" aria-label="mode"><option value="REAL"${S.mode === 'REAL' ? ' selected' : ''}>${tr('real')}</option><option value="TRAINING"${S.mode === 'TRAINING' ? ' selected' : ''}>${tr('train')}</option><option value="ALL"${S.mode === 'ALL' ? ' selected' : ''}>${tr('all')}</option></select>` : '';
-  return `<button class="sd-btn ghost" type="button" data-day="-1" aria-label="-1">◀</button><input class="sd-in" id="sd-day" type="date" value="${esc(S.day)}"${S.today ? ` max="${esc(S.today)}"` : ''}><button class="sd-btn ghost" type="button" data-day="1" aria-label="+1">▶</button><button class="sd-btn ghost" type="button" data-day="0">${tr('today')}</button>${seg}${chip}`;
+  return weekHtml() + `<button class="sd-btn ghost" type="button" data-day="-1" aria-label="-1">◀</button><input class="sd-in" id="sd-day" type="date" value="${esc(S.day)}"${S.today ? ` max="${esc(S.today)}"` : ''}><button class="sd-btn ghost" type="button" data-day="1" aria-label="+1">▶</button><button class="sd-btn ghost" type="button" data-day="0">${tr('today')}</button>${seg}${chip}`;
  }
 
  function salesCard(R) {
   const v = R.revenue, n = R.counts;
   if (!n.orders && !R.storno.count && !R.cancelled.count) return card('empty', tr('sales'), `<p class="empty-day">${tr('noSales')} 🎉</p>`);
-  let b = `<div class="big">${euro(R.net.grossCents)}</div><div class="muted">${tr('netAfter')}${R.storno.count ? '' : ''}</div>`;
-  b += `<div class="tiles"><div class="tile"><span>🧾 ${tr('orders')}</span><b>${n.orders}</b></div><div class="tile"><span>📊 ${tr('avg')}</span><b>${euro(n.avgCents)}</b></div></div>`;
-  b += row('💵 ' + tr('cash'), euro(v.cashCents)) + row('💳 ' + tr('card'), euro(v.cardCents));
+  let b = `<div class="big" data-cents="${R.net.grossCents}" data-k="big">${euro(R.net.grossCents)}</div><div class="muted">${tr('netAfter')}${R.storno.count ? '' : ''}</div>`;
+  b += `<div class="tiles"><div class="tile"><span>${ic('orders')}${tr('orders')}</span><b>${n.orders}</b></div><div class="tile"><span>${ic('avg')}${tr('avg')}</span><b>${euro(n.avgCents)}</b></div></div>`;
+  b += row(ic('cash') + tr('cash'), euro(v.cashCents)) + row(ic('card') + tr('card'), euro(v.cardCents));
   if (v.otherCents) b += row(tr('other'), euro(v.otherCents));
-  b += row('🎁 ' + tr('tip'), euro(v.tipCents), 'sub');
-  if (v.discountCents) b += row('🏷️ ' + tr('discount'), '− ' + euro(v.discountCents), 'sub');
-  if (R.storno.count) b += row(`↩️ ${tr('storno')} (${R.storno.count})`, '− ' + euro(R.storno.amountCents), 'sub');
-  if (R.cancelled.count) b += row(`🚫 ${tr('cancelled')} (${R.cancelled.count})`, euro(R.cancelled.cartCents), 'sub');
+  b += row(ic('tip') + tr('tip'), euro(v.tipCents), 'sub');
+  if (v.discountCents) b += row(ic('discount') + tr('discount'), '− ' + euro(v.discountCents), 'sub');
+  if (R.storno.count) b += row(`${ic('storno')}${tr('storno')} (${R.storno.count})`, '− ' + euro(R.storno.amountCents), 'sub');
+  if (R.cancelled.count) b += row(`${ic('cancel')}${tr('cancelled')} (${R.cancelled.count})`, euro(R.cancelled.cartCents), 'sub');
   if (!n.orders && !R.storno.count) b += `<p class="muted">${tr('noSales')}</p>`;
   return card('', tr('sales'), b);
  }
  function vatCard(R) {
   if (!R.vat.rows.length) return '';
-  const tot = R.vat.grossCents || 1, ico = r => r === 7 ? '🍔' : r === 19 ? '🥤' : '🧾', col = r => r === 7 ? 'g' : r === 19 ? 'b' : 'x';
+  const tot = R.vat.grossCents || 1, ico = r => ic(r === 7 ? 'food' : r === 19 ? 'drink' : 'tax'), col = r => r === 7 ? 'g' : r === 19 ? 'b' : 'x';
   let b = R.vat.rows.map(r => `<div class="vat-item"><div class="vat-top"><b>${ico(r.rate)} ${r.rate} %</b><b>${euro(r.grossCents)}</b></div><div class="vat-bar"><i class="${col(r.rate)}" style="width:${Math.max(3, Math.round(r.grossCents * 100 / tot))}%"></i></div><div class="vat-nums"><span>${tr('net')} ${euro(r.netCents)}</span><span>${tr('tax')} ${euro(r.vatCents)}</span></div></div>`).join('');
   b += row(tr('total'), euro(R.vat.grossCents), 'strong') + `<div class="vat-nums"><span>${tr('net')} ${euro(R.vat.netCents)}</span><span>${tr('tax')} ${euro(R.vat.vatCents)}</span></div>`;
   return card('', tr('vat'), b);
  }
  function platformCard(R) {
   if (!R.platform.rows.length) return '';
-  let b = `<p class="muted">${tr('platHint')}</p>` + R.platform.rows.map(r => row(`${esc(LABELS[r.key] || r.key)} · ${r.count}× · ${r.rate}% ${tr('commission')} ${euro(r.commissionCents)}${r.cashDueCents ? ` · ${tr('cashDue')} ${euro(r.cashDueCents)}` : ''}`, euro(r.grossCents))).join('');
+  let b = `<p class="muted">${tr('platHint')}</p>` + R.platform.rows.map(r => row(`${ic('platform')}${esc(LABELS[r.key] || r.key)} · ${r.count}× · ${r.rate}% ${tr('commission')} ${euro(r.commissionCents)}${r.cashDueCents ? ` · ${tr('cashDue')} ${euro(r.cashDueCents)}` : ''}`, euro(r.grossCents))).join('');
   b += row(tr('total'), euro(R.platform.grossCents), 'strong');
   return card('', tr('plat'), b);
  }
@@ -148,7 +157,7 @@
    return card('', tr('cashCard'), b);
   }
   const isCoin = d => d <= 200, coinsUsed = DEN.some(d => isCoin(d) && S.counts[d]), showCoins = S.coins || coinsUsed;
-  const grid = DEN.filter(d => !isCoin(d) || showCoins).map(d => `<div class="den"><span>${denLabel(d)}</span><div class="stp"><button type="button" data-act="dm" data-c="${d}">−</button><b id="dn-${d}">${S.counts[d] || 0}</b><button type="button" data-act="dp" data-c="${d}">+</button></div></div>`).join('');
+  const grid = DEN.filter(d => !isCoin(d) || showCoins).map(d => `<div class="den ${d >= 500 ? 'note' : 'coin'} d${d}" data-act="dp" data-c="${d}" role="button" tabindex="0"><div class="face"><span>${denLabel(d)}</span></div><b class="cnt" id="dn-${d}">${S.counts[d] || 0}</b><button type="button" class="minus" data-act="dm" data-c="${d}" aria-label="−">−</button></div>`).join('');
   let b = `<div class="den-grid">${grid}</div>${showCoins ? '' : `<button class="sd-btn ghost sm" type="button" data-act="coins">${tr('coins')}</button>`}<div class="fields"><label>${tr('opening')}<input class="sd-in" id="in-open" inputmode="decimal" value="${inEuro(openingNow())}"></label><label>${tr('total2')}<input class="sd-in" id="in-total" inputmode="decimal" value="${inEuro(countedNow())}"></label><label>${tr('leave')}<input class="sd-in" id="in-leave" inputmode="decimal" value="${inEuro(leaveNow())}"></label></div>`;
   b += row(tr('expected'), `<span id="c-exp">${euro(expectedNow())}</span>`, 'strong');
   b += `<div class="diff" id="c-diff"></div>` + row(tr('takeOut'), `<span id="c-take"></span>`);
@@ -164,6 +173,7 @@
   const lv = $('#in-leave'); if (lv && S.leave == null) lv.value = inEuro(cn);
   $('#c-exp').textContent = euro(ex);
   const el = $('#c-diff'); el.className = 'diff ' + st; el.innerHTML = `<span>${tr('diff')}</span><span>${stateText(df, st)}</span>`;
+  const fm = $('#fl-mood'); if (fm && S.report) { const mm = moodOf(S.report, df, S.touched); if (!fm.className.includes(mm)) { fm.outerHTML = moodHtml(mm); } }
   const sd = $('#s-diff'); if (sd) { sd.className = 'diff ' + (S.touched ? st : ''); sd.innerHTML = S.touched ? `<span>${tr('diff')}</span><span>${stateText(df, st)}</span>` : `<span>${tr('needCount')}</span>`; }
   $('#c-take').textContent = euro(Math.max(0, cn - leaveNow()));
  }
@@ -175,8 +185,16 @@
   if (closed && S.status.lateSales) out += card('warn', tr('late')(S.status.lateSales.count, euro(S.status.lateSales.grossCents)), canClose() ? `<button class="sd-btn amber" type="button" data-act="nachtrag">${tr('nachtrag')}</button>` : '');
   return out;
  }
+ function moodOf(R, df, counted) {
+  if (!R.counts.orders && !R.storno.count) return 'sleeping';
+  if (counted && df !== 0) return 'worried';
+  return 'happy';
+ }
+ const moodHtml = m => `<div class="fl-mood ${m}" id="fl-mood"><img src="brand/flamo-${m}.png" alt="Flamo ${m}">${m === 'sleeping' ? '<span class="zz">z z z</span>' : m === 'happy' ? '<span class="sp">✨</span>' : ''}</div>`;
  function summaryCard(closed, R) {
-  const sales = `<div class="sum-main"><span>${tr('sales')}</span><b>${euro(R.net.grossCents)}</b></div>`;
+  const isClosed = S.mode === 'REAL' && !!(S.status && S.status.closed && S.record);
+  const mood = moodOf(R, isClosed ? (R.cash && R.cash.differenceCents || 0) : 0, isClosed);
+  const sales = `<div class="sum-main">${moodHtml(mood)}<div><span>${tr('sales')}</span><b data-cents="${R.net.grossCents}" data-k="sum">${euro(R.net.grossCents)}</b></div></div>`;
   if (S.mode !== 'REAL' || closed || !canClose() || (S.status && S.status.closed)) return `<section class="card sum">${sales}</section>`;
   return `<section class="card sum">${sales}<div class="diff" id="s-diff"></div><button class="sd-btn go" type="button" data-act="close"${S.busy ? ' disabled' : ''}>${tr('closeDay')}</button></section>`;
  }
@@ -236,6 +254,19 @@
   if (!closed && S.mode === 'REAL' && canClose() && !(S.status && S.status.closed)) actions = `<button class="sd-btn go" type="button" data-act="close"${S.busy ? ' disabled' : ''}>${tr('closeDay')}</button>`;
   root.innerHTML = msg + summaryCard(closed, R) + warnCard(closed) + salesCard(R) + vatCard(R) + platformCard(R) + cashCard(R, closed) + nachtraegeCard() + printCard(closed);
   updateCash();
+  animateAfterRender();
+ }
+ const reduced = () => { try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; } };
+ function animateAfterRender() {
+  const root = $('#app'); if (!root || !root.querySelectorAll) return;
+  S.shown = S.shown || {};
+  root.querySelectorAll('[data-cents]').forEach(el => {
+   const to = Number(el.dataset.cents), k = el.dataset.k, from = S.shown[k] == null ? 0 : S.shown[k]; S.shown[k] = to;
+   if (reduced() || from === to || typeof requestAnimationFrame !== 'function') return;
+   const t0 = Date.now(), dur = 600;
+   const step = () => { const p = Math.min(1, (Date.now() - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = euro(Math.round(from + (to - from) * e)); if (p < 1) requestAnimationFrame(step); };
+   requestAnimationFrame(step);
+  });
  }
 
  // ── أفعال ──
@@ -258,6 +289,7 @@
  function bind() {
   const bar = $('#bar'), app = $('#app');
   bar.addEventListener('click', e => {
+   const gt = e.target.closest('[data-goto]'); if (gt) { S.day = gt.dataset.goto; S.msg = null; return load(true); }
    const d = e.target.closest('[data-day]'); if (d) {
     const k = Number(d.dataset.day);
     if (k === 0) S.day = S.today; else { const t = new Date(S.day + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + k); const nd = t.toISOString().slice(0, 10); if (S.today && nd > S.today) return; S.day = nd; }
@@ -273,12 +305,13 @@
    const act = a.dataset.act, c = Number(a.dataset.c);
    if (act === 'dp' || act === 'dm') { S.manual = false; S.touched = true; S.counts[c] = Math.max(0, (S.counts[c] || 0) + (act === 'dp' ? 1 : -1)); S.leave = null; updateCash(); }
    else if (act === 'coins') { S.coins = true; render(); }
-   else if (act === 'close') doClose(false);
+   else if (act === 'close') { a.classList && a.classList.add('wobble'); doClose(false); }
    else if (act === 'nachtrag') doClose(true);
    else if (act === 'csv') doCsv(a.dataset.id);
    else if (act === 'csvall') doCsvAll();
    else if (act === 'print') doPrint(a.dataset.kind, a.dataset.id);
   });
+  app.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains && e.target.classList.contains('den')) { e.preventDefault(); e.target.click(); } });
   app.addEventListener('input', e => {
    const id = e.target.id;
    if (id === 'in-open') { S.opening = toCents(e.target.value); S.touched = true; updateCash(); }
@@ -293,6 +326,11 @@
   if (window.NARA_LANG) window.NARA_LANG.mountSwitcher($('#settlement-lang'));
   $('#sd-refresh').addEventListener('click', () => { S.msg = null; load(false); });
   bind();
+  const nightBtn = $('#sd-night');
+  const applyNight = on => { try { document.body.classList.toggle('night', on); } catch (e) {} if (nightBtn) nightBtn.textContent = on ? '☀️' : '🌙'; };
+  let night = false; try { night = localStorage.getItem('flamo-night') === '1'; } catch (e) {}
+  applyNight(night);
+  if (nightBtn) nightBtn.addEventListener('click', () => { night = !night; try { localStorage.setItem('flamo-night', night ? '1' : '0'); } catch (e) {} applyNight(night); });
   api('GET', '/api/auth/me').then(r => { S.user = (r.json && r.json.user) || null; return load(true); });
   // وضع التدريب على هالجهاز: إذا انطفى وإحنا بالتدريب → فعلي. إذا اشتغل → خيار التدريب بيظهر.
   let last = trainingOn();

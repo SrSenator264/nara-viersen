@@ -63,3 +63,59 @@ textarea.sd-in{min-height:70px;resize:vertical}
 .vat-bar{height:14px;border-radius:999px;background:#eef1f3;margin:8px 0;overflow:hidden}.vat-bar i{display:block;height:100%;border-radius:999px}
 .vat-bar i.g{background:#16a34a}.vat-bar i.b{background:#2563eb}.vat-bar i.x{background:#94a3b8}
 .vat-nums{display:flex;gap:16px;color:#5a6670;font-size:.9rem}
+
+/* ── فلامو المزاجي ── */
+.sum-main{align-items:center}.sum-main>div:last-child{display:flex;flex-direction:column;align-items:flex-end;margin-inline-start:auto}
+.fl-mood{position:relative;width:68px;height:78px;flex:none}.fl-mood img{height:78px;width:auto;display:block;margin:0 auto;transform-origin:50% 100%}
+.fl-mood.happy img{animation:flBounce 2.4s ease-in-out infinite}.fl-mood.worried img{animation:flShake 2.8s ease-in-out infinite}.fl-mood.sleeping img{animation:flBreathe 3.4s ease-in-out infinite}
+.fl-mood .zz{position:absolute;top:-4px;inset-inline-end:-10px;font-weight:900;font-size:.85rem;color:#a16207;animation:flZ 2.6s ease-in-out infinite}
+.fl-mood .sp{position:absolute;top:-6px;inset-inline-start:-6px;animation:flBounce 1.6s ease-in-out infinite}
+@keyframes flBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes flShake{0%,90%,100%{transform:rotate(0)}93%{transform:rotate(-3deg)}96%{transform:rotate(3deg)}}
+@keyframes flBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+@keyframes flZ{0%{opacity:0;transform:translateY(6px)}50%{opacity:1}100%{opacity:0;transform:translateY(-8px)}}
+
+/* ── حركة خفيفة ── */
+.card{animation:cardIn .35s ease both}.card:nth-child(2){animation-delay:.04s}.card:nth-child(3){animation-delay:.08s}.card:nth-child(4){animation-delay:.12s}.card:nth-child(5){animation-delay:.16s}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.sd-btn.wobble{animation:wob .35s ease}
+@keyframes wob{0%,100%{transform:none}25%{transform:translateX(-4px) rotate(-1deg)}75%{transform:translateX(4px) rotate(1deg)}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ── بطاقات العدّ بالصور ── */
+.den-grid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+.den{position:relative;flex-direction:column;align-items:center;justify-content:center;padding:10px 6px 8px;cursor:pointer;user-select:none;touch-action:manipulation;transition:transform .1s}
+.den:active{transform:scale(.95)}.den:focus-visible{outline:3px solid #286bc1;outline-offset:2px}
+.den .face{display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;text-shadow:0 1px 2px #0005}
+.den.note .face{width:96px;height:48px;border-radius:6px;border:2px solid #ffffff90;box-shadow:inset 0 0 0 3px #ffffff40,0 2px 5px #0002;font-size:1.05rem}
+.den.coin .face{width:54px;height:54px;border-radius:50%;border:4px solid #ffffff70;box-shadow:inset 0 0 0 2px #0002,0 2px 5px #0002;font-size:.85rem}
+.d50000 .face{background:linear-gradient(135deg,#9333ea,#6b21a8)}.d20000 .face{background:linear-gradient(135deg,#d4a017,#a16207)}.d10000 .face{background:linear-gradient(135deg,#22c55e,#15803d)}
+.d5000 .face{background:linear-gradient(135deg,#fb923c,#c2410c)}.d2000 .face{background:linear-gradient(135deg,#38bdf8,#1d4ed8)}.d1000 .face{background:linear-gradient(135deg,#f87171,#b91c1c)}.d500 .face{background:linear-gradient(135deg,#a8a29e,#57534e)}
+.d200 .face{background:radial-gradient(circle at 30% 30%,#e5e7eb,#9ca3af 55%,#d4a017 56%)}.d100 .face{background:radial-gradient(circle at 30% 30%,#fde68a,#d4a017 55%,#9ca3af 56%)}
+.d50 .face,.d20 .face,.d10 .face{background:radial-gradient(circle at 30% 30%,#fde68a,#ca8a04)}
+.d5 .face,.d2 .face,.d1 .face{background:radial-gradient(circle at 30% 30%,#fdba74,#b45309)}
+.den .cnt{position:absolute;top:4px;inset-inline-end:6px;min-width:26px;height:26px;border-radius:13px;background:#1d2327;color:#fff;font-size:.95rem;display:flex;align-items:center;justify-content:center;padding:0 7px}
+.den .cnt:not(:empty){}.den .minus{margin-top:6px;width:44px;height:30px;border-radius:8px;border:1px solid #ccd3d8;background:#fff;font-weight:800;font-size:1.1rem;cursor:pointer}
+
+/* ── شريط الأيام ── */
+.wk{display:flex;gap:8px;width:100%;overflow-x:auto;padding-bottom:4px}
+.wk-d{flex:1;min-width:52px;border:2px solid transparent;border-radius:14px;padding:6px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;font-family:inherit;color:#17202a;background:#eef1f3}
+.wk-d small{font-size:.72rem;color:#5a6670}.wk-d b{font-size:1.15rem}
+.wk-d.closed{background:#dcfce7}.wk-d.open{background:#fef3c7}.wk-d.diff{background:#fee2e2}.wk-d.empty{background:#f1f5f9;opacity:.75}
+.wk-d.sel{border-color:#1d2327;box-shadow:0 3px 10px #17202a26}
+
+/* ── رموز موحّدة ── */
+.ic{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:color-mix(in srgb,var(--c) 18%,transparent);font-style:normal;margin-inline-end:8px;font-size:.95rem;vertical-align:middle}
+
+/* ── وضع ليلي ── */
+body.night{background:#0f1419;color:#e6edf3}
+body.night .sd-head,body.night .card,body.night .tile,body.night .den,body.night .sd-in,body.night .sd-sel{background:#18202a;border-color:#2a3644;color:#e6edf3}
+body.night .card.warn{background:#3a2e0e;border-color:#8a6d1a}body.night .card.empty{background:#141b23}
+body.night .sd-btn.ghost,body.night .sd-btn.sm,body.night .den .minus{background:#18202a;color:#e6edf3;border-color:#2a3644}
+body.night .sd-btn:not(.ghost):not(.go):not(.amber){background:#2a3644}
+body.night .muted,body.night .row.sub span,body.night .tile span,body.night .sum-main span,body.night .vat-nums,body.night .empty-day,body.night .wk-d small{color:#9fb0c0}
+body.night .row,body.night .vat-item{border-color:#2a3644}.body.night .vat-bar,body.night .vat-bar{background:#2a3644}
+body.night .sd-chip{background:#2a3644;color:#e6edf3}body.night .sd-chip.green{background:#14532d;color:#bbf7d0}body.night .sd-chip.amber{background:#713f12;color:#fde68a}
+body.night .wk-d{color:#e6edf3;background:#2a3644}body.night .wk-d.closed{background:#14532d}body.night .wk-d.open{background:#713f12}body.night .wk-d.diff{background:#7f1d1d}body.night .wk-d.sel{border-color:#e6edf3}
+body.night .den .cnt{background:#e6edf3;color:#0f1419}body.night .fl-mood .zz{color:#fde68a}
+body.night .msg.err{background:#7f1d1d;color:#fecaca}body.night .msg.good{background:#14532d;color:#bbf7d0}

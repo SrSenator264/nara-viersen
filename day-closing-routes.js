@@ -33,6 +33,13 @@ function handle(req, res, url, ctx) {
     return true;
   }
 
+  if (p === '/api/day-closing/week' && m === 'GET') {
+    const end = q('end') || bizDay.today();
+    if (!ISO.test(end)) return reply(res, 400, { error: 'Ungültiger Tag.', code: 'BAD_DAY' }), true;
+    reply(res, 200, { ok: true, days: DC.weekStrip(readAdminData(), end, 7) });
+    return true;
+  }
+
   if (p === '/api/day-closing/list' && m === 'GET') {
     const limit = Math.min(500, Math.max(1, Number(q('limit')) || 60));
     const rows = (readAdminData().dayClosings || []).filter(s => s && s.mode !== 'TRAINING').sort((a, b) => (a.closedAt < b.closedAt ? 1 : -1)).slice(0, limit).map(summary);
