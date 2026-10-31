@@ -17,7 +17,7 @@
 |---|---|
 | دليل الحسابات + دفتر القيود + الفترات | `accounting.html/js`، `/api/accounting/accounts`, `journal-entries`, `periods`, `periods/close` |
 | سجل المبيعات (محلي / منصات) | `sales-ledger.js`، `/api/reports/sales-ledger` |
-| تسكيرة اليوم | `kasse-settlement.js`، `settlement-ledger.js` |
+| تقفيلة اليوم | `kasse-settlement.js`، `settlement-ledger.js` |
 | الصندوق والبنك | `cashbook`، `bank-transactions` (+csv, match)، `banking.html`، `qonto-sync.js`، `bank-pay.js` |
 | الفواتير الواردة (Belege) | `belege`, `belege/review`, `belege/post`, `invoice-extract`، OCR محلي |
 | ضريبة وأصول وتكاليف | `tax-summary`, `fixed-assets`, `auto-post-cogs`, `auto-post-platform-commissions`, `platform-settlement` |
@@ -37,7 +37,7 @@
 - ناتج المرحلة: ملف قصير `plans/ACCOUNTING_AUDIT.md` بالفجوات.
 
 ### المرحلة 1: المبيعات اليومية والصندوق (Kassenbuch)
-- تسكيرة اليوم تطلع Z-Bericht واحد واضح: نقدي / كارت / تحويل، لكل قناة ولكل علامة (Flamo، Loco Chicken، Just Smashed).
+- تقفيلة اليوم تطلع Z-Bericht واحد واضح: نقدي / كارت / تحويل، لكل قناة ولكل علامة (Flamo، Loco Chicken، Just Smashed).
 - Kassenbuch يومي من مبيعات المحل + مصاريف نقدية + إيداعات، مع رصيد مطابق للدرج الفعلي.
 - ربط رقم معاملة الـ TSE بكل بيع (بعد وصول Swissbit، حسب `PLAN_TSE_SWISSBIT.md`).
 - طلبات التدريب ما بتدخل أبداً.

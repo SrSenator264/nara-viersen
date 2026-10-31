@@ -217,7 +217,7 @@ async function load(){
     for(const o of all){if(autoDone.has(o.id)||plat(o)==='NARA'||plat(o)==='WEB'||o.isTest||cancelled(o)||stageOf(o)==='DONE')continue;if(S(o.payment&&o.payment.method).toUpperCase()==='CASH')continue;const due=Date.parse(o.dueAt||'')||when(o)+60*60000;if(Date.now()-due<AUTO_DONE_MIN*60000)continue;autoDone.add(o.id);fetch('/api/live-orders/stage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:o.id,stage:'DONE'})}).then(r=>{if(r.ok){o.liveStage='DONE';o.status='COMPLETED'}}).catch(()=>{})}
     // طلبات التجربة اللي انلغت (NARA-Demo-Loeschen) ما بتطلع أبداً
     orders=all.filter(o=>plat(o)!=='NARA'&&!o.liveArchivedAt&&!(o.isTest&&cancelled(o))&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<3*3600000));
-    // بعد تسكيرة اليوم (5 الصبح) كل طلبات امبارح بتروح عالأرشيف، حتى لو المنصة ما سكّرتها. بس طلب عمرو أقل من 3 ساعات بيضل.
+    // بعد تقفيلة اليوم (5 الصبح) كل طلبات امبارح بتروح عالأرشيف، حتى لو المنصة ما سكّرتها. بس طلب عمرو أقل من 3 ساعات بيضل.
     lastOk=Date.now();
   }catch(e){}
   render();

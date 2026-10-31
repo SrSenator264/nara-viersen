@@ -26,7 +26,7 @@
     { k: 'delivery', f: 'driver-app-v2.html', i: '📦', g: 'delivery', n: L('Lieferaufträge', 'طلبات التوصيل', 'Delivery orders') },
     { k: 'delivery-print', f: 'delivery-print.html', i: '🖨️', g: 'delivery', n: L('Lieferzettel drucken', 'طباعة طلب توصيل', 'Print delivery slip') },
     { k: 'sales', f: 'sales.html', i: '💶', g: 'money', n: L('Umsätze', 'المبيعات', 'Sales') },
-    { k: 'close', f: 'kasse-settlement.html', i: '📊', g: 'money', n: L('Tagesabschluss', 'تسكيرة اليوم', 'Daily closing') },
+    { k: 'close', f: 'kasse-settlement.html', i: '📊', g: 'money', n: L('Tagesabschluss', 'تقفيلة اليوم', 'Daily closing') },
     { k: 'accounting', f: 'accounting.html', i: '📚', g: 'money', n: L('Buchhaltung', 'المحاسبة', 'Accounting') },
     { k: 'banking', f: 'banking.html', i: '🏦', g: 'money', n: L('Bank', 'البنك', 'Bank') },
     { k: 'reports', f: 'reports.html', i: '📈', g: 'money', n: L('Gewinn & Verlust', 'الربح والخسارة', 'Profit & loss') },
