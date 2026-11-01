@@ -26,7 +26,7 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
 <body>
 <main>
   <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h1 data-t="title"></h1><p class="sub" data-t="sub"></p></div><span id="lang-switch"></span></div>
-<div id="restore-owner" hidden style="display:none;margin:14px 0;padding:14px 16px;border-radius:14px;background:#fff3e6;border:1px solid #f5b57a;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>👑 ما في صاحب محل بالنظام. بتقدر ترجّع حسابك صاحب محل (من جهاز المحل بس).</span><button id="restore-owner-btn" type="button" class="primary">👑 رجّعني صاحب المحل</button></div>
+<div id="restore-owner" hidden style="display:none;margin:14px 0;padding:14px 16px;border-radius:14px;background:#fff3e6;border:1px solid #f5b57a;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span id="restore-owner-msg" style="color:#1b2433;font-weight:700">👑 ما في صاحب محل بالنظام. بتقدر ترجّع حسابك صاحب محل (من جهاز المحل بس).</span><button id="restore-owner-btn" type="button" class="primary">👑 رجّعني صاحب المحل</button></div>
   <section><h2 data-t="staff"></h2><div id="team"></div><div class="msg" id="tmsg"></div></section>
   <section><h2 id="inv-h"></h2><p class="sub" id="inv-sub"></p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="pri" id="inv-go"></button><button id="inv-wa" hidden></button><button id="inv-cp" hidden></button></div>
@@ -130,7 +130,7 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
   }
   load();
 })();
-  (function(){var bt=document.getElementById('restore-owner-btn');if(bt)bt.onclick=function(){if(!confirm('رجّع حسابك صاحب محل؟'))return;bt.disabled=true;api('POST','/api/auth/restore-owner',{}).then(function(j){if(j&&j.ok){location.reload()}else{bt.disabled=false;alert((j&&j.error)||'تعذّر')}})}})();
+  (function(){var bt=document.getElementById('restore-owner-btn'),msg=document.getElementById('restore-owner-msg');if(bt)bt.onclick=function(){if(!confirm('رجّع حسابك صاحب محل؟'))return;bt.disabled=true;msg.textContent='⏳ عم يرجّع...';api('POST','/api/auth/restore-owner',{}).then(function(j){if(j&&j.ok){msg.textContent='✅ تم! صرت صاحب المحل. عم يعيد التحميل...';setTimeout(function(){location.reload()},900)}else{bt.disabled=false;msg.textContent='❌ فشل ('+(j&&j.__s)+'): '+((j&&(j.error||j.code))||'ما في رد من السيرفر')}}).catch(function(e){bt.disabled=false;msg.textContent='❌ خطأ: '+(e&&e.message)})}})();
 </script>
 <script src="flamo-home.js?v=20261031a" defer></script></body>
 </html>
