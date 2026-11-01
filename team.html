@@ -26,7 +26,7 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
 <body>
 <main>
   <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap"><div><h1 data-t="title"></h1><p class="sub" data-t="sub"></p></div><span id="lang-switch"></span></div>
-<div id="restore-owner" hidden style="margin:14px 0;padding:14px 16px;border-radius:14px;background:#fff3e6;border:1px solid #f5b57a;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>👑 ما في صاحب محل بالنظام. بتقدر ترجّع حسابك صاحب محل (من جهاز المحل بس).</span><button id="restore-owner-btn" type="button" class="primary">👑 رجّعني صاحب المحل</button></div>
+<div id="restore-owner" hidden style="display:none;margin:14px 0;padding:14px 16px;border-radius:14px;background:#fff3e6;border:1px solid #f5b57a;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span>👑 ما في صاحب محل بالنظام. بتقدر ترجّع حسابك صاحب محل (من جهاز المحل بس).</span><button id="restore-owner-btn" type="button" class="primary">👑 رجّعني صاحب المحل</button></div>
   <section><h2 data-t="staff"></h2><div id="team"></div><div class="msg" id="tmsg"></div></section>
   <section><h2 id="inv-h"></h2><p class="sub" id="inv-sub"></p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="pri" id="inv-go"></button><button id="inv-wa" hidden></button><button id="inv-cp" hidden></button></div>
@@ -58,7 +58,7 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
   opt($('n-role'),'CASHIER');
   var team=[],cfg=null,drivers=[];
   function load(){
-    api('GET','/api/auth/team').then(function(j){team=j.team||[];ME=j.me||{};renderTeam();var ro=document.getElementById('restore-owner');if(ro)ro.hidden=!ME.canRestoreOwner;return api('GET','/api/delivery/config')}).then(function(j){cfg=j.config;drivers=j.drivers||[];renderPay()});
+    api('GET','/api/auth/team').then(function(j){team=j.team||[];ME=j.me||{};renderTeam();var ro=document.getElementById('restore-owner');if(ro)ro.style.display=ME.canRestoreOwner?"flex":"none";return api('GET','/api/delivery/config')}).then(function(j){cfg=j.config;drivers=j.drivers||[];renderPay()});
   }
   var ME={};
   function renderTeam(){
