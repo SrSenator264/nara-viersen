@@ -1,6 +1,8 @@
 # Plan: Order correction ("✏️ تصحيح") from the Sales page
 
-Status: planned, to start after go-live (1 Nov 2026), in a fresh single-topic session. Suggested model: Sonnet (review at the end).
+Status: planned. PRIORITY RAISED (2026-11-01): Storno is legally required, so this must be done BEFORE the cashier is treated as a legal device (same gate as PLAN_TSE_SWISSBIT items 1-4). Start in a fresh single-topic session. Suggested model: Sonnet (Opus for the tax-sensitive review).
+
+Until it is built: staff write every mistaken order by hand (order no., what went wrong, date) and delete nothing. Omar asks the accountant / Finanzamt what is accepted in the transition period.
 
 ## Why
 A paid cashier order sometimes needs a fix. After payment (and once the Swissbit TSE is connected) the transaction is closed and cannot be edited. The correct way is a Storno of the old order plus a new order with the fixed content.
@@ -22,6 +24,12 @@ Edge cases
 - Cannot correct an already cancelled/STORNIERT order, nor correct the same order twice.
 - Platform orders (Lieferando, Uber Eats, Loco, ...) get no button; they are corrected on the platform.
 - If the business day was already closed (تقفيلة), the button shows a warning and does not run (proposal, can be changed).
+
+6. Every cart clear / line removal is logged (who, when, what was removed), in the audit log (today the clear-cart handler in kasse-domain.js deletes without a trace).
+7. After the order was sent to the kitchen or paid, cancelling is only possible as Storno with a mandatory reason (no silent delete).
+8. "فحص التطابق" page: compares cashier records with the TSE (count, amounts, signature numbers) and shows differences; usable when an inspector prints from the TSE USB. Needs the real TSE connected.
+
+Booklet: once 1-4 work, add the Storno page to anleitung.html (3 languages), bump VER/DATE, export a new dated German PDF (see PLAN_CASHIER_BOOKLET.md).
 
 Not blockers
 - Real TSE signing of the Storno and the new order (separate plan: PLAN_TSE_SWISSBIT.md, when the USB TSE is connected).
