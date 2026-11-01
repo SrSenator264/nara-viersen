@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="de" dir="ltr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<script src="nara-lang.js?v=20261009b" data-section="kasse"></script>
+<title>Flamo · Kassen-Anleitung</title>
+<style>
+@font-face{font-family:LalezarX;src:url(fonts/lalezar.woff) format('woff');font-weight:400}
+@font-face{font-family:CairoX;src:url(fonts/cairo-600.woff) format('woff');font-weight:600}
+@font-face{font-family:CairoX;src:url(fonts/cairo-700.woff) format('woff');font-weight:700}
+@font-face{font-family:CairoX;src:url(fonts/cairo-800.woff) format('woff');font-weight:800}
+:root{--paper:#fff4de;--ink:#2b2118;--orange:#ff7a1a;--yellow:#ffc233;--red:#ff4d2e;--green:#3fae5a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{font-family:CairoX,system-ui,'Noto Color Emoji',sans-serif;font-weight:700;color:var(--ink);background:var(--paper);background-image:radial-gradient(#f3dcb2 2px,transparent 2.5px);background-size:34px 34px}
+.bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 14px;background:var(--ink);color:#fff}
+.bar b{font-family:LalezarX;font-weight:400;font-size:24px;color:var(--orange)}
+.bar .tools{display:flex;gap:6px;flex-wrap:wrap}
+.bar button{font:inherit;font-size:15px;border:2px solid #fff6;background:#3a2c22;color:#fff;border-radius:12px;padding:6px 12px;cursor:pointer}
+.bar button.on{background:var(--orange);border-color:var(--orange)}
+.wrap{max-width:600px;margin:0 auto;padding:14px 14px 100px}
+.dots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:2px 0 12px}
+.dots i{width:14px;height:14px;border-radius:50%;background:#e6cfa6;border:2px solid var(--ink);cursor:pointer}
+.dots i.on{background:var(--orange)}
+.card{position:relative;background:#fffaf0;border:4px solid var(--ink);border-radius:26px;box-shadow:6px 6px 0 var(--ink);padding:16px}
+.head{display:flex;align-items:center;gap:12px}
+.badge{flex:none;width:64px;height:64px;border-radius:50%;background:var(--orange);color:#fff;border:4px solid var(--ink);box-shadow:4px 4px 0 var(--ink);display:flex;align-items:center;justify-content:center;font-family:LalezarX;font-weight:400;font-size:40px;line-height:1.1}
+h1{font-family:LalezarX;font-weight:400;font-size:clamp(28px,7.4vw,42px);line-height:1.2}
+.art{margin:12px -6px 4px}
+.art svg{display:block;width:100%;height:auto;direction:ltr}
+.row{display:flex;align-items:flex-end;gap:12px;margin-top:6px}
+.flamo{flex:none;width:96px;height:auto;filter:drop-shadow(4px 5px 0 rgba(43,33,24,.18))}
+.body{font-size:19px;line-height:1.65;font-weight:700}
+.body ol{margin:8px 0 0;padding-inline-start:24px}
+.body li{margin:4px 0}
+.tip{margin-top:12px;background:#e9f7ec;border:3px dashed var(--green);border-radius:18px;padding:12px 14px;color:#1f5e30;font-size:17px;line-height:1.55}
+.pfoot{display:none}
+.nav{position:fixed;inset-inline:0;bottom:0;z-index:5;display:flex;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--ink)}
+.nav button{flex:1;font:inherit;font-size:20px;border:0;border-radius:16px;padding:12px;background:var(--orange);color:#fff;cursor:pointer}
+.nav button[disabled]{opacity:.35}
+.nav .cnt{align-self:center;color:#fff;font-size:16px;min-width:64px;text-align:center}
+@page{size:A5;margin:8mm}
+body.print{background:#fff;background-image:none}
+body.print .bar,body.print .nav,body.print .dots{display:none}
+body.print .wrap{max-width:none;padding:0}
+body.print .card{box-shadow:none;border-width:3px;page-break-after:always;break-after:page;margin:0;border-radius:18px}
+body.print .card:last-child{page-break-after:auto;break-after:auto}
+body.print .pfoot{display:block;margin-top:10px;text-align:center;font-size:12px;color:#8a6a4a;direction:ltr}
+body.print .flamo{width:72px}
+body.print .body{font-size:15px}
+body.print .tip{font-size:13px}
+body.print h1{font-size:30px}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="6"/></filter>
+<filter id="wob2"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4"/></filter>
+</defs></svg>
+<div id="app"></div>
+<script>
+'use strict';
+const VER='1.0', DATE='01.11.2026';
+const INK='#2b2118';
+const LANGS=[['de','Deutsch'],['ar','العربية'],['en','English']];
+const UI={
+ de:{title:'Kassen-Anleitung',prev:'Zurück',next:'Weiter',pdf:'🖨️ PDF',here:'Hier tippen!',doc:'Kassen-Anleitung'},
+ ar:{title:'دليل الكاشير',prev:'السابق',next:'التالي',pdf:'🖨️ PDF',here:'اضغط هون!',doc:'دليل الكاشير'},
+ en:{title:'Till guide',prev:'Back',next:'Next',pdf:'🖨️ PDF',here:'Tap here!',doc:'Till guide'}
+};
+// Beschriftungen genau wie in der echten Kasse
+const X={
+ de:{cashier:'Kasse',local:'🍽️ Vor Ort / Tisch',pickup:'🛍️ Abholung',delivery:'🛵 Lieferung',table:'Tisch',openOrders:'Offene Aufträge',newOrder:'Neuer Auftrag',search:'Artikel suchen …',currentOrder:'Aktueller Auftrag',total:'Gesamt',cash:'💶 Bar',card:'💳 Karte',addToOrder:'Zum Auftrag hinzufügen',itemNote:'Notiz für diesen Artikel (optional)',openMaps:'Google Maps öffnen',name:'Name',phone:'Telefonnummer',street:'Straße',house:'Hausnummer',postal:'PLZ',city:'Ort',deliveryDetails:'Lieferdaten',fee:'Liefergebühr',single:'Einzeln',asMenu:'Als Menü',drink:'🥤 Getränk',sauce:'🫙 Sauce',required:'Pflicht',extra:'➕ Extra',price:'Preis',alone:'Eigene Zeile',exTxt:'z. B. extra Tomate',payTitle:'Bezahlen',toPay:'Zu zahlen',discount:'Rabatt',none:'Kein Rabatt',split:'🧾 Rechnung teilen',noSplit:'Nicht teilen',equal:'Gleich teilen',byItem:'Nach Artikeln',mixed:'🔀 Bar + Karte',given:'Gegeben',change:'Rückgeld',payAll:'Bezahlen',done:'Bezahlt ✓',kitchenT:'Küche',customerT:'Kunde',oTitle:'Offene Bestellungen',stNew:'Neu',stPrep:'Wird zubereitet',stReady:'Fertig',stDriver:'Beim Fahrer',payNow:'Jetzt kassieren',closeTitle:'Tagesabschluss 📊',opening:'Anfangsbestand',cashSales:'Barumsatz',deposits:'Einlagen',withdrawals:'Entnahmen',expected:'Soll',counted:'Gezählt',diff:'Differenz',ok:'Stimmt ✅',leave:'In der Kasse lassen',takeOut:'Entnahme',countTill:'🧮 Kasse zählen',short:['Ausweis prüfen','Chef anrufen','Kasse zeigen','Nichts löschen'],ins:'Finanzamt'},
+ ar:{cashier:'الكاشير',local:'🍽️ بالمحل / طاولة',pickup:'🛍️ استلام',delivery:'🛵 توصيل',table:'طاولة',openOrders:'الطلبات المفتوحة',newOrder:'طلب جديد',search:'دوّر على صنف …',currentOrder:'الطلب الحالي',total:'المجموع',cash:'💶 كاش',card:'💳 كرت',addToOrder:'زيد عالطلب',itemNote:'ملاحظة عهالصنف (اختياري)',openMaps:'افتح Google Maps',name:'اسم الزبون',phone:'رقم التلفون',street:'الشارع',house:'رقم البيت',postal:'PLZ',city:'المدينة',deliveryDetails:'معلومات التوصيل',fee:'أجرة التوصيل',single:'لحالو',asMenu:'منيو',drink:'🥤 مشروب',sauce:'🫙 صوص',required:'إجباري',extra:'➕ Extra',price:'السعر',alone:'سطر لحاله',exTxt:'مثلاً: بندورة زيادة',payTitle:'الدفع',toPay:'المطلوب',discount:'خصم',none:'بلا خصم',split:'🧾 قسّم الفاتورة',noSplit:'بلا تقسيم',equal:'بالتساوي',byItem:'حسب الأصناف',mixed:'🔀 كاش + كرت',given:'أعطى',change:'الباقي إلو',payAll:'ادفع',done:'اندفع ✓',kitchenT:'المطبخ',customerT:'نسخة الزبون',oTitle:'الطلبات المفتوحة',stNew:'جديد',stPrep:'عم يتجهّز',stReady:'جاهز',stDriver:'مع السواق',payNow:'دفع الآن',closeTitle:'تقفيلة اليوم 📊',opening:'رصيد البداية',cashSales:'مبيعات الكاش',deposits:'إيداعات',withdrawals:'مسحوبات',expected:'المتوقع',counted:'المعدود',diff:'الفرق',ok:'مظبوط ✅',leave:'بخلّي بالصندوق لبكرة',takeOut:'بسحب',countTill:'🧮 عدّ الصندوق',short:['شوف الهوية','اتصل بالمدير','وريه الكاسة','لا تمسح شي'],ins:'Finanzamt'},
+ en:{cashier:'Cashier',local:'🍽️ Dine-in / Table',pickup:'🛍️ Pickup',delivery:'🛵 Delivery',table:'Table',openOrders:'Open orders',newOrder:'New order',search:'Search item …',currentOrder:'Current order',total:'Total',cash:'💶 Cash',card:'💳 Card',addToOrder:'Add to order',itemNote:'Note for this item (optional)',openMaps:'Open Google Maps',name:'Name',phone:'Phone number',street:'Street',house:'House number',postal:'Postcode',city:'City',deliveryDetails:'Delivery details',fee:'Delivery fee',single:'Single',asMenu:'As menu',drink:'🥤 Drink',sauce:'🫙 Sauce',required:'Required',extra:'➕ Extra',price:'Price',alone:'Own line',exTxt:'e.g. extra tomato',payTitle:'Payment',toPay:'To pay',discount:'Discount',none:'No discount',split:'🧾 Split bill',noSplit:'No split',equal:'Split equally',byItem:'By items',mixed:'🔀 Cash + card',given:'Given',change:'Change',payAll:'Pay',done:'Paid ✓',kitchenT:'Kitchen',customerT:'Customer copy',oTitle:'Open orders',stNew:'New',stPrep:'Preparing',stReady:'Ready',stDriver:'With driver',payNow:'Pay now',closeTitle:'End of day 📊',opening:'Opening float',cashSales:'Cash sales',deposits:'Deposits',withdrawals:'Withdrawals',expected:'Expected',counted:'Counted',diff:'Difference',ok:'Balanced ✅',leave:'Leave in the till',takeOut:'Take out',countTill:'🧮 Count the till',short:['Check ID','Call the manager','Show the till','Delete nothing'],ins:'Tax office'}
+};
+
+/* ---------- SVG-Helfer (Skizzen-Stil) ---------- */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const wob=s=>`<g filter="url(#wob)">${s}</g>`;
+const rect=(x,y,w,h,f='#fff',r=12,sw=3,ex='')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${f}" stroke="${INK}" stroke-width="${sw}" ${ex}/>`;
+const txt=(x,y,s,sz=22,f=INK,a='middle',font='CairoX',w=700)=>`<text ${a==='middle'&&/[\u0600-\u06FF]/.test(s)?'direction="rtl" ':''}x="${x}" y="${y}" font-size="${sz}" fill="${f}" text-anchor="${a}" font-family="${font}" font-weight="${w}">${esc(s)}</text>`;
+const chip=(x,y,w,h,s,sel,sz=17,f)=>wob(rect(x,y,w,h,f||(sel?'#ff7a1a':'#ffe7bf'),h/2,3))+txt(x+w/2,y+h/2+sz*0.35,s,sz,sel?'#fff':INK);
+const ring=(x,y,w,h,r=16)=>`<g filter="url(#wob2)"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="none" stroke="#ff4d2e" stroke-width="6"/></g>`;
+const num=(n,x,y)=>`<circle cx="${x}" cy="${y}" r="17" fill="#ff4d2e" stroke="${INK}" stroke-width="3"/>`+txt(x,y+7,n,20,'#fff');
+const sticky=(x,y,w,h,s,tx)=>`<g filter="url(#wob2)"><path d="M${x} ${y}H${tx-24}L${tx} ${y-28}L${tx+24} ${y}H${x+w}V${y+h}H${x}Z" fill="#ffd84d" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/></g>`+txt(x+w/2,y+h/2+11,s,30,INK,'middle','LalezarX',400);
+const bar=(x,y,w,c='#cdbb9e')=>`<path d="M${x} ${y}h${w}" stroke="${c}" stroke-width="8" stroke-linecap="round"/>`;
+
+function shell(L,x,body){
+ const lg=[['de','Deutsch',452],['ar','العربية',580],['en','English',708]];
+ return `<svg viewBox="0 0 900 640" xmlns="http://www.w3.org/2000/svg" direction="ltr">`+
+ wob(`<rect x="48" y="44" width="820" height="560" rx="46" fill="#3a2c22" stroke="${INK}" stroke-width="8"/><rect x="70" y="66" width="776" height="516" rx="24" fill="#fffaf0" stroke="${INK}" stroke-width="5"/><rect x="70" y="66" width="776" height="84" rx="24" fill="#1d2327"/><rect x="70" y="106" width="776" height="44" fill="#1d2327"/><rect x="70" y="66" width="776" height="516" rx="24" fill="none" stroke="${INK}" stroke-width="5"/>`)+
+ wob(lg.map(([c,n,px])=>`<rect x="${px}" y="88" width="118" height="42" rx="12" fill="${c===L?'#ff7a1a':'#3a444a'}" stroke="#fff" stroke-width="2"/>`).join(''))+
+ lg.map(([c,n,px])=>txt(px+59,117,n,c==='ar'?24:22,'#fff')).join('')+
+ txt(104,124,'Flamo',42,'#ff7a1a','start','LalezarX',400)+txt(236,124,x.cashier,24,'#fff','start')+
+ body+`</svg>`;
+}
+function skel(op=1){
+ let s=`<g opacity="${op}">`;
+ [100,242,384].forEach(px=>s+=wob(rect(px,176,130,46,'#ffe7bf',14)));
+ for(const py of [250,396])for(const px of [100,242,384])s+=wob(rect(px,py,128,130,'#fff0d6',14))+`<circle cx="${px+64}" cy="${py+50}" r="22" fill="#ffc233" stroke="${INK}" stroke-width="3"/>`+bar(px+26,py+100,76,INK);
+ s+=wob(rect(540,262,280,266,'#fff',16))+bar(562,296,160)+bar(562,332,120)+bar(562,368,140)+wob(rect(556,462,118,50,'#3fae5a',14)+rect(686,462,118,50,'#3b82c4',14));
+ return s+'</g>';
+}
+const SC={
+ lang:(L,x)=>shell(L,x,skel()+ring(442,78,396,64)+sticky(520,176,316,70,UI[L].here,639)),
+ type:(L,x)=>shell(L,x,[['local',96],['pickup',342],['delivery',588]].map(([k,px],i)=>chip(px,170,232,66,x[k],i===0,22)).join('')+num(1,106,176)+
+  txt(96,288,x.table,24,INK,'start')+wob(rect(214,256,130,52,'#fff',12))+txt(279,291,'5  ▾',26)+ring(206,250,146,64)+num(2,214,256)+
+  wob(rect(96,330,420,52,'#fff',12))+txt(120,364,x.openOrders+'  ▾',22,INK,'start')+wob(rect(534,330,240,52,'#3a444a',12))+txt(654,364,x.newOrder,22,'#fff')+ring(526,324,256,64)+num(3,534,330)+
+  `<g opacity=".35">`+[96,334,572].map(px=>wob(rect(px,420,224,120,'#fff0d6',14))).join('')+`</g>`),
+ delivery:(L,x)=>shell(L,x,wob(rect(96,168,724,396,'#fff',16))+txt(116,208,x.deliveryDetails,26,INK,'start')+wob(rect(560,182,240,40,'#3b82c4',12))+txt(680,209,x.openMaps,17,'#fff')+
+  [[x.name,116,240],[x.phone,470,240],[x.street,116,320],[x.house,470,320],[x.postal,116,400],[x.city,470,400]].map(([l,px,py])=>txt(px,py,l,16,'#7a6a58','start')+wob(rect(px,py+8,330,40,'#fffaf0',10,2))).join('')+
+  ring(462,244,346,52)+ring(108,404,338,52)+wob(rect(116,478,480,50,'#d9f2df',25,3))+txt(356,511,'🛵 '+x.fee+' ✓',22,'#1f5e30')),
+ items:(L,x)=>shell(L,x,['🍔','🍟','🥤','🍰'].map((e,i)=>chip(96+i*120,168,108,46,e,i===0,24)).join('')+wob(rect(96,226,424,44,'#fff',12))+txt(112,256,x.search,19,'#a8977f','start')+
+  [0,1,2].map(i=>[0,1].map(j=>wob(rect(96+i*136,288+j*136,124,124,'#fff0d6',14))+txt(158+i*136,350+j*136,['🍔','🍗','🍟','🥤','🧆','🍰'][j*3+i],52)+bar(122+i*136,396+j*136,72,INK)).join('')).join('')+
+  ring(228,282,140,136)+txt(344,310,'👆',48)+
+  wob(rect(540,170,280,392,'#fff',16))+txt(680,204,x.currentOrder,20)+txt(572,262,'1×  🍔',26,INK,'start')+bar(566,282,230)+txt(572,500,x.total,22,INK,'start')+bar(700,496,90,INK)+wob(rect(556,516,118,36,'#3fae5a',12)+rect(686,516,118,36,'#3b82c4',12))),
+ dialog:(L,x)=>shell(L,x,`<rect x="70" y="150" width="776" height="432" fill="#000" opacity=".35"/>`+wob(rect(150,162,616,404,'#fff',22,4))+txt(196,222,'🍔',44)+bar(236,212,330,INK)+txt(730,214,'✕',26)+
+  chip(176,240,270,58,x.single,false,24)+chip(466,240,270,58,x.asMenu,true,24)+ring(458,234,286,70)+
+  txt(176,330,x.drink,18,INK,'start')+txt(736,330,x.required,16,'#ff4d2e','end')+[0,1,2].map(i=>wob(rect(176+i*120,340,108,52,i===0?'#d9f2df':'#fffaf0',12))+txt(230+i*120,376,['🥤','🧃','☕'][i],30)).join('')+txt(228,372,'✓',18,'#1f5e30','start')+
+  txt(176,424,x.sauce,18,INK,'start')+[0,1,2].map(i=>wob(rect(176+i*120,432,108,44,i===0?'#d9f2df':'#fffaf0',12))+txt(230+i*120,462,'🫙',24)).join('')+
+  wob(rect(176,486,560,32,'#fffaf0',10,2))+txt(190,509,x.itemNote,14,'#a8977f','start')+
+  `<circle cx="196" cy="544" r="14" fill="#ffe7bf" stroke="${INK}" stroke-width="3"/>`+txt(196,551,'−',22)+txt(236,552,'1',24)+`<circle cx="276" cy="544" r="14" fill="#ffe7bf" stroke="${INK}" stroke-width="3"/>`+txt(276,551,'+',22)+wob(rect(320,522,416,44,'#ff7a1a',14))+txt(528,552,x.addToOrder,22,'#fff')),
+ extra:(L,x)=>shell(L,x,wob(rect(96,170,360,392,'#fff',16))+txt(276,204,x.currentOrder,20)+txt(116,256,'1×  🍔',24,INK,'start')+bar(112,274,320)+txt(116,312,'2×  🍟',24,INK,'start')+bar(112,330,320)+
+  wob(rect(116,440,320,56,'#ffd84d',14))+txt(276,477,x.extra,26)+ring(108,432,336,72)+
+  wob(rect(480,170,340,392,'#fff',16))+txt(650,212,x.extra,26)+txt(500,258,x.price,16,'#7a6a58','start')+wob(rect(500,266,300,44,'#fffaf0',10,2))+txt(516,297,'1,00 €',22,INK,'start')+
+  txt(500,342,x.exTxt,16,'#a8977f','start')+wob(rect(500,350,300,44,'#fffaf0',10,2))+chip(500,412,140,44,x.alone,true,17)+chip(660,412,140,44,'→ 🍔',false,20)+wob(rect(500,490,300,48,'#ff7a1a',14))+txt(650,522,x.addToOrder,20,'#fff')),
+ cart:(L,x)=>shell(L,x,wob(rect(170,164,560,402,'#fff',18))+txt(450,200,x.currentOrder,22)+
+  ['🍔','🍟','🥤'].map((e,i)=>{const y=236+i*62;return txt(206,y+10,e,34)+bar(240,y+8,110,INK)+[[430,'✎'],[480,'−'],[560,'+'],[620,'✕']].map(([cx,s])=>`<circle cx="${cx}" cy="${y+2}" r="17" fill="${s==='✕'?'#ffd0c8':'#ffe7bf'}" stroke="${INK}" stroke-width="3"/>`+txt(cx,y+10,s,22)).join('')+txt(520,y+10,String(i+1),26)+bar(660,y+8,50,'#cdbb9e');}).join('')+
+  `<path d="M196 410H704" stroke="${INK}" stroke-width="3" stroke-dasharray="8 8"/>`+txt(196,448,x.total,26,INK,'start')+bar(580,442,120,INK)+
+  wob(rect(200,468,240,64,'#3fae5a',16))+txt(320,510,x.cash,26,'#fff')+wob(rect(460,468,240,64,'#3b82c4',16))+txt(580,510,x.card,26,'#fff')+ring(190,458,520,84,20)),
+ pay:(L,x)=>shell(L,x,wob(rect(96,160,724,412,'#fff',20,4))+txt(120,198,x.payTitle,28,INK,'start')+txt(796,198,x.toPay+'  18,50 €',26,'#1f5e30','end')+
+  txt(120,232,x.discount,15,'#7a6a58','start')+chip(120,238,150,36,x.none,true,15)+['10%','12%','20%','−1 €','−2 €','−3 €'].map((s,i)=>chip(278+i*82,238,74,36,s,false,16)).join('')+
+  txt(120,296,x.split,15,'#7a6a58','start')+[x.noSplit,x.equal,x.byItem].map((s,i)=>chip(120+i*176,302,168,38,s,i===0,16)).join('')+
+  [x.cash,x.card,x.mixed].map((s,i)=>chip(120+i*176,356,168,44,s,i===0,19)).join('')+ring(112,350,184,56)+
+  txt(120,442,x.given,16,'#7a6a58','start')+wob(rect(120,448,110,42,'#fffaf0',10,2))+txt(175,478,'20',24)+[5,10,20,50,100].map((v,i)=>chip(246+i*76,452,68,36,v+' €',false,16)).join('')+txt(796,478,x.change+':  1,50 €',22,'#1f5e30','end')+
+  wob(rect(120,506,676,52,'#3fae5a',16))+txt(458,541,x.payAll+' · 18,50 €',26,'#fff')),
+ after:(L,x)=>{
+  const paper=(px,py,t,e,qr)=>wob(`<path d="M${px} ${py}H${px+300}V${py+380}`+Array.from({length:10},(_,i)=>`l-15 ${i%2?-14:14}`).join('')+`L${px} ${py+380}Z" fill="#fff" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`)+txt(px+150,py+50,e+' '+t,28)+[90,128,166].map((o,i)=>bar(px+30,py+o,i%2?150:210,'#cdbb9e')).join('')+(qr?Array.from({length:36},(_,i)=>(i*7+((i/6)|0)*3)%5<2?`<rect x="${px+105+(i%6)*15}" y="${py+230+((i/6)|0)*15}" width="15" height="15" fill="${INK}"/>`:'').join(''):bar(px+30,py+240,160,INK)+bar(px+30,py+280,120,INK));
+  return `<svg viewBox="0 0 900 640" xmlns="http://www.w3.org/2000/svg" direction="ltr">`+wob(rect(290,24,320,70,'#d9f2df',35,4))+txt(450,70,x.done,34,'#1f5e30')+
+   `<g filter="url(#wob2)" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"><path d="M350 100C300 120 250 135 230 160M370 96L350 100L358 84"/><path d="M550 100C600 120 650 135 670 160M530 96L550 100L542 84"/></g>`+
+   paper(80,170,x.kitchenT,'🔥',false)+paper(520,170,x.customerT,'🧾',true)+txt(230,606,'👨‍🍳',44)+txt(670,606,'🙂',44)+`</svg>`;},
+ open:(L,x)=>{
+  const R=L==='ar',dx=R?516:70,card=(y,e,c,st,col,btn)=>wob(rect(dx+14,y,302,btn?98:84,'#fff',14))+txt(dx+36,y+36,e,26,INK,'start')+txt(dx+76,y+34,'#112',22,INK,'start')+chip(dx+136,y+14,170,34,st,false,16,col)+(btn?chip(dx+30,y+56,270,34,x.payNow,true,17,'#3fae5a'):bar(dx+30,y+66,200,'#cdbb9e'));
+  return shell(L,x,skel(.35)+wob(rect(dx,150,330,432,'#f6f7f3',10,4))+txt(dx+165,186,x.oTitle+' · 3',22)+card(204,'🍽️','',x.stNew,'#cfe3f7')+card(302,'🛍️','',x.stPrep,'#ffd7a8')+card(400,'🛵','',x.stDriver,'#d9f2df',true)+ring(dx+8,396,314,110));
+ },
+ close:(L,x)=>shell(L,x,wob(rect(96,164,724,404,'#fff',18))+txt(116,204,x.closeTitle,28,INK,'start')+chip(560,176,240,40,x.countTill,true,18)+
+  [[x.opening,'100,00 €'],[x.cashSales,'250,00 €'],[x.deposits,'0,00 €'],[x.withdrawals,'0,00 €'],[x.expected,'350,00 €']].map(([l,v],i)=>txt(116,258+i*44,l,i===4?22:19,INK,'start')+txt(440,258+i*44,v,i===4?22:19,INK,'end')+(i===4?'':bar(116,270+i*44,324,'#eee0c6'))).join('')+
+  txt(480,258,x.counted,17,'#7a6a58','start')+wob(rect(480,266,320,44,'#fffaf0',10,2))+txt(496,298,'350,00 €',24,INK,'start')+ring(472,260,336,56)+
+  txt(480,344,x.diff,17,'#7a6a58','start')+wob(rect(480,352,320,42,'#d9f2df',21,3))+txt(640,381,'0,00 €  ·  '+x.ok,20,'#1f5e30')+
+  txt(480,428,x.leave,16,'#7a6a58','start')+wob(rect(480,436,150,40,'#fffaf0',10,2))+txt(650,428,x.takeOut,16,'#7a6a58','start')+wob(rect(650,436,150,40,'#fffaf0',10,2))),
+ inspector:(L,x)=>`<svg viewBox="0 0 900 640" xmlns="http://www.w3.org/2000/svg" direction="ltr">`+
+  wob(`<circle cx="190" cy="210" r="70" fill="#ffe0bd" stroke="${INK}" stroke-width="5"/><path d="M110 520C110 400 270 400 270 520Z" fill="#3b82c4" stroke="${INK}" stroke-width="5"/><path d="M118 168C130 110 250 110 262 168C220 150 160 150 118 168Z" fill="${INK}"/>`)+
+  `<circle cx="165" cy="215" r="7" fill="${INK}"/><circle cx="215" cy="215" r="7" fill="${INK}"/><path d="M165 245Q190 262 215 245" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`+
+  wob(rect(150,420,80,56,'#fff',8,3))+txt(190,458,'🪪',34)+txt(190,590,x.ins,22,'#7a6a58')+
+  wob(rect(330,70,520,500,'#fffaf0',22,4))+x.short.map((s,i)=>wob(rect(366,112+i*118,60,60,'#d9f2df',14,4))+txt(396,156+i*118,'✓',40,'#1f5e30')+txt(448,152+i*118,s,32,INK,'start')+(i<3?`<path d="M366 ${196+i*118}H814" stroke="#eee0c6" stroke-width="3" stroke-dasharray="6 8"/>`:'')).join('')+`</svg>`
+};
+
+/* ---------- Schritte (Text in 3 Sprachen) ---------- */
+const STEPS=[
+ {scene:'lang',clip:'wave',
+  de:{t:'Kasse öffnen und Sprache wählen',b:'Wenn die Kasse offen ist, tippe oben auf deine Sprache.',tip:'Die Sprache wird auf diesem Gerät gespeichert. Du musst sie nicht jedes Mal neu wählen.'},
+  ar:{t:'افتح الكاشير واختار لغتك',b:'أول ما يفتح الكاشير، اضغط على لغتك من فوق.',tip:'اللغة اللي بتختارها بتنحفظ على هالجهاز، فما بتحتاج تختارها كل مرة.'},
+  en:{t:'Open the till and pick your language',b:'When the till is open, tap your language at the top.',tip:'The language is saved on this device, so you do not have to choose it every time.'}},
+ {scene:'type',clip:'point',
+  de:{t:'Bestellart wählen',b:'① Vor Ort / Tisch, Abholung oder Lieferung. ② Bei “Vor Ort” die Tischnummer wählen. ③ Für eine weitere Bestellung tippe auf “Neuer Auftrag”.',tip:'Du kannst mehrere Bestellungen gleichzeitig offen haben. Sie bleiben sichtbar, bis sie bezahlt oder abgebrochen sind.'},
+  ar:{t:'اختار نوع الطلب',b:'① بالمحل / طاولة، أو استلام، أو توصيل. ② إذا بالمحل، اختار رقم الطاولة. ③ لطلب تاني بنفس الوقت، اضغط «طلب جديد».',tip:'بتقدر تفتح أكتر من طلب بنفس الوقت. الطلبات المفتوحة بتضل ظاهرة لحد ما تندفع أو تنلغي.'},
+  en:{t:'Choose the order type',b:'① Dine-in / Table, Pickup or Delivery. ② For dine-in, choose the table number. ③ For another order, tap “New order”.',tip:'You can keep several orders open at the same time. They stay visible until they are paid or cancelled.'}},
+ {scene:'delivery',clip:'guide',
+  de:{t:'Lieferung: Kundendaten',b:'Gib die Telefonnummer ein: Es erscheinen Vorschläge aus der Kundenkartei. Tippe darauf, dann werden die Daten übernommen. Prüfe Straße, Hausnummer und PLZ.',tip:'Die Liefergebühr kommt automatisch nach PLZ dazu. Liegt die Bestellung unter dem Mindestbestellwert, erscheint nur ein Hinweis.'},
+  ar:{t:'طلب توصيل: بيانات الزبون',b:'اكتب رقم التلفون: بتظهر اقتراحات من دفتر الزبائن، اضغط عليها وبتتعبّى البيانات. بعدين تأكد من الشارع ورقم البيت والـ PLZ.',tip:'أجرة التوصيل بتنضاف لحالها حسب الـ PLZ. وإذا الطلب أقل من الحد الأدنى بيطلع تنبيه بس ما بيمنعك.'},
+  en:{t:'Delivery: customer details',b:'Type the phone number: suggestions from the customer book appear. Tap one and the details are filled in. Check street, house number and postcode.',tip:'The delivery fee is added automatically by postcode. If the order is below the minimum, you only get a warning.'}},
+ {scene:'items',clip:'present',
+  de:{t:'Artikel auswählen',b:'Wähle die Kategorie oder nutze die Suche und tippe auf den Artikel. Hat er Optionen, öffnet sich das Artikelfenster.',tip:'Jeder Artikel erscheint im aktuellen Auftrag auf der Seite.'},
+  ar:{t:'اختار الأصناف',b:'اختار القسم أو دوّر بخانة البحث، واضغط عالصنف. إذا عنده خيارات بتفتح نافذة الصنف.',tip:'كل صنف بينضاف للطلب الحالي اللي عالجنب.'},
+  en:{t:'Choose the items',b:'Pick the category or use search, then tap the item. If it has options, the item window opens.',tip:'Every item appears in the current order at the side.'}},
+ {scene:'dialog',clip:'talk',
+  de:{t:'Artikelfenster',b:'Wähle “Einzeln” oder “Als Menü”. Getränk und Sauce mit einem Tipp (Pflichtfelder müssen gewählt sein). Extras hinzufügen, bei Bedarf eine Notiz für die Küche schreiben, dann “Zum Auftrag hinzufügen”.',tip:'Die Notiz erscheint auf dem Küchenzettel.'},
+  ar:{t:'نافذة الصنف',b:'اختار «لحالو» أو «منيو». المشروب والصوص بكبسة وحدة (الإجباري لازم تختاره). زيد إضافات، وإذا في ملاحظة للمطبخ اكتبها، وبالآخر «زيد عالطلب».',tip:'الملاحظة بتطلع عتذكرة المطبخ.'},
+  en:{t:'The item window',b:'Choose “Single” or “As menu”. Drink and sauce with one tap (required fields must be chosen). Add extras, write a note for the kitchen if needed, then “Add to order”.',tip:'The note shows on the kitchen ticket.'}},
+ {scene:'extra',clip:'happy',
+  de:{t:'Etwas, das nicht auf der Karte steht: Extra',b:'Tippe unter dem Auftrag auf “➕ Extra“. Gib den Preis ein (Name und Notiz sind optional) und füge es als eigene Zeile oder an einen Artikel an.',tip:'Beispiel: extra Tomate, Plastikbecher.'},
+  ar:{t:'شي مو بالقائمة: Extra',b:'اضغط «➕ Extra» تحت الطلب. اكتب السعر (الاسم والملاحظة اختياريين)، وزيده كسطر لحاله أو ملزوق على صنف.',tip:'مثال: بندورة زيادة، كاسة بلاستيك.'},
+  en:{t:'Something not on the menu: Extra',b:'Tap “➕ Extra” under the order. Enter the price (name and note are optional) and add it as its own line or attached to an item.',tip:'Example: extra tomato, plastic cup.'}},
+ {scene:'cart',clip:'check',
+  de:{t:'Bestellung prüfen',b:'Pro Zeile: bearbeiten ✎, Menge ändern, entfernen ✕. Prüfe Menge und Extras, dann tippe auf “Bar” oder “Karte”.',tip:'Nach der ersten Zahlung ist der Warenkorb gesperrt.'},
+  ar:{t:'راجع الطلب والمجموع',b:'كل سطر: تعديل ✎، زيادة أو نقصان، وحذف ✕. راجع الكمية والإضافات، وبعدين اضغط «كاش» أو «كرت».',tip:'بعد أول دفعة بتنقفل السلة عالتعديل.'},
+  en:{t:'Check the order',b:'Each line: edit ✎, change quantity, remove ✕. Check quantities and extras, then tap “Cash” or “Card”.',tip:'After the first payment the cart is locked.'}},
+ {scene:'pay',clip:'paid',
+  de:{t:'Bezahlen',b:'Wähle einen Rabatt, falls nötig (10, 12 oder 20 %, −1/−2/−3 € oder eigener Wert). Zum Teilen der Rechnung: gleichmäßig oder nach Artikeln. Wähle Bar, Karte oder Bar + Karte. Bei Barzahlung gibst du den erhaltenen Betrag ein, das Rückgeld wird berechnet. Tippe auf “Bezahlen”.',tip:'Der Rabatt wird vor der ersten Zahlung festgelegt. Danach ist er gesperrt.'},
+  ar:{t:'الدفع',b:'اختار الخصم إذا في (10 أو 12 أو 20٪، أو −1/−2/−3 €، أو رقم). لتقسيم الفاتورة: بالتساوي أو حسب الأصناف. اختار كاش أو كرت أو الاتنين. بالكاش اكتب المبلغ اللي أعطاك ياه الزبون وهو بيحسب الباقي، وبعدين اضغط «ادفع».',tip:'الخصم بينحدد قبل أول دفعة، وبعدها بيتقفل.'},
+  en:{t:'Payment',b:'Choose a discount if needed (10, 12 or 20 %, −1/−2/−3 € or a custom value). To split the bill: equally or by items. Choose cash, card or cash + card. For cash, enter the amount received and the change is calculated. Tap “Pay”.',tip:'The discount is set before the first payment. After that it is locked.'}},
+ {scene:'after',clip:'cheer',
+  de:{t:'Nach der Zahlung',b:'Vor Ort und Abholung: Die Bestellung geht automatisch an die Küche, Küchenzettel und Kundenbeleg werden gedruckt (je nach Druckereinstellung). Lieferung: Statt Bar/Karte tippst du auf “An Küche · Zahlung bei Lieferung”. Der Kunde zahlt bei der Übergabe.',tip:'Wenn nichts gedruckt wird, sag der Geschäftsleitung Bescheid.'},
+  ar:{t:'بعد الدفع',b:'بالمحل واستلام: الطلب بينبعت للمطبخ لحاله وبتنطبع تذكرة المطبخ ونسخة الزبون (حسب إعدادات الطابعة). توصيل: بدل كاش وكرت اضغط «للمطبخ · الدفع عند التسليم»، والزبون بيدفع لما ينسلّم الطلب.',tip:'إذا ما انطبع شي، بلّغ المدير.'},
+  en:{t:'After payment',b:'Dine-in and pickup: the order goes to the kitchen automatically; the kitchen ticket and customer receipt are printed (depending on printer settings). Delivery: instead of cash/card tap “To kitchen · pay on delivery”. The customer pays at handover.',tip:'If nothing prints, tell the manager.'}},
+ {scene:'open',clip:'sit',
+  de:{t:'Offene Bestellungen',b:'Zieh das Seitenfenster vom Bildschirmrand. Jede offene Bestellung ist eine Karte mit Status: Neu, Wird zubereitet, Fertig, dann Serviert, Abholbereit oder Beim Fahrer, am Ende “Vom Kunden erhalten”. Tippe auf eine Karte, um sie zu öffnen. Bei Lieferung tippst du bei der Übergabe auf “Jetzt kassieren”.',tip:'Tippe die offene Bestellung nochmal an: Sie geht zurück ins Kästchen.'},
+  ar:{t:'الطلبات المفتوحة',b:'اسحب اللوحة الجانبية من حافة الشاشة. كل طلب مفتوح بكرت وحالته: جديد، عم يتجهّز، جاهز، بعدين قُدّم للطاولة أو جاهز للاستلام أو مع السواق، وبالآخر «استلمه الزبون». اضغط عالكرت بيفتح الطلب. وبالتوصيل اضغط «دفع الآن» لما يسلّم السواق.',tip:'اضغط عالطلب المفتوح مرة تانية: بيرجع لمربعه.'},
+  en:{t:'Open orders',b:'Pull the side panel from the edge of the screen. Each open order is a card with a status: New, Preparing, Ready, then Served, Ready for pickup or With driver, finally “Received by customer”. Tap a card to open the order. For delivery, tap “Pay now” at handover.',tip:'Tap the open order again: it goes back to its box.'}},
+ {scene:'close',clip:'bank',
+  de:{t:'Tagesabschluss',b:'Öffne im Seitenmenü “Tagesabschluss” (nur mit Berechtigung). Zähle die Kasse und gib den Betrag ein. Prüfe die Differenz: “Stimmt”, “Überschuss“ oder ”Fehlbetrag“. Trage ein, wie viel in der Kasse bleibt und was entnommen wird, schreibe bei Bedarf eine Notiz, dann schließe den Tag ab.',tip:'Einlagen und Entnahmen müssen erfasst sein. Offene Bestellungen werden als Warnung angezeigt.'},
+  ar:{t:'آخر اليوم: تقفيلة اليوم',b:'من القائمة الجانبية افتح «تقفيلة اليوم» (حسب الصلاحية). عدّ الصندوق واكتب المبلغ، وشوف الفرق: «مظبوط» أو «زيادة» أو «نقص». اكتب قديش بتخلّي بالصندوق وقديش بتسحب، وأي ملاحظة، وبعدين قفّل اليوم.',tip:'الإيداعات والمسحوبات لازم تتسجّل. وإذا في طلبات لسا مفتوحة بيطلع تنبيه.'},
+  en:{t:'End of day',b:'Open “End of day” in the side menu (only with permission). Count the till and enter the amount. Check the difference: “Balanced”, “Over” or “Short”. Enter how much stays in the till and how much is taken out, add a note if needed, then close the day.',tip:'Deposits and withdrawals must be recorded. Open orders are shown as a warning.'}},
+ {scene:'inspector',clip:'idle',
+  de:{t:'Wenn das Finanzamt zur Kassen-Nachschau kommt',b:'Eine Kassen-Nachschau kann jederzeit ohne Anmeldung kommen. Bleib ruhig und freundlich:',list:['Dienstausweis und schriftliche Ermächtigung zeigen lassen.','Sofort die Geschäftsleitung anrufen.','Die Kasse zeigen und Fragen zur Bedienung beantworten.','Nichts löschen, ändern oder verstecken.'],tip:'Geprüft wird die Kasse. Bei anderen Wünschen (Schränke, private Sachen) bitte auf die Geschäftsleitung warten.'},
+  ar:{t:'إذا جاء مفتّش الـ Finanzamt',b:'فحص الكاسة ممكن ييجي بأي وقت بدون موعد. خليك هادي ولطيف:',list:['اطلب تشوف الهوية (Dienstausweis) والتفويض المكتوب.','اتصل بالمدير فوراً.','وريه الكاسة وجاوب عأسئلته عن الاستعمال.','لا تمسح ولا تغيّر ولا تخبّي شي.'],tip:'الفحص عن الكاسة بس. إذا طلب شي تاني (خزائن، أغراض شخصية)، قله ينتظر المدير.'},
+  en:{t:'If the tax office comes for a cash-register inspection',b:'A cash-register inspection (Kassen-Nachschau) can come at any time without notice. Stay calm and friendly:',list:['Ask to see their official ID and written authorisation.','Call the manager immediately.','Show the till and answer questions about how to use it.','Do not delete, change or hide anything.'],tip:'Only the till is being checked. For other requests (cupboards, private belongings) ask them to wait for the manager.'}}
+];
+
+/* ---------- App ---------- */
+const $=s=>document.querySelector(s);
+const AR_DIG='٠١٢٣٤٥٦٧٨٩';
+const dig=(n,L)=>L==='ar'?String(n).replace(/\d/g,d=>AR_DIG[d]):String(n);
+const params=new URLSearchParams(location.search);
+const printLang=['de','ar','en'].includes(params.get('print'))?params.get('print'):null;
+let lang=printLang||(()=>{try{const a=localStorage.getItem('flamo-guide-lang')||localStorage.getItem('nara-kasse-language');if(['de','ar','en'].includes(a))return a}catch(e){}return 'de'})();
+let cur=Math.max(0,Math.min(STEPS.length-1,(parseInt(location.hash.slice(1),10)||1)-1));
+
+function card(s,n){
+ const d=s[lang];
+ return `<article class="card" data-n="${n}"><div class="head"><div class="badge">${dig(n+1,lang)}</div><h1>${d.t}</h1></div>
+ <div class="art">${SC[s.scene](lang,X[lang])}</div>
+ <div class="row"><img class="flamo" src="web-prototype/c/flamo-${s.clip}.webp" alt="" ${printLang?'':'loading="lazy"'}><div class="body">${d.b}${d.list?'<ol>'+d.list.map(l=>`<li>${l}</li>`).join('')+'</ol>':''}</div></div>
+ ${d.tip?`<div class="tip">💡 ${d.tip}</div>`:''}
+ <div class="pfoot">Flamo · ${UI.de.doc} · v${VER} · ${DATE} · ${n+1}/${STEPS.length}</div></article>`;
+}
+function render(){
+ const rtl=lang==='ar';
+ document.documentElement.lang=lang;document.documentElement.dir=rtl?'rtl':'ltr';
+ document.title='Flamo · '+UI[lang].title;
+ const u=UI[lang];
+ const bar=`<div class="bar"><b>Flamo · ${u.title}</b><div class="tools">${LANGS.map(([c,n])=>`<button data-l="${c}" class="${c===lang?'on':''}">${n}</button>`).join('')}<button data-pdf="1">${u.pdf}</button></div></div>`;
+ if(printLang){$('#app').innerHTML=`<div class="wrap">${STEPS.map(card).join('')}</div>`;document.body.classList.add('print');return}
+ const arrow=rtl?['▶','◀']:['◀','▶'];
+ $('#app').innerHTML=bar+`<div class="wrap"><div class="dots">${STEPS.map((_,i)=>`<i data-i="${i}" class="${i===cur?'on':''}"></i>`).join('')}</div>${card(STEPS[cur],cur)}</div>
+ <div class="nav"><button data-go="-1" ${cur===0?'disabled':''}>${arrow[0]} ${u.prev}</button><div class="cnt">${dig(cur+1,lang)} / ${dig(STEPS.length,lang)}</div><button data-go="1" ${cur===STEPS.length-1?'disabled':''}>${u.next} ${arrow[1]}</button></div>`;
+}
+function go(i){cur=Math.max(0,Math.min(STEPS.length-1,i));history.replaceState(null,'','#'+(cur+1));render();window.scrollTo(0,0)}
+document.addEventListener('click',e=>{
+ const l=e.target.closest('[data-l]');if(l){lang=l.dataset.l;try{localStorage.setItem('flamo-guide-lang',lang)}catch(_){}render();return}
+ if(e.target.closest('[data-pdf]')){window.open(location.pathname+'?print='+lang,'_blank');return}
+ const g=e.target.closest('[data-go]');if(g){go(cur+Number(g.dataset.go));return}
+ const d=e.target.closest('[data-i]');if(d)go(Number(d.dataset.i));
+});
+document.addEventListener('keydown',e=>{if(printLang)return;const rtl=lang==='ar';if(e.key==='ArrowRight')go(cur+(rtl?-1:1));if(e.key==='ArrowLeft')go(cur+(rtl?1:-1))});
+let tx=null;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{if(tx==null||printLang)return;const dx=e.changedTouches[0].clientX-tx;tx=null;if(Math.abs(dx)<60)return;const rtl=lang==='ar';go(cur+((dx<0)!==rtl?1:-1))},{passive:true});
+render();
+if(printLang){
+ const imgs=[...document.images].map(im=>im.complete?1:new Promise(r=>{im.onload=im.onerror=r}));
+ Promise.all([document.fonts.ready,...imgs]).then(()=>setTimeout(()=>window.print(),500));
+}
+</script>
+<script src="flamo-home.js?v=20261031a" defer></script></body></html>

@@ -17,6 +17,7 @@
   // k = Schlüssel, f = Datei (+ #Hash), i = Icon, g = Gruppe
   const PAGES = [
     { k: 'kasse', f: 'kasse.html', i: '🧾', g: 'today', n: L('Kasse', 'الكاشير', 'Till') },
+    { k: 'guide', f: 'anleitung.html', i: '📖', g: 'today', n: L('Anleitung', 'دليل الكاشير', 'Till guide') },
     { k: 'live', f: 'live-orders.html', i: '📋', g: 'today', n: L('Live Orders', 'الطلبات الحية', 'Live Orders') },
     { k: 'reception', f: 'reception.html', i: '📥', g: 'today', n: L('Plattformen', 'تجميع المنصات', 'Platform hub') },
     { k: 'kitchen', f: 'kitchen.html', i: '👨‍🍳', g: 'today', n: L('Küche', 'المطبخ', 'Kitchen') },
