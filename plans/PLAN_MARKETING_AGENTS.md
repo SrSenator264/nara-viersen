@@ -64,6 +64,7 @@
 ## أدوات للمستقبل (خيارات، مش ضرورية هلأ)
 
 - **OpenHands / Agent Canvas** (https://github.com/OpenHands/OpenHands): لوحة تحكم مفتوحة المصدر (MIT) بتشغّل وكلاء (Claude Code وغيره) وبتجدول automations من مكان واحد. بتتثبّت محلياً بـ npm أو Docker. بدون sandbox الوكيل بياخد وصول كامل للملفات. نرجع لها فقط إذا احتجنا واجهة موحّدة للوكلاء.
+- **Agent Desktop** (https://github.com/vercel-labs/agent-desktop): أداة من Vercel Labs (Apache-2.0) بتخلّي وكيل يتحكم ببرامج سطح المكتب (Windows وmacOS وLinux) عبر شجرة الـ accessibility مش الصور. تثبيت: `npm install -g agent-desktop`. مشروع تجريبي، واللقطات والـ clipboard ممكن تحتوي بيانات خاصة. مفيدة لو بدنا وكيل يشغّل برامج على جهاز عمر (مثل CapCut للفيديوهات أو اختبار الكاشير).
 - **anthropics/skills** (https://github.com/anthropics/skills): ريبو رسمي فيه skills جاهزة. تثبيتها: `/plugin marketplace add anthropics/skills`.
 
 ## ربط مع شغل ثاني
