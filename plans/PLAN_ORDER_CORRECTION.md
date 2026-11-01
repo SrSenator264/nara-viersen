@@ -25,7 +25,7 @@ Edge cases
 - Platform orders (Lieferando, Uber Eats, Loco, ...) get no button; they are corrected on the platform.
 - If the business day was already closed (تقفيلة), the button shows a warning and does not run (proposal, can be changed).
 
-6. Every cart clear / line removal is logged (who, when, what was removed), in the audit log (today the clear-cart handler in kasse-domain.js deletes without a trace).
+6. Clearing the cart / removing lines BEFORE kitchen or payment is normal work and is NOT logged (decision by Omar, 2026-11-01).
 7. After the order was sent to the kitchen or paid, cancelling is only possible as Storno with a mandatory reason (no silent delete).
 8. "فحص التطابق" page: compares cashier records with the TSE (count, amounts, signature numbers) and shows differences; usable when an inspector prints from the TSE USB. Needs the real TSE connected.
 
