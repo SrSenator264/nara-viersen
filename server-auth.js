@@ -223,12 +223,16 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
       if (!isLocal(req)) return reply(res, 403, { error: 'Nur am Geschäfts-PC.', code: 'FORBIDDEN' });
       const me = req.naraUser, acc = me && store.accounts[me.id];
       if (!acc || acc.role !== 'MANAGER' || acc.active === false || !acc.pin) return reply(res, 403, { error: 'Nur ein angemeldeter Manager kann die Inhaber-Rolle zurückholen.', code: 'FORBIDDEN' });
-      const data = readAdminData(), emp = (data.employees || []).find(e => e.id === me.id), now = new Date().toISOString();
-      acc.role = 'OWNER';
-      if (emp) { emp.role = 'OWNER'; emp.updatedAt = now; }
-      (data.auditEvents ||= []).push({ id: adminId('audit'), type: 'OWNER_RESTORED', entityId: me.id, createdAt: now, details: { name: nameOf(data, me.id) } });
-      writeAdminData(data); save();
-      replyC(res, 200, { ok: true, role: 'OWNER' }); return true;
+      try {
+        acc.role = 'OWNER'; save(); // الصلاحية الفعلية بتنحفظ أول
+        try { // تحديث سجل الموظف + سجل التدقيق: محاولة ثانوية، فشلها ما بيمنع الصلاحية
+          const data = readAdminData(), emp = (data.employees || []).find(e => e.id === me.id), now = new Date().toISOString();
+          if (emp) { emp.role = 'OWNER'; emp.updatedAt = now; }
+          (data.auditEvents ||= []).push({ id: adminId('audit'), type: 'OWNER_RESTORED', entityId: me.id, createdAt: now, details: { name: nameOf(data, me.id) } });
+          writeAdminData(data);
+        } catch (e2) { console.error('[NARA][RESTORE_OWNER_ADMIN_DATA]', e2 && e2.message || e2); }
+        replyC(res, 200, { ok: true, role: 'OWNER' }); return true;
+      } catch (e) { console.error('[NARA][RESTORE_OWNER]', e && e.stack || e); return reply(res, 500, { error: 'Fehler: ' + String(e && e.message || e), code: 'RESTORE_FAILED' }); }
     }
     if (p === '/api/auth/staff' && m === 'POST') {
       readJson(req, res, 5000, b => {
