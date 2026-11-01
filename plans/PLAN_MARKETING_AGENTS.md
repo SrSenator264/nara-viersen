@@ -61,6 +61,11 @@
 
 الذكاء الاصطناعي بيبحث وبيحلل وبيكتب مسودات. أنت (عمر) بتقرر شو ينشر وبتعتمد المحتوى النهائي.
 
+## أدوات للمستقبل (خيارات، مش ضرورية هلأ)
+
+- **OpenHands / Agent Canvas** (https://github.com/OpenHands/OpenHands): لوحة تحكم مفتوحة المصدر (MIT) بتشغّل وكلاء (Claude Code وغيره) وبتجدول automations من مكان واحد. بتتثبّت محلياً بـ npm أو Docker. بدون sandbox الوكيل بياخد وصول كامل للملفات. نرجع لها فقط إذا احتجنا واجهة موحّدة للوكلاء.
+- **anthropics/skills** (https://github.com/anthropics/skills): ريبو رسمي فيه skills جاهزة. تثبيتها: `/plugin marketplace add anthropics/skills`.
+
 ## ربط مع شغل ثاني
 
 - `MARKETING.md` ومسودة اللوغو والواجهة (مؤجّلة لحد الكاشير)
