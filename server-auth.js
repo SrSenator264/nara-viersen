@@ -181,7 +181,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
       const data = readAdminData();
       const ids = new Set([...(data.employees || []).filter(e => !e.archivedAt).map(e => e.id), ...Object.keys(store.accounts)]);
       const team = [...ids].map(id => { const a = store.accounts[id]; const e = (data.employees || []).find(x => x.id === id); return { id, name: nameOf(data, id), role: a?.role || null, active: a ? a.active !== false : false, hasPin: !!a?.pin, customers: a?.role === 'OWNER' || a?.customers === true, canDelete: a?.role === 'OWNER' || a?.canDelete === true, employeeActive: e ? e.active !== false : false, empRole: e ? A.normalizeRole(e.role) : null }; });
-      replyC(res, 200, { ok: true, team, roles: A.ROLES, me: { owner: req.naraUser.role === 'OWNER', canDelete: !!req.naraUser.canDelete } }); return true;
+      replyC(res, 200, { ok: true, team, roles: A.ROLES, me: { owner: req.naraUser.role === 'OWNER', canDelete: !!req.naraUser.canDelete, canRestoreOwner: req.naraUser.role === 'MANAGER' && !Object.values(store.accounts).some(a => a.role === 'OWNER' && a.active !== false) && isLocal(req) } }); return true;
     }
     if (p === '/api/auth/staff/delete' && m === 'POST') {
       readJson(req, res, 2000, b => {
@@ -215,6 +215,20 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
         replyC(res, 200, { ok: true });
       });
       return true;
+    }
+    if (p === '/api/auth/restore-owner' && m === 'POST') {
+      // استرجاع صلاحية "صاحب المحل": بس إذا ما في ولا صاحب مفعّل، ومن جهاز المحل، ومن حساب مدير مسجّل دخول
+      const hasOwner = Object.values(store.accounts).some(a => a.role === 'OWNER' && a.active !== false);
+      if (hasOwner) return reply(res, 409, { error: 'Es gibt bereits einen Inhaber.', code: 'OWNER_EXISTS' });
+      if (!isLocal(req)) return reply(res, 403, { error: 'Nur am Geschäfts-PC.', code: 'FORBIDDEN' });
+      const me = req.naraUser, acc = me && store.accounts[me.id];
+      if (!acc || acc.role !== 'MANAGER' || acc.active === false || !acc.pin) return reply(res, 403, { error: 'Nur ein angemeldeter Manager kann die Inhaber-Rolle zurückholen.', code: 'FORBIDDEN' });
+      const data = readAdminData(), emp = (data.employees || []).find(e => e.id === me.id), now = new Date().toISOString();
+      acc.role = 'OWNER';
+      if (emp) { emp.role = 'OWNER'; emp.updatedAt = now; }
+      (data.auditEvents ||= []).push({ id: adminId('audit'), type: 'OWNER_RESTORED', entityId: me.id, createdAt: now, details: { name: nameOf(data, me.id) } });
+      writeAdminData(data); save();
+      replyC(res, 200, { ok: true, role: 'OWNER' }); return true;
     }
     if (p === '/api/auth/staff' && m === 'POST') {
       readJson(req, res, 5000, b => {
