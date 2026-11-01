@@ -3,13 +3,19 @@
 //  • applyExtraCategory(data, newId): مرة وحدة (بتتسجّل بـ settings.priceSyncsApplied). بتجمع إضافات البرغر والصوصات (Dips)
 //    من مكتبة الخيارات، بنفس أسعارها الحالية، وبتعمل لكل واحد صنف باسم "الاسم اكسترا". الكاتيغوري بتنحط بعد Fried Chicken.
 //    أسعار 0 (المضمّنة بالمنيو) والمشروبات والصوص-ضمن-المنيو (__) ما بتنضاف. للكاشير بس (مو للموقع).
+//  • renameExtraProducts(data): تصحيح مرة وحدة للأصناف اللي انعملت باسم عربي: الاسم الألماني + Extra، والعربي بالترجمة.
 //  • doubleIngredientsOption(categoryName, priceCents): خيار "Doppelte Zutaten" = 35% من سعر الصنف، بس للـ Sandwiches و Hot Dogs.
 const optionLibrary = require('./option-library.js');
 
 const TAG = 'extra-category-2026-11-01';
 const CAT_NAME = 'Extra';
 const AFTER_CAT = 'Fried Chicken';
-const SUFFIX = ' اكسترا';
+const AR_SUFFIX = ' اكسترا';
+const RENAME_TAG = 'extra-names-2026-11-01';
+// الاسم الأساسي بالألماني + Extra (إلا إذا فيه Extra أصلاً)؛ الترجمة العربية: الاسم + اكسترا
+const deName = base => (/extra/i.test(base) ? base : base + ' Extra');
+const arName = base => base.replace(/[,\s]*extra\s*$/i, '').trim() + AR_SUFFIX;
+const arTr = base => ({ status: 'approved', name: arName(base) });
 const FIRST_ID = 91001;
 const DOUBLE_PERCENT = 35;
 const DOUBLE_CATEGORIES = /^(sandwiches|hot dogs)$/i;
@@ -19,7 +25,7 @@ const SAUCE_OR_EXTRA_GROUP = /extra|dip|sauce|so[sß]e/i;
 function doubleIngredientsOption(categoryName, priceCents) {
   const base = Number(priceCents);
   if (!DOUBLE_CATEGORIES.test(String(categoryName || '').trim()) || !Number.isFinite(base) || base <= 0) return null;
-  return { id: 'double-ingredients', name: 'Doppelte Zutaten (×2)', cents: Math.round(base * DOUBLE_PERCENT / 100), group: 'Ihre Extras' };
+  return { id: 'double-ingredients', name: 'Doppelte Zutaten', cents: Math.round(base * DOUBLE_PERCENT / 100), group: 'Extra' };
 }
 
 // الاسم بالمكتبة → السعر الأكثر تكراراً (عند التعادل الأقل)
@@ -78,14 +84,14 @@ function applyExtraCategory(data, newId) {
   let nextId = FIRST_ID;
   const created = [];
   for (const e of extras) {
-    const name = e.name + SUFFIX;
+    const name = deName(e.name);
     if (takenNames.has(name)) continue;
     while (takenIds.has(String(nextId))) nextId++;
     const id = nextId++;
     takenIds.add(String(id));
     created.push({
       id: newId(), sourceId: id, name, categoryId: cat.id, priceCents: e.cents, description: '', active: true, available: true,
-      sortOrder: created.length, imageRef: null, translations: { de: null, ar: null, en: null }, optionGroupIds: [],
+      sortOrder: created.length, imageRef: null, translations: { de: null, ar: arTr(e.name), en: null }, optionGroupIds: [],
       channels: { kasse: true, customer: false },
       menuData: { id, n: name, c: CAT_NAME, cents: e.cents, p: e.cents / 100, d: '', img: null },
     });
@@ -99,4 +105,22 @@ function applyExtraCategory(data, newId) {
   return { applied: true, added: created.length };
 }
 
-module.exports = { applyExtraCategory, doubleIngredientsOption, collectExtras, TAG, DOUBLE_PERCENT };
+function renameExtraProducts(data) {
+  data.settings = data.settings && typeof data.settings === 'object' ? data.settings : {};
+  const done = Array.isArray(data.settings.priceSyncsApplied) ? data.settings.priceSyncsApplied : [];
+  if (done.includes(RENAME_TAG)) return { applied: false, renamed: 0 };
+  const cat = (data.categories || []).find(c => c.name === CAT_NAME);
+  let renamed = 0;
+  for (const p of data.products || []) {
+    if (!cat || p.categoryId !== cat.id || !String(p.name).endsWith(AR_SUFFIX)) continue;
+    const base = String(p.name).slice(0, -AR_SUFFIX.length).trim();
+    p.name = deName(base);
+    p.translations = { ...(p.translations || {}), ar: arTr(base) };
+    if (p.menuData) p.menuData.n = p.name;
+    renamed++;
+  }
+  data.settings.priceSyncsApplied = [...done, RENAME_TAG];
+  return { applied: true, renamed };
+}
+
+module.exports = { renameExtraProducts, applyExtraCategory, doubleIngredientsOption, collectExtras, TAG, DOUBLE_PERCENT };
