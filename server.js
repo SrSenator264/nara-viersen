@@ -380,10 +380,16 @@ if(url.pathname==='/api/platform-orders/status'&&req.method==='GET'){let quotes=
       const trn=stored.training===true;if(trn)payment.isTest=true;const fiscal={id:adminId('fiscal'),paymentId:payment.id,orderId:stored.id,status:trn?'TRAINING_NOT_SIGNED':'DEVELOPMENT_NOT_CONFIGURED',provider:null,createdAt:now};const receipt={id:adminId('receipt'),receiptNumber:(trn?'UEB-':'DEV-')+rcptSuffix(),training:trn||undefined,orderId:stored.id,paymentId:payment.id,fiscalTransactionId:fiscal.id,items:stored.cart||[],paymentLines:payment.paymentLines,amountCents:payment.amountCents,split:payment.split||null,createdAt:now};const audit={id:adminId('audit'),type:r.completed?'PAYMENT_FINALIZED':'PAYMENT_PARTIAL',orderId:stored.id,createdAt:now,details:{paymentId:payment.id,paymentLines:payment.paymentLines,discount:r.discount||null,remainingCents:r.remainingCents}};
       current.payments.push(payment);current.fiscalTransactions.push(fiscal);current.receipts.push(receipt);current.auditEvents.push(audit);if(r.completed&&!trn)applyApprovedRecipeConsumption(current,r.order,payment.id,now);current.orders=current.orders.map(x=>x.id===stored.id?r.order:x);const saved=writeAdminData(current);return reply(res,200,{...saved,payment:{completed:r.completed,remainingCents:r.remainingCents,expectedCents:r.expectedCents,paidCents:r.order.paidCents}});
     }
-    if(action==='STORNO'){
-      if(stored.status!=='COMPLETED')return reply(res,409,{error:'Nur abgeschlossene Zahlungen können storniert werden.'});
-      if(current.auditEvents.some(x=>x.type==='STORNO'&&x.orderId===stored.id))return reply(res,409,{error:'Für diese Zahlung existiert bereits ein Storno.'});
-      const parts=current.payments.filter(x=>(stored.paymentIds||[stored.paymentId]).includes(x.id)),original=parts[parts.length-1],now=new Date().toISOString(),correction={id:adminId('correction'),type:'STORNO',orderId:stored.id,originalPaymentId:original?.id||null,originalPaymentIds:parts.map(x=>x.id),amountCents:parts.reduce((s,x)=>s+(Number(x.amountCents)||0),0),reason:String(payload.reason||'Test-Storno'),createdAt:now};current.auditEvents.push({id:adminId('audit'),type:'STORNO',orderId:stored.id,createdAt:now,details:correction});current.receipts.push({...correction,receiptNumber:'DEV-STORNO-'+rcptSuffix()});current.orders=current.orders.map(x=>x.id===stored.id?{...x,status:'STORNIERT',correctionId:correction.id}:x);return reply(res,200,writeAdminData(current));
+    // Storno (nur nach Zahlung, Pflicht-Grund, negative Gegenbuchung) und Korrektur (= Storno + neue offene Bestellung). Logik in order-correction.js (getestet).
+    // Trainings-Bestellungen werden frei wieder geöffnet (kein Grund, kein Storno, nie gesperrt) — dafür keine Manager-Pflicht.
+    if(action==='STORNO'||action==='CORRECT_ORDER'){
+      const OC=require('./order-correction.js');
+      // Manager-Pflicht: ein angemeldeter Benutzer wird nach ROLLE geprüft (naraManagerOnly allein ließe jede lokale Anfrage durch, auch einen Kassierer am Kassen-PC)
+      if(!OC.isTraining(stored)){if(req.naraUser){if(!['OWNER','MANAGER'].includes(req.naraUser.role))return reply(res,403,{error:'Storno/Korrektur nur für Inhaber oder Manager.',code:'FORBIDDEN'})}else if(!naraManagerOnly(req,res))return}
+      let r;
+      try{r=OC.stornoOrder(current,{orderId:stored.id,reason:payload.reason,user:req.naraUser||null,now:new Date().toISOString(),newId:adminId,suffix:rcptSuffix,correct:action==='CORRECT_ORDER'})}catch(e){return reply(res,e.status||400,{error:e.message,code:e.code})}
+      const saved=writeAdminData(current);
+      return reply(res,200,{...saved,correction:{mode:r.mode,orderId:stored.id,newOrderId:r.newOrder?r.newOrder.id:(r.mode==='TRAINING_REOPEN'?stored.id:null),newOrderCode:r.newOrder?r.newOrder.displayCode:null,receiptNumber:r.receipt?r.receipt.receiptNumber:null}});
     }
     return reply(res,400,{error:'Unbekannte Kassenaktion.'});
   }catch(error){return reply(res,400,{error:error.message||'Kassenaktion fehlgeschlagen.'});}});

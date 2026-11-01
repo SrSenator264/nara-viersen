@@ -68,6 +68,8 @@
         if(local){
           // انعدّل على جهاز تاني ونحنا ما عدّلنا شي هون من آخر مزامنة: منحدّث نسختنا
           if(Number.isInteger(s.rev)&&s.rev>(Number(local.rev)||0)&&(pushed[s.id]===hash(local)||same(local,s))&&!closed(local.status)){replaceLocal(L,s.id,s);savePushed();changed=true}
+          // تدريب: الطلب انفتح من جديد عالسيرفر (✏️ من صفحة المبيعات) — نسختنا المحلية مسكّرة: منحمّل النسخة المفتوحة
+          else if(s.training===true&&closed(local.status)&&!closed(s.status)&&Number.isInteger(s.rev)&&s.rev>(Number(local.rev)||0)){replaceLocal(L,s.id,s);savePushed();changed=true}
           continue;
         }
         const plat=String(s.platform||s.source||'NARA').toUpperCase();
@@ -76,8 +78,11 @@
       }
       for(const c of d.closed||[]){const l=list.find(x=>String(x.id)===String(c.id));if(l&&!closed(l.status)){l.status=c.status;changed=true}}
       if(changed){L.save();L.render()}
+      openFromUrl(L);
     }catch(e){status(false)}
   }
+  // kasse.html?open=<orderId> (من زر ✏️ تصحيح بصفحة المبيعات): بيفتح هالطلب بالكاشير أول ما يوصل، وبعدها بيشيل الباراميتر من العنوان
+  function openFromUrl(L){let id='';try{id=new URLSearchParams(location.search).get('open')||''}catch(e){}if(!id||!L.setCurrentId)return;if(L.setCurrentId(id)){try{const u=new URL(location.href);u.searchParams.delete('open');history.replaceState(null,'',u.pathname+(u.search||'')+u.hash)}catch(e){}}}
   const schedOrd=()=>{clearTimeout(ordTimer);ordTimer=setTimeout(pushOrders,1200)};
 
   // أي كتابة محلية على المفتاحين بتحرّك المزامنة

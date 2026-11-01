@@ -71,6 +71,8 @@
     // رقم الطلب + المنصة + الوقت
     const pb=platBox(r.platform);if(pb)rows.push(pb);
     rows.push('<div class="rc-code">'+esc(r.displayCode)+'</div>');
+    // Korrekturbestellung (nach Storno): Verweis auf den stornierten Beleg
+    if(o&&(o.correctionOfCode||o.correctionOf))rows.push('<div class="rc-c rc-small"><b>Korrektur zu '+esc(o.correctionOfCode||o.correctionOf)+'</b></div>');
     rows.push('<div class="rc-small rc-c">'+esc(stamp(r.placedAt))+'</div>');
     // نوع الطلب (شريط معكوس)
     rows.push('<div class="rc-type">'+esc(type)+'</div>');
