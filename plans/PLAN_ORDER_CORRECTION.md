@@ -25,8 +25,8 @@ Edge cases
 - Platform orders (Lieferando, Uber Eats, Loco, ...) get no button; they are corrected on the platform.
 - If the business day was already closed (تقفيلة), the button shows a warning and does not run (proposal, can be changed).
 
-6. Clearing the cart / removing lines BEFORE kitchen or payment is normal work and is NOT logged (decision by Omar, 2026-11-01).
-7. After the order was sent to the kitchen or paid, cancelling is only possible as Storno with a mandatory reason (no silent delete).
+6. Clearing the cart / removing lines BEFORE payment is normal work and is NOT logged (decision by Omar, 2026-11-01).
+7. Storno is required only AFTER PAYMENT (with a mandatory reason). Before payment, even after the order went to the kitchen, changes/cancel stay normal and are not Storno (decision by Omar, 2026-11-01).
 8. "فحص التطابق" page: compares cashier records with the TSE (count, amounts, signature numbers) and shows differences; usable when an inspector prints from the TSE USB. Needs the real TSE connected.
 
 Booklet: once 1-4 work, add the Storno page to anleitung.html (3 languages), bump VER/DATE, export a new dated German PDF (see PLAN_CASHIER_BOOKLET.md).
