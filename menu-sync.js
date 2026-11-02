@@ -3,7 +3,7 @@
 // Never touches existing products; never re-adds items the owner deleted.
 function syncNewSourceItems(data, sourceCatalog) {
   data.settings = data.settings || {};
-  const hasSeen = Array.isArray(data.settings.menuSyncedSourceIds);
+  const hasSeen = data.settings.menuSyncVersion === 2 && Array.isArray(data.settings.menuSyncedSourceIds);
   const existing = new Set(data.products.map(p => p.sourceId).filter(v => v != null).map(String));
   let seen;
   let candidates;
@@ -11,12 +11,9 @@ function syncNewSourceItems(data, sourceCatalog) {
     seen = new Set(data.settings.menuSyncedSourceIds.map(String));
     candidates = sourceCatalog.filter(it => !seen.has(String(it.id)) && !existing.has(String(it.id)));
   } else {
-    // first run: only items newer than everything stored (deleted old items stay deleted)
-    const nums = data.products.map(p => Number(p.sourceId)).filter(Number.isFinite);
-    const max = nums.length ? Math.max(...nums) : -Infinity;
+    // first run: add every catalog item that is not stored yet
     seen = new Set(existing);
-    for (const it of sourceCatalog) if (Number(it.id) <= max) seen.add(String(it.id));
-    candidates = sourceCatalog.filter(it => !seen.has(String(it.id)) && !existing.has(String(it.id)));
+    candidates = sourceCatalog.filter(it => !existing.has(String(it.id)));
   }
   let changed = !hasSeen;
   let order = data.products.reduce((m, p) => Math.max(m, Number(p.sortOrder) || 0), 0);
@@ -37,6 +34,7 @@ function syncNewSourceItems(data, sourceCatalog) {
     changed = true;
   }
   data.settings.menuSyncedSourceIds = [...seen];
+  data.settings.menuSyncVersion = 2;
   return { changed, added: candidates.length };
 }
 module.exports = { syncNewSourceItems };
