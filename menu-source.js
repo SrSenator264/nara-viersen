@@ -546,3 +546,12 @@ for(const [burgerId,menuId] of burgerMenuPairs){const burger=catalog.find(p=>p.i
 Object.assign(catalog.find(p=>p.id===202),{cents:499,p:4.99,unavailable:false});
 // Nur im Laden (Kasse): nicht auf Website/Web-Bestellung, nicht im Flamo-Chat/WhatsApp, nicht für Lieferung.
 catalog.push({id:520,n:'Shisha (Wasserpfeife)',c:'Shisha',cents:1500,p:15,d:'Wasserpfeife.',img:null,verified:true,optionsPending:false,hidden:true,channels:{kasse:true,customer:false}});
+// Inhaber 2026-11-02: Kindergerichte (Happy Meal / Kindermenü). Ein Sauce, Capri-Sun; beim Happy Meal Burger Rind oder Hähnchen zum gleichen Preis.
+const kidsSauces=[['ketchup','Mit Ketchup'],['mayo','Mit Mayonnaise'],['cheese','Mit Cheesesauce']].map(([id,name])=>({id:'kids-sauce-'+id,name,cents:0,required:true,group:'Ihre Sauce'}));
+const kidsDrink=[{id:'kids-drink-capri',name:'Capri-Sun',cents:0,deposit:0,detail:'',required:true,group:'Ihr Getränk'}];
+const kidsBurger=[['beef','Cheeseburger mit Rindfleisch'],['chicken','Cheeseburger mit Hähnchen']].map(([id,name])=>({id:'kids-burger-'+id,name,cents:0,required:true,group:'Burger nach Wahl'}));
+const kidsMeals=[
+ {id:310,img:'kids-happy-meal.png',n:'Kinder Happy Meal',cents:799,d:'Cheeseburger (Rind oder Hähnchen nach Wahl), Pommes frites, Capri-Sun und Sauce nach Wahl.',groups:[kidsBurger,kidsDrink,kidsSauces]},
+ {id:311,img:'kids-menu.png',n:'Kindermenü',cents:699,d:'5 Chicken Nuggets, Pommes frites, Capri-Sun und Sauce nach Wahl.',groups:[kidsDrink,kidsSauces]}
+];
+for(const k of kidsMeals){const dips=k.groups.flat();catalog.push({id:k.id,n:k.n,c:'Kindergerichte',cents:k.cents,p:k.cents/100,d:k.d,img:'assets/'+k.img,verified:true,optionsPending:false,requiredGroups:[...new Set(dips.map(o=>o.group))],dips});}
