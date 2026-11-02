@@ -28,6 +28,7 @@ test('Navigation: kein Ziel doppelt, Gruppen übersichtlich, Altseiten weg', () 
   assert.equal(keys.length, 5, 'genau 5 Gruppen');
   for (const g of keys) { const n = PAGES.filter(p => p.g === g).length; assert.ok(n >= 1 && n <= 6, `Gruppe ${g}: ${n} Einträge`); }
   for (const p of PAGES) assert.ok(keys.includes(p.g), p.k + ': unbekannte Gruppe');
+  assert.equal(targets.filter(f => f === 'inventory-foundation.html').length, 1, 'Lager/Einkauf/Rechnungen/Dokumente = EIN Menüpunkt (Tabs in der Seite)');
   for (const dead of ['admin.html', 'dashboard.html', 'driver-app-v2.html']) {
     assert.ok(!fs.existsSync(path.join(root, dead)), dead + ' sollte weg sein');
     assert.ok(!targets.includes(dead) && !(dead in A.PAGE_ROLES), dead + ' wird noch referenziert');

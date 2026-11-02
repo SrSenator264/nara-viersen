@@ -27,6 +27,7 @@
     { k: 'accounting', f: 'accounting.html', i: '📚', g: 'money', n: L('Buchhaltung', 'المحاسبة', 'Accounting') },
     { k: 'banking', f: 'banking.html', i: '🏦', g: 'money', n: L('Bank', 'البنك', 'Bank') },
     { k: 'reports', f: 'reports.html', i: '📈', g: 'money', n: L('Gewinn & Verlust', 'الربح والخسارة', 'Profit & loss') },
+    { k: 'stock', f: 'inventory-foundation.html', i: '📦', g: 'money', n: L('Lager & Einkauf', 'المخزن والمشتريات', 'Stock & purchasing') }, // مدخل واحد: الأقسام (مخزن، موردين، فواتير، وثائق) تابات جوّا الصفحة
     { k: 'menu', f: 'admin-foundation.html', i: '🍔', g: 'ops', n: L('Speisekarte', 'المنيو', 'Menu') },
     { k: 'customers', f: 'customers.html', i: '👥', g: 'ops', n: L('Kunden', 'الزباين', 'Customers') },
     { k: 'customer-book', f: 'customer-book.html', i: '📒', g: 'ops', n: L('Kundenkartei', 'سجل الزباين', 'Customer book') },
