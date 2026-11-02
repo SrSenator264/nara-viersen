@@ -141,7 +141,7 @@ test('وضع ليلي: الجزء 3 (المحاسبة والأرقام)', () => 
 });
 
 test('زر الرئيسية 🏠: على كل الصفحات (حتى موقع الزبون) ما عدا الرئيسية نفسها، وبيظهر بس مع جلسة موظف', () => {
-  const root = path.join(__dirname, '..'), skip = new Set(['nara-app.html', 'index.html', 'delivery-print.html']);
+  const root = path.join(__dirname, '..'), skip = new Set(['nara-app.html', 'index.html']);
   for (const f of fs.readdirSync(root).filter(x => x.endsWith('.html') && !skip.has(x))) assert.ok(fs.readFileSync(path.join(root, f), 'utf8').includes('flamo-home.js'), f);
   assert.ok(fs.readFileSync(path.join(root, 'web-prototype', 'c.html'), 'utf8').includes('../flamo-home.js'));
   for (const f of skip) assert.ok(!fs.readFileSync(path.join(root, f), 'utf8').includes('flamo-home.js'), f);

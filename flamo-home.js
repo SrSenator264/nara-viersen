@@ -3,7 +3,7 @@
    إذا الصفحة فيها الشريط العلوي (زر 🏠 جاهز) ما بيظهر لتفادي التكرار. بيظهر بس إذا في جلسة موظف مفتوحة (/api/auth/me)، فالزبون العادي ما بيشوف شي. */
 (function () {
   const HOME = '/nara-app.html', file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-  if (['nara-app.html', 'index.html', 'delivery-print.html'].includes(file) || /[?&]app=1\b/.test(location.search)) return;
+  if (['nara-app.html', 'index.html'].includes(file) || /[?&]app=1\b/.test(location.search)) return;
   function mount() {
     if (document.getElementById('flamo-home-btn') || !document.body) return;
     const a = document.createElement('a');

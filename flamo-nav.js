@@ -21,7 +21,6 @@
     { k: 'reception', f: 'reception.html', i: '📥', g: 'today', n: L('Plattformen', 'تجميع المنصات', 'Platform hub') },
     { k: 'kitchen', f: 'kitchen.html', i: '👨‍🍳', g: 'today', n: L('Küche', 'المطبخ', 'Kitchen') },
     { k: 'dispatch', f: 'dispatch.html', i: '🛵', g: 'delivery', n: L('Fahrer-Plan', 'توزيع السواقين', 'Dispatch') },
-    { k: 'delivery-print', f: 'delivery-print.html', i: '🖨️', g: 'delivery', n: L('Lieferzettel drucken', 'طباعة طلب توصيل', 'Print delivery slip') },
     { k: 'sales', f: 'sales.html', i: '💶', g: 'money', n: L('Umsätze', 'المبيعات', 'Sales') },
     { k: 'close', f: 'kasse-settlement.html', i: '📊', g: 'money', n: L('Tagesabschluss', 'تقفيلة اليوم', 'Daily closing') },
     { k: 'accounting', f: 'accounting.html', i: '📚', g: 'money', n: L('Buchhaltung', 'المحاسبة', 'Accounting') },

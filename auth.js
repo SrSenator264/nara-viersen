@@ -129,7 +129,7 @@ const RULES = [
   ['POST', /^\/api\/tse-demo\/receipt$/, CASH],
   ['GET', /^\/api\/day-closing(\/|$)/, ACCT], // تقفيلة اليوم: عرض (المحاسب كمان)
   ['POST', /^\/api\/day-closing(\/|$)/, MANAGERS], // إنشاء تقفيلة / Nachtrag / إعادة طباعة: مالك أو مدير بس
-  ['GET', /^\/api\/delivery\/(scan|route-link|order-print)$/, STAFF],
+  ['GET', /^\/api\/delivery\/(scan|route-link)$/, STAFF],
   ['POST', /^\/api\/delivery\/(order-qr|route-qr)$/, STAFF],
   ['GET', /^\/api\/delivery\/(dispatch-plan|operations-plan)$/, CASH],
   ['POST', /^\/api\/delivery\/smart-plan$/, CASH],
@@ -197,7 +197,7 @@ function staticAllowed(rel) {
 // الصفحات اللي بتنحقن فيها شاشة الدخول (الاسم → الأدوار)
 const PAGE_ROLES = {
   'kasse.html': CASH, 'anleitung.html': STAFF, 'live-orders.html': KITCH, 'kitchen.html': KITCH, 'reception.html': KITCH, 'nara-app.html': STAFF,
-  'driver.html': STAFF, 'dispatch.html': CASH, 'connect.html': CASH, 'delivery.html': STAFF, 'delivery-print.html': STAFF,
+  'driver.html': STAFF, 'dispatch.html': CASH, 'connect.html': CASH, 'delivery.html': STAFF,
   'staff.html': MANAGERS, 'customers.html': KITCH, 'customer-book.html': KITCH, 'reminders.html': KITCH, 'team.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'status.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
   'accounting.html': ACCT, 'banking.html': ACCT, 'reports.html': ACCT, 'sales.html': ACCT, 'kasse-settlement.html': ACCT,
   'update.html': MANAGERS,
