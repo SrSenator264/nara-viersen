@@ -281,7 +281,7 @@ function renderDetail(o){
   if(!o){el.innerHTML='<p class="placeholder">'+t('pick')+'</p>';return}
   const st=stageOf(o),cash=S(o.payment&&o.payment.method).toUpperCase()==='CASH';
   const n=(o.cart||[]).filter(i=>!/FEE|TIP/.test(S(i.kind).toUpperCase())).reduce((s,i)=>s+(Number(i.quantity)||1),0);
-  const acc=Date.parse(o.acceptedAt||o.confirmedAt||o.placedAt||o.createdAt||0);
+  const acc=Date.parse(o.acceptedAt||o.confirmedAt||o.placedAt||o.createdAt||'')||(plat(o)==='NARA'?(when(o)||0):0);
   const notes=[S(D(o).notes),S(o.remarks)].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
   const tel=phone(o);
   el.innerHTML=
