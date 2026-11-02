@@ -220,9 +220,18 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
       // استرجاع صلاحية "صاحب المحل": بس إذا ما في ولا صاحب مفعّل، ومن جهاز المحل، ومن حساب مدير مسجّل دخول
       const hasOwner = Object.values(store.accounts).some(a => a.role === 'OWNER' && a.active !== false);
       if (hasOwner) return reply(res, 409, { error: 'Es gibt bereits einen Inhaber.', code: 'OWNER_EXISTS' });
-      if (!isLocal(req)) return reply(res, 403, { error: 'Nur am Geschäfts-PC.', code: 'FORBIDDEN' });
       const me = req.naraUser, acc = me && store.accounts[me.id];
-      if (!acc || acc.role !== 'MANAGER' || acc.active === false || !acc.pin) return reply(res, 403, { error: 'Nur ein angemeldeter Manager kann die Inhaber-Rolle zurückholen.', code: 'FORBIDDEN' });
+      // رفض بسبب الصلاحية/المكان: منسجّله بسجل التدقيق (محاولة ثانوية، فشلها ما بيغيّر الرد)
+      const deny = (error, reason) => {
+        try {
+          const data = readAdminData(), now = new Date().toISOString();
+          (data.auditEvents ||= []).push({ id: adminId('audit'), type: 'OWNER_RESTORE_DENIED', entityId: (me && me.id) || 'unknown', createdAt: now, details: { reason, role: (me && me.role) || null } });
+          writeAdminData(data);
+        } catch (e3) { console.error('[NARA][RESTORE_OWNER_DENIED_AUDIT]', e3 && e3.message || e3); }
+        return reply(res, 403, { error, code: 'FORBIDDEN' });
+      };
+      if (!isLocal(req)) return deny('Nur am Geschäfts-PC.', 'NOT_LOCAL');
+      if (!acc || acc.role !== 'MANAGER' || acc.active === false || !acc.pin) return deny('Nur ein angemeldeter Manager kann die Inhaber-Rolle zurückholen.', 'NOT_MANAGER');
       try {
         acc.role = 'OWNER'; save(); // الصلاحية الفعلية بتنحفظ أول
         try { // تحديث سجل الموظف + سجل التدقيق: محاولة ثانوية، فشلها ما بيمنع الصلاحية

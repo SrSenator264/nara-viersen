@@ -33,6 +33,10 @@ test('restore-owner: only a logged-in manager, only when no owner exists', async
   assert.equal(cash.status, 200);
   assert.equal((await call('POST', '/api/auth/restore-owner', {})).status === 200, false);
   assert.equal((await call('POST', '/api/auth/restore-owner', {}, cash.cookie)).status, 403);
+  // الرفض بينسجّل بسجل التدقيق
+  const audit = JSON.parse(fs.readFileSync(path.join(tmp, 'data', 'nara-admin.json'), 'utf8')).auditEvents || [];
+  const denied = audit.find(e => e.type === 'OWNER_RESTORE_DENIED' && e.entityId === 'cash1');
+  assert.ok(denied && denied.details.reason === 'NOT_MANAGER');
   const m2 = await call('POST', '/api/auth/login', { employeeId: 'mgr2', pin: '582913' });
   const chef = await call('POST', '/api/auth/login', { employeeId: 'mgr1', pin: '739402' });
   assert.equal(chef.status, 200);

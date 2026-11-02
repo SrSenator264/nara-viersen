@@ -4,6 +4,12 @@
 const fs = require('node:fs'), path = require('node:path'), readline = require('node:readline');
 const dir = process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, '..', 'data');
 const authFile = path.join(dir, 'nara-auth.json'), adminFile = path.join(dir, 'nara-admin.json');
+// كتابة ذرّية (متل السيرفر): نكتب على ملف مؤقت وبعدها rename، فإذا انقطعت الكهربا بنص الكتابة الملف الأصلي بيضل سليم
+const writeAtomic = (file, text, mode) => {
+  const tmp = file + '.tmp-' + process.pid;
+  try { fs.writeFileSync(tmp, text, mode ? { mode } : undefined); fs.renameSync(tmp, file); }
+  catch (err) { try { fs.unlinkSync(tmp); } catch { /* egal */ } throw err; }
+};
 const store = JSON.parse(fs.readFileSync(authFile, 'utf8'));
 let admin = null; try { admin = JSON.parse(fs.readFileSync(adminFile, 'utf8')); } catch { /* egal */ }
 const nameOf = id => { const e = ((admin && admin.employees) || []).find(x => x.id === id); return e ? (e.name || e.fullName || id) : id; };
@@ -25,10 +31,10 @@ const ask = q => { process.stdout.write(q); return lines.length ? Promise.resolv
   fs.copyFileSync(authFile, authFile + '.bak-' + Date.now());
   acc.role = 'OWNER'; acc.active = true;
   for (const [k, s] of Object.entries(store.sessions || {})) if (s.employeeId === id) delete store.sessions[k];
-  fs.writeFileSync(authFile, JSON.stringify(store), { mode: 0o600 });
+  writeAtomic(authFile, JSON.stringify(store), 0o600);
   if (admin && Array.isArray(admin.employees)) {
     const e = admin.employees.find(x => x.id === id);
-    if (e) { try { fs.copyFileSync(adminFile, adminFile + '.bak-' + Date.now()); e.role = 'OWNER'; e.updatedAt = new Date().toISOString(); fs.writeFileSync(adminFile, JSON.stringify(admin, null, 2)); } catch (err) { console.log('(سجل الموظف ما انحدّث، مو مشكلة: ' + err.message + ')'); } }
+    if (e) { try { fs.copyFileSync(adminFile, adminFile + '.bak-' + Date.now()); e.role = 'OWNER'; e.updatedAt = new Date().toISOString(); writeAtomic(adminFile, JSON.stringify(admin, null, 2)); } catch (err) { console.log('(سجل الموظف ما انحدّث، مو مشكلة: ' + err.message + ')'); } }
   }
   console.log(`\n✓ ${nameOf(id)} صار صاحب المحل. سجّل دخول من جديد بنفس الـ PIN.`);
   rl.close();

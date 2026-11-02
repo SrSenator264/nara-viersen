@@ -82,7 +82,7 @@
     }catch(e){status(false)}
   }
   // kasse.html?open=<orderId> (من زر ✏️ تصحيح بصفحة المبيعات): بيفتح هالطلب بالكاشير أول ما يوصل، وبعدها بيشيل الباراميتر من العنوان
-  function openFromUrl(L){let id='';try{id=new URLSearchParams(location.search).get('open')||''}catch(e){}if(!id||!L.setCurrentId)return;if(L.setCurrentId(id)){try{const u=new URL(location.href);u.searchParams.delete('open');history.replaceState(null,'',u.pathname+(u.search||'')+u.hash)}catch(e){}}}
+  function openFromUrl(L){let id='';try{id=new URLSearchParams(location.search).get('open')||''}catch(e){}if(!id||!L.setCurrentId||!/^[\w.:-]{1,80}$/.test(id))return;if(L.setCurrentId(id)){try{const u=new URL(location.href);u.searchParams.delete('open');history.replaceState(null,'',u.pathname+(u.search||'')+u.hash)}catch(e){}}}
   const schedOrd=()=>{clearTimeout(ordTimer);ordTimer=setTimeout(pushOrders,1200)};
 
   // أي كتابة محلية على المفتاحين بتحرّك المزامنة
