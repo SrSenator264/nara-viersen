@@ -43,7 +43,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 .ring span small{font-weight:600;font-size:.68rem;color:var(--mute);margin-top:2px}
 .ring.big{width:74px;height:74px}.ring.big span{font-size:1.3rem}
 .badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.02em;white-space:nowrap}
-.b-WEB{background:#fde8e9;color:#b3141c}.b-LIEFERANDO{background:#fff1e6;color:#d65a00}.b-UBER_EATS{background:#e6f6ec;color:#0b7a3b}.b-WOLT{background:#e6f4fb;color:#0a7cb2}.b-LANCH{background:#f1eafd;color:#6b3fc4}.b-LOCO{background:#fde8e8;color:#c21f1f}.b-Flamo{background:#eceff1;color:#37474f}
+.b-NARA{background:#e8edf0;color:#37474f}.b-WEB{background:#fde8e9;color:#b3141c}.b-LIEFERANDO{background:#fff1e6;color:#d65a00}.b-UBER_EATS{background:#e6f6ec;color:#0b7a3b}.b-WOLT{background:#e6f4fb;color:#0a7cb2}.b-LANCH{background:#f1eafd;color:#6b3fc4}.b-LOCO{background:#fde8e8;color:#c21f1f}.b-Flamo{background:#eceff1;color:#37474f}
 .b-x{background:#fde8e8;color:#c21f1f}
 .detail{padding:24px 26px;min-height:420px;display:flex;flex-direction:column}
 .dh{display:flex;gap:16px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line)}
@@ -119,7 +119,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
   <section class="panel list">
     <h1 data-t="yourOrders"></h1>
     <div class="tools">
-      <select id="plat"><option value="ALL" data-t="allPlat"></option><option value="WEB">Website</option><option value="LIEFERANDO">Lieferando</option><option value="UBER_EATS">Uber Eats</option><option value="WOLT">Wolt</option><option value="LANCH">Lanch</option><option value="LOCO">Loco Chicken</option></select>
+      <select id="plat"><option value="ALL" data-t="allPlat"></option><option value="WEB">Website</option><option value="LIEFERANDO">Lieferando</option><option value="UBER_EATS">Uber Eats</option><option value="WOLT">Wolt</option><option value="LANCH">Lanch</option><option value="LOCO">Loco Chicken</option><option value="NARA" data-t="naraKasse"></option></select>
       <input id="q" data-tp="search">
     </div>
     <div class="tabs">
@@ -172,9 +172,9 @@ let orders=[],stage='PREPARE',selId=null,lastOk=0,arcSel=null;
 
 const isLoco=o=>/loco/i.test(S(o.brand||o.brandName))||/^SIDES/i.test(S(o.source));
 function plat(o){if(isLoco(o))return 'LOCO';const p=S(o.platform||o.source).toUpperCase();if(/LIEFERANDO/.test(p))return 'LIEFERANDO';if(/UBER/.test(p))return 'UBER_EATS';if(/WOLT/.test(p))return 'WOLT';if(/LANCH/.test(p))return 'LANCH';if(/^WEB/.test(p))return 'WEB';return 'NARA'}
-const PC={WEB:'#E3262F',LIEFERANDO:'#ff8000',UBER_EATS:'#06c167',WOLT:'#009de0',LANCH:'#7b4ddb',LOCO:'#d62828',Flamo:'#37474f'};
+const PC={WEB:'#E3262F',LIEFERANDO:'#ff8000',UBER_EATS:'#06c167',WOLT:'#009de0',LANCH:'#7b4ddb',LOCO:'#d62828',NARA:'#37474f',Flamo:'#37474f'};
 let all=[],pays={};const autoDone=new Set(),AUTO_DONE_MIN=120;
-const PL={WEB:'Website',LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',LOCO:'Loco Chicken',Flamo:'NARA'};
+const PL={WEB:'Website',LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',LOCO:'Loco Chicken',Flamo:'NARA'};PL.NARA=(T[lang]||T.de).naraKasse;
 function badge(o){const p=plat(o);let t=PL[p];if(p==='LOCO'&&o.channel&&o.channel!=='SIDES')t+=' · '+(PL[o.channel]||o.portalName||'');return '<span class="badge b-'+p+'">'+esc(t)+'</span>'}
 function stageOf(o){const st=S(o.status).toUpperCase();if(st==='CANCELLED')return 'DONE';const s=S(o.liveStage).toUpperCase();if(s==='DONE'||st==='COMPLETED')return 'DONE';if(s==='HANDOVER')return 'HANDOVER';return 'PREPARE'}
 const cancelled=o=>S(o.status).toUpperCase()==='CANCELLED';
@@ -183,7 +183,7 @@ const D=o=>o.delivery||{};
 const isDel=o=>S(o.type||o.orderType).toLowerCase().startsWith('deliv');
 function street(o){const d=D(o),st=S(d.street),h=S(d.house||d.houseNumber);return (st&&h&&!new RegExp('\\s'+h.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$').test(st)?st+' '+h:st)||S(d.address)}
 function place(o){const d=D(o);return [S(d.postal||d.postalCode),S(d.city)].filter(Boolean).join(' ')}
-function title(o){if(!isDel(o))return t('pickup');return [place(o),street(o)].filter(Boolean).join(', ')||t('delivery')}
+function title(o){if(!isDel(o))return S(o.type)==='local'?t('local')+(o.table?' '+S(o.table):''):t('pickup');return [place(o),street(o)].filter(Boolean).join(', ')||t('delivery')}
 function custName(o){return S(D(o).name)||S(o.customerName)||t('customer')}
 function phone(o){return S(o.customerPhone)||S(D(o).phone)}
 // يوم الشغل: من 5 الصبح لـ 5 الصبح (طلب الساعة 00:30 تابع لليوم اللي قبل)
@@ -216,7 +216,7 @@ async function load(){
     // تسكير تلقائي: طلب منصة مدفوع أونلاين (مو كاش) وفات 120 دقيقة عن موعد تسليمه وما حدا حرّكه → Erledigt
     for(const o of all){if(autoDone.has(o.id)||plat(o)==='NARA'||plat(o)==='WEB'||o.isTest||cancelled(o)||stageOf(o)==='DONE')continue;if(S(o.payment&&o.payment.method).toUpperCase()==='CASH')continue;const due=Date.parse(o.dueAt||'')||when(o)+60*60000;if(Date.now()-due<AUTO_DONE_MIN*60000)continue;autoDone.add(o.id);fetch('/api/live-orders/stage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:o.id,stage:'DONE'})}).then(r=>{if(r.ok){o.liveStage='DONE';o.status='COMPLETED'}}).catch(()=>{})}
     // طلبات التجربة اللي انلغت (NARA-Demo-Loeschen) ما بتطلع أبداً
-    orders=all.filter(o=>plat(o)!=='NARA'&&!o.liveArchivedAt&&!(o.isTest&&cancelled(o))&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<3*3600000));
+    orders=all.filter(o=>!(plat(o)==='NARA'&&(o.isTest||o.training||!(o.cart||[]).length))&&!o.liveArchivedAt&&!(o.isTest&&cancelled(o))&&(localDay(when(o))===today||stageOf(o)!=='DONE'&&Date.now()-when(o)<3*3600000));
     // بعد تقفيلة اليوم (5 الصبح) كل طلبات امبارح بتروح عالأرشيف، حتى لو المنصة ما سكّرتها. بس طلب عمرو أقل من 3 ساعات بيضل.
     lastOk=Date.now();
   }catch(e){}
@@ -285,14 +285,14 @@ function renderDetail(o){
   const notes=[S(D(o).notes),S(o.remarks)].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
   const tel=phone(o);
   el.innerHTML=
-    '<div class="dh">'+ring(o,true)+'<div><h2>'+'<bdi>'+esc(title(o))+'</bdi>'+'</h2><div class="meta">#'+esc(code(o))+' · '+(isDel(o)?t('delTag'):t('pickTag'))+' '+badge(o)+(cancelled(o)?' <span class="badge b-x">'+t('cancelled')+'</span>':'')+'</div></div><span class="sp"></span></div>'+
+    '<div class="dh">'+ring(o,true)+'<div><h2>'+'<bdi>'+esc(title(o))+'</bdi>'+'</h2><div class="meta">#'+esc(code(o))+' · '+(isDel(o)?t('delTag'):S(o.type)==='local'?'🍽️ '+t('local'):t('pickTag'))+' '+badge(o)+(cancelled(o)?' <span class="badge b-x">'+t('cancelled')+'</span>':'')+'</div></div><span class="sp"></span></div>'+
     '<div class="cust"><b>'+'<bdi>'+esc(custName(o))+'</bdi>'+'</b><div class="row">'+(tel?'<a href="tel:'+esc(tel.replace(/\s/g,''))+'">📞 <bdi dir="ltr">'+esc(tel)+'</bdi>'+'</a>':'')+(o.verificationCode?'<span><b>'+t('verify')+'</b> '+esc(o.verificationCode)+'</span>':'')+'</div>'+
       custLine(o)+hintLine(o)+
       (acc?'<div class="row muted">'+t('ordered')+' '+new Date(acc).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+(due(o)?' · '+t('dueBy')+' '+new Date(due(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'')+'</div>':'')+
       notes.map(x=>'<div class="note">📝 '+esc(x)+'</div>').join('')+'</div>'+
-    '<div class="items"><div class="ih"><h3>'+n+' '+t('items')+'</h3><span class="pay'+(cash?' cash':'')+'">'+(cash?t('cash')+' · '+eur(o.cashDueCents||o.totalCents)+(o.payment.collectedBy==='UBER_COURIER'?' · '+t('uberCourier'):''):t('online'))+'</span></div>'+itemsHtml(o)+'</div>'+
+    '<div class="items"><div class="ih"><h3>'+n+' '+t('items')+'</h3><span class="pay'+(cash?' cash':'')+'">'+(plat(o)==='NARA'?(S(o.status).toUpperCase()==='COMPLETED'?(t(payOf(o))||payOf(o)):t('offen')):cash?t('cash')+' · '+eur(o.cashDueCents||o.totalCents)+(o.payment.collectedBy==='UBER_COURIER'?' · '+t('uberCourier'):''):t('online'))+'</span></div>'+itemsHtml(o)+'</div>'+
     sumHtml(o)+
-    '<div class="acts">'+(plat(o)==='WEB'&&!cancelled(o)&&st!=='DONE'?'<button class="sec" id="cxl" style="color:#B91C1C;border-color:#F3C4C4">'+t('cancelWeb')+'</button>':'')+'<button class="sec" id="print">'+t('printOrder')+'</button>'+(cancelled(o)?'':st==='PREPARE'?'<button class="pri" id="adv" data-to="HANDOVER">'+t('toHandover')+'</button>':st==='HANDOVER'?'<button class="pri" id="adv" data-to="DONE">'+t('done')+'</button>':'<button class="sec" id="adv" data-to="HANDOVER">'+t('back')+'</button>')+'</div>';
+    '<div class="acts">'+(plat(o)==='WEB'&&!cancelled(o)&&st!=='DONE'?'<button class="sec" id="cxl" style="color:#B91C1C;border-color:#F3C4C4">'+t('cancelWeb')+'</button>':'')+'<button class="sec" id="print">'+t('printOrder')+'</button>'+(cancelled(o)||plat(o)==='NARA'?'':st==='PREPARE'?'<button class="pri" id="adv" data-to="HANDOVER">'+t('toHandover')+'</button>':st==='HANDOVER'?'<button class="pri" id="adv" data-to="DONE">'+t('done')+'</button>':'<button class="sec" id="adv" data-to="HANDOVER">'+t('back')+'</button>')+'</div>';
   $('#print').onclick=()=>printOrder(o);
   const cx=$('#cxl');if(cx)cx.onclick=async()=>{if(!confirm(t('cancelWebQ')))return;cx.disabled=true;try{const r=await fetch('/api/live-orders/stage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:o.id,stage:'CANCELLED'})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||r.status);Object.assign(o,j.order||{status:'CANCELLED'})}catch(e){cx.disabled=false;cx.textContent=t('err')+e.message;return}render()};
   const a=$('#adv');if(a)a.onclick=async()=>{a.disabled=true;try{const r=await fetch('/api/live-orders/stage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:o.id,stage:a.dataset.to})});const j=await r.json().catch(()=>({}));if(!r.ok)throw Error(j.error||r.status);Object.assign(o,j.order||{liveStage:a.dataset.to})}catch(e){a.disabled=false;a.textContent=t('err')+e.message;return}render()};
