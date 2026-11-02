@@ -39,32 +39,49 @@ function latestRemote() {
   });
 }
 
-function readLast(root) {
-  try { return JSON.parse(fs.readFileSync(path.join(root, 'logs', 'update-status.json'), 'utf8').replace(/^﻿/, '')); } catch { return null; }
-}
+const readLogJson = (root, name) => { try { return JSON.parse(fs.readFileSync(path.join(root, 'logs', name), 'utf8').replace(/^﻿/, '')); } catch { return null; } };
+const readLast = root => readLogJson(root, 'update-status.json');
 const isRunning = last => !!last && last.state === 'RUNNING' && Date.now() - Date.parse(last.time || 0) < 5 * 60000;
+const SHA = /^[0-9a-f]{40}$/;
+const MODES = ['update', 'rollback', 'test'];
+
+// نفس قاعدة Flamo-Update.ps1: النسخة اللي قبل آخر تحديث ناجح وصّلنا للنسخة الحالية
+function rollbackTarget(history, cur) {
+  if (!cur || !Array.isArray(history)) return null;
+  const h = history.find(x => x && x.ok === true && x.mode === 'update' && x.to === cur && SHA.test(String(x.from || '')) && x.from !== cur);
+  return h ? h.from : null;
+}
 
 async function status(root) {
   const cur = currentSha(root), remote = await latestRemote(), last = readLast(root);
-  return { current: cur, remote, behind: !!(cur && remote && remote.sha !== cur), running: isRunning(last), last };
+  const history = readLogJson(root, 'update-history.json'), blocked = readLogJson(root, 'update-blocked.json');
+  const list = Array.isArray(history) ? history.slice(0, 8) : [];
+  const isBlocked = !!(remote && blocked && blocked.sha === remote.sha);
+  return { current: cur, remote, behind: !!(cur && remote && remote.sha !== cur), blocked: isBlocked ? { sha: blocked.sha, reason: String(blocked.reason || '').slice(0, 200), time: blocked.time } : null,
+    rollbackTo: rollbackTarget(history, cur), history: list, running: isRunning(last), last };
 }
 
-function start(root) {
+function start(root, mode = 'update') {
+  if (!MODES.includes(mode)) return Promise.reject(new Error('Unbekannter Modus.'));
   const last = readLast(root);
   if (isRunning(last)) return Promise.reject(new Error('التحديث شغّال هلأ، استنى دقيقة.'));
+  if (mode === 'rollback' && !rollbackTarget(readLogJson(root, 'update-history.json'), currentSha(root))) return Promise.reject(new Error('ما في نسخة سابقة معروفة لهالنسخة.'));
+  // السكربت بيقرا الوضع من هالملف (المهمة المجدولة ما بتاخد باراميترات)
+  try { fs.mkdirSync(path.join(root, 'logs'), { recursive: true }); fs.writeFileSync(path.join(root, 'logs', 'update-request.json'), JSON.stringify({ mode, at: new Date().toISOString() })); }
+  catch (e) { return Promise.reject(new Error('ما قدرت أكتب طلب التحديث: ' + e.message)); }
   return new Promise((resolve, reject) => {
     execFile('schtasks', ['/Run', '/TN', TASK], { windowsHide: true, timeout: 15000 }, err => {
-      if (!err) return resolve({ started: true, via: 'task' });
+      if (!err) return resolve({ started: true, via: 'task', mode });
       // احتياط: شغّل السكربت مباشرة (بنفس مستخدم السيرفر)
       try {
         const ps1 = path.join(root, 'Flamo-Update.ps1');
         if (!fs.existsSync(ps1)) return reject(new Error('مهمة Flamo-Update مو موجودة. شغّل Flamo-Update-Einrichten.cmd مرة وحدة على كمبيوتر المحل.'));
         const p = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ps1], { cwd: root, detached: true, stdio: 'ignore', windowsHide: true });
         p.on('error', () => {}); p.unref();
-        resolve({ started: true, via: 'direct' });
+        resolve({ started: true, via: 'direct', mode });
       } catch (e) { reject(new Error('ما قدرت أبدأ التحديث: ' + e.message)); }
     });
   });
 }
 
-module.exports = { status, start, currentSha };
+module.exports = { status, start, currentSha, rollbackTarget, MODES };

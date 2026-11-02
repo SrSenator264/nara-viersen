@@ -23,6 +23,10 @@ button.big[disabled]{opacity:.55;cursor:default}
 .msg{margin-top:12px;font-size:17px;font-weight:600}
 .small{color:var(--mut);font-size:14px;margin-top:10px}
 #lang{display:flex;gap:6px;justify-content:flex-end;margin-bottom:8px}
+button.mid{width:100%;min-height:52px;border:2px solid #d9d4c7;border-radius:14px;background:#fff;color:var(--ink);font-size:18px;font-weight:700;cursor:pointer;margin-top:10px}
+button.mid[disabled]{opacity:.45;cursor:default}
+.hist{list-style:none;margin:0;padding:0}.hist li{padding:8px 0;border-bottom:1px dashed #e3dfd5;font-size:15px}.hist li:last-child{border-bottom:0}.hist small{display:block;color:var(--mut);font-size:13px}
+.warnbox{background:#fff1d6;color:#6b4300;border-radius:12px;padding:10px 12px;margin-top:12px;font-weight:600}
 a.back{display:inline-block;margin-bottom:6px;color:var(--mut);text-decoration:none;font-weight:600}
 </style>
 </head>
@@ -44,6 +48,20 @@ a.back{display:inline-block;margin-bottom:6px;color:var(--mut);text-decoration:n
     <button id="go" class="big" type="button" data-t="go"></button>
     <div id="msg" class="msg" aria-live="polite"></div>
     <div class="small" data-t="note"></div>
+    <div id="blocked" class="warnbox" hidden></div>
+  </section>
+
+  <section class="card">
+    <h2 style="margin:0 0 4px;font-size:20px" data-t="safeH"></h2>
+    <div class="small" style="margin-top:0" data-t="safeTxt"></div>
+    <button id="test" class="mid" type="button" data-t="testBtn"></button>
+    <button id="back" class="mid" type="button" data-t="backBtn"></button>
+    <div id="backInfo" class="small"></div>
+  </section>
+
+  <section class="card">
+    <h2 style="margin:0 0 6px;font-size:20px" data-t="histH"></h2>
+    <ul id="hist" class="hist"></ul>
   </section>
 </main>
 <script src="/nara-lang.js?v=20261018" data-section="update"></script>
@@ -53,13 +71,27 @@ a.back{display:inline-block;margin-bottom:6px;color:var(--mut);text-decoration:n
   var T = {
     back: { de: '→ Zurück zur Kasse', ar: '→ رجوع للكاشير', en: '→ Back to the till' },
     h1: { de: '🔄 System aktualisieren', ar: '🔄 تحديث النظام', en: '🔄 Update system' },
-    sub: { de: 'Lädt die neueste Version von GitHub und startet den Server neu. Die Plattform-Brücken laufen weiter, deine Daten bleiben unberührt.', ar: 'بينزّل آخر نسخة من GitHub ويعيد تشغيل السيرفر. جسور المنصات بتضل شغالة، وبياناتك ما بتنمس.', en: 'Downloads the latest version from GitHub and restarts the server. Platform bridges keep running and your data is untouched.' },
+    sub: { de: 'Lädt die neueste Version von GitHub, prüft sie und startet den Server neu. Vorher werden deine Daten gesichert. Klappt etwas nicht, geht Flamo automatisch zur alten Version zurück.', ar: 'بينزّل آخر نسخة من GitHub، بيفحصها، وبيعيد تشغيل السيرفر. قبلها بيحفظ نسخة من بياناتك، وإذا في شي ما زبط بيرجع لحاله للنسخة القديمة.', en: 'Downloads the latest version from GitHub, checks it and restarts the server. Your data is backed up first. If anything fails, Flamo goes back to the old version by itself.' },
     cur: { de: 'Aktuelle Version', ar: 'النسخة الحالية', en: 'Current version' },
     rem: { de: 'Neueste Version auf GitHub', ar: 'آخر نسخة على GitHub', en: 'Latest version on GitHub' },
     chg: { de: 'Letzte Änderung', ar: 'آخر تغيير', en: 'Last change' },
     st: { de: 'Status', ar: 'الحالة', en: 'Status' },
     go: { de: '🔄 System aktualisieren', ar: '🔄 حدّث النظام', en: '🔄 Update system' },
     note: { de: 'Die Seite kann beim Neustart kurz unterbrechen. Das ist normal.', ar: 'ممكن الصفحة تنقطع ثواني وقت إعادة التشغيل، هاد طبيعي.', en: 'The page may drop for a few seconds during the restart. That is normal.' },
+    safeH: { de: '🛟 Schutz', ar: '🛟 الحماية', en: '🛟 Safety' },
+    safeTxt: { de: 'Test am besten nach Feierabend: der Server ist dabei ca. 30 Sekunden weg.', ar: 'التجربة أحسن بعد الإغلاق: السيرفر بيغيب حوالي 30 ثانية.', en: 'Best tested after closing: the server is away for about 30 seconds.' },
+    testBtn: { de: '🧪 Schutz testen', ar: '🧪 جرّب الحماية', en: '🧪 Test the safety net' },
+    backBtn: { de: '↩️ Zurück zur vorigen Version', ar: '↩️ رجّع للنسخة السابقة', en: '↩️ Back to the previous version' },
+    backTo: { de: 'Vorige Version: ', ar: 'النسخة السابقة: ', en: 'Previous version: ' },
+    noBack: { de: 'Keine vorige Version bekannt (erst nach einem Update mit Schutz).', ar: 'ما في نسخة سابقة معروفة (بتبيّن بعد أول تحديث فيه حماية).', en: 'No previous version known yet (appears after the first protected update).' },
+    confirmTest: { de: 'Schutz jetzt testen? Der Server ist ca. 30 Sekunden nicht erreichbar.', ar: 'نجرّب الحماية هلأ؟ السيرفر رح يغيب حوالي 30 ثانية.', en: 'Test the safety net now? The server will be away for about 30 seconds.' },
+    confirmBack: { de: 'Wirklich zur vorigen Version zurück? Deine Daten bleiben, nur das Programm wird alt.', ar: 'أكيد بدك ترجع للنسخة السابقة؟ بياناتك بتضل، بس البرنامج بيرجع قديم.', en: 'Really go back to the previous version? Your data stays, only the program goes back.' },
+    blockedTxt: { de: '⛔ Diese neue Version wurde schon zurückgerollt und wird nicht installiert, bis eine neuere kommt.', ar: '⛔ هالنسخة الجديدة انرجعنا عنها قبل، وما رح تنركّب لحتى تنزل نسخة أجدد.', en: '⛔ This new version was rolled back before and will not be installed until a newer one arrives.' },
+    histH: { de: '🕘 Letzte Vorgänge', ar: '🕘 آخر العمليات', en: '🕘 Recent runs' },
+    histNone: { de: 'Noch nichts.', ar: 'لسا ما في شي.', en: 'Nothing yet.' },
+    mUpdate: { de: 'Update', ar: 'تحديث', en: 'Update' },
+    mRollback: { de: 'Zurück', ar: 'رجوع', en: 'Rollback' },
+    mTest: { de: 'Test', ar: 'تجربة', en: 'Test' },
     checking: { de: 'Prüfe …', ar: 'عم يفحص …', en: 'Checking …' },
     needOwner: { de: 'Bitte als Inhaber/Manager anmelden', ar: 'لازم تدخل كمالك أو مدير', en: 'Please sign in as owner/manager' },
     cannotCheck: { de: 'Prüfung nicht möglich', ar: 'ما قدرت أفحص', en: 'Cannot check' },
@@ -83,8 +115,8 @@ a.back{display:inline-block;margin-bottom:6px;color:var(--mut);text-decoration:n
     document.title = 'Flamo · ' + (L ? L.t({ de: 'Update', ar: 'تحديث', en: 'Update' }) : 'Update');
   }
   function setState(cls, key) { stateKey = key; var e = $('state'); e.className = 'badge ' + cls; e.textContent = tr(key); }
-  function api(method) {
-    return fetch('/api/system/update', { method: method, headers: { 'Content-Type': 'application/json' }, body: method === 'POST' ? '{}' : undefined, credentials: 'same-origin', cache: 'no-store' })
+  function api(method, mode) {
+    return fetch('/api/system/update', { method: method, headers: { 'Content-Type': 'application/json' }, body: method === 'POST' ? JSON.stringify({ mode: mode || 'update' }) : undefined, credentials: 'same-origin', cache: 'no-store' })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j._status = r.status; return j; }); });
   }
   // Server-Meldungen kommen auf Arabisch aus dem Update-Skript; sie werden unverändert angezeigt.
@@ -95,8 +127,9 @@ a.back{display:inline-block;margin-bottom:6px;color:var(--mut);text-decoration:n
     $('rem').textContent = j.remote ? short(j.remote.sha) : tr('cannotCheck');
     $('remMsg').textContent = j.remote && j.remote.message ? j.remote.message : '—';
     last = j.last;
-    if (j.running) { setState('warn', 'working'); busy = true; $('go').disabled = true; $('msg').textContent = (last && last.message) || ''; return; }
-    busy = false; $('go').disabled = false;
+    renderSafety(j);
+    if (j.running) { setState('warn', 'working'); busy = true; lock(true); $('msg').style.color = ''; $('msg').textContent = (last && last.message) || ''; return; }
+    busy = false; lock(false);
     if (!j.remote) setState('mut', 'noGithub');
     else if (j.behind) setState('warn', 'newer');
     else setState('ok', 'uptodate');
@@ -106,18 +139,33 @@ a.back{display:inline-block;margin-bottom:6px;color:var(--mut);text-decoration:n
       $('msg').textContent = (last.ok ? '✅ ' : '❌ ') + last.message + (t ? '  (' + t + ')' : '');
     }
   }
+  function lock(on) { $('go').disabled = on || !!(data && data.blocked); $('test').disabled = on; $('back').disabled = on || !(data && data.rollbackTo); }
+  function renderSafety(j) {
+    var b = $('blocked'); b.hidden = !j.blocked; b.textContent = j.blocked ? tr('blockedTxt') : '';
+    $('backInfo').textContent = j.rollbackTo ? tr('backTo') + short(j.rollbackTo) : tr('noBack');
+    var icon = { update: '🔄', rollback: '↩️', test: '🧪' }, name = { update: 'mUpdate', rollback: 'mRollback', test: 'mTest' };
+    var h = Array.isArray(j.history) ? j.history.slice(0, 6) : [];
+    $('hist').innerHTML = h.length ? h.map(function (x) {
+      var t = x.time ? new Date(x.time).toLocaleString('de-DE') : '';
+      return '<li>' + (x.ok ? '✅ ' : '❌ ') + (icon[x.mode] || '•') + ' <b>' + esc(tr(name[x.mode] || 'mUpdate')) + '</b> · ' + esc(x.message || '') + '<small>' + esc(t) + ' · ' + esc(short(x.from)) + ' → ' + esc(short(x.to)) + '</small></li>';
+    }).join('') : '<li>' + esc(tr('histNone')) + '</li>';
+  }
+  var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  function run(mode, confirmKey) {
+    if (busy) return;
+    if (!confirm(tr(confirmKey))) return;
+    busy = true; lock(true); $('msg').style.color = ''; $('msg').textContent = tr('starting');
+    api('POST', mode).then(function (j) {
+      if (!j.ok) { busy = false; lock(false); $('msg').style.color = 'var(--bad)'; $('msg').textContent = '❌ ' + (j.error || tr('failed')); return; }
+      setState('warn', 'working'); poll();
+    }).catch(function () { busy = false; lock(false); $('msg').textContent = '❌ ' + tr('noServer'); });
+  }
+  $('test').onclick = function () { run('test', 'confirmTest'); };
+  $('back').onclick = function () { run('rollback', 'confirmBack'); };
   function refresh() { return api('GET').then(render).catch(function () { setState('warn', 'restarting'); }); }
   function poll() { clearInterval(timer); timer = setInterval(refresh, 2500); }
 
-  $('go').onclick = function () {
-    if (busy) return;
-    if (!confirm(tr('confirm'))) return;
-    busy = true; $('go').disabled = true; $('msg').style.color = ''; $('msg').textContent = tr('starting');
-    api('POST').then(function (j) {
-      if (!j.ok) { busy = false; $('go').disabled = false; $('msg').style.color = 'var(--bad)'; $('msg').textContent = '❌ ' + (j.error || tr('failed')); return; }
-      setState('warn', 'working'); poll();
-    }).catch(function () { busy = false; $('go').disabled = false; $('msg').textContent = '❌ ' + tr('noServer'); });
-  };
+  $('go').onclick = function () { run('update', 'confirm'); };
   if (L && L.mountSwitcher) L.mountSwitcher($('lang'));
   window.addEventListener('nara-lang', function () { paintStatic(); setState($('state').className.replace('badge ', '') || 'mut', stateKey); });
   paintStatic(); setState('mut', 'checking'); refresh(); poll();
