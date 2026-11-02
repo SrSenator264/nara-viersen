@@ -197,8 +197,8 @@ function staticAllowed(rel) {
 // الصفحات اللي بتنحقن فيها شاشة الدخول (الاسم → الأدوار)
 const PAGE_ROLES = {
   'kasse.html': CASH, 'anleitung.html': STAFF, 'live-orders.html': KITCH, 'kitchen.html': KITCH, 'reception.html': KITCH, 'nara-app.html': STAFF,
-  'driver-app-v2.html': STAFF, 'driver.html': STAFF, 'dispatch.html': CASH, 'connect.html': CASH, 'delivery.html': STAFF, 'delivery-print.html': STAFF,
-  'staff.html': MANAGERS, 'customers.html': KITCH, 'customer-book.html': KITCH, 'reminders.html': KITCH, 'team.html': MANAGERS, 'admin.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'dashboard.html': MANAGERS, 'status.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
+  'driver.html': STAFF, 'dispatch.html': CASH, 'connect.html': CASH, 'delivery.html': STAFF, 'delivery-print.html': STAFF,
+  'staff.html': MANAGERS, 'customers.html': KITCH, 'customer-book.html': KITCH, 'reminders.html': KITCH, 'team.html': MANAGERS, 'admin-foundation.html': MANAGERS, 'ai-control.html': MANAGERS, 'status.html': MANAGERS, 'inventory-foundation.html': MANAGERS,
   'accounting.html': ACCT, 'banking.html': ACCT, 'reports.html': ACCT, 'sales.html': ACCT, 'kasse-settlement.html': ACCT,
   'update.html': MANAGERS,
 };

@@ -12,37 +12,31 @@
     delivery: L('Lieferung', 'التوصيل', 'Delivery'),
     money: L('Zahlen', 'الأرقام والمحاسبة', 'Money'),
     ops: L('Betrieb', 'التشغيل', 'Operations'),
-    flamo: L('Flamo', 'فلامو', 'Flamo'),
+    system: L('System', 'النظام', 'System'),
   };
   // k = Schlüssel, f = Datei (+ #Hash), i = Icon, g = Gruppe
   const PAGES = [
     { k: 'kasse', f: 'kasse.html', i: '🧾', g: 'today', n: L('Kasse', 'الكاشير', 'Till') },
-    { k: 'guide', f: 'anleitung.html', i: '📖', g: 'today', n: L('Anleitung', 'دليل الكاشير', 'Till guide') },
     { k: 'live', f: 'live-orders.html', i: '📋', g: 'today', n: L('Live Orders', 'الطلبات الحية', 'Live Orders') },
     { k: 'reception', f: 'reception.html', i: '📥', g: 'today', n: L('Plattformen', 'تجميع المنصات', 'Platform hub') },
     { k: 'kitchen', f: 'kitchen.html', i: '👨‍🍳', g: 'today', n: L('Küche', 'المطبخ', 'Kitchen') },
-    { k: 'customers', f: 'customers.html', i: '👥', g: 'today', n: L('Kunden', 'الزباين', 'Customers') },
-    { k: 'customer-book', f: 'customer-book.html', i: '📒', g: 'today', n: L('Kundenkartei', 'سجل الزباين', 'Customer book') },
     { k: 'dispatch', f: 'dispatch.html', i: '🛵', g: 'delivery', n: L('Fahrer-Plan', 'توزيع السواقين', 'Dispatch') },
-    { k: 'delivery', f: 'driver-app-v2.html', i: '📦', g: 'delivery', n: L('Lieferaufträge', 'طلبات التوصيل', 'Delivery orders') },
     { k: 'delivery-print', f: 'delivery-print.html', i: '🖨️', g: 'delivery', n: L('Lieferzettel drucken', 'طباعة طلب توصيل', 'Print delivery slip') },
     { k: 'sales', f: 'sales.html', i: '💶', g: 'money', n: L('Umsätze', 'المبيعات', 'Sales') },
     { k: 'close', f: 'kasse-settlement.html', i: '📊', g: 'money', n: L('Tagesabschluss', 'تقفيلة اليوم', 'Daily closing') },
     { k: 'accounting', f: 'accounting.html', i: '📚', g: 'money', n: L('Buchhaltung', 'المحاسبة', 'Accounting') },
     { k: 'banking', f: 'banking.html', i: '🏦', g: 'money', n: L('Bank', 'البنك', 'Bank') },
     { k: 'reports', f: 'reports.html', i: '📈', g: 'money', n: L('Gewinn & Verlust', 'الربح والخسارة', 'Profit & loss') },
-    { k: 'documents', f: 'inventory-foundation.html#documents', i: '🗂️', g: 'money', n: L('Dokumente', 'الأوراق والمستندات', 'Documents') },
-    { k: 'reminders', f: 'reminders.html', i: '🔔', g: 'ops', n: L('Erinnerungen', 'تنبيهات', 'Reminders') },
     { k: 'menu', f: 'admin-foundation.html', i: '🍔', g: 'ops', n: L('Speisekarte', 'المنيو', 'Menu') },
-    { k: 'stock', f: 'inventory-foundation.html#items', i: '🥬', g: 'ops', n: L('Lager', 'المخزن', 'Stock') },
-    { k: 'suppliers', f: 'inventory-foundation.html#suppliers', i: '🚚', g: 'ops', n: L('Lieferanten', 'الموردين', 'Suppliers') },
-    { k: 'invoices', f: 'inventory-foundation.html#invoices', i: '🧮', g: 'ops', n: L('Einkaufsrechnungen', 'فواتير الشراء', 'Purchase invoices') },
+    { k: 'customers', f: 'customers.html', i: '👥', g: 'ops', n: L('Kunden', 'الزباين', 'Customers') },
+    { k: 'customer-book', f: 'customer-book.html', i: '📒', g: 'ops', n: L('Kundenkartei', 'سجل الزباين', 'Customer book') },
     { k: 'staff', f: 'staff.html', i: '🗓️', g: 'ops', n: L('Mitarbeiter & Schichten', 'الموظفين والورديات', 'Staff & shifts') },
     { k: 'team', f: 'team.html', i: '🔑', g: 'ops', n: L('Team & PINs', 'الفريق والرموز', 'Team & PINs') },
-    { k: 'status', f: 'status.html', i: '🩺', g: 'flamo', n: L('Betriebsstatus', 'حالة الشغل', 'System status') },
-    { k: 'dashboard', f: 'dashboard.html', i: '🏠', g: 'flamo', n: L('Dashboard', 'لوحة التحكم', 'Dashboard') },
-    { k: 'ai', f: 'ai-control.html', i: '🤖', g: 'flamo', n: L('AI Manager', 'AI Manager', 'AI Manager') },
-    { k: 'site', f: 'web-prototype/c.html', i: '🔥', g: 'flamo', n: L('Kundenseite', 'موقع الزبون', 'Customer site') },
+    { k: 'reminders', f: 'reminders.html', i: '🔔', g: 'ops', n: L('Erinnerungen', 'تنبيهات', 'Reminders') },
+    { k: 'status', f: 'status.html', i: '🩺', g: 'system', n: L('Betriebsstatus', 'حالة الشغل', 'System status') },
+    { k: 'ai', f: 'ai-control.html', i: '🤖', g: 'system', n: L('AI Manager', 'AI Manager', 'AI Manager') },
+    { k: 'guide', f: 'anleitung.html', i: '📖', g: 'system', n: L('Anleitung', 'دليل الكاشير', 'Till guide') },
+    { k: 'site', f: 'web-prototype/c.html', i: '🔥', g: 'system', n: L('Kundenseite', 'موقع الزبون', 'Customer site') },
   ];
   const HOME = { f: 'nara-app.html', i: '🏁', n: L('Start', 'الرئيسية', 'Home') };
   const T = {
@@ -58,9 +52,9 @@
     noNet: L('Kein Internet', 'ما في إنترنت', 'No internet'),
   };
   // Arbeitsbildschirme: Seitenleiste nur auf Knopfdruck (volle Breite für Kasse/Küche)
-  const COMPACT = new Set(['kasse.html', 'anleitung.html', 'reception.html', 'kitchen.html', 'live-orders.html', 'dispatch.html', 'driver-app-v2.html', 'connect.html']);
+  const COMPACT = new Set(['kasse.html', 'anleitung.html', 'reception.html', 'kitchen.html', 'live-orders.html', 'dispatch.html', 'connect.html']);
   // Seiten, deren Inhalt früher von nara-shell.js in .main gepackt wurde (Abstand/Breite bleibt gleich)
-  const WRAP = new Set(['accounting.html', 'admin-foundation.html', 'ai-control.html', 'banking.html', 'dashboard.html', 'inventory-foundation.html', 'reports.html', 'sales.html', 'staff.html']);
+  const WRAP = new Set(['accounting.html', 'admin-foundation.html', 'ai-control.html', 'banking.html', 'inventory-foundation.html', 'reports.html', 'sales.html', 'staff.html']);
   const MANAGERS = ['OWNER', 'MANAGER'];
 
   const me = document.currentScript;
@@ -95,7 +89,6 @@
   };
   const keyOfCurrent = () => {
     const h = location.hash || '';
-    if (file === 'inventory-foundation.html') return h.includes('suppliers') ? 'suppliers' : h.includes('invoices') ? 'invoices' : h.includes('documents') ? 'documents' : 'stock';
     if (inWebProto && file === 'c.html') return 'site';
     const p = PAGES.find(x => x.f.split('#')[0] === file);
     return p ? p.k : '';

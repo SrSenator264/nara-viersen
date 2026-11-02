@@ -19,6 +19,21 @@ test('Navigation: jede Seite hat Name in de/ar/en, existiert und hat Rechte', ()
   }
 });
 
+test('Navigation: kein Ziel doppelt, Gruppen übersichtlich, Altseiten weg', () => {
+  const targets = PAGES.map(p => p.f);
+  assert.equal(new Set(targets).size, targets.length, 'zwei Menüpunkte führen auf dieselbe Seite');
+  assert.ok(!targets.some(f => f.includes('#')), 'Menüpunkte mit #Anker führen auf dieselbe Seite');
+  const groups = src.match(/const GROUPS = (\{[\s\S]*?\n  \});/)[1];
+  const keys = [...groups.matchAll(/^\s{4}(\w+):/gm)].map(m => m[1]);
+  assert.equal(keys.length, 5, 'genau 5 Gruppen');
+  for (const g of keys) { const n = PAGES.filter(p => p.g === g).length; assert.ok(n >= 1 && n <= 6, `Gruppe ${g}: ${n} Einträge`); }
+  for (const p of PAGES) assert.ok(keys.includes(p.g), p.k + ': unbekannte Gruppe');
+  for (const dead of ['admin.html', 'dashboard.html', 'driver-app-v2.html']) {
+    assert.ok(!fs.existsSync(path.join(root, dead)), dead + ' sollte weg sein');
+    assert.ok(!targets.includes(dead) && !(dead in A.PAGE_ROLES), dead + ' wird noch referenziert');
+  }
+});
+
 test('Navigation: Server fügt Seitenleiste ein (nicht in Fahrer-/Kundenseiten)', () => {
   const inject = fs.readFileSync(path.join(root, 'server-auth.js'), 'utf8');
   assert.ok(inject.includes('/flamo-nav.js?v=') && inject.includes('NAV_SKIP'));

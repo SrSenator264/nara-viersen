@@ -132,12 +132,12 @@ test('وضع ليلي عام: ملفات الفرونت + مفعّل بصفحة 
 });
 
 test('وضع ليلي: الجزء 2 (Live Orders، المطبخ، السواقين)', () => {
-  for (const f of ['live-orders.html', 'driver.html', 'driver-app-v2.html']) assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').includes('flamo-night.js'), f);
+  for (const f of ['live-orders.html', 'driver.html']) assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').includes('flamo-night.js'), f);
   assert.ok(!fs.readFileSync(path.join(__dirname, '..', 'kitchen.html'), 'utf8').includes('flamo-night'), 'المطبخ بدون وضع ليلي (طلب Omar)');
 });
 
 test('وضع ليلي: الجزء 3 (المحاسبة والأرقام)', () => {
-  for (const f of ['accounting.html', 'sales.html', 'reports.html', 'dashboard.html', 'banking.html', 'admin.html']) assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').includes('flamo-night.js'), f);
+  for (const f of ['accounting.html', 'sales.html', 'reports.html', 'banking.html']) assert.ok(fs.readFileSync(path.join(__dirname, '..', f), 'utf8').includes('flamo-night.js'), f);
 });
 
 test('زر الرئيسية 🏠: على كل الصفحات (حتى موقع الزبون) ما عدا الرئيسية نفسها، وبيظهر بس مع جلسة موظف', () => {

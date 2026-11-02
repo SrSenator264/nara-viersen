@@ -2,7 +2,7 @@
 import { test, expect } from 'playwright/test';
 
 const PAGES = ['kasse.html', 'kitchen.html', 'live-orders.html', 'dispatch.html', 'driver.html',
-  'delivery.html', 'dashboard.html', 'reports.html', 'accounting.html', 'customers.html'];
+  'delivery.html', 'reports.html', 'accounting.html', 'customers.html'];
 
 for (const name of PAGES) {
   test(`صفحة ${name} بتنفتح بدون أخطاء`, async ({ page, baseURL }) => {
