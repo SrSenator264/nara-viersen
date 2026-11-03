@@ -1,0 +1,250 @@
+=== الكاتيغوريات وعدد الأصناف ===
+Beef Burger (10) | Chicken Burger (8) | Veggie Burger (1) | Korean & Fusion Wings (6) | Chicken Buckets & Deals (New) (4) | Angebot (3) | Angebot 3 für 2 (2) | Crispyburger Bundels (4) | French Tacos (18) | Specials (22) | Salate (6) | Falafel (6) | Hot Dogs (7) | Sandwiches (12) | Fried Chicken (3) | Extra (35) | Desserts (11) | Dips (14) | Frappuccino Series (16) | Alkoholfreie Getränke (28) | Iced Coffee (9) | Iced Tea (8) | Shisha (1) | Kindergerichte (2)
+
+=== كل مجموعة ===
+
+[og_2f1584aa16] "Ihre Extras"  اسم داخلي: "Ihre Extras"  | عناصر: 18 | مدفوعة: 18
+  كاتيغوريات: Beef Burger(10), Chicken Burger(8), Veggie Burger(1), French Tacos(18)
+  أصناف (أول 4): Joppie Beef burger, Joppie Chicken Burger, Crunchy Chik’n Burger, Cheese Burger …
+  أسعار المدفوع: 4.50€×2, 1.20€×2, 3.00€×1, 0.99€×9, 0.49€×1, 1.99€×2, 1.49€×1
+  عناصر: Beef, extra 4.50 | Chicken, extra 4.50 | Käse, extra 1.20 | Back-Camembert 3.00 | Ei 0.99 | Bacon 1.20 …
+
+[og_0905d985c6] "Ihr Getränk"  اسم داخلي: "Ihr Getränk"  | عناصر: 11 | مدفوعة: 2
+  كاتيغوريات: Beef Burger(10), Chicken Burger(7), Veggie Burger(1)
+  أصناف (أول 4): Joppie Beef burger, Joppie Chicken Burger, Crunchy Chik’n Burger, Cheese Burger …
+  أسعار المدفوع: 0.75€×1, 1.49€×1
+  عناصر: Ohne Getränk 0.00 | Fanta Lemon & Elderflower 0,33 l 0.00 | Coca-Cola Zero Sugar 0,33 l (EINWEG) 0.00 | Fanta Mango & Dragonfruit 0,33 l 0.00 | Fuze Tea Schwarzer Tee Zitrone 0,4 l (EINWEG) 0.75 | Mezzo Mix 0,33 l (EINWEG) 0.00 …
+
+[og_64ec56e21d] "Ihre Sauce"  اسم داخلي: "Ihre Sauce"  | عناصر: 4 | مدفوعة: 1
+  كاتيغوريات: Beef Burger(10), Chicken Burger(7), Veggie Burger(1)
+  أصناف (أول 4): Joppie Beef burger, Joppie Chicken Burger, Crunchy Chik’n Burger, Cheese Burger …
+  أسعار المدفوع: 1.49€×1
+  عناصر: Mit Mayonnaise 0.00 | Mit Ketchup 0.00 | Mit Cheesesauce 1.49 | Ohne Sauce 0.00
+
+[og_e90555785f] "Dips"  اسم داخلي: "Dips"  | عناصر: 17 | مدفوعة: 17
+  كاتيغوريات: Beef Burger(10), Chicken Burger(8), Veggie Burger(1)
+  أصناف (أول 4): Joppie Beef burger, Joppie Chicken Burger, Crunchy Chik’n Burger, Cheese Burger …
+  أسعار المدفوع: 0.49€×2, 1.49€×15
+  عناصر: Mayonnaise 0.49 | Ketchup 0.49 | Aioli 1.49 | Chili-Scharf Sauce 1.49 | Barbecuesauce 1.49 | Chillicheese Sauce 1.49 …
+
+[og_9ff4599551] ""  اسم داخلي: ""  | عناصر: 17 | مدفوعة: 17
+  كاتيغوريات: Korean & Fusion Wings(6)
+  أصناف (أول 4): Korean Classic Yangnyeom Wings, Creamy Cheese Bomb Wings, Original Korean Chili Wings, Tokyo Teriyaki Wings …
+  أسعار المدفوع: 0.49€×2, 1.49€×15
+  عناصر: Mayonnaise 0.49 | Ketchup 0.49 | Aioli 1.49 | Chili-Scharf Sauce 1.49 | Barbecuesauce 1.49 | Chillicheese Sauce 1.49 …
+
+[og_244b47049e] "Inklusive · Dip 1"  اسم داخلي: "Inklusive · Dip 1"  | عناصر: 17 | مدفوعة: 0
+  كاتيغوريات: Chicken Buckets & Deals (New)(4)
+  أصناف (أول 4): Ultra Wings Bucket, Crispy Tenders Bucket, Half & Half Bucket, Ultimate Variety Bucket
+  أسعار المدفوع: —
+  عناصر: Mayonnaise 0.00 | Ketchup 0.00 | Aioli 0.00 | Chili-Scharf Sauce 0.00 | Barbecuesauce 0.00 | Chillicheese Sauce 0.00 …
+
+[og_e68b223da8] "Inklusive · Dip 2"  اسم داخلي: "Inklusive · Dip 2"  | عناصر: 17 | مدفوعة: 0
+  كاتيغوريات: Chicken Buckets & Deals (New)(4)
+  أصناف (أول 4): Ultra Wings Bucket, Crispy Tenders Bucket, Half & Half Bucket, Ultimate Variety Bucket
+  أسعار المدفوع: —
+  عناصر: Mayonnaise 0.00 | Ketchup 0.00 | Aioli 0.00 | Chili-Scharf Sauce 0.00 | Barbecuesauce 0.00 | Chillicheese Sauce 0.00 …
+
+[og_cc87b052c4] "Zusätzliche Dips · kostenpflichtig"  اسم داخلي: "Zusätzliche Dips · kostenpflichtig"  | عناصر: 17 | مدفوعة: 17
+  كاتيغوريات: Chicken Buckets & Deals (New)(4)
+  أصناف (أول 4): Ultra Wings Bucket, Crispy Tenders Bucket, Half & Half Bucket, Ultimate Variety Bucket
+  أسعار المدفوع: 0.49€×2, 1.49€×15
+  عناصر: Mayonnaise 0.49 | Ketchup 0.49 | Aioli 1.49 | Chili-Scharf Sauce 1.49 | Barbecuesauce 1.49 | Chillicheese Sauce 1.49 …
+
+[og_c65e6686f2] "Deine 1. Sauce · inklusive"  اسم داخلي: "Deine 1. Sauce · inklusive"  | عناصر: 8 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Duo Power Meal
+  أسعار المدفوع: —
+  عناصر: Mit Aioli 0.00 | Mit Süß Sauer 0.00 | Mit Cheese Sauce 0.00 | Mit Ketchup 0.00 | Mit Barbecuesauce 0.00 | Mit Mayonnaise 0.00 …
+
+[og_68347a740c] "Dein 1. Getränk · inklusive"  اسم داخلي: "Dein 1. Getränk · inklusive"  | عناصر: 9 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(2)
+  أصناف (أول 4): Duo Power Meal, Friends Feast Combo
+  أسعار المدفوع: —
+  عناصر: Coca-Cola Zero Sugar 0,33 l (EINWEG) 0.00 | Coca-Cola 0,33 l (EINWEG) 0.00 | Fanta Lemon und Elderflower 0,33 l (EINWEG) 0.00 | Sprite 0,33 l (EINWEG) 0.00 | Fanta Orange 0,33 l (EINWEG) 0.00 | Fanta Mango und Drachenfrucht 0,33 l (EINWEG) 0.00 …
+
+[og_b7fb3b9796] "Dein 2. Getränk · inklusive"  اسم داخلي: "Dein 2. Getränk · inklusive"  | عناصر: 9 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(2)
+  أصناف (أول 4): Duo Power Meal, Friends Feast Combo
+  أسعار المدفوع: —
+  عناصر: Ohne weiteres Getränk 0.00 | Fanta Orange 0,33 l (EINWEG) 0.00 | Fanta Strawberry und Kiwi 0,33 l (EINWEG) 0.00 | Coca-Cola Zero Sugar 0,33 l (EINWEG) 0.00 | Fanta Mango und Drachenfrucht 0,33 l (EINWEG) 0.00 | Mezzo Mix 0,33 l (EINWEG) 0.00 …
+
+[og_476d51be17] "Deine 1. Sauce · inklusive"  اسم داخلي: "Deine 1. Sauce · inklusive"  | عناصر: 8 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Friends Feast Combo
+  أسعار المدفوع: —
+  عناصر: Mit Süß Sauer 0.00 | Mit Aioli 0.00 | Mit Barbecuesauce 0.00 | Mit Ketchup 0.00 | Mit Mayonnaise 0.00 | Mit Chilli Cheese Sauce 0.00 …
+
+[og_ce921547e4] "Deine 2. Sauce · inklusive"  اسم داخلي: "Deine 2. Sauce · inklusive"  | عناصر: 8 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Friends Feast Combo
+  أسعار المدفوع: —
+  عناصر: Ohne weitere Sauce 0.00 | Mit Barbecuesauce 0.00 | Mit Mayonnaise 0.00 | Mit Ketchup 0.00 | Mit Cheese Sauce 0.00 | Mit Chilli Cheese Sauce 0.00 …
+
+[og_cb367c1326] "Dein 3. Getränk · inklusive"  اسم داخلي: "Dein 3. Getränk · inklusive"  | عناصر: 9 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Friends Feast Combo
+  أسعار المدفوع: —
+  عناصر: Ohne weiteres Getränk 0.00 | Fanta Lemon und Elderflower 0,33 l (EINWEG) 0.00 | Fanta Mango und Drachenfrucht 0,33 l (EINWEG) 0.00 | Sprite 0,33 l (EINWEG) 0.00 | Coca-Cola 0,33 l (EINWEG) 0.00 | Coca-Cola Zero Sugar 0,33 l (EINWEG) 0.00 …
+
+[og_5b30f4098d] "Deine 1. Sauce · inklusive"  اسم داخلي: "Deine 1. Sauce · inklusive"  | عناصر: 8 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Family Mix Box
+  أسعار المدفوع: —
+  عناصر: Mit Cheese Sauce 0.00 | Mit Aioli 0.00 | Mit Chilli Cheese Sauce 0.00 | Mit Ketchup 0.00 | Mit Süß Sauer 0.00 | Mit Mayonnaise 0.00 …
+
+[og_63d0d79540] "Deine 2. Sauce · inklusive"  اسم داخلي: "Deine 2. Sauce · inklusive"  | عناصر: 7 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Family Mix Box
+  أسعار المدفوع: —
+  عناصر: Ohne weitere Sauce 0.00 | Mit Cheese Sauce 0.00 | Mit Ketchup 0.00 | Mit Süß Sauer 0.00 | Mit Mayonnaise 0.00 | Mit Chilli Cheese Sauce 0.00 …
+
+[og_762abf3471] "Deine 3. Sauce · inklusive"  اسم داخلي: "Deine 3. Sauce · inklusive"  | عناصر: 8 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(2)
+  أصناف (أول 4): Family Mix Box, Party Platter XL
+  أسعار المدفوع: —
+  عناصر: Ohne weitere Sauce 0.00 | Mit Barbecuesauce 0.00 | Mit Cheese Sauce 0.00 | Mit Aioli 0.00 | Mit Süß Sauer 0.00 | Mit Chilli Cheese Sauce 0.00 …
+
+[og_f91e503050] "Deine 4. Sauce · inklusive"  اسم داخلي: "Deine 4. Sauce · inklusive"  | عناصر: 8 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(2)
+  أصناف (أول 4): Family Mix Box, Party Platter XL
+  أسعار المدفوع: —
+  عناصر: Ohne weitere Sauce 0.00 | Mit Cheese Sauce 0.00 | Mit Barbecuesauce 0.00 | Mit Mayonnaise 0.00 | Mit Aioli 0.00 | Mit Chilli Cheese Sauce 0.00 …
+
+[og_ed8b74d50b] "Dein 1. Getränk · inklusive"  اسم داخلي: "Dein 1. Getränk · inklusive"  | عناصر: 2 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(2)
+  أصناف (أول 4): Family Mix Box, Party Platter XL
+  أسعار المدفوع: —
+  عناصر: Coca-Cola 1,0 l (MEHRWEG) 0.00 | Ohne Getränk 0.00
+
+[og_9da7e9a5e9] "Deine 1. Sauce · inklusive"  اسم داخلي: "Deine 1. Sauce · inklusive"  | عناصر: 8 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Party Platter XL
+  أسعار المدفوع: —
+  عناصر: Mit Süß Sauer 0.00 | Mit Chilli Cheese Sauce 0.00 | Mit Aioli 0.00 | Mit Cheese Sauce 0.00 | Mit Ketchup 0.00 | Mit Mayonnaise 0.00 …
+
+[og_5602af999b] "Deine 2. Sauce · inklusive"  اسم داخلي: "Deine 2. Sauce · inklusive"  | عناصر: 9 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Party Platter XL
+  أسعار المدفوع: —
+  عناصر: Ohne weitere Sauce 0.00 | Mit Mayonnaise 0.00 | Mit Süß Sauer 0.00 | Mit Knoblauchsauce 0.00 | Mit Aioli 0.00 | Mit Chilli Cheese Sauce 0.00 …
+
+[og_a442741359] "Deine 5. Sauce · inklusive"  اسم داخلي: "Deine 5. Sauce · inklusive"  | عناصر: 8 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Party Platter XL
+  أسعار المدفوع: —
+  عناصر: Ohne weitere Sauce 0.00 | Mit Mayonnaise 0.00 | Mit Ketchup 0.00 | Mit Cheese Sauce 0.00 | Mit Süß Sauer 0.00 | Mit Aioli 0.00 …
+
+[og_b098dc6183] "Deine 6. Sauce · inklusive"  اسم داخلي: "Deine 6. Sauce · inklusive"  | عناصر: 8 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Party Platter XL
+  أسعار المدفوع: —
+  عناصر: Ohne weitere Sauce 0.00 | Mit Chilli Cheese Sauce 0.00 | Mit Cheese Sauce 0.00 | Mit Barbecuesauce 0.00 | Mit Mayonnaise 0.00 | Mit Ketchup 0.00 …
+
+[og_d162cd7658] "Dein 2. Getränk · inklusive"  اسم داخلي: "Dein 2. Getränk · inklusive"  | عناصر: 2 | مدفوعة: 0
+  كاتيغوريات: Crispyburger Bundels(1)
+  أصناف (أول 4): Party Platter XL
+  أسعار المدفوع: —
+  عناصر: Coca-Cola 1,0 l (MEHRWEG) 0.00 | Ohne weiteres Getränk 0.00
+
+[og_d253c88b2f] "Ihr Dessert"  اسم داخلي: "Ihr Dessert"  | عناصر: 5 | مدفوعة: 2
+  كاتيغوريات: French Tacos(18)
+  أصناف (أول 4): Falafel Taco, (Extra) Falafel Taco, Chilli Cheese Beef Taco, (Extra) Chilli Cheese Beef Taco …
+  أسعار المدفوع: 4.45€×2
+  عناصر: Crispy Caramel-gefüllte Donut 0.00 | Rich Chocolate Muffin 4.45 | Filly Berry-gefüllte Donut 0.00 | Choconougat muffin Pof 4.45 | Filly Apple Cinnamon muffin 0.00
+
+[og_951b494301] "Ihr alkoholfreies Getränk"  اسم داخلي: "Ihr alkoholfreies Getränk"  | عناصر: 13 | مدفوعة: 13
+  كاتيغوريات: French Tacos(18)
+  أصناف (أول 4): Falafel Taco, (Extra) Falafel Taco, Chilli Cheese Beef Taco, (Extra) Chilli Cheese Beef Taco …
+  أسعار المدفوع: 3.49€×1, 2.24€×6, 3.24€×2, 3.74€×2, 3.64€×2
+  عناصر: Coca-Cola 1,0 l 3.49 | Fanta Orange 0,33 l (EINWEG) 2.24 | Coca-Cola Zero Sugar 0,33 l (EINWEG) 2.24 | Sprite 0,33 l (EINWEG) 2.24 | Fuze Tea Schwarzer Tee Zitrone 0,4 l (EINWEG) 3.24 | Softdrink-Moloko 0,25 l 3.74 …
+
+[og_40b66e86c4] "Ihr Dessert"  اسم داخلي: "Ihr Dessert"  | عناصر: 6 | مدفوعة: 3
+  كاتيغوريات: Falafel(5), Hot Dogs(7), Sandwiches(12)
+  أصناف (أول 4): Falafel Sandwich, Falafel Sandwich Extra, Falafel Teller, Jalangi …
+  أسعار المدفوع: 4.45€×2, 3.99€×1
+  عناصر: Choconougat muffin Pof 4.45 | Blue Berry Muffin 0.00 | Filly Apple Cinnamon muffin 0.00 | Rich Chocolate Muffin 4.45 | Filly Berry-gefüllte Donut 0.00 | Crispy Caramel-gefüllte Donut 3.99
+
+[og_82d1260e76] "Ihr alkoholfreies Getränk"  اسم داخلي: "Ihr alkoholfreies Getränk"  | عناصر: 13 | مدفوعة: 13
+  كاتيغوريات: Falafel(5), Hot Dogs(7), Sandwiches(12)
+  أصناف (أول 4): Falafel Sandwich, Falafel Sandwich Extra, Falafel Teller, Jalangi …
+  أسعار المدفوع: 3.24€×2, 3.64€×2, 2.24€×6, 3.34€×1, 3.74€×2
+  عناصر: Fuze Tea Schwarzer Tee Pfirsich 0,4 l (EINWEG) 3.24 | Kokos Blaubeere Red Bull 0,25 l 3.64 | Fanta Orange 0,33 l (EINWEG) 2.24 | Fanta Strawberry & Kiwi 0,33 l 2.24 | Coca-Cola 0,33 l (EINWEG) 2.24 | Sprite 0,33 l (EINWEG) 2.24 …
+
+[og_3516e37a12] "Ihr Gericht"  اسم داخلي: "Ihr Gericht"  | عناصر: 2 | مدفوعة: 1
+  كاتيغوريات: Falafel(1)
+  أصناف (أول 4): Falafel-Menü
+  أسعار المدفوع: 1.09€×1
+  عناصر: Falafel Sandwich 0.00 | Falafel Sandwich Extra 1.09
+
+[og_b380acb7f6] "Ihr Dip"  اسم داخلي: "Ihr Dip"  | عناصر: 4 | مدفوعة: 1
+  كاتيغوريات: Falafel(1)
+  أصناف (أول 4): Falafel-Menü
+  أسعار المدفوع: 0.99€×1
+  عناصر: Mit Mayonnaise 0.00 | Mit Ketchup 0.00 | Joppie Sauce 0.99 | Ohne Dip 0.00
+
+[og_63b3a66d47] "Ihr Getränk"  اسم داخلي: "Ihr Getränk"  | عناصر: 12 | مدفوعة: 5
+  كاتيغوريات: Falafel(1)
+  أصناف (أول 4): Falafel-Menü
+  أسعار المدفوع: 1.35€×1, 1.25€×4
+  عناصر: Coca-Cola 1,0 l 1.35 | Fanta Mango & Dragonfruit 0,33 l 0.00 | Fanta Orange 0,33 l (EINWEG) 0.00 | Red Bull Kokos-Blaubeere 0,25 l 1.25 | Coca-Cola Zero Sugar 0,33 l (EINWEG) 0.00 | Sprite 0,33 l (EINWEG) 0.00 …
+
+[og_f911f06ec6] "Dips"  اسم داخلي: "Dips"  | عناصر: 17 | مدفوعة: 17
+  كاتيغوريات: Sandwiches(12)
+  أصناف (أول 4): Shawarma Rolle im Tortilla Brot, Shawarma doppelt, Shawarma (Fleisch) Rolle im Tortilla Brot, Shawarma doppelt (Fleisch) …
+  أسعار المدفوع: 0.49€×2, 1.49€×15
+  عناصر: Mayonnaise 0.49 | Ketchup 0.49 | Aioli 1.49 | Chili-Scharf Sauce 1.49 | Barbecuesauce 1.49 | Chillicheese Sauce 1.49 …
+
+[og_88aebd2d32] "Ihr Getränk"  اسم داخلي: "Ihr Getränk"  | عناصر: 11 | مدفوعة: 4
+  كاتيغوريات: Fried Chicken(1)
+  أصناف (أول 4): Crispy Chicken Filet Menü
+  أسعار المدفوع: 1.25€×3, 1.35€×1
+  عناصر: Mezzo Mix 0,33 l (EINWEG) 0.00 | Red Bull 0,25 l (EINWEG) 1.25 | Coca-Cola 1,0 l 1.35 | Fuze Tea Schwarzer Tee Pfirsich 0,4 l (EINWEG) 1.25 | Sprite 0,33 l (EINWEG) 0.00 | Fuze Tea Schwarzer Tee Zitrone 0,4 l (EINWEG) 1.25 …
+
+[og_171f8eb634] "Ihr Dip"  اسم داخلي: "Ihr Dip"  | عناصر: 3 | مدفوعة: 0
+  كاتيغوريات: Fried Chicken(3)
+  أصناف (أول 4): Crispy Chicken Filet Menü, Crispy Chicken Filet (4 Stück), Crispy Chicken Filet (6 Stück)
+  أسعار المدفوع: —
+  عناصر: Mit Mayonnaise 0.00 | Mit Ketchup 0.00 | Ohne Dip 0.00
+
+[og_4d69d318e7] "Zusätzliche Dips · kostenpflichtig"  اسم داخلي: "Zusätzliche Dips · kostenpflichtig"  | عناصر: 17 | مدفوعة: 17
+  كاتيغوريات: Fried Chicken(3)
+  أصناف (أول 4): Crispy Chicken Filet Menü, Crispy Chicken Filet (4 Stück), Crispy Chicken Filet (6 Stück)
+  أسعار المدفوع: 0.49€×2, 1.49€×15
+  عناصر: Mayonnaise 0.49 | Ketchup 0.49 | Aioli 1.49 | Chili-Scharf Sauce 1.49 | Barbecuesauce 1.49 | Chillicheese Sauce 1.49 …
+
+[og_ef593fa8fe] "Extras"  اسم داخلي: "Extras"  | عناصر: 1 | مدفوعة: 1
+  كاتيغوريات: Fried Chicken(3)
+  أصناف (أول 4): Crispy Chicken Filet Menü, Crispy Chicken Filet (4 Stück), Crispy Chicken Filet (6 Stück)
+  أسعار المدفوع: 0.99€×1
+  عناصر: Burger Bun 0.99
+
+[og_28c87b7454] "Deine Bestellung"  اسم داخلي: "Deine Bestellung"  | عناصر: 2 | مدفوعة: 1
+  كاتيغوريات: Frappuccino Series(8)
+  أصناف (أول 4): Mango Cream Frappe 0,5l, Strawberry cream Frappe 0,5l, Peach cream frappe 0,5l, Maracuja Cream frappe 0,5l …
+  أسعار المدفوع: 2.50€×1
+  عناصر: Als Einzelgetränk 0.00 | Als Menü mit 2 Donuts 2.50
+
+[og_80e41b367c] "Deine Sahne"  اسم داخلي: "Deine Sahne"  | عناصر: 2 | مدفوعة: 0
+  كاتيغوريات: Frappuccino Series(16)
+  أصناف (أول 4): Mango Cream Frappe 0,5l, Strawberry cream Frappe 0,5l, Peach cream frappe 0,5l, Maracuja Cream frappe 0,5l …
+  أسعار المدفوع: —
+  عناصر: Mit Sahne 0.00 | Ohne Sahne 0.00
+
+[og_8335d6983c] "Dein 1. Donut"  اسم داخلي: "Dein 1. Donut"  | عناصر: 4 | مدفوعة: 0
+  كاتيغوريات: Frappuccino Series(16)
+  أصناف (أول 4): Mango Cream Frappe 0,5l, Strawberry cream Frappe 0,5l, Peach cream frappe 0,5l, Maracuja Cream frappe 0,5l …
+  أسعار المدفوع: —
+  عناصر: White Donut 0.00 | Pinky-Donut 0.00 | Schokoladen Black-Donut 0.00 | Sprinkle Donut 0.00
+
+[og_bc273a1bc7] "Dein 2. Donut"  اسم داخلي: "Dein 2. Donut"  | عناصر: 4 | مدفوعة: 0
+  كاتيغوريات: Frappuccino Series(16)
+  أصناف (أول 4): Mango Cream Frappe 0,5l, Strawberry cream Frappe 0,5l, Peach cream frappe 0,5l, Maracuja Cream frappe 0,5l …
+  أسعار المدفوع: —
+  عناصر: White Donut 0.00 | Pinky-Donut 0.00 | Schokoladen Black-Donut 0.00 | Sprinkle Donut 0.00
+
+[og_07c2a3296b] "Deine Bestellung"  اسم داخلي: "Deine Bestellung"  | عناصر: 2 | مدفوعة: 1
+  كاتيغوريات: Frappuccino Series(8)
+  أصناف (أول 4): Mango Strawberry cream frappe 0,5l, Strawberry white mocha cream frappe 0,5l, Strawberry peach cream frappe 0,5l, Caramel mocha cream frappe 0,5l …
+  أسعار المدفوع: 2.00€×1
+  عناصر: Als Einzelgetränk 0.00 | Als Menü mit 2 Donuts 2.00
