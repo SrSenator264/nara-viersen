@@ -175,7 +175,7 @@ function plat(o){if(isLoco(o))return 'LOCO';const p=S(o.platform||o.source).toUp
 const PC={WEB:'#E3262F',LIEFERANDO:'#ff8000',UBER_EATS:'#06c167',WOLT:'#009de0',LANCH:'#7b4ddb',LOCO:'#d62828',NARA:'#37474f',Flamo:'#37474f'};
 let all=[],pays={};const autoDone=new Set(),AUTO_DONE_MIN=120;
 const PL={WEB:'Website',LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',LOCO:'Loco Chicken',Flamo:'NARA'};PL.NARA=(T[lang]||T.de).naraKasse;
-function badge(o){const p=plat(o);let t=PL[p];if(p==='LOCO'&&o.channel&&o.channel!=='SIDES')t+=' · '+(PL[o.channel]||o.portalName||'');return '<span class="badge b-'+p+'">'+esc(t)+'</span>'+(p==='NARA'&&(o.isTest||o.training)?' <span class="badge" style="background:#fff3cd;color:#8a5a00">🎓 '+(lang==='ar'?'تدريب':'Training')+'</span>':'')}
+function badge(o){const p=plat(o);let t=PL[p];if(p==='LOCO'&&o.channel&&o.channel!=='SIDES')t+=' · '+(PL[o.channel]||o.portalName||'');return '<span class="badge b-'+p+'">'+esc(t)+'</span>'}
 function stageOf(o){const st=S(o.status).toUpperCase();if(st==='CANCELLED')return 'DONE';const s=S(o.liveStage).toUpperCase();if(s==='DONE'||st==='COMPLETED')return 'DONE';if(s==='HANDOVER')return 'HANDOVER';return 'PREPARE'}
 const cancelled=o=>S(o.status).toUpperCase()==='CANCELLED';
 const code=o=>S(o.displayCode)||S(o.externalOrderCode)||S(o.id).slice(-6);
