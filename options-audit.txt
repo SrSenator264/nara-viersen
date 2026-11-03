@@ -1,0 +1,244 @@
+
+=== 1. الأرقام العامة ===
+مجموعات: 41 | عناصر كتالوج: 85 | أصناف: 236
+أصناف مربوطة بمجموعات: 95
+مجموعات بدون أي صنف: 0
+
+=== 2. مجموعات مكررة تماماً (نفس العناصر بنفس الأسعار) ===
+• Dips [19 أصناف]  =  og_9ff4599551 [6 أصناف]  =  Zusätzliche Dips · kostenpflichtig [4 أصناف]  =  Dips [12 أصناف]  =  Zusätzliche Dips · kostenpflichtig [3 أصناف]  (17 عنصر)
+• Inklusive · Dip 1 [4 أصناف]  =  Inklusive · Dip 2 [4 أصناف]  (17 عنصر)
+• Deine 1. Sauce · inklusive [1 أصناف]  =  Deine 1. Sauce · inklusive [1 أصناف]  =  Deine 1. Sauce · inklusive [1 أصناف]  =  Deine 1. Sauce · inklusive [1 أصناف]  (8 عنصر)
+• Dein 2. Getränk · inklusive [2 أصناف]  =  Dein 3. Getränk · inklusive [1 أصناف]  (9 عنصر)
+• Deine 2. Sauce · inklusive [1 أصناف]  =  Deine 3. Sauce · inklusive [2 أصناف]  =  Deine 4. Sauce · inklusive [2 أصناف]  =  Deine 5. Sauce · inklusive [1 أصناف]  =  Deine 6. Sauce · inklusive [1 أصناف]  (8 عنصر)
+• Dein 1. Donut [16 أصناف]  =  Dein 2. Donut [16 أصناف]  (4 عنصر)
+
+=== 3. مجموعات متشابهة (70% أو أكتر نفس العناصر، بس مش مطابقة) ===
+• Ihre Sauce [18 أصناف]  ~  Ihr Dip [3 أصناف]  (75%)
+    فقط بالأولى: Mit Cheesesauce
+• Dips [19 أصناف]  ~  Inklusive · Dip 1 [4 أصناف]  (100%)
+• Dips [19 أصناف]  ~  Inklusive · Dip 2 [4 أصناف]  (100%)
+• og_9ff4599551 [6 أصناف]  ~  Inklusive · Dip 1 [4 أصناف]  (100%)
+• og_9ff4599551 [6 أصناف]  ~  Inklusive · Dip 2 [4 أصناف]  (100%)
+• Inklusive · Dip 1 [4 أصناف]  ~  Zusätzliche Dips · kostenpflichtig [4 أصناف]  (100%)
+• Inklusive · Dip 1 [4 أصناف]  ~  Dips [12 أصناف]  (100%)
+• Inklusive · Dip 1 [4 أصناف]  ~  Zusätzliche Dips · kostenpflichtig [3 أصناف]  (100%)
+• Inklusive · Dip 2 [4 أصناف]  ~  Zusätzliche Dips · kostenpflichtig [4 أصناف]  (100%)
+• Inklusive · Dip 2 [4 أصناف]  ~  Dips [12 أصناف]  (100%)
+• Inklusive · Dip 2 [4 أصناف]  ~  Zusätzliche Dips · kostenpflichtig [3 أصناف]  (100%)
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 3. Sauce · inklusive [2 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 4. Sauce · inklusive [2 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (70%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce, Mit Knoblauchsauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 5. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 6. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Dein 1. Getränk · inklusive [2 أصناف]  ~  Dein 2. Getränk · inklusive [2 أصناف]  (80%)
+    فقط بالأولى: Ohne Getränk
+    فقط بالتانية: Ohne weiteres Getränk
+• Dein 1. Getränk · inklusive [2 أصناف]  ~  Dein 3. Getränk · inklusive [1 أصناف]  (80%)
+    فقط بالأولى: Ohne Getränk
+    فقط بالتانية: Ohne weiteres Getränk
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 3. Sauce · inklusive [2 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 4. Sauce · inklusive [2 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (70%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce, Mit Knoblauchsauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 5. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 6. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 1. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne weitere Sauce
+    فقط بالتانية: Ohne Sauce
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (88%)
+    فقط بالأولى: Mit Aioli
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 1. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne weitere Sauce
+    فقط بالتانية: Ohne Sauce
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (89%)
+    فقط بالتانية: Mit Knoblauchsauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 3. Sauce · inklusive [2 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 4. Sauce · inklusive [2 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (70%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce, Mit Knoblauchsauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 5. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 6. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 3. Sauce · inklusive [2 أصناف]  (88%)
+    فقط بالتانية: Mit Aioli
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 4. Sauce · inklusive [2 أصناف]  (88%)
+    فقط بالتانية: Mit Aioli
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالتانية: Mit Knoblauchsauce, Mit Aioli
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 5. Sauce · inklusive [1 أصناف]  (88%)
+    فقط بالتانية: Mit Aioli
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 6. Sauce · inklusive [1 أصناف]  (88%)
+    فقط بالتانية: Mit Aioli
+• Deine 3. Sauce · inklusive [2 أصناف]  ~  Deine 1. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne weitere Sauce
+    فقط بالتانية: Ohne Sauce
+• Deine 3. Sauce · inklusive [2 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (89%)
+    فقط بالتانية: Mit Knoblauchsauce
+• Deine 4. Sauce · inklusive [2 أصناف]  ~  Deine 1. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne weitere Sauce
+    فقط بالتانية: Ohne Sauce
+• Deine 4. Sauce · inklusive [2 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (89%)
+    فقط بالتانية: Mit Knoblauchsauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 2. Sauce · inklusive [1 أصناف]  (70%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce, Mit Knoblauchsauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 5. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 1. Sauce · inklusive [1 أصناف]  ~  Deine 6. Sauce · inklusive [1 أصناف]  (78%)
+    فقط بالأولى: Ohne Sauce
+    فقط بالتانية: Ohne weitere Sauce
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 5. Sauce · inklusive [1 أصناف]  (89%)
+    فقط بالأولى: Mit Knoblauchsauce
+• Deine 2. Sauce · inklusive [1 أصناف]  ~  Deine 6. Sauce · inklusive [1 أصناف]  (89%)
+    فقط بالأولى: Mit Knoblauchsauce
+• Ihr Dessert [18 أصناف]  ~  Ihr Dessert [24 أصناف]  (83%)
+    فقط بالتانية: Blue Berry Muffin
+• Ihr alkoholfreies Getränk [18 أصناف]  ~  Ihr alkoholfreies Getränk [24 أصناف]  (100%)
+• Ihr Dip [1 أصناف]  ~  Ihr Dip [3 أصناف]  (75%)
+    فقط بالأولى: Joppie Sauce
+• Ihr Getränk [1 أصناف]  ~  Ihr Getränk [1 أصناف]  (92%)
+    فقط بالأولى: Red Bull Kokos-Blaubeere 0,25 l
+• Deine Bestellung [8 أصناف]  ~  Deine Bestellung [8 أصناف]  (100%)
+
+=== 4. عناصر كتالوج بأسماء متقاربة (غالباً نفس الصوص) ===
+• "Senf, extra" 0.99€  |  "Senf" 1.49€
+• "Aioli Sauce Extra" 0.99€  |  "Aioli" 1.49€  |  "Mit Aioli" 0.00€
+• "Barbecuesauce" 1.49€  |  "Mit Barbecuesauce" 0.00€
+• "Joppie Sauce Extra" 0.99€  |  "Joppie Sauce" 1.49€
+• "Mit Mayonnaise" 0.00€  |  "Mayonnaise" 0.49€
+• "Mit Ketchup" 0.00€  |  "Ketchup" 0.49€
+• "Chillicheese Sauce" 1.49€  |  "Mit Chilli Cheese Sauce" 0.00€
+• "Cheese Sauce" 1.49€  |  "Mit Cheese Sauce" 0.00€
+• "Falafel Sandwich" 0.00€  |  "Falafel Sandwich Extra" 1.09€
+• "Mit Sahne" 0.00€  |  "Ohne Sahne" 0.00€
+
+=== 5. نفس العنصر بأسعار مختلفة حسب المجموعة ===
+• Barbecuesauce (سعر الكتالوج 1.49€):
+    0.99€ [fixed] ← 1 مجموعة: Ihre Extras
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Coca-Cola Zero Sugar 0,33 l (EINWEG) (سعر الكتالوج 2.24€):
+    0.00€ [free] ← 6 مجموعة: Ihr Getränk, Dein 1. Getränk · inklusive, Dein 2. Getränk · inklusive, Dein 3. Getränk · inklusive, Ihr Getränk, Ihr Getränk
+    2.24€ [catalog] ← 2 مجموعة: Ihr alkoholfreies Getränk, Ihr alkoholfreies Getränk
+• Fuze Tea Schwarzer Tee Zitrone 0,4 l (EINWEG) (سعر الكتالوج 1.25€):
+    0.75€ [fixed] ← 1 مجموعة: Ihr Getränk
+    3.24€ [fixed] ← 2 مجموعة: Ihr alkoholfreies Getränk, Ihr alkoholfreies Getränk
+    1.25€ [catalog] ← 2 مجموعة: Ihr Getränk, Ihr Getränk
+• Mezzo Mix 0,33 l (EINWEG) (سعر الكتالوج 2.24€):
+    0.00€ [free] ← 6 مجموعة: Ihr Getränk, Dein 1. Getränk · inklusive, Dein 2. Getränk · inklusive, Dein 3. Getränk · inklusive, Ihr Getränk, Ihr Getränk
+    2.24€ [catalog] ← 2 مجموعة: Ihr alkoholfreies Getränk, Ihr alkoholfreies Getränk
+• Fanta Strawberry & Kiwi 0,33 l (سعر الكتالوج 2.24€):
+    0.00€ [free] ← 1 مجموعة: Ihr Getränk
+    2.24€ [catalog] ← 2 مجموعة: Ihr alkoholfreies Getränk, Ihr alkoholfreies Getränk
+• Sprite 0,33 l (EINWEG) (سعر الكتالوج 2.24€):
+    0.00€ [free] ← 6 مجموعة: Ihr Getränk, Dein 1. Getränk · inklusive, Dein 2. Getränk · inklusive, Dein 3. Getränk · inklusive, Ihr Getränk, Ihr Getränk
+    2.24€ [catalog] ← 2 مجموعة: Ihr alkoholfreies Getränk, Ihr alkoholfreies Getränk
+• Coca-Cola 0,33 l (EINWEG) (سعر الكتالوج 2.24€):
+    0.00€ [free] ← 6 مجموعة: Ihr Getränk, Dein 1. Getränk · inklusive, Dein 2. Getränk · inklusive, Dein 3. Getränk · inklusive, Ihr Getränk, Ihr Getränk
+    2.24€ [catalog] ← 2 مجموعة: Ihr alkoholfreies Getränk, Ihr alkoholfreies Getränk
+• Fanta Orange 0,33 l (EINWEG) (سعر الكتالوج 2.24€):
+    0.00€ [free] ← 6 مجموعة: Ihr Getränk, Dein 1. Getränk · inklusive, Dein 2. Getränk · inklusive, Dein 3. Getränk · inklusive, Ihr Getränk, Ihr Getränk
+    2.24€ [catalog] ← 2 مجموعة: Ihr alkoholfreies Getränk, Ihr alkoholfreies Getränk
+• Coca-Cola 1,0 l (سعر الكتالوج 1.35€):
+    1.49€ [fixed] ← 1 مجموعة: Ihr Getränk
+    3.49€ [fixed] ← 1 مجموعة: Ihr alkoholfreies Getränk
+    3.34€ [fixed] ← 1 مجموعة: Ihr alkoholfreies Getränk
+    1.35€ [catalog] ← 2 مجموعة: Ihr Getränk, Ihr Getränk
+• Mayonnaise (سعر الكتالوج 0.49€):
+    0.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Ketchup (سعر الكتالوج 0.49€):
+    0.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Aioli (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Chili-Scharf Sauce (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Chillicheese Sauce (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Cheese Sauce (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Senf (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Joppie Sauce (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+    0.99€ [fixed] ← 1 مجموعة: Ihr Dip
+• Lemon Sauce (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Truffle Mayo (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Teriyaki Sauce (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Haus Sauce (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Garlic Sauce (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Garlic Cheese Sauce (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Buffalo Sauce (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Hot Chilli Mayo (سعر الكتالوج 1.49€):
+    1.49€ [catalog] ← 5 مجموعة: Dips, og_9ff4599551, Zusätzliche Dips · kostenpflichtig, Dips, Zusätzliche Dips · kostenpflichtig
+    0.00€ [free] ← 2 مجموعة: Inklusive · Dip 1, Inklusive · Dip 2
+• Crispy Caramel-gefüllte Donut (سعر الكتالوج 3.99€):
+    0.00€ [free] ← 1 مجموعة: Ihr Dessert
+    3.99€ [catalog] ← 1 مجموعة: Ihr Dessert
+• Fuze Tea Schwarzer Tee Pfirsich 0,4 l (EINWEG) (سعر الكتالوج 1.25€):
+    3.24€ [fixed] ← 2 مجموعة: Ihr alkoholfreies Getränk, Ihr alkoholfreies Getränk
+    1.25€ [catalog] ← 2 مجموعة: Ihr Getränk, Ihr Getränk
+• Red Bull 0,25 l (EINWEG) (سعر الكتالوج 1.25€):
+    3.64€ [fixed] ← 2 مجموعة: Ihr alkoholfreies Getränk, Ihr alkoholfreies Getränk
+    1.25€ [catalog] ← 2 مجموعة: Ihr Getränk, Ihr Getränk
+• Als Menü mit 2 Donuts (سعر الكتالوج 2.00€):
+    2.50€ [fixed] ← 1 مجموعة: Deine Bestellung
+    2.00€ [catalog] ← 1 مجموعة: Deine Bestellung
+
+=== 6. ملخص ===
+مجموعات مكررة: 6 | متشابهة: 53 | أسماء كتالوج متقاربة: 10 | عناصر بأسعار متضاربة: 29 | مجموعات فارغة الاستخدام: 0
