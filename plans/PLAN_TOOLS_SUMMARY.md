@@ -12,6 +12,7 @@
 | Agent Desktop (Vercel Labs) | الوكيل بيتحكم ببرامج سطح المكتب عبر شجرة الـ accessibility. Apache-2.0، تجريبي. `npm install -g agent-desktop` | https://github.com/vercel-labs/agent-desktop |
 | Claude Code Remote Control | تشغّل الجلسة على كمبيوترك وتتابعها وتوافق على الصلاحيات من التلفون | (ميزة داخل Claude Code) |
 | /brag | skill لعمل فيديو إطلاق للموقع/التطبيق | https://github.com/latent-spaces/brag , letsbrag.app |
+| Concat | محرر فيديو مجاني ومحلي (بديل CapCut) مع سيرفر MCP؛ للتسويق. التفاصيل بـ PLAN_MARKETING_VIDEO.md | https://github.com/jub0t/Concat |
 | مقال الـ 50 وكيل تسويق | هيكل فريق تسويق بالوكلاء، نأخد منه 3 أو 4 فقط | محفوظ بـ PLAN_MARKETING_AGENTS.md |
 
 ## 2. أدوات الصوت والسكرتيرة (من بحث سابق)

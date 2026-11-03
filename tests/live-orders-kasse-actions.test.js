@@ -47,3 +47,19 @@ test('Live Orders actions on a cashier order: pay remaining (cash/card) and canc
   // طلب منتهي ما بينلغى/ما بينندفع تاني
   assert.equal((await call('POST', '/api/kasse/events', { action: 'FINALIZE_PAYMENT', order: { id: 'pay1' }, paymentLines: [{ method: 'CASH', amountCents: 1798 }] }, S.owner)).status, 409);
 });
+
+test('Training cashier order paid from Live Orders (without training flag) stays training: payment isTest, real order unaffected', async () => {
+  const mk = (id, extra) => ({ id, type: 'local', table: '7', status: 'OPEN', createdAt: new Date().toISOString(), cart: [{ id: 'x', name: 'Burger', unitCents: 500, quantity: 1, kind: 'ITEM' }], ...extra });
+  assert.equal((await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', training: true, order: mk('trn1', { training: true }) }, S.owner)).status, 200);
+  assert.equal((await call('POST', '/api/kasse/events', { action: 'ORDER_SYNC', order: mk('real1') }, S.owner)).status, 200);
+  const st0 = (await call('GET', '/api/kasse-state', null, S.owner)).json;
+  const t0 = st0.orders.find(o => o.id === 'trn1'); assert.ok(t0 && (t0.isTest || t0.training), 'training order visible in state');
+  assert.ok(!st0.orders.find(o => o.id === 'real1').isTest);
+  for (const id of ['trn1', 'real1']) {
+    const r = await call('POST', '/api/kasse/events', { action: 'FINALIZE_PAYMENT', clientId: '', order: { id }, paymentLines: [{ method: 'CASH', amountCents: 500, amountReceivedCents: 500 }] }, S.owner);
+    assert.equal(r.status, 200, JSON.stringify(r.json));
+  }
+  const st = (await call('GET', '/api/kasse-state', null, S.owner)).json;
+  assert.equal(st.payments.find(p => p.orderId === 'trn1').isTest, true);
+  assert.ok(!st.payments.find(p => p.orderId === 'real1').isTest);
+});
