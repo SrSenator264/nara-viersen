@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="de" dir="ltr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<script src="nara-lang.js?v=20261009b" data-section="kasse"></script>
+<title>Flamo · Menü-Anleitung</title>
+<style>
+@font-face{font-family:LalezarX;src:url(fonts/lalezar.woff) format('woff');font-weight:400}
+@font-face{font-family:CairoX;src:url(fonts/cairo-600.woff) format('woff');font-weight:600}
+@font-face{font-family:CairoX;src:url(fonts/cairo-700.woff) format('woff');font-weight:700}
+@font-face{font-family:CairoX;src:url(fonts/cairo-800.woff) format('woff');font-weight:800}
+:root{--paper:#fff4de;--ink:#2b2118;--orange:#ff7a1a;--yellow:#ffc233;--red:#ff4d2e;--green:#3fae5a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{font-family:CairoX,system-ui,'Noto Color Emoji',sans-serif;font-weight:700;color:var(--ink);background:var(--paper);background-image:radial-gradient(#f3dcb2 2px,transparent 2.5px);background-size:34px 34px}
+.bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:10px 14px;background:var(--ink);color:#fff}
+.bar b{font-family:LalezarX;font-weight:400;font-size:24px;color:var(--orange)}
+.bar .tools{display:flex;gap:6px;flex-wrap:wrap}
+.bar button{font:inherit;font-size:15px;border:2px solid #fff6;background:#3a2c22;color:#fff;border-radius:12px;padding:6px 12px;cursor:pointer}
+.bar button.on{background:var(--orange);border-color:var(--orange)}
+.wrap{max-width:600px;margin:0 auto;padding:14px 14px 100px}
+.dots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:2px 0 12px}
+.dots i{width:14px;height:14px;border-radius:50%;background:#e6cfa6;border:2px solid var(--ink);cursor:pointer}
+.dots i.on{background:var(--orange)}
+.card{position:relative;background:#fffaf0;border:4px solid var(--ink);border-radius:26px;box-shadow:6px 6px 0 var(--ink);padding:16px}
+.head{display:flex;align-items:center;gap:12px}
+.badge{flex:none;width:64px;height:64px;border-radius:50%;background:var(--orange);color:#fff;border:4px solid var(--ink);box-shadow:4px 4px 0 var(--ink);display:flex;align-items:center;justify-content:center;font-family:LalezarX;font-weight:400;font-size:40px;line-height:1.1}
+h1{font-family:LalezarX;font-weight:400;font-size:clamp(28px,7.4vw,42px);line-height:1.2}
+.art{margin:12px -6px 4px}
+.art svg{display:block;width:100%;height:auto;direction:ltr}
+.row{display:flex;align-items:flex-end;gap:12px;margin-top:6px}
+.flamo{flex:none;width:96px;height:auto;filter:drop-shadow(4px 5px 0 rgba(43,33,24,.18))}
+.body{font-size:19px;line-height:1.65;font-weight:700}
+.body ol{margin:8px 0 0;padding-inline-start:24px}
+.body li{margin:4px 0}
+.tip{margin-top:12px;background:#e9f7ec;border:3px dashed var(--green);border-radius:18px;padding:12px 14px;color:#1f5e30;font-size:17px;line-height:1.55}
+.pfoot{display:none}
+.nav{position:fixed;inset-inline:0;bottom:0;z-index:5;display:flex;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--ink)}
+.nav button{flex:1;font:inherit;font-size:20px;border:0;border-radius:16px;padding:12px;background:var(--orange);color:#fff;cursor:pointer}
+.nav button[disabled]{opacity:.35}
+.nav .cnt{align-self:center;color:#fff;font-size:16px;min-width:64px;text-align:center}
+@page{size:A5;margin:8mm}
+body.fn-on .bar{top:46px}
+body.print{background:#fff;background-image:none;padding-top:0!important}
+body.print .bar,body.print .nav,body.print .dots{display:none}
+body.print .wrap{max-width:none;padding:0}
+body.print .card{box-shadow:none;border-width:3px;page-break-after:always;break-after:page;margin:0;border-radius:18px}
+body.print .card:last-child{page-break-after:auto;break-after:auto}
+body.print .pfoot{display:block;margin-top:10px;text-align:center;font-size:12px;color:#8a6a4a;direction:ltr}
+body.print .flamo{width:72px}
+body.print .body{font-size:15px}
+body.print .tip{font-size:13px}
+body.print h1{font-size:30px}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="6"/></filter>
+<filter id="wob2"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="4"/></filter>
+</defs></svg>
+<div id="app"></div>
+<script>
+'use strict';
+const VER='1.0', DATE='03.11.2026';
+const INK='#2b2118';
+const LANGS=[['de','Deutsch'],['ar','العربية'],['en','English']];
+const UI={
+ de:{title:'Menü-Anleitung',prev:'Zurück',next:'Weiter',pdf:'🖨️ PDF',doc:'Menü-Anleitung'},
+ ar:{title:'دليل المنيو',prev:'السابق',next:'التالي',pdf:'🖨️ PDF',doc:'دليل المنيو'},
+ en:{title:'Menu guide',prev:'Back',next:'Next',pdf:'🖨️ PDF',doc:'Menu guide'}
+};
+// Beschriftungen genau wie auf der echten Speisekarten-Seite
+const X={
+ de:{menu:'Speisekarte',cats:'Kategorien',newCat:'➕ Neue Kategorie',newProd:'➕ Neues Produkt',search:'🔎 Produkt suchen …',lib:'📚 Optionen & Extras',hist:'🕘 Verlauf',edit:'✏️ Bearbeiten',copy:'📋 Kopieren',catDlg:'Neue Kategorie',prodNew:'Neues Produkt',name:'Name',sort:'Sortierung',active:'Aktiv',cancel:'Abbrechen',save:'Speichern',cat:'Kategorie',price:'Verkaufspreis (€)',desc:'Beschreibung',optLegend:'🧩 Optionen & Extras dieses Produkts',optAdd:'➕ Gruppe hinzufügen …',libTitle:'Optionen & Extras (Bibliothek)',tabG:'📋 Gruppen',tabC:'📚 Katalog',newGroup:'➕ Neue Gruppe',addItem:'➕ Eintrag',mCat:'Katalogpreis',mFree:'Gratis',mFixed:'Eigener Preis',avail:'verfügbar',today:'😴 nur heute aus',plat:'💼 Plattformpreis (Referenz)',delProd:'🗑️ Produkt löschen',undo:'↩ Rückgängig',inside:'Im Burger',outside:'Im Becher',single:'Einzeln',asMenu:'Als Menü',drinkQ:'🥤 Getränk',sauceQ:'🫙 Ihre Sauce',required:'Pflicht',unify:'Auf Katalogpreis setzen',lbl:'Anzeigename',only:'Nur für dieses Produkt'},
+ ar:{menu:'المنيو',cats:'الفئات',newCat:'➕ فئة جديدة',newProd:'➕ منتج جديد',search:'🔎 دوّر على منتج …',lib:'📚 الخيارات والإضافات',hist:'🕘 سجل التغييرات',edit:'✏️ تعديل',copy:'📋 نسخ',catDlg:'فئة جديدة',prodNew:'منتج جديد',name:'الاسم',sort:'الترتيب',active:'فعّال',cancel:'إلغاء',save:'حفظ',cat:'الفئة',price:'سعر البيع (€)',desc:'الوصف',optLegend:'🧩 خيارات وإضافات هالمنتج',optAdd:'➕ زيد مجموعة …',libTitle:'مكتبة الخيارات والإضافات',tabG:'📋 المجموعات',tabC:'📚 الكتالوج',newGroup:'➕ مجموعة جديدة',addItem:'➕ خيار',mCat:'سعر الكتالوج',mFree:'مجاني',mFixed:'سعر خاص',avail:'متوفر',today:'😴 نفد اليوم بس',plat:'💼 سعر المنصة (مرجع)',delProd:'🗑️ احذف المنتج',undo:'↩ تراجع',inside:'جوا البرغر',outside:'بعلبة',single:'لحالو',asMenu:'منيو',drinkQ:'🥤 مشروب',sauceQ:'🫙 صوصك',required:'إجباري',unify:'وحّد على سعر الكتالوج',lbl:'اسم العرض',only:'لهالمنتج بس'},
+ en:{menu:'Menu',cats:'Categories',newCat:'➕ New category',newProd:'➕ New product',search:'🔎 Search products …',lib:'📚 Options & extras',hist:'🕘 History',edit:'✏️ Edit',copy:'📋 Copy',catDlg:'New category',prodNew:'New product',name:'Name',sort:'Sort order',active:'Active',cancel:'Cancel',save:'Save',cat:'Category',price:'Sales price (€)',desc:'Description',optLegend:'🧩 Options & extras of this product',optAdd:'➕ Add a group …',libTitle:'Options & extras library',tabG:'📋 Groups',tabC:'📚 Catalog',newGroup:'➕ New group',addItem:'➕ Item',mCat:'Catalog price',mFree:'Free',mFixed:'Own price',avail:'available',today:'😴 out today only',plat:'💼 Platform price (reference)',delProd:'🗑️ Delete product',undo:'↩ Undo',inside:'In the burger',outside:'In a cup',single:'Single',asMenu:'As menu',drinkQ:'🥤 Drink',sauceQ:'🫙 Your sauce',required:'Required',unify:'Set to catalog price',lbl:'Display name',only:'This product only'}
+};
+
+/* ---------- SVG-Helfer (Skizzen-Stil) ---------- */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const wob=s=>`<g filter="url(#wob)">${s}</g>`;
+const rect=(x,y,w,h,f='#fff',r=12,sw=3,ex='')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${f}" stroke="${INK}" stroke-width="${sw}" ${ex}/>`;
+const txt=(x,y,s,sz=22,f=INK,a='middle',font='CairoX',w=700)=>`<text ${a==='middle'&&/[؀-ۿ]/.test(s)?'direction="rtl" ':''}x="${x}" y="${y}" font-size="${sz}" fill="${f}" text-anchor="${a}" font-family="${font}" font-weight="${w}">${esc(s)}</text>`;
+const chip=(x,y,w,h,s,sel,sz=17,f)=>wob(rect(x,y,w,h,f||(sel?'#ff7a1a':'#ffe7bf'),h/2,3))+txt(x+w/2,y+h/2+sz*0.35,s,sz,sel?'#fff':INK);
+const ring=(x,y,w,h,r=16)=>`<g filter="url(#wob2)"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="none" stroke="#ff4d2e" stroke-width="6"/></g>`;
+const num=(n,x,y)=>`<circle cx="${x}" cy="${y}" r="17" fill="#ff4d2e" stroke="${INK}" stroke-width="3"/>`+txt(x,y+7,n,20,'#fff');
+const bar=(x,y,w,c='#cdbb9e')=>`<path d="M${x} ${y}h${w}" stroke="${c}" stroke-width="8" stroke-linecap="round"/>`;
+const arrow=(x1,y1,x2,y2)=>{const a=Math.atan2(y2-y1,x2-x1),h=14;return `<path d="M${x1} ${y1}L${x2} ${y2}M${x2} ${y2}l${-h*Math.cos(a-0.5)} ${-h*Math.sin(a-0.5)}M${x2} ${y2}l${-h*Math.cos(a+0.5)} ${-h*Math.sin(a+0.5)}" stroke="${INK}" stroke-width="5" stroke-linecap="round" fill="none"/>`};
+const field=(x,y,w,label,val,req)=>txt(x,y,label,16,'#7a6a58','start')+wob(rect(x,y+8,w,42,'#fffaf0',10,2))+(val?txt(x+14,y+37,val,20,INK,'start'):'')+(req?ring(x-6,y+10,w+12,46,12):'');
+const check=(x,y,on,label,sz=20)=>wob(rect(x,y,28,28,on?'#d9f2df':'#fff',7,3))+(on?txt(x+14,y+22,'✓',22,'#1f5e30'):'')+txt(x+42,y+23,label,sz,INK,'start');
+const note=(x,y,w,h,s,sz=20,f='#ffd84d')=>wob(rect(x,y,w,h,f,14,3))+txt(x+w/2,y+h/2+sz*0.35,s,sz);
+const price=(x,y,s,c='#ff7a1a')=>wob(rect(x,y,104,40,c,20,3))+txt(x+52,y+28,s,22,'#fff');
+
+function ashell(L,x,body){
+ return `<svg viewBox="0 0 900 640" xmlns="http://www.w3.org/2000/svg" direction="ltr">`+
+ wob(`<rect x="48" y="44" width="820" height="560" rx="46" fill="#3a2c22" stroke="${INK}" stroke-width="8"/><rect x="70" y="66" width="776" height="516" rx="24" fill="#fffaf0" stroke="${INK}" stroke-width="5"/><rect x="70" y="66" width="776" height="84" rx="24" fill="#1d2327"/><rect x="70" y="106" width="776" height="44" fill="#1d2327"/>`)+
+ txt(104,124,'🍔',36,'#fff','start')+txt(150,124,x.menu,28,'#fff','start')+
+ wob(rect(560,86,130,44,'#3a444a',12,2)+rect(700,86,130,44,'#3a444a',12,2))+txt(625,116,x.hist.replace('🕘 ',''),16,'#fff')+txt(765,116,x.lib.replace('📚 ',''),14,'#fff')+
+ body+`</svg>`;
+}
+const catRows=(x,sel,n=5)=>wob(rect(90,166,220,398,'#fff',16))+txt(200,198,x.cats,20)+['Beef Burger','Chicken Burger','Sandwiches','Dips','Drinks'].slice(0,n).map((c,i)=>wob(rect(104,214+i*62,192,48,i===sel?'#ffe7bf':'#fffaf0',12,i===sel?4:2))+txt(200,246+i*62,c,19)).join('');
+const prodCard=(px,py,name,pr,btns=true)=>wob(rect(px,py,236,150,'#fff0d6',14))+txt(px+118,py+34,name,20)+price(px+66,py+50,pr)+(btns?chip(px+12,py+104,100,34,x_.edit,false,14)+chip(px+124,py+104,100,34,x_.copy,false,14):'');
+let x_={};
+function A(fn){return (L,x)=>{x_=x;return ashell(L,x,fn(L,x))}}
+function dlg(x,title,inner,w=560,h=420){const px=450-w/2;return `<rect x="70" y="150" width="776" height="432" fill="#000" opacity=".35"/>`+wob(rect(px,160,w,h,'#fff',22,4))+txt(450,204,title,26,INK)+inner}
+function dlgBtns(x,px,py){return chip(px,py,150,46,x.cancel,false,19)+chip(px+170,py,180,46,x.save,true,20)}
+
+const SC={
+ cover:A((L,x)=>wob(rect(150,180,600,320,'#fff0d6',30))+txt(450,290,'🍔',110)+txt(450,390,UI[L].title,46,'#ff7a1a','middle','LalezarX',400)+txt(450,444,'Flamo',30,INK,'middle','LalezarX',400)),
+ overview:A((L,x)=>
+  note(330,172,240,54,x.cat,24,'#ffe7bf')+arrow(450,230,450,262)+
+  note(330,266,240,54,'🍔 '+x.prodNew.replace('➕ ',''),24,'#fff')+arrow(450,324,450,352)+
+  [['Ihre Extras',-1],['Dips',-1],['Ihr Getränk',-1],['Ihre Sauce',-1]].map(([g],i)=>note(100+i*180,360,168,54,g,19,['#d9f2df','#d9ecf8','#ffe7bf','#f3d9f2'][i])+arrow(450,324,184+i*180,356)).join('')+
+  txt(450,456,'🧩',44)+txt(450,500,'Ihre Extras = '+x.inside+'   ·   Dips = '+x.outside,21)+bar(150,526,600,'#e6cfa6')),
+ menupage:A((L,x)=>catRows(x,0)+
+  chip(104,520,192,40,x.newCat,true,15)+num(1,104,520)+
+  wob(rect(330,166,484,50,'#fff',12))+txt(350,198,x.search,19,'#a8977f','start')+num(3,340,166)+
+  chip(560,226,254,44,x.newProd,true,18)+num(2,570,226)+
+  prodCard(330,284,'Classic Beef','8,90 €')+prodCard(578,284,'Cheese Beef','9,90 €')),
+ catdlg:A((L,x)=>dlg(x,x.catDlg,field(210,224,480,x.name,'Beef Burger',true)+field(210,300,200,x.sort,'1')+check(450,320,true,x.active)+dlgBtns(x,320,454),560,372)),
+ simple:A((L,x)=>dlg(x,x.prodNew,field(190,222,520,x.name,'Cola 0,33 l',true)+field(190,292,330,x.cat,'Drinks ▾',true)+field(540,292,170,x.price,'2,50',true)+field(190,362,520,x.desc,'')+check(190,432,true,x.active)+dlgBtns(x,350,490),620,430)),
+ copy:A((L,x)=>prodCard(100,190,'Classic Beef','8,90 €')+ring(204,284,128,56)+num(1,206,290)+arrow(372,262,440,262)+
+  wob(rect(450,170,370,384,'#fff',20,4))+txt(635,208,x.prodNew,24)+field(474,226,322,x.name,'Mega Burger',true)+num(2,794,252)+field(474,296,150,x.price,'11,90',true)+num(3,610,322)+txt(474,392,x.optLegend,16,'#7a6a58','start')+
+  ['Ihre Extras','Dips','Ihr Getränk','Ihre Sauce'].map((g,i)=>check(474+(i%2)*170,406+Math.floor(i/2)*44,true,g,16)).join('')+chip(560,500,200,40,x.save,true,18)),
+ groups:A((L,x)=>wob(rect(110,166,690,398,'#fff',20,4))+txt(455,204,x.optLegend,24)+
+  [['Ihre Extras','#d9f2df'],['Dips','#d9ecf8'],['Ihr Getränk','#ffe7bf'],['Ihre Sauce','#f3d9f2']].map(([g,c],i)=>wob(rect(140,226+i*62,630,50,c,12,2))+check(156,237+i*62,true,g,22)+txt(752,258+i*62,'▾',24,INK,'end')).join('')+
+  ring(130,218,650,258)+wob(rect(140,494,300,46,'#fffaf0',12,2))+txt(290,525,x.optAdd,19)),
+ rule:A((L,x)=>
+  wob(rect(100,170,350,300,'#d9f2df',20,4))+txt(275,212,'Ihre Extras',26)+txt(275,248,'= '+x.inside,20)+txt(275,326,'🍔',64)+price(223,350,'0,99 €','#3fae5a')+txt(275,420,'Aioli · Cheese · BBQ …',17,'#1f5e30')+
+  wob(rect(470,170,350,300,'#d9ecf8',20,4))+txt(645,212,'Dips',26)+txt(645,248,'= '+x.outside,20)+txt(645,326,'🥡',64)+price(593,350,'1,49 €','#3b82c4')+txt(645,420,'Aioli · Cheese · BBQ …',17,'#1d4f7c')+
+  note(220,490,460,58,'Mayo · Ketchup = 0,49 € ('+x.inside+' / '+x.outside+')',20)),
+ menu:A((L,x)=>dlg(x,'🍔 Classic Beef',
+  chip(176,226,270,54,x.single,false,22)+chip(466,226,270,54,x.asMenu,true,22)+
+  txt(176,316,x.drinkQ,18,INK,'start')+txt(736,316,x.required,16,'#ff4d2e','end')+[0,1,2].map(i=>wob(rect(176+i*120,326,108,48,i===0?'#d9f2df':'#fffaf0',12))+txt(230+i*120,360,['🥤','🧃','☕'][i],28)).join('')+
+  txt(176,408,x.sauceQ,18,INK,'start')+[0,1].map(i=>wob(rect(176+i*120,418,108,44,i===0?'#d9f2df':'#fffaf0',12))+txt(230+i*120,448,'🫙',24)).join('')+
+  note(176+250,418,310,44,'+ Dips 1,49 €',19,'#d9ecf8')+wob(rect(176,486,560,44,'#ff7a1a',14))+txt(456,516,'+ 4,50 € '+x.asMenu,22,'#fff'),620,420)),
+ exclude:A((L,x)=>wob(rect(110,166,690,398,'#fff',20,4))+txt(455,204,'Ihre Extras  ▾',24)+
+  ['Extra Patty','Extra Cheddar','Extra Bacon','Jalapeños','Aioli'].map((n,i)=>check(150,232+i*54,i!==3,n,22)+(i===3?txt(560,256+i*54,'✗',30,'#ff4d2e'):'')).join('')+ring(140,380,640,56)+
+  note(160,508,600,46,'Jalapeños ✗  →  '+x.only,20)),
+ library:A((L,x)=>wob(rect(90,162,740,408,'#fff',20,4))+chip(110,176,170,42,x.tabG,true,17)+chip(290,176,170,42,x.tabC,false,17)+
+  wob(rect(110,232,230,320,'#fffaf0',14,2))+['Ihre Extras','Dips','Ihr Getränk','Ihre Sauce'].map((g,i)=>wob(rect(120,244+i*52,210,42,i===1?'#ffe7bf':'#fff',10,i===1?4:2))+txt(225,272+i*52,g,18)).join('')+chip(120,500,210,40,x.newGroup,false,15)+
+  [['Aioli',x.mCat,'1,49'],['Cheese Sauce',x.mCat,'1,49'],['Mayonnaise',x.mCat,'0,49']].map(([n,m,p],i)=>wob(rect(360,244+i*56,440,46,'#fff',10,2))+txt(376,274+i*56,n,18,INK,'start')+txt(580,274+i*56,m+' ▾',15,'#7a6a58')+wob(rect(670,250+i*56,110,34,'#fffaf0',8,2))+txt(725,274+i*56,p,18)).join('')+
+  chip(360,420,150,40,x.addItem,false,16)+ring(352,414,166,52)+num(1,358,420)+ring(664,244,124,46)+num(2,668,246)),
+ newsauce:A((L,x)=>wob(rect(90,162,740,408,'#fff',20,4))+txt(300,200,'Dips',22)+
+  wob(rect(110,214,330,46,'#fff',10,2))+txt(124,244,'Chimichurri',19,INK,'start')+wob(rect(330,220,100,34,'#fffaf0',8,2))+txt(380,244,'1,49',18)+txt(205,282,x.mCat,14,'#7a6a58')+
+  txt(300,356,'Ihre Extras',22)+wob(rect(110,370,330,46,'#fff',10,2))+txt(124,400,'Chimichurri',19,INK,'start')+wob(rect(330,376,100,34,'#fffaf0',8,2))+txt(380,400,'0,99',18)+txt(205,438,x.mFixed,14,'#7a6a58')+
+  arrow(470,300,520,300)+note(530,254,270,90,'Dips = 1,49 €',22,'#d9ecf8')+arrow(470,400,520,400)+note(530,360,270,90,'Extras = 0,99 €',22,'#d9f2df')+
+  txt(455,514,'Mayo · Ketchup = 0,49 €',20)),
+ catalog:A((L,x)=>wob(rect(90,162,740,408,'#fff',20,4))+chip(110,176,170,42,x.tabG,false,17)+chip(290,176,170,42,x.tabC,true,17)+
+  [['Aioli','1,49',0],['Cheese Sauce','1,49',2],['Mayonnaise','0,49',0]].map(([n,p,fx],i)=>wob(rect(110,236+i*60,700,48,'#fffaf0',10,2))+txt(126,268+i*60,n,19,INK,'start')+wob(rect(470,242+i*60,100,36,'#fff',8,2))+txt(520,268+i*60,p,18)+(fx?wob(rect(590,242+i*60,200,36,'#ffe7bf',10,2))+txt(690,267+i*60,'⚠️ '+fx+'× '+x.mFixed,14):'')).join('')+
+  ring(580,296,220,52)+note(160,470,600,52,'⚠️ → '+x.unify,20)),
+ soldout:A((L,x)=>wob(rect(110,166,690,398,'#fff',20,4))+
+  ['Aioli','Cheese Sauce','Teriyaki Sauce'].map((n,i)=>wob(rect(130,196+i*64,650,52,'#fffaf0',10,2))+txt(150,230+i*64,n,20,INK,'start')+check(420,206+i*64,true,x.avail,15)+check(590,206+i*64,i===1,x.today,15)).join('')+ring(580,258,205,52)+
+  note(160,420,590,52,x.today+'  → ',20)+txt(455,520,'24h',30)),
+ plat:A((L,x)=>wob(rect(110,166,690,398,'#fff',20,4))+txt(455,206,'Cheese Sauce',26)+
+  field(190,240,260,x.price,'1,49')+field(480,240,260,x.plat,'1,29')+ring(474,234,272,64)+
+  note(190,370,550,58,x.plat+' ≠ 🧾 '+x.menu,20)+txt(455,486,'🧾 = '+x.price,20)),
+ history:A((L,x)=>wob(rect(110,166,690,398,'#fff',20,4))+txt(455,204,x.hist,26)+
+  ['Cheese Sauce  1,49 → 0,99','Mega Burger  +','Aioli  −'].map((n,i)=>wob(rect(130,226+i*62,650,50,'#fffaf0',10,2))+txt(150,258+i*62,n,19,INK,'start')+chip(610,232+i*62,150,38,x.undo,false,16)).join('')+ring(600,224,170,54)+
+  chip(500,430,280,44,x.delProd,false,17,'#ffd0c8')),
+ test:A((L,x)=>wob(rect(110,166,690,398,'#fff',20,4))+
+  [['🍔 Mega Burger',''],['Ihre Extras → 0,99 €',''],['Dips → 1,49 €',''],['Mayo/Ketchup → 0,49 €',''],['Als Menü → +4,50 €','']].map(([n],i)=>check(160,200+i*62,true,n,24)).join('')+txt(660,330,'🎉',90)),
+ mistakes:A((L,x)=>wob(rect(110,166,690,398,'#fff',20,4))+
+  [0,1,2,3].map(i=>txt(160,230+i*88,'✗',44,'#ff4d2e','start')+bar(220,222+i*88,420)+bar(220,248+i*88,300,'#e6cfa6')).join('')+txt(700,330,'⚠️',80))
+};
+
+/* ---------- Schritte (Text in 3 Sprachen) ---------- */
+const STEPS=[
+ {scene:'cover',clip:'wave',
+  de:{t:'Die Speisekarte aufbauen',b:'Diese Anleitung zeigt Schritt für Schritt, wie du eine Kategorie, ein Produkt und Extras anlegst. Danach kann jeder ein neues Produkt oder ein Menü komplett allein einrichten.',tip:'Alles passiert auf der Seite “Speisekarte”. Jede Änderung wird im Verlauf gespeichert und lässt sich rückgängig machen.'},
+  ar:{t:'كيف بتبني المنيو',b:'هالدليل بيشرحلك خطوة خطوة كيف بتضيف فئة ومنتج وإضافات. بعدها أي حدا بيقدر يجهّز منتج جديد أو منيو كامل لحاله.',tip:'كل شي بيصير بصفحة «المنيو». كل تغيير بينحفظ بسجل التغييرات وبتقدر ترجّعه.'},
+  en:{t:'Building the menu',b:'This guide shows step by step how to create a category, a product and its extras. After that, anyone can set up a new product or a full menu on their own.',tip:'Everything happens on the “Menu” page. Every change is saved in the history and can be undone.'}},
+ {scene:'overview',clip:'present',
+  de:{t:'Die Idee: Kategorie → Produkt → Listen',b:'Eine Kategorie enthält Produkte. Ein Produkt bekommt Listen mit Extras. Es gibt nur zwei Extra-Listen: “Ihre Extras” (alles, was IN den Burger kommt) und “Dips” (extra Becher). Dazu kommen bei Burgern “Ihr Getränk” und “Ihre Sauce” für das Menü.',tip:'Die Listen werden einmal gepflegt und gelten für alle Produkte, die sie benutzen. Du legst für ein neues Produkt keine neue Liste an, du verknüpfst nur.'},
+  ar:{t:'الفكرة: فئة ← منتج ← قوائم',b:'الفئة فيها منتجات. المنتج بنربطلو قوائم إضافات. في بس قائمتين للإضافات: «Ihre Extras» (كل شي بينحط جوا البرغر) و«Dips» (علبة منفصلة). وللبرغر كمان «Ihr Getränk» و«Ihre Sauce» للمنيو.',tip:'القوائم بتنعدّل مرة وحدة وبتنطبق على كل المنتجات اللي مربوطة فيها. للمنتج الجديد ما بتعمل قائمة جديدة، بس بتربطه بالموجودة.'},
+  en:{t:'The idea: category → product → lists',b:'A category holds products. A product gets lists of extras. There are only two extra lists: “Ihre Extras” (everything that goes IN the burger) and “Dips” (a separate cup). Burgers also get “Ihr Getränk” and “Ihre Sauce” for the menu.',tip:'Each list is maintained once and applies to every product that uses it. For a new product you do not create a new list, you just link it.'}},
+ {scene:'menupage',clip:'point',
+  de:{t:'Die Seite “Speisekarte” öffnen',b:'Links stehen die Kategorien, rechts die Produkte der gewählten Kategorie. ① “Neue Kategorie”, ② “Neues Produkt”, ③ Suche. Ganz oben rechts findest du “Optionen & Extras” (die Bibliothek) und “Verlauf”.',tip:'Diese Seite ist nur für Chef und Manager. Die Kasse selbst kann nichts am Menü ändern.'},
+  ar:{t:'افتح صفحة «المنيو»',b:'عاليسار الفئات، وعاليمين منتجات الفئة المختارة. ① «فئة جديدة»، ② «منتج جديد»، ③ البحث. فوق ع الزاوية بتلاقي «الخيارات والإضافات» (المكتبة) و«سجل التغييرات».',tip:'هالصفحة للمدير والمانجر بس. الكاشير نفسه ما بيقدر يعدّل المنيو.'},
+  en:{t:'Open the “Menu” page',b:'Categories are on the left, the products of the selected category on the right. ① “New category”, ② “New product”, ③ search. At the top right you find “Options & extras” (the library) and “History”.',tip:'This page is for owner and managers only. The till itself cannot change the menu.'}},
+ {scene:'catdlg',clip:'guide',
+  de:{t:'Szenario 1: Neue Kategorie',b:'Tippe auf “Neue Kategorie”, schreibe den Namen, wähle die Sortierung (kleine Zahl = weiter oben) und lass “Aktiv” eingeschaltet. Dann “Speichern”.',tip:'Achtung beim Namen: Enthält er Wörter wie Dessert, Getränk/Drink, Special, Bucket, Bundle, Angebot, Kaffee, Tee, Wasser, Cola, Bier oder Wein, bietet die Kasse für diese Produkte KEIN “Als Menü” an.'},
+  ar:{t:'سيناريو 1: فئة جديدة',b:'اضغط «فئة جديدة»، اكتب الاسم، حدّد الترتيب (رقم صغير = أعلى) واترك «فعّال» مفعّل. بعدين «حفظ».',tip:'انتبه للاسم: إذا فيه كلمات متل Dessert أو Getränk/Drink أو Special أو Bucket أو Bundle أو Angebot أو Kaffee أو Tee أو Wasser أو Cola أو Bier أو Wein، الكاشير ما بيعرض «منيو» لمنتجات هالفئة.'},
+  en:{t:'Scenario 1: A new category',b:'Tap “New category”, type the name, set the sort order (small number = higher up) and keep “Active” on. Then “Save”.',tip:'Careful with the name: if it contains words like Dessert, Getränk/Drink, Special, Bucket, Bundle, Angebot, Kaffee, Tee, Wasser, Cola, Bier or Wein, the till will NOT offer “As menu” for its products.'}},
+ {scene:'simple',clip:'talk',
+  de:{t:'Szenario 2: Einfaches Produkt (z. B. Getränk)',b:'Wähle die Kategorie und tippe auf “Neues Produkt”. Fülle Name, Kategorie und Verkaufspreis aus (rot markiert = Pflicht). Beschreibung ist optional. “Speichern” – fertig. Ohne Haken bei Extras hat das Produkt keine Optionen.',tip:'Der Preis wird mit Komma oder Punkt geschrieben, zum Beispiel 2,50.'},
+  ar:{t:'سيناريو 2: منتج بسيط (مثل مشروب)',b:'اختار الفئة واضغط «منتج جديد». عبّي الاسم والفئة وسعر البيع (المعلّم بالأحمر إجباري). الوصف اختياري. «حفظ» وخلص. إذا ما حطيت علامة عالإضافات بيكون المنتج بدون خيارات.',tip:'اكتب السعر بفاصلة أو نقطة، مثلاً 2,50.'},
+  en:{t:'Scenario 2: A simple product (e.g. a drink)',b:'Pick the category and tap “New product”. Fill in name, category and sales price (red = required). The description is optional. “Save” – done. With no ticks under extras, the product has no options.',tip:'Write the price with a comma or a dot, for example 2.50.'}},
+ {scene:'copy',clip:'present',
+  de:{t:'Szenario 3: Neuer Burger durch Kopieren (empfohlen)',b:'① Bei einem ähnlichen Burger auf “Kopieren” tippen. ② Neuen Namen schreiben. ③ Preis anpassen. “Speichern”. Alle Listen (Extras, Dips, Getränk, Sauce) sind schon verknüpft.',tip:'Das ist der schnellste und sicherste Weg: nichts wird vergessen, und die Preise der Extras stimmen automatisch.'},
+  ar:{t:'سيناريو 3: برغر جديد بالنسخ (الأفضل)',b:'① عند برغر شبيه اضغط «نسخ». ② اكتب الاسم الجديد. ③ عدّل السعر. «حفظ». كل القوائم (Extras وDips ومشروب وصوص) بتكون مربوطة جاهزة.',tip:'هي أسرع وأضمن طريقة: ما بينسى شي، وأسعار الإضافات صح لحالها.'},
+  en:{t:'Scenario 3: A new burger by copying (recommended)',b:'① Tap “Copy” on a similar burger. ② Type the new name. ③ Adjust the price. “Save”. All lists (extras, dips, drink, sauce) are already linked.',tip:'This is the fastest and safest way: nothing gets forgotten, and the extra prices are right automatically.'}},
+ {scene:'groups',clip:'guide',
+  de:{t:'Szenario 4: Produkt von Grund auf mit Extras',b:'Öffne das Produkt und scrolle zu “Optionen & Extras dieses Produkts”. Setze den Haken bei den Listen, die gelten sollen: Burger = Ihre Extras + Dips + Ihr Getränk + Ihre Sauce. Wings/Fingerfood = nur Dips. Getränke = keine. Über “Gruppe hinzufügen …” kommen weitere Listen dazu.',tip:'Reihenfolge: Die Listen erscheinen in der Kasse in dieser Reihenfolge. Name der Listen nicht ändern, die Kasse nutzt die Namen für ihre Texte (der Name ist gesperrt).'},
+  ar:{t:'سيناريو 4: منتج من الصفر مع الإضافات',b:'افتح المنتج وانزل لـ «خيارات وإضافات هالمنتج». حط علامة عالقوائم اللي بدك ياها: برغر = Ihre Extras + Dips + Ihr Getränk + Ihre Sauce. وينغز/فينغر فود = Dips بس. مشروبات = ولا وحدة. من «زيد مجموعة …» بتضيف قوائم تانية.',tip:'الترتيب: القوائم بتظهر بالكاشير بنفس الترتيب. لا تغيّر أسماء القوائم، الكاشير بيستعملها بالنصوص (الاسم مقفول).'},
+  en:{t:'Scenario 4: A product from scratch with extras',b:'Open the product and scroll to “Options & extras of this product”. Tick the lists that should apply: burger = Ihre Extras + Dips + Ihr Getränk + Ihre Sauce. Wings/finger food = Dips only. Drinks = none. “Add a group …” adds more lists.',tip:'Order: the lists appear in the till in this order. Do not rename the lists, the till uses the names for its labels (the name is locked).'}},
+ {scene:'rule',clip:'point',
+  de:{t:'Die Preisregel für Saucen',b:'Sauce IM Burger, Sandwich, Taco oder Hot Dog (Liste “Ihre Extras”) = 0,99 €. Sauce als extra Becher (Liste “Dips”) = 1,49 €. Mayonnaise und Ketchup kosten immer 0,49 €. Alle anderen Extras (Fleisch, Käse, Bacon …) behalten ihren eigenen Preis.',tip:'Im Menü sind die Sauce-Auswahl und das Getränk schon im Preis. Mehr Saucen gibt es dann aus “Dips`.'.replace('`','”')},
+  ar:{t:'قاعدة أسعار الصوصات',b:'الصوص جوا البرغر أو الساندويش أو التاكو أو الهوت دوغ (قائمة «Ihre Extras») = 0,99 €. الصوص بعلبة منفصلة (قائمة «Dips») = 1,49 €. المايونيز والكاتشب دايماً 0,49 €. باقي الإضافات (لحم، جبنة، بيكون …) بتضل بسعرها.',tip:'بالمنيو اختيار الصوص والمشروب محسوبين بالسعر. الصوصات الزيادة بتاخدها من «Dips».'},
+  en:{t:'The sauce price rule',b:'Sauce IN the burger, sandwich, taco or hot dog (list “Ihre Extras”) = €0.99. Sauce as a separate cup (list “Dips”) = €1.49. Mayonnaise and ketchup are always €0.49. All other extras (meat, cheese, bacon …) keep their own price.',tip:'In a menu the sauce choice and the drink are already in the price. Extra sauces come from “Dips”.'}},
+ {scene:'menu',clip:'talk',
+  de:{t:'Szenario 5: Als Menü verkaufen',b:'Ein Burger mit den Listen “Ihr Getränk” und “Ihre Sauce” kann an der Kasse “Als Menü” verkauft werden. Das Getränk und die freie Sauce sind Pflicht. Weitere Saucen kommen aus “Dips` (1,49 €). Der Menü-Aufpreis ist eine allgemeine Einstellung (Standard 4,50 €).'.replace('`','”'),tip:'Kein “Als Menü” sichtbar? Prüfe den Kategorienamen (Szenario 1) und ob die Listen “Ihr Getränk” und “Ihre Sauce” am Produkt angehakt sind.'},
+  ar:{t:'سيناريو 5: بيع المنتج كمنيو',b:'البرغر اللي عليه قائمتين «Ihr Getränk» و«Ihre Sauce» بينباع بالكاشير «Als Menü». المشروب والصوص المجاني إجباريين. الصوصات الزيادة من «Dips» (1,49 €). زيادة المنيو إعداد عام (الأساسي 4,50 €).',tip:'ما ظهر خيار المنيو؟ شوف اسم الفئة (سيناريو 1) وتأكد إنو قائمتي «Ihr Getränk» و«Ihre Sauce» معلّمين عالمنتج.'},
+  en:{t:'Scenario 5: Selling it as a menu',b:'A burger with the lists “Ihr Getränk” and “Ihre Sauce” can be sold “As menu” at the till. The drink and the free sauce are required. More sauces come from “Dips” (€1.49). The menu surcharge is a general setting (default €4.50).',tip:'No “As menu” visible? Check the category name (scenario 1) and that “Ihr Getränk” and “Ihre Sauce” are ticked on the product.'}},
+ {scene:'exclude',clip:'check',
+  de:{t:'Szenario 6: Ein Extra für ein Produkt ausschließen',b:'Beim Produkt die Liste mit dem Pfeil aufklappen und den Haken beim Eintrag entfernen. Das gilt nur für dieses Produkt, die Liste selbst bleibt für alle anderen unverändert.',tip:'Beispiel: “Extra Patty” beim Veggie Burger ausschließen, ohne es bei den anderen Burgern zu ändern.'},
+  ar:{t:'سيناريو 6: استثناء إضافة لمنتج واحد',b:'عند المنتج افتح القائمة بالسهم وشيل العلامة عن الخيار. هيك بينطبق عهالمنتج بس، والقائمة نفسها بتضل متل ما هي لباقي المنتجات.',tip:'مثال: استثني «Extra Patty» من الفيجي برغر بدون ما تغيّر شي عند باقي البرغر.'},
+  en:{t:'Scenario 6: Exclude one extra for one product',b:'On the product, expand the list with the arrow and untick the entry. This applies to this product only; the list itself stays unchanged for all others.',tip:'Example: exclude “Extra Patty” on the veggie burger without changing the other burgers.'}},
+ {scene:'library',clip:'present',
+  de:{t:'Die Bibliothek: Preise und Listen ändern',b:'Oben rechts auf “Optionen & Extras” tippen. Links die Liste wählen, rechts stehen die Einträge. ① Einen Eintrag ändern oder ➕ Eintrag hinzufügen. ② Preis ändern. Mit “Speichern” gilt es sofort für alle Produkte, die die Liste benutzen.',tip:'Preismodus je Eintrag: “Katalogpreis” (gilt überall gleich), “Gratis” oder “Eigener Preis” (nur in dieser Liste, z. B. 0,99 € in “Ihre Extras”).'},
+  ar:{t:'المكتبة: تغيير الأسعار والقوائم',b:'فوق ع اليمين اضغط «الخيارات والإضافات». اختار القائمة عاليسار، وعاليمين الخيارات. ① عدّل خيار أو ➕ خيار جديد. ② غيّر السعر. مع «حفظ» بينطبق فوراً عكل المنتجات اللي بتستعمل القائمة.',tip:'نمط السعر لكل خيار: «سعر الكتالوج» (واحد بكل مكان) أو «مجاني» أو «سعر خاص» (بهالقائمة بس، مثلاً 0,99 € بـ Ihre Extras).'},
+  en:{t:'The library: changing prices and lists',b:'Tap “Options & extras” at the top right. Pick the list on the left, the entries are on the right. ① Edit an entry or add ➕ Item. ② Change the price. With “Save” it applies immediately to all products using the list.',tip:'Price mode per entry: “Catalog price” (same everywhere), “Free” or “Own price” (this list only, e.g. €0.99 in “Ihre Extras”).'}},
+ {scene:'newsauce',clip:'guide',
+  de:{t:'Szenario 7: Eine neue Sauce hinzufügen',b:'Öffne die Bibliothek. In “Dips” einen Eintrag hinzufügen (Name + Katalogpreis 1,49 €). Dann in “Ihre Extras” denselben Namen mit “Eigener Preis” 0,99 € eintragen. Mayo/Ketchup-Art: 0,49 € in beiden. Soll sie im Menü gratis wählbar sein, trage sie auch in “Ihre Sauce” ein (Gratis).',tip:'Schreibe den Namen in beiden Listen gleich. Dann erkennt das System, dass es dieselbe Sauce ist, und ein späterer Preiswechsel gilt für beide.'},
+  ar:{t:'سيناريو 7: إضافة صوص جديد',b:'افتح المكتبة. بـ «Dips» زيد خيار (اسم + سعر الكتالوج 1,49 €). بعدين بـ «Ihre Extras» اكتب نفس الاسم بنمط «سعر خاص» 0,99 €. إذا مايونيز/كاتشب: 0,49 € بالاتنين. وإذا بدك الصوص يكون مجاني بالمنيو، زيده كمان بـ «Ihre Sauce» (مجاني).',tip:'اكتب الاسم نفسه بالقائمتين. هيك النظام بيعرف إنو نفس الصوص، وأي تغيير سعر بعدين بينطبق عالاتنين.'},
+  en:{t:'Scenario 7: Adding a new sauce',b:'Open the library. In “Dips” add an entry (name + catalog price €1.49). Then in “Ihre Extras” add the same name with “Own price” €0.99. For mayo/ketchup type: €0.49 in both. If it should be a free menu choice, also add it to “Ihre Sauce” (Free).',tip:'Write the name exactly the same in both lists. The system then knows it is the same sauce, and a later price change applies to both.'}},
+ {scene:'catalog',clip:'point',
+  de:{t:'Szenario 8: Preise überall vereinheitlichen',b:'Im Tab “Katalog” steht jeder Eintrag nur einmal. Siehst du ⚠️, hat der Eintrag in manchen Listen einen eigenen Preis. Tippe auf ⚠️, um alle auf den Katalogpreis zu setzen, oder lasse den Eigenen Preis bewusst stehen (z. B. 0,99 € in “Ihre Extras”).',tip:'Gewollte Unterschiede sind normal: Sauce im Burger 0,99 €, als Dip 1,49 €. Das ⚠️ ist nur ein Hinweis zum Prüfen.'},
+  ar:{t:'سيناريو 8: توحيد الأسعار بكل مكان',b:'بتبويب «الكتالوج» كل خيار بينذكر مرة وحدة. إذا شفت ⚠️ يعني الخيار إلو سعر خاص ببعض القوائم. اضغط ⚠️ لتوحّد الكل على سعر الكتالوج، أو اترك السعر الخاص عن قصد (مثلاً 0,99 € بـ Ihre Extras).',tip:'الفروقات المقصودة عادية: صوص جوا البرغر 0,99 € وكديب 1,49 €. الـ ⚠️ مجرد تنبيه للمراجعة.'},
+  en:{t:'Scenario 8: Unify prices everywhere',b:'In the “Catalog” tab every entry appears only once. If you see ⚠️, the entry has its own price in some lists. Tap ⚠️ to set all to the catalog price, or keep the own price on purpose (e.g. €0.99 in “Ihre Extras”).',tip:'Intended differences are normal: sauce in the burger €0.99, as a dip €1.49. The ⚠️ is only a hint to check.'}},
+ {scene:'soldout',clip:'sit',
+  de:{t:'Szenario 9: Etwas ist ausverkauft',b:'In der Bibliothek beim Eintrag “nur heute aus” anhaken: Er verschwindet für heute und ist morgen automatisch wieder da. Nimmst du den Haken bei “verfügbar` weg, bleibt er ausgeblendet, bis du ihn wieder setzt.'.replace('`','”'),tip:'Das wirkt an der Kasse und im Online-Shop für alle Produkte, die den Eintrag benutzen.'},
+  ar:{t:'سيناريو 9: صنف خلص',b:'بالمكتبة علّم «نفد اليوم بس» عند الخيار: بيختفي لليوم وبكرا بيرجع لحالو. وإذا شلت علامة «متوفر» بيضل مخفي لحد ما ترجّعها.',tip:'بيأثر بالكاشير وبالمتجر الأونلاين عكل المنتجات اللي بتستعمل الخيار.'},
+  en:{t:'Scenario 9: Something is sold out',b:'In the library tick “out today only” on the entry: it disappears for today and is back tomorrow by itself. If you untick “available”, it stays hidden until you tick it again.',tip:'It applies at the till and in the online shop for every product using the entry.'}},
+ {scene:'plat',clip:'idle',
+  de:{t:'Plattformpreis (nur Referenz)',b:'Bei Einträgen und Produkten steht manchmal “Plattformpreis (Referenz)”. Das ist nur eine Notiz, welcher Preis bei Lieferando, Uber und Co. gilt. Der Preis an der Kasse ist immer der normale Verkaufspreis.',tip:'Bestellungen von den Plattformen kommen mit den Preisen der Plattform. Du musst sie nicht in der Bibliothek pflegen.'},
+  ar:{t:'سعر المنصة (للمرجع بس)',b:'أحياناً بتشوف «سعر المنصة (مرجع)» عند الخيارات والمنتجات. هاد ملاحظة بس عن السعر عند Lieferando وUber وغيرهم. سعر الكاشير دايماً سعر البيع العادي.',tip:'طلبات المنصات بتيجي بأسعار المنصة. ما بتحتاج تعدّلها بالمكتبة.'},
+  en:{t:'Platform price (reference only)',b:'Entries and products sometimes show “Platform price (reference)”. It is only a note of the price on Lieferando, Uber and others. The till always uses the normal sales price.',tip:'Platform orders arrive with the platform’s own prices. You do not need to maintain them in the library.'}},
+ {scene:'history',clip:'check',
+  de:{t:'Fehler rückgängig machen, Produkt löschen',b:'Mit “Verlauf” siehst du jede Änderung. “Rückgängig” stellt den alten Wert wieder her. “Produkt löschen” steht im Produkt; auch ein gelöschtes Produkt holst du im Verlauf zurück. Eine Liste kann nur gelöscht werden, wenn kein Produkt sie mehr benutzt.',tip:'Habe keine Angst, etwas kaputt zu machen: Es gibt immer einen Weg zurück.'},
+  ar:{t:'ترجيع غلطة وحذف منتج',b:'من «سجل التغييرات» بتشوف كل تعديل. «تراجع» بيرجّع القيمة القديمة. «احذف المنتج» موجود جوا المنتج، وحتى المنتج المحذوف بترجّعه من السجل. القائمة ما بتنحذف إلا إذا ما في منتج مربوط فيها.',tip:'لا تخاف تخرّب شي: دايماً في طريق للرجوع.'},
+  en:{t:'Undo mistakes, delete a product',b:'“History” shows every change. “Undo” restores the old value. “Delete product” is inside the product; even a deleted product can be restored from the history. A list can only be deleted when no product uses it any more.',tip:'Do not be afraid to break something: there is always a way back.'}},
+ {scene:'test',clip:'cheer',
+  de:{t:'Zum Schluss: An der Kasse testen',b:'Öffne die Kasse und lege das neue Produkt in einen Auftrag (danach wieder löschen, nicht bezahlen). Prüfe: ✓ Produkt und Preis ✓ “Ihre Extras”-Saucen 0,99 € ✓ “Dips” 1,49 € ✓ Mayo/Ketchup 0,49 € ✓ “Als Menü” mit Aufpreis.',tip:'Nach größeren Änderungen: Kasse-Seite neu laden (Strg + F5), damit sie die neue Karte holt.'},
+  ar:{t:'بالآخر: جرّب بالكاشير',b:'افتح الكاشير وحط المنتج الجديد بطلب (وبعدها احذفه، لا تدفع). تأكد: ✓ المنتج والسعر ✓ صوصات «Ihre Extras» 0,99 € ✓ «Dips» 1,49 € ✓ المايونيز/الكاتشب 0,49 € ✓ «Als Menü» مع الزيادة.',tip:'بعد تغييرات كبيرة: حدّث صفحة الكاشير (Strg + F5) ليجيب المنيو الجديد.'},
+  en:{t:'Finally: test at the till',b:'Open the till and add the new product to an order (delete it afterwards, do not pay). Check: ✓ product and price ✓ “Ihre Extras” sauces €0.99 ✓ “Dips” €1.49 ✓ mayo/ketchup €0.49 ✓ “As menu” with the surcharge.',tip:'After bigger changes: reload the till page (Ctrl + F5) so it fetches the new menu.'}},
+ {scene:'mistakes',clip:'point',
+  de:{t:'Häufige Fehler und Lösungen',b:'',list:['Neue Liste statt Verknüpfung angelegt → besser vorhandene Liste anhaken oder Produkt kopieren.','Kein “Als Menü” → Kategorienname enthält ein Sperrwort oder “Ihr Getränk”/“Ihre Sauce” fehlen.','Sauce hat verschiedene Preise → im Tab “Katalog” auf ⚠️ prüfen. Im Burger 0,99 €, als Dip 1,49 €, Mayo/Ketchup 0,49 €.','Änderung nicht sichtbar → “Speichern` nicht vergessen und die Kasse neu laden.'.replace('`','”')],tip:'Im Zweifel: Verlauf öffnen und die letzte Änderung rückgängig machen.'},
+  ar:{t:'أخطاء شائعة وحلولها',b:'',list:['عملت قائمة جديدة بدل ما تربط → الأفضل تعلّم القائمة الموجودة أو تنسخ منتج.','ما في «Als Menü» → اسم الفئة فيه كلمة ممنوعة أو قائمتي «Ihr Getränk»/«Ihre Sauce» ناقصين.','الصوص إله أسعار مختلفة → راجع ⚠️ بتبويب «الكتالوج». جوا البرغر 0,99 €، كديب 1,49 €، مايو/كاتشب 0,49 €.','التعديل ما ظهر → ما تنسى «حفظ» وحدّث الكاشير.'],tip:'إذا ما عرفت: افتح سجل التغييرات وارجع آخر تعديل.'},
+  en:{t:'Common mistakes and fixes',b:'',list:['Created a new list instead of linking → better tick the existing list or copy a product.','No “As menu” → the category name has a blocked word, or “Ihr Getränk”/“Ihre Sauce” are missing.','A sauce has different prices → check ⚠️ in the “Catalog” tab. In the burger €0.99, as a dip €1.49, mayo/ketchup €0.49.','Change not visible → do not forget “Save” and reload the till.'],tip:'When in doubt: open the history and undo the last change.'}}
+];
+
+/* ---------- App ---------- */
+const $=s=>document.querySelector(s);
+const AR_DIG='٠١٢٣٤٥٦٧٨٩';
+const dig=(n,L)=>L==='ar'?String(n).replace(/\d/g,d=>AR_DIG[d]):String(n);
+const params=new URLSearchParams(location.search);
+const printLang=['de','ar','en'].includes(params.get('print'))?params.get('print'):null;
+let lang=printLang||(()=>{try{const a=localStorage.getItem('flamo-guide-lang')||localStorage.getItem('nara-kasse-language');if(['de','ar','en'].includes(a))return a}catch(e){}return 'de'})();
+let cur=Math.max(0,Math.min(STEPS.length-1,(parseInt(location.hash.slice(1),10)||1)-1));
+
+function card(s,n){
+ const d=s[lang];
+ return `<article class="card" data-n="${n}"><div class="head"><div class="badge">${dig(n+1,lang)}</div><h1>${d.t}</h1></div>
+ <div class="art">${SC[s.scene](lang,X[lang])}</div>
+ <div class="row"><img class="flamo" src="web-prototype/c/flamo-${s.clip}.webp" alt="" ${printLang?'':'loading="lazy"'}><div class="body">${d.b}${d.list?'<ol>'+d.list.map(l=>`<li>${l}</li>`).join('')+'</ol>':''}</div></div>
+ ${d.tip?`<div class="tip">💡 ${d.tip}</div>`:''}
+ <div class="pfoot">Flamo · ${UI.de.doc} · v${VER} · ${DATE} · ${n+1}/${STEPS.length}</div></article>`;
+}
+function render(){
+ const rtl=lang==='ar';
+ document.documentElement.lang=lang;document.documentElement.dir=rtl?'rtl':'ltr';
+ document.title='Flamo · '+UI[lang].title;
+ const u=UI[lang];
+ const bar=`<div class="bar"><b>Flamo · ${u.title}</b><div class="tools">${LANGS.map(([c,n])=>`<button data-l="${c}" class="${c===lang?'on':''}">${n}</button>`).join('')}<button data-pdf="1">${u.pdf}</button></div></div>`;
+ if(printLang){$('#app').innerHTML=`<div class="wrap">${STEPS.map(card).join('')}</div>`;document.body.classList.add('print');return}
+ const arrow=rtl?['▶','◀']:['◀','▶'];
+ $('#app').innerHTML=bar+`<div class="wrap"><div class="dots">${STEPS.map((_,i)=>`<i data-i="${i}" class="${i===cur?'on':''}"></i>`).join('')}</div>${card(STEPS[cur],cur)}</div>
+ <div class="nav"><button data-go="-1" ${cur===0?'disabled':''}>${arrow[0]} ${u.prev}</button><div class="cnt">${dig(cur+1,lang)} / ${dig(STEPS.length,lang)}</div><button data-go="1" ${cur===STEPS.length-1?'disabled':''}>${u.next} ${arrow[1]}</button></div>`;
+}
+function go(i){cur=Math.max(0,Math.min(STEPS.length-1,i));history.replaceState(null,'','#'+(cur+1));render();window.scrollTo(0,0)}
+document.addEventListener('click',e=>{
+ const l=e.target.closest('[data-l]');if(l){lang=l.dataset.l;try{localStorage.setItem('flamo-guide-lang',lang)}catch(_){}render();return}
+ if(e.target.closest('[data-pdf]')){window.open(location.pathname+'?print='+lang,'_blank');return}
+ const g=e.target.closest('[data-go]');if(g){go(cur+Number(g.dataset.go));return}
+ const d=e.target.closest('[data-i]');if(d)go(Number(d.dataset.i));
+});
+document.addEventListener('keydown',e=>{if(printLang)return;const rtl=lang==='ar';if(e.key==='ArrowRight')go(cur+(rtl?-1:1));if(e.key==='ArrowLeft')go(cur+(rtl?1:-1))});
+let tx=null;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{if(tx==null||printLang)return;const dx=e.changedTouches[0].clientX-tx;tx=null;if(Math.abs(dx)<60)return;const rtl=lang==='ar';go(cur+((dx<0)!==rtl?1:-1))},{passive:true});
+render();
+if(printLang){
+ const imgs=[...document.images].map(im=>im.complete?1:new Promise(r=>{im.onload=im.onerror=r}));
+ Promise.all([document.fonts.ready,...imgs]).then(()=>setTimeout(()=>window.print(),500));
+}
+</script>
+<script src="flamo-home.js?v=20261031a" defer></script></body></html>
