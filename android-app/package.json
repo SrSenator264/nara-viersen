@@ -4,11 +4,12 @@
   "private": true,
   "description": "Android-Huelle fuer die Flamo Fahrer-App (laedt https://app.flamo.co.de/driver.html, GPS im Hintergrund)",
   "dependencies": {
+    "@capacitor-community/background-geolocation": "^1.2.20",
+    "@capacitor-mlkit/barcode-scanning": "^6.2.0",
     "@capacitor/android": "^6.1.0",
     "@capacitor/cli": "^6.1.0",
     "@capacitor/core": "^6.1.0",
     "@capacitor/local-notifications": "^6.1.0",
-    "@capacitor/push-notifications": "^6.0.0",
-    "@capacitor-community/background-geolocation": "^1.2.20"
+    "@capacitor/push-notifications": "^6.0.0"
   }
 }

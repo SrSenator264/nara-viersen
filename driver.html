@@ -52,7 +52,8 @@ main{padding:12px 12px 90px}
 <link rel="stylesheet" href="flamo-night.css?v=20261031b"><script src="flamo-night.js?v=20261031b"></script></head>
 <body>
 <header><h1 id="title">🛵</h1><span id="langsw"></span><span class="gps" id="gps">📍 …</span><span class="gps" id="pushst" hidden></span></header>
-<main id="main"><div class="empty">…</div></main>
+<div id="scanbar" style="padding:12px 12px 0"><button class="big" id="scanbtn" style="margin:0;width:100%">📷 …</button></div>
+<main id="main" style="padding-top:4px"><div class="empty">…</div></main>
 <div id="msg"></div>
 <input type="file" id="cam" accept="image/*" capture="environment" hidden>
 <script>
@@ -169,7 +170,70 @@ function capPlugin(n){var C=window.Capacitor||{};return typeof C.registerPlugin=
     await load();
   });
   document.title=t('doc');$('#title').textContent=t('title');if(NL)NL.mountSwitcher($('#langsw'),{buttonStyle:'min-width:30px;height:28px;border-radius:8px;border:1px solid #fff4;background:transparent;color:#fff;font-weight:800;font-size:13px'});
+  window.naraDriver={reload:load,pos:()=>last,toast:toast};
   startGps();load();setInterval(load,10000);
+})();
+</script>
+<script>
+// ===== مسح QR: السائق بيضيف الطلب لجولته (أي نوع QR: رابطنا / Lieferando-Scoober / FLAMO|منصة|كود) =====
+(function(){
+  var M={
+    de:{btn:'📷 Auftrag scannen',added:'Hinzugefügt ✅ Auftrag {c} – Stopp {n} von {t}',already:'Auftrag {c} ist schon bei dir',NOT_FOUND:'Zu diesem QR-Code gibt es keinen Auftrag',NOT_DELIVERY:'Auftrag {c} ist keine Lieferung',DELIVERED:'Auftrag {c} wurde schon geliefert',TAKEN:'Auftrag {c} ist bei {d}. Der Chef kann ihn verschieben',FULL:'Deine Tour ist voll (8 Aufträge)',DRIVERS_ONLY:'Scannen nur für Fahrer',login:'Bitte anmelden',offline:'Keine Verbindung',cam:'Kamera nicht erlaubt – bitte in den Handy-Einstellungen erlauben',old:'App veraltet – bitte die neue APK installieren',prep:'Scanner wird vorbereitet … in ein paar Sekunden nochmal versuchen',paste:'QR-Text einfügen:',cancel:'Abbrechen'},
+    ar:{btn:'📷 مسح طلب',added:'تمت الإضافة ✅ طلب {c} – المحطة {n} من {t}',already:'الطلب {c} مضاف عندك أصلاً',NOT_FOUND:'ما لقيت طلب لهالـ QR',NOT_DELIVERY:'الطلب {c} مو توصيل',DELIVERED:'الطلب {c} انسلّم',TAKEN:'الطلب {c} عند {d}. المدير بينقله',FULL:'جولتك ممتلئة (8 طلبات)',DRIVERS_ONLY:'المسح للسواقين بس',login:'سجّل دخول',offline:'ما في اتصال',cam:'الكاميرا مو مسموحة – اسمح فيها من إعدادات الجوال',old:'التطبيق قديم – ثبّت الـ APK الجديد',prep:'عم نجهّز القارئ … جرّب بعد كم ثانية',paste:'الصق نص الـ QR:',cancel:'إلغاء'},
+    en:{btn:'📷 Scan order',added:'Added ✅ order {c} – stop {n} of {t}',already:'Order {c} is already yours',NOT_FOUND:'No order found for this QR code',NOT_DELIVERY:'Order {c} is not a delivery',DELIVERED:'Order {c} was already delivered',TAKEN:'Order {c} is with {d}. The manager can move it',FULL:'Your round is full (8 orders)',DRIVERS_ONLY:'Scanning is for drivers only',login:'Please log in',offline:'No connection',cam:'Camera not allowed – please allow it in phone settings',old:'App outdated – please install the new APK',prep:'Scanner is getting ready … try again in a few seconds',paste:'Paste the QR text:',cancel:'Cancel'}
+  };
+  var L=(window.NARA_LANG&&NARA_LANG.get())||'de',X=M[L]||M.de,btn=document.getElementById('scanbtn'),busy=false;
+  var fill=function(s,v){return String(s||'').replace(/\{(\w)\}/g,function(_,k){return v&&v[k]!=null?v[k]:''})};
+  function say(txt){if(window.naraDriver)window.naraDriver.toast(txt);else alert(txt)}
+  btn.textContent=X.btn;
+  var NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+  function capPlug(n){var C=window.Capacitor||{};return typeof C.registerPlugin==='function'?C.registerPlugin(n):(C.Plugins&&C.Plugins[n])}
+  // APK: قارئ ML Kit الأصلي
+  async function nativeScan(){
+    var BS=capPlug('BarcodeScanner');
+    if(!BS||(Capacitor.isPluginAvailable&&!Capacitor.isPluginAvailable('BarcodeScanner')))throw Error('old');
+    var p=await BS.requestPermissions();
+    if(!p||(p.camera!=='granted'&&p.camera!=='limited'))throw Error('cam');
+    try{var a=await BS.isGoogleBarcodeScannerModuleAvailable();if(a&&!a.available){await BS.installGoogleBarcodeScannerModule();throw Error('prep')}}catch(e){if(e.message==='prep')throw e}
+    var r=await BS.scan({formats:['QR_CODE']});
+    return r&&r.barcodes&&r.barcodes[0]?String(r.barcodes[0].rawValue||''):'';
+  }
+  // متصفح: BarcodeDetector + الكاميرا، وإلا لصق النص يدوياً
+  function webScan(){
+    if(!('BarcodeDetector' in window)||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){var v=window.prompt(X.paste,'');return Promise.resolve(v||'')}
+    return new Promise(function(ok,bad){
+      var ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;z-index:30;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px';
+      var vd=document.createElement('video');vd.setAttribute('playsinline','');vd.muted=true;vd.style.cssText='width:100%;max-height:75vh;object-fit:cover';
+      var cb=document.createElement('button');cb.className='big sec';cb.textContent=X.cancel;cb.style.maxWidth='360px';
+      ov.appendChild(vd);ov.appendChild(cb);document.body.appendChild(ov);
+      var stream=null,timer=null,det=new BarcodeDetector({formats:['qr_code']});
+      function end(v,e){clearInterval(timer);if(stream)stream.getTracks().forEach(function(t){t.stop()});ov.remove();e?bad(e):ok(v||'')}
+      cb.onclick=function(){end('')};
+      navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(s){stream=s;vd.srcObject=s;vd.play();
+        timer=setInterval(function(){det.detect(vd).then(function(r){if(r&&r.length&&r[0].rawValue)end(r[0].rawValue)}).catch(function(){})},250)}).catch(function(){end('',Error('cam'))});
+    });
+  }
+  async function claim(code){
+    var pos=window.naraDriver&&window.naraDriver.pos&&window.naraDriver.pos()||{};
+    var r=await fetch('/api/driver/claim',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({code:String(code).slice(0,600),lat:pos.lat,lng:pos.lng,accuracy:pos.accuracy})});
+    var j=await r.json().catch(function(){return{}});
+    return{status:r.status,j:j};
+  }
+  btn.onclick=async function(){
+    if(busy)return;busy=true;btn.disabled=true;
+    try{
+      var code=NATIVE?await nativeScan():await webScan();
+      if(!code){return}
+      var res=await claim(code),j=res.j||{};
+      if(res.status===401){say(X.login);return}
+      if(res.status>=400){say(fill(X[j.code||j.error]||X.NOT_FOUND,{c:j.orderCode,d:j.driverName}));if(navigator.vibrate)navigator.vibrate([120,80,120]);return}
+      say(j.already?fill(X.already,{c:j.code}):fill(X.added,{c:j.code,n:j.order,t:j.stops}));
+      if(navigator.vibrate)navigator.vibrate(80);
+      if(window.naraDriver)await window.naraDriver.reload();
+    }catch(e){
+      var k=e&&e.message;say(X[k]||(k&&k.indexOf('fetch')>=0?X.offline:(k||X.offline)));
+    }finally{busy=false;btn.disabled=false}
+  };
 })();
 </script>
 <style>

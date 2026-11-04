@@ -219,12 +219,14 @@ function plan(input) {
 }
 
 // رابط ملاحة Google Maps للسائق (مجاني، بدون مفتاح): من المحل عبر المحطات بالترتيب ورجوع للمحل
-function googleMapsLink(shop, stops) {
+// opts.fromHere: بدون origin، فـ Google Maps بيبدأ من مكان السائق الحالي (للجولة اللي طلعت)
+function googleMapsLink(shop, stops, opts = {}) {
   const p = x => `${x.lat},${x.lng}`;
   const pts = stops.filter(validPoint);
   if (!pts.length) return null;
   const last = pts[pts.length - 1];
-  const q = new URLSearchParams({ api: '1', origin: p(shop), destination: p(last), travelmode: 'driving' });
+  const q = new URLSearchParams({ api: '1', destination: p(last), travelmode: 'driving' });
+  if (!opts.fromHere) q.set('origin', p(shop));
   if (pts.length > 1) q.set('waypoints', pts.slice(0, -1).map(p).join('|'));
   return 'https://www.google.com/maps/dir/?' + q.toString();
 }

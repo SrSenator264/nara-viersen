@@ -387,7 +387,8 @@ function driverRoutes(data, driverId) {
         notes: kv.notes, notesI18n: require('./note-translate.js').view(o, kv.notes), itemsCount: kv.items.reduce((s, i) => s + i.quantity, 0), cash, delivered: !!o.deliveredAt, etaAt: o.assignment && o.assignment.etaAt || null, ...(pointOf(o, cache) || {}) };
     });
     return { routeId: r.id, roundId: r.id.slice(-4).toUpperCase(), status: r.status, startedAt: r.startedAt, allDelivered: stops.every(s => s.delivered), stops,
-      googleMapsUrl: engine.googleMapsLink(shopOf(data), stops.filter(s => !s.delivered && Number.isFinite(s.lat))) };
+      // الجولة طالعة: الخريطة من مكان السائق الحالي (مو من المحل)
+      googleMapsUrl: engine.googleMapsLink(shopOf(data), stops.filter(s => !s.delivered && Number.isFinite(s.lat)), { fromHere: !!r.startedAt }) };
   });
 }
 
@@ -401,6 +402,106 @@ function missingAddresses(data, now = Date.now()) {
   return [...out];
 }
 
+// ===== مسح QR: السائق بيضيف الطلب لجولته بنفسه (حتى لو جولته طالعة: طوارئ) =====
+const claimErr = (status, code, extra) => Object.assign(new Error(code), { status, code, ...(extra || {}) });
+const normCode = v => str(v).replace(/[\s-]/g, '').toUpperCase();
+const SCOOBER_RE = /mca\.scoober\.com\/qr\/?\?ref=([A-Za-z0-9]+)(?:&amp;|&|\\u0026)id=([a-f0-9]{16,64})/i;
+const codesOf = o => [o.displayCode, o.externalOrderCode, o.publicReference, o.platformOrderId].map(normCode).filter(Boolean);
+const pickOpen = list => list.find(o => !o.deliveredAt && !delivered(o)) || list[0];
+
+// أي نص ممسوح -> الطلب. بنقبل: رابطنا (token=)، رابط Scoober/Lieferando، FLAMO|منصة|كود، أو نص مطابق تماماً لما محفوظ بالطلب
+function findOrderByScan(data, text) {
+  const t = str(text).slice(0, 600);
+  if (!t) return null;
+  const orders = data.orders || [];
+  const tok = /[?&]token=([^&#\s]+)/.exec(t);
+  if (tok) {
+    let v = tok[1]; try { v = decodeURIComponent(v); } catch (e) { /* خليه متل ما هو */ }
+    const hit = orders.find(o => o.deliveryQrToken && o.deliveryQrToken === v);
+    if (hit) return hit;
+  }
+  const exact = orders.filter(o => t === str(o.deliveryQrUrl) || t === str(o.ownDeliveryQrUrl));
+  if (exact.length) return pickOpen(exact);
+  const sc = SCOOBER_RE.exec(t);
+  if (sc) {
+    const ref = sc[1].toUpperCase(), id = sc[2].toLowerCase();
+    const byUrl = orders.filter(o => { const m = SCOOBER_RE.exec(str(o.deliveryQrUrl)); return m && m[1].toUpperCase() === ref && m[2].toLowerCase() === id; });
+    if (byUrl.length) return pickOpen(byUrl);
+    const byRef = orders.filter(o => codesOf(o).includes(normCode(ref)));
+    if (byRef.length) return pickOpen(byRef);
+  }
+  const fl = /^FLAMO\|([^|]*)\|(.+)$/i.exec(t);
+  if (fl) {
+    const plat = fl[1].trim().toUpperCase(), code = normCode(fl[2]);
+    const list = orders.filter(o => codesOf(o).includes(code) && (!plat || [o.platform, o.source].some(x => str(x).toUpperCase() === plat)));
+    if (list.length) return pickOpen(list);
+  }
+  return null;
+}
+
+function permutationsOf(arr) {
+  if (arr.length <= 1) return [arr.slice()];
+  const out = [];
+  arr.forEach((x, i) => { for (const p of permutationsOf([...arr.slice(0, i), ...arr.slice(i + 1)])) out.push([x, ...p]); });
+  return out;
+}
+
+// ترتيب المحطات اللي لسا ما انسلّمت: أقل مجموع أوقات وصول من نقطة البداية (موقع السائق إذا طالع، وإلا المحل). المسلَّم بيضل أول القائمة.
+function optimizeOpenStops(data, route, from, now) {
+  const cache = data.geocodeCache || {}, tm = travelModel(data), shop = shopOf(data);
+  const stopMin = tm.model.stopMin || tm.cfg.stopMin;
+  const ids = (route.orderIds || []).map(String), ord = ids.map(id => findOrder(data, id));
+  const done = ids.filter((id, i) => !ord[i] || ord[i].deliveredAt), open = ids.filter((id, i) => ord[i] && !ord[i].deliveredAt);
+  const pts = new Map(open.map(id => [id, pointOf(findOrder(data, id), cache)]));
+  const known = open.filter(id => pts.get(id)), unknown = open.filter(id => !pts.get(id));
+  const start = from && Number.isFinite(Number(from.lat)) && Number.isFinite(Number(from.lng)) ? { lat: Number(from.lat), lng: Number(from.lng) } : shop;
+  let best = known;
+  if (known.length > 1) {
+    const cost = seq => { let at = start, t = 0, sum = 0; for (const id of seq) { t += tm.travel(at, pts.get(id)) + stopMin; sum += t; at = pts.get(id); } return sum; };
+    if (known.length <= 6) {
+      let bc = Infinity;
+      for (const seq of permutationsOf(known)) { const c = cost(seq); if (c < bc) { bc = c; best = seq; } }
+    } else { // أكتر من 6: الأقرب فالأقرب
+      const left = known.slice(); best = []; let at = start;
+      while (left.length) { let k = 0; for (let i = 1; i < left.length; i++) if (tm.travel(at, pts.get(left[i])) < tm.travel(at, pts.get(left[k]))) k = i; const id = left.splice(k, 1)[0]; best.push(id); at = pts.get(id); }
+    }
+  }
+  route.orderIds = [...done, ...best, ...unknown];
+  let t = Date.parse(now) + (route.startedAt ? 0 : tm.cfg.handoverMin * MIN), at = start;
+  const etas = {};
+  for (const id of best) { t += tm.travel(at, pts.get(id)) * MIN; etas[id] = new Date(t).toISOString(); t += stopMin * MIN; at = pts.get(id); }
+  route.plannedEtas = { ...(route.plannedEtas || {}), ...etas }; route.updatedAt = now;
+  for (const id of best) { const o = findOrder(data, id); if (o) { o.assignment = { ...(o.assignment || {}), etaAt: etas[id] }; o.updatedAt = now; } }
+  return route;
+}
+
+// السائق مسح QR: الطلب بينضاف لجولته المفتوحة (أو جولة جديدة) وبتنرتّب المحطات الباقية من موقعه
+function claimByScan(data, { code, pos }, user, now = new Date().toISOString()) {
+  const me = user && (data.employees || []).find(e => e.id === user.id && str(e.role).toUpperCase() === 'DRIVER' && e.active !== false);
+  if (!me) throw claimErr(403, 'DRIVERS_ONLY');
+  const o = findOrderByScan(data, code);
+  if (!o) throw claimErr(404, 'NOT_FOUND');
+  const orderCode = kitchen.kitchenView(o).displayCode, id = String(o.id);
+  if (!isDelivery(o)) throw claimErr(409, 'NOT_DELIVERY', { orderCode });
+  if (o.deliveredAt || delivered(o, Date.parse(now))) throw claimErr(409, 'DELIVERED', { orderCode });
+  const cur = routeOfOrder(data, id);
+  if (cur && cur.employeeId === me.id) return { already: true, orderId: o.id, code: orderCode, routeId: cur.id, stops: cur.orderIds.length };
+  if (cur) throw claimErr(409, 'TAKEN', { orderCode, driverName: cur.employeeName || '' });
+  let route = openRoutes(data).filter(r => r.employeeId === me.id && !r.allDeliveredAt).pop();
+  if (route && (route.orderIds || []).length >= 8) throw claimErr(409, 'FULL', { orderCode });
+  if (!route) {
+    data.deliveryRoutes ??= [];
+    route = { id: 'route_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), employeeId: me.id, employeeName: me.name, orderIds: [], plannedEtas: null, status: 'ASSIGNED', source: 'SCAN', createdAt: now, createdBy: me.name, startedAt: null, completedAt: null, updatedAt: now };
+    data.deliveryRoutes.push(route);
+  }
+  route.orderIds.push(id);
+  bind(o, route, now);
+  if (route.startedAt) { o.outAt ??= now; o.liveStage = 'HANDOVER'; } // الجولة طالعة: الطلب طالع معه
+  const prefs = (data.dispatchPrefs || {}).orders; if (prefs) delete prefs[id];
+  optimizeOpenStops(data, route, route.startedAt ? pos : null, now);
+  return { already: false, orderId: o.id, code: orderCode, routeId: route.id, started: !!route.startedAt, stops: route.orderIds.length, order: route.orderIds.map(String).indexOf(id) + 1 };
+}
+
 // Nominatim: مجاني، طلب واحد بالثانية، ولازم اسم برنامج واضح
 async function geocode(address, fetchImpl = fetch) {
   const url = 'https://nominatim.openstreetmap.org/search?' + new URLSearchParams({ q: address, format: 'json', limit: '1', countrycodes: 'de', viewbox: '6.05,51.55,6.75,50.95' });
@@ -411,4 +512,4 @@ async function geocode(address, fetchImpl = fetch) {
   return { lat: Number(j[0].lat), lng: Number(j[0].lon) };
 }
 
-module.exports = { DEFAULT_CITY, plzAssumed, DEFAULT_SHOP, shopOf, addressOf, addressKey, pointOf, buildInput, planFor, missingAddresses, geocode, activeDrivers, assignRoute, pushTargets, moveOrder, swapOrders, reorderStops, setOrderPref, setDriverPref, cancelRoute, startRoute, deliverStop, finishRoute, driverRoutes, travelModel, paidOnline, proofDelivery };
+module.exports = { DEFAULT_CITY, plzAssumed, DEFAULT_SHOP, shopOf, addressOf, addressKey, pointOf, buildInput, planFor, missingAddresses, geocode, activeDrivers, assignRoute, pushTargets, moveOrder, swapOrders, reorderStops, setOrderPref, setDriverPref, cancelRoute, startRoute, deliverStop, finishRoute, driverRoutes, travelModel, paidOnline, proofDelivery, findOrderByScan, claimByScan };

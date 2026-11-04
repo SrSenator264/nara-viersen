@@ -18,6 +18,7 @@ jobs:
           npm install
           npx cap add android
           python3 patch_manifest.py android/app/src/main/AndroidManifest.xml
+          sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 24/' android/variables.gradle
           npx cap sync android
       - name: Firebase-Konfiguration (FCM)
         env:

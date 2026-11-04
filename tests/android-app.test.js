@@ -45,3 +45,11 @@ test('driver page registers the FCM token (native only) and creates the high-imp
   assert.match(h, /createChannel\(\{id:'orders'[^}]*importance:5/);
   assert.match(h, /__fcmOk&&document\.visibilityState!=='visible'/); // kein Doppel-Alarm im Hintergrund
 });
+test('apk has the QR scanner: ML Kit plugin, camera permission, scanner module meta-data, minSdk 24 patched before sync', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+  assert.ok(pkg.dependencies['@capacitor-mlkit/barcode-scanning']);
+  const p = fs.readFileSync(path.join(root, 'patch_manifest.py'), 'utf8');
+  assert.ok(p.includes("'CAMERA'")); assert.ok(p.includes('com.google.mlkit.vision.DEPENDENCIES')); assert.ok(p.includes('barcode_ui'));
+  const w = fs.readFileSync(path.join(__dirname, '..', '.github', 'workflows', 'android-apk.yml'), 'utf8');
+  assert.match(w, /minSdkVersion = 24/); assert.ok(w.indexOf('minSdkVersion') < w.indexOf('cap sync android'));
+});
