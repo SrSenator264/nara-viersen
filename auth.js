@@ -120,6 +120,8 @@ const RULES = [
   ['GET', /^\/api\/delivery\/auto-plan$/, CASH],
   ['POST', /^\/api\/kitchen\/estimate$/, CASH],
   ['*', /^\/api\/kasse\/settings$/, CASH],
+  ['*', /^\/api\/driver\/track$/, 'public'], // iPhone-Fahrer (Traccar Client): Auth = geheimer Token pro Fahrer, geprüft im Handler
+  ['*', /^\/api\/driver\/track-tokens$/, MANAGERS],
   ['POST', /^\/api\/driver\/(position|start|delivered|finish|proof|door-pay|claim)$/, STAFF],
   ['GET', /^\/api\/delivery\/proof$/, CASH],
   ['GET', /^\/api\/driver\/routes$/, STAFF],

@@ -37,6 +37,7 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
     <div class="msg" id="nmsg"></div>
     <p class="sub" data-t="pinRules"></p>
   </section>
+  <section id="trk"><h2 id="trk-h"></h2><p class="sub" id="trk-sub"></p><div id="trk-list"></div><div class="msg" id="trk-msg"></div></section>
   <section class="pay"><h2 data-t="payH"></h2>
     <p class="sub" data-t="payNote"></p>
     <div id="pay"></div><div class="msg" id="pmsg"></div>
@@ -101,6 +102,31 @@ button{cursor:pointer;background:#1f2a35;transition:background .12s}button:hover
   $('inv-go').onclick=function(){api('POST','/api/auth/invite',{}).then(function(j){if(!j.ok){say('inv-msg',j.error||'Fehler');return}lastInv=j.url;$('inv-url').textContent=j.url;$('inv-wa').hidden=false;$('inv-cp').hidden=false;say('inv-msg','',true)})};
   $('inv-wa').onclick=function(){window.open('https://wa.me/?text='+encodeURIComponent(IV[6]+lastInv+'\n\n'+IV[7]+lastInv.replace(/\/join\.html.*$/,'/driver.html')),'_blank')};
   $('inv-cp').onclick=function(){(navigator.clipboard?navigator.clipboard.writeText(lastInv):Promise.reject()).then(function(){say('inv-msg',IV[5],true)},function(){say('inv-msg',lastInv)})};
+  var TRKD={de:['📱 iPhone-Fahrer (Traccar)','Auf dem iPhone stoppt die Fahrer-App, sobald Google Maps vorne ist. Lösung: Fahrer installiert „Traccar Client“ (gratis, App Store) und trägt unten Server-URL und Geräte-ID ein (Server URL / Device identifier). Standort: „Immer“.','Keine aktiven Fahrer.','Code erstellen','Neu erzeugen','Server-URL','Geräte-ID','Kopieren','Kopiert.','Neuen Code erzeugen? Der alte funktioniert dann nicht mehr.','Fehler'],
+  ar:['📱 سائقين الأيفون (Traccar)','على الأيفون التتبع بيوقف لما السائق يفتح Google Maps. الحل: السائق يثبّت تطبيق Traccar Client (مجاني من App Store) ويكتب الرابط والرمز اللي تحت (Server URL و Device identifier). والموقع يكون "دائماً".','ما في سائقين فعّالين.','إنشاء رمز','رمز جديد','رابط السيرفر','رمز الجهاز','نسخ','تم النسخ.','تنشئ رمز جديد؟ القديم رح يوقف.','خطأ'],
+  en:['📱 iPhone drivers (Traccar)','On iPhone the driver app stops tracking once Google Maps is in front. Fix: the driver installs “Traccar Client” (free, App Store) and enters the server URL and device ID below (Server URL / Device identifier). Location: “Always”.','No active drivers.','Create code','Regenerate','Server URL','Device ID','Copy','Copied.','Create a new code? The old one will stop working.','Error']};
+  var TK=TRKD[LANG]||TRKD.de;
+  $('trk-h').textContent=TK[0];$('trk-sub').textContent=TK[1];
+  function trkCopy(txt){(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){say('trk-msg',TK[8],true)},function(){say('trk-msg',txt)})}
+  function trkMake(id,regen){api('POST','/api/driver/track-tokens',{employeeId:id,regenerate:regen}).then(function(j){if(!j.ok)say('trk-msg',j.error||TK[10]);trkRender()})}
+  function trkRender(){api('GET','/api/driver/track-tokens').then(function(j){
+    var box=$('trk-list');box.innerHTML='';
+    if(!j.ok){say('trk-msg',j.error||TK[10]);return}
+    if(!j.drivers.length){var e=document.createElement('p');e.className='sub';e.textContent=TK[2];box.appendChild(e);return}
+    j.drivers.forEach(function(d){
+      var r=document.createElement('div');r.className='row';r.style.gridTemplateColumns='1fr';
+      var n=document.createElement('div');n.className='nm';n.textContent='📱 '+d.name;r.appendChild(n);
+      if(!d.token){var b=document.createElement('button');b.className='pri';b.textContent=TK[3];b.onclick=function(){trkMake(d.id,false)};r.appendChild(b)}
+      else{
+        [[TK[5],j.serverUrl],[TK[6],d.token]].forEach(function(x){
+          var w=document.createElement('div');w.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+          var l=document.createElement('span');l.className='tag';l.style.minWidth='110px';l.textContent=x[0];
+          var i=document.createElement('input');i.readOnly=true;i.value=x[1];i.style.cssText='flex:1;min-width:200px';
+          var c=document.createElement('button');c.textContent=TK[7];c.onclick=function(){trkCopy(x[1])};
+          w.appendChild(l);w.appendChild(i);w.appendChild(c);r.appendChild(w)});
+        var rg=document.createElement('button');rg.textContent=TK[4];rg.onclick=function(){if(confirm(TK[9]))trkMake(d.id,true)};r.appendChild(rg)}
+      box.appendChild(r)})})}
+  trkRender();
   function eur(c){return c==null?'':(c/100).toFixed(2).replace('.',',')}
   function cents(v){v=String(v).trim().replace(',','.');if(v==='')return null;var n=Math.round(parseFloat(v)*100);return isFinite(n)&&n>=0?n:NaN}
   function renderPay(){

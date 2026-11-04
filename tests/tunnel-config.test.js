@@ -19,7 +19,7 @@ test('Tunnel-Config: erlaubte Pfade (Fahrer + Kunde) sind offen', () => {
     '/web-prototype/c.html', '/web-prototype/c/mascot.webp', '/web-prototype/menu.json',
     '/api/auth/login', '/api/auth/logout', '/api/auth/me', '/api/auth/employees', '/api/attendance', '/api/menu', '/api/web-orders', '/api/web-orders/status',
     '/api/pay/enabled', '/api/pay/door', '/api/flamo/chat', '/api/flamo/status', '/api/delivery/scan', '/api/delivery/route-link', '/api/delivery/quote', '/api/delivery/zones',
-    '/api/driver/position', '/api/driver/start', '/api/driver/delivered', '/api/driver/finish', '/api/driver/proof', '/api/driver/door-pay', '/api/driver/routes', '/api/driver/claim'])
+    '/api/driver/position', '/api/driver/track', '/api/driver/start', '/api/driver/delivered', '/api/driver/finish', '/api/driver/proof', '/api/driver/door-pay', '/api/driver/routes', '/api/driver/claim'])
     assert.ok(open(p), 'sollte offen sein: ' + p);
 });
 
@@ -30,7 +30,7 @@ test('Tunnel-Config: Kasse/Admin/Buchhaltung/Küche/Live Orders/Dispatch/Geheime
     '/api/auth/bootstrap', '/api/auth/staff', '/api/auth/set-pin', '/api/admin-data', '/api/kasse-state', '/api/customers', '/api/kitchen/orders', '/api/live-orders/stage',
     '/api/accounting/accounts', '/api/accounting/bank-transactions', '/api/delivery/config', '/api/delivery/assign', '/api/delivery/driver-pay', '/api/delivery/auto-plan',
     '/api/platform-orders/import', '/api/print', '/api/printing/config', '/api/manager-execute', '/api/project-chat', '/api/ai-orchestrate', '/api/nara-guide', '/api/permissions',
-    '/api/system/lan', '/api/transcribe-audio', '/api/invoices', '/api/attendance/qr', '/api/employee/qr', '/api/driver', '/api/driver/', '/api/driver/anything-else'])
+    '/api/system/lan', '/api/transcribe-audio', '/api/invoices', '/api/attendance/qr', '/api/employee/qr', '/api/driver', '/api/driver/', '/api/driver/anything-else', '/api/driver/track-tokens', '/api/driver/tracks'])
     assert.ok(!open(p), 'MUSS gesperrt sein: ' + p);
 });
 

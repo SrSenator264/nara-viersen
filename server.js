@@ -14,6 +14,35 @@ const driverPositions=new Map();
 const posFile=path.join(__dirname,'data','driver-positions.json');
 try{for(const [k,v] of Object.entries(JSON.parse(fs.readFileSync(posFile,'utf8'))))if(v&&Date.now()-Date.parse(v.at)<864e5)driverPositions.set(k,v)}catch(e){}
 let _posT=null;function savePositions(){if(_posT)return;_posT=setTimeout(()=>{_posT=null;try{fs.writeFileSync(posFile,JSON.stringify(Object.fromEntries(driverPositions)))}catch(e){}},5000)}
+// Auto-Abschluss der Tour, wenn der Fahrer am Lokal ankommt (gemeinsam für App-GPS und Traccar-iPhone)
+function naraAutoFinish(user,lat,lng){let finished=null;try{const data=readAdminData(),shop=dispatchService.buildInput({...data,orders:[]}).shop;if(require('./dispatch-engine.js').haversineKm(shop,{lat,lng})<0.15){for(const r of (data.deliveryRoutes||[]).filter(r=>r.employeeId===user.id&&r.startedAt&&r.allDeliveredAt&&!r.completedAt)){dispatchService.finishRoute(data,r.id,user);finished=r.id;}if(finished)writeAdminData(data);}}catch(e){console.warn('[NARA][AUTO_FINISH]',e.message)}return finished}
+// iPhone-Fahrer: Traccar Client schickt Positionen im Hintergrund (OsmAnd-Format), Token pro Fahrer – Logik in driver-tracker.js
+const naraTracker=require('./driver-tracker.js');
+const naraTrackStore=naraTracker.createStore(path.join(__dirname,'data','driver-track-tokens.json')),naraTrackGuard=naraTracker.createGuard();
+setInterval(()=>naraTrackGuard.prune(Date.now()),10*60000).unref();
+function naraTrackParams(req,url){return new Promise(resolve=>{const q=Object.fromEntries(url.searchParams);if(req.method!=='POST')return resolve(q);let b='';req.on('data',c=>{b+=c;if(b.length>4000)req.destroy()});req.on('end',()=>{let o={};try{o=b.trim().startsWith('{')?JSON.parse(b):Object.fromEntries(new URLSearchParams(b))}catch(e){}resolve({...o,...q})});req.on('error',()=>resolve(q))})}
+async function naraTrackRoute(req,res,url){
+ const now=Date.now(),ip=require('./auth.js').clientIp(req)||'local';
+ if(naraTrackGuard.blocked(ip,now))return reply(res,429,{error:'Too many attempts.'});
+ const rep=naraTracker.parseReport(await naraTrackParams(req,url));
+ const emp=naraTrackStore.employeeFor(rep.id),acc=emp&&naraAuth._store().accounts[emp];
+ if(!emp||!acc||acc.active===false||require('./auth.js').normalizeRole(acc.role)!=='DRIVER'){naraTrackGuard.fail(ip,now);return reply(res,401,{error:'Unknown device.'})}
+ if(naraTrackGuard.tooFast(rep.id,now))return reply(res,200,{ok:true,skipped:true});
+ const ev=naraTracker.evaluate(rep,now,(driverPositions.get(emp)||{}).at);
+ if(!ev.ok)return reply(res,422,{error:ev.reason});
+ if(ev.stale)return reply(res,200,{ok:true,stale:true});
+ const e=(readAdminData().employees||[]).find(x=>x.id===emp),name=e?String(e.name||e.fullName||emp):emp;
+ driverPositions.set(emp,{...ev.position,name});savePositions();
+ return reply(res,200,{ok:true,finished:naraAutoFinish({id:emp,name},ev.position.lat,ev.position.lng)});
+}
+// Inhaber/Manager: Token pro Fahrer anzeigen, erzeugen, neu erzeugen (Rolle wird vom Gate geprüft)
+function naraTrackTokens(req,res){
+ const accs=naraAuth._store().accounts,isDrv=id=>{const a=accs[id];return !!a&&a.active!==false&&require('./auth.js').normalizeRole(a.role)==='DRIVER'};
+ const nm=(d,id)=>{const e=(d.employees||[]).find(x=>x.id===id);return e?String(e.name||e.fullName||id):id};
+ const serverUrl=(String(process.env.NARA_PUBLIC_URL||'').replace(/\/+$/,'')||'https://app.flamo.co.de')+'/api/driver/track';
+ if(req.method==='GET'){const d=readAdminData();return reply(res,200,{ok:true,serverUrl,drivers:Object.keys(accs).filter(isDrv).map(id=>({id,name:nm(d,id),token:naraTrackStore.get(id)}))})}
+ return naraJsonBody(req,res,1000,p=>{const id=String(p.employeeId||'');if(!isDrv(id))return reply(res,404,{error:'Fahrer nicht gefunden.'});const token=p.regenerate===true?naraTrackStore.regenerate(id):naraTrackStore.ensure(id);return reply(res,200,{ok:true,serverUrl,token})});
+}
 // PaddleOCR may need model warm-up plus several seconds per invoice page.
 // Keep the API alive long enough for the local worker to finish instead of
 // converting a valid OCR run into a false 503 timeout.
@@ -403,7 +432,9 @@ if(url.pathname==='/api/platform-orders/status'&&req.method==='GET'){let quotes=
  if(url.pathname==='/api/admin-history/undo'&&req.method==='POST'){if(!naraManagerOnly(req,res))return;return naraJsonBody(req,res,2000,p=>{try{const d=readAdminData(),r=adminHistory.undo(adminDataDir,String(p.id||''),d);if(!r.ok)return reply(res,409,{error:r.error});writeAdminData(d);reply(res,200,{ok:true})}catch(e){reply(res,400,{error:e.message})}})}
  if(url.pathname==='/api/admin-data'&&req.method==='GET'){const requestId=`admin-get-${Date.now().toString(36)}`;console.info('[NARA][ADMIN_REQUEST_RECEIVED]',{requestId,method:req.method,path:url.pathname});try{console.info('[NARA][ADMIN_READ_START]',{requestId});const data=readAdminData();console.info('[NARA][ADMIN_READ_FINISHED]',{requestId,invoices:data.invoices?.length||0});reply(res,200,data);console.info('[NARA][ADMIN_RESPONSE_SENT]',{requestId,status:200});}catch(error){console.error('[NARA][ADMIN_ERROR]',{requestId,message:error?.message,stack:error?.stack});reply(res,500,{error:error.message||'admin data read failed'});}return}
  if(url.pathname==='/api/delivery/auto-plan'&&req.method==='GET'){try{const data=readAdminData();return reply(res,200,dispatchService.planFor({...data,driverPositions:Object.fromEntries(driverPositions)}));}catch(error){return reply(res,500,{ok:false,error:error.message||'تعذر حساب خطة التوزيع'});}}
- if(url.pathname==='/api/driver/position'&&req.method==='POST'){let body='';req.on('data',chunk=>{body+=chunk;if(body.length>2000)req.destroy()});return req.on('end',()=>{try{const p=JSON.parse(body||'{}'),lat=Number(p.lat),lng=Number(p.lng),user=req.naraUser;if(!user)return reply(res,401,{error:'login required'});if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)return reply(res,422,{error:'invalid position'});driverPositions.set(user.id,{lat,lng,accuracy:Number(p.accuracy)||null,at:new Date().toISOString(),name:user.name});savePositions();let finished=null;try{const data=readAdminData(),shop=dispatchService.buildInput({...data,orders:[]}).shop;if(require('./dispatch-engine.js').haversineKm(shop,{lat,lng})<0.15){for(const r of (data.deliveryRoutes||[]).filter(r=>r.employeeId===user.id&&r.startedAt&&r.allDeliveredAt&&!r.completedAt)){dispatchService.finishRoute(data,r.id,user);finished=r.id;}if(finished)writeAdminData(data);}}catch(e){console.warn('[NARA][AUTO_FINISH]',e.message)}return reply(res,200,{ok:true,finished});}catch(error){return reply(res,400,{error:'invalid position'});}});}
+ if(url.pathname==='/api/driver/track'&&(req.method==='GET'||req.method==='POST')){naraTrackRoute(req,res,url).catch(e=>{try{reply(res,500,{error:'Server error.'})}catch(_){}});return}
+ if(url.pathname==='/api/driver/track-tokens'&&(req.method==='GET'||req.method==='POST'))return naraTrackTokens(req,res);
+ if(url.pathname==='/api/driver/position'&&req.method==='POST'){let body='';req.on('data',chunk=>{body+=chunk;if(body.length>2000)req.destroy()});return req.on('end',()=>{try{const p=JSON.parse(body||'{}'),lat=Number(p.lat),lng=Number(p.lng),user=req.naraUser;if(!user)return reply(res,401,{error:'login required'});if(!Number.isFinite(lat)||!Number.isFinite(lng)||Math.abs(lat)>90||Math.abs(lng)>180)return reply(res,422,{error:'invalid position'});driverPositions.set(user.id,{lat,lng,accuracy:Number(p.accuracy)||null,at:new Date().toISOString(),name:user.name});savePositions();const finished=naraAutoFinish(user,lat,lng);return reply(res,200,{ok:true,finished});}catch(error){return reply(res,400,{error:'invalid position'});}});}
  if(['/api/delivery/assign','/api/delivery/cancel','/api/driver/start','/api/driver/delivered','/api/driver/finish','/api/delivery/move','/api/delivery/swap','/api/delivery/reorder','/api/delivery/order-pref','/api/delivery/driver-pref'].includes(url.pathname)&&req.method==='POST'){let body='';req.on('data',chunk=>{body+=chunk;if(body.length>20000)req.destroy()});return req.on('end',()=>{try{const p=JSON.parse(body||'{}'),data=readAdminData(),user=req.naraUser||null,now=new Date().toISOString();let result,type;
   if(user&&['/api/driver/start','/api/driver/delivered','/api/driver/finish'].includes(url.pathname)){const la=Number(p.lat),ln=Number(p.lng);if(p.lat!=null&&p.lng!=null&&Number.isFinite(la)&&Number.isFinite(ln)&&Math.abs(la)<=90&&Math.abs(ln)<=180){driverPositions.set(user.id,{lat:la,lng:ln,accuracy:Number(p.accuracy)||null,at:now,name:user.name});savePositions();}}
   if(url.pathname==='/api/delivery/assign'){result=dispatchService.assignRoute(data,{driverId:String(p.driverId||''),orderIds:p.orderIds,etas:p.etas},user,now);type='DELIVERY_ROUTE_ASSIGNED';}
