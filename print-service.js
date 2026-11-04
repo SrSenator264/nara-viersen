@@ -37,7 +37,14 @@ function config(data) {
     auto: { ...d.auto, ...(s.auto || {}) },
     promo: { ...d.promo, ...(s.promo || {}) },
     copies: { ...d.copies, ...(s.copies || {}) },
+    // تجميع المنصات: نوع التذكرة (واحد بس) + طباعة تلقائية عند القبول (تشغيل/إلغاء)
+    platformPrint: platformPrintOf(data),
   };
+}
+const PP_KINDS = ['kitchen', 'customer', 'driver'];
+function platformPrintOf(data) {
+  const p = (data && data.settings && data.settings.platformPrint) || {};
+  return { kind: PP_KINDS.includes(p.kind) ? p.kind : 'kitchen', onAccept: p.onAccept !== false };
 }
 
 const str = v => (v == null ? '' : String(v)).trim();
@@ -228,4 +235,4 @@ async function printClosing(data, rec, opts = {}) {
   return { ok: true, mode: printer.mode, printer: printer.id };
 }
 
-module.exports = { defaults, config, sanitize, roleFor, printerFor, printOrder, printClosing, buildTextJob, rasterize, buildJob, escposRaster, windowsPrinters, ROLES };
+module.exports = { PP_KINDS, platformPrintOf, defaults, config, sanitize, roleFor, printerFor, printOrder, printClosing, buildTextJob, rasterize, buildJob, escposRaster, windowsPrinters, ROLES };

@@ -232,6 +232,18 @@ test.describe('End-to-End', () => {
     assert.equal((await call('POST', '/api/platform-orders/stage', { orderId: 'nope', stage: 'DONE' }, cookie)).status, 404);
     assert.equal((await call('POST', '/api/platform-orders/stage', { orderId: id, stage: 'XX' }, cookie)).status, 422);
   });
+
+  test('Drucken im Tablet: Einstellung (Typ/Automatik) wird gespeichert und geprüft; unbekannte Bestellung → 404', async () => {
+    assert.deepEqual((await call('GET', '/api/platform-orders/print-settings', null, cookie)).json, { ok: true, kind: 'kitchen', onAccept: true });
+    assert.equal((await call('POST', '/api/platform-orders/print-settings', { kind: 'driver', onAccept: false }, cookie)).status, 200);
+    assert.deepEqual((await call('GET', '/api/platform-orders/print-settings', null, cookie)).json, { ok: true, kind: 'driver', onAccept: false });
+    assert.equal((await call('POST', '/api/platform-orders/print-settings', { kind: 'zzz' }, cookie)).status, 422);
+    assert.equal((await call('POST', '/api/platform-orders/print', { orderId: 'nope' }, cookie)).status, 404);
+    await imp('9301'); const id = (await pend()).json.orders.find(o => o.displayCode === 'T9301').id;
+    const r = await call('POST', '/api/platform-orders/print', { orderId: id }, cookie);
+    assert.equal(r.status, 200); assert.equal(r.json.kind, 'driver');
+    assert.equal((await pend()).json.orders.some(o => o.id === id), true, 'Drucken nimmt die wartende Bestellung nicht an');
+  });
 });
 
 test('Uber/Loco: neue frische Bestellung wird gehalten; Annahme ist intern (kein Bridge-Befehl) und druckt sofort; alte/späte werden nicht gehalten', () => {
@@ -301,4 +313,18 @@ test('Board/Erledigt: nur Bestellungen des aktuellen Geschäftstags (Schnitt 05:
   const late = Date.parse('2026-10-28T00:30:00Z');
   const b2 = A.board({ orders: [done('spaet', '2026-10-27T21:00:00Z')] }, late, deps);
   assert.equal(b2.counts.DONE, 1);
+});
+
+test('printJobs/platformPrint: genau ein Typ nach Wahl, bei Annahme ein-/ausschaltbar, nie doppelt; Web-Bestellungen unverändert', () => {
+  const PS = require('../print-service.js');
+  const base = { auto: { kitchenOnPlatformOrder: false, receiptOnPlatformOrder: false, webOrder: true, kitchenOnAccept: true, receiptOnAccept: true } };
+  const o = mk(), kinds = (cfg, ord = o, opts = { onAccept: true }) => A.printJobs(ord, cfg, opts).map(j => j[0]);
+  assert.deepEqual(PS.platformPrintOf({}), { kind: 'kitchen', onAccept: true }, 'Standard');
+  assert.deepEqual(PS.platformPrintOf({ settings: { platformPrint: { kind: 'bogus', onAccept: false } } }), { kind: 'kitchen', onAccept: false });
+  assert.deepEqual(kinds({ ...base, platformPrint: { kind: 'customer', onAccept: true } }), ['customer']);
+  assert.deepEqual(kinds({ ...base, platformPrint: { kind: 'driver', onAccept: true } }), ['driver']);
+  assert.deepEqual(kinds({ ...base, platformPrint: { kind: 'kitchen', onAccept: false } }), [], 'automatisch aus');
+  assert.deepEqual(kinds({ ...base, platformPrint: { kind: 'kitchen', onAccept: true } }, { ...o, autoKitchenPrintedAt: 'x' }), [], 'nie doppelt');
+  assert.deepEqual(kinds({ ...base, platformPrint: { kind: 'kitchen', onAccept: true } }, o, {}), [], 'vor Annahme nichts');
+  assert.deepEqual(kinds({ ...base, platformPrint: { kind: 'driver', onAccept: false } }, mk({ source: 'WEB', platform: 'WEB' }), {}), ['kitchen', 'customer'], 'Web unverändert');
 });

@@ -91,6 +91,8 @@ main{padding:12px 12px 40px}
 .go{width:100%;height:58px;margin-top:8px;border:0;border-radius:16px;background:var(--ok);color:#fff;font-weight:800;font-size:1.25rem}
 .go:disabled{background:#9aa5a0}
 .go.retry{background:var(--late)}
+.prn{display:block;width:100%;height:44px;margin-top:8px;border:2px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);font-weight:800;font-size:1rem}
+.prn:disabled{opacity:.6}
 .err{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:#fde8e8;color:#9b1c1c;font-weight:700;font-size:.92rem}
 #set{position:fixed;inset:0;z-index:20;background:#0008;display:none;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto}
 #set .box{width:min(520px,100%);background:#fff;border-radius:18px;padding:20px 22px}
@@ -124,6 +126,9 @@ main{padding:12px 12px 40px}
   <div id="setRows"></div>
   <div class="row"><label for="vol" data-t="volume"></label><input type="range" id="vol" min="10" max="100" step="5"></div>
   <div class="row"><label for="rep" data-t="repeat"></label><select id="rep"></select></div>
+  <h2 style="margin-top:16px" data-t="printSet"></h2>
+  <div class="row"><label for="ppKind" data-t="printType"></label><select id="ppKind"></select></div>
+  <div class="row"><label for="ppAuto" data-t="autoPrint"></label><input type="checkbox" id="ppAuto" style="width:28px;height:28px"></div>
   <div id="diag" style="margin-top:10px;color:#6b7378;font-size:.85rem"></div>
   <button class="close" id="closeSet" type="button" data-t="close"></button>
 </div></div>
@@ -137,17 +142,17 @@ const T={
     prep:'Zubereitungszeit',min:'Min',delivery:'🛵 Lieferung',pickup:'🛍 Abholung',cash:'💶 Barzahlung',online:'💳 Online bezahlt',asap:'So schnell wie möglich',at:'um',now:'jetzt',ago:'vor {n} Min',
     queue:'🍳 Küche aktuell: {n}',sounds:'⚙️ Töne',enableSound:'🔊 Tippen, um den Ton zu aktivieren',volume:'Lautstärke',repeat:'Wiederholen alle',off:'aus',test:'Test',close:'Schließen',offline:'Keine Verbindung',live:'Live',
     short:'Kurz',double:'Doppelt',long:'Lang',triple:'Dreifach',rising:'Steigend',falling:'Fallend',bell:'Glocke',siren:'Sirene',mute:'Stumm',web:'Website',sec:'{n} Sek',errGeneric:'Fehler: ',
-    tabPrepare:'Zubereitung',tabHandover:'Übergabe',tabDone:'Erledigt',deliveryTime:'Lieferzeit',toHandover:'🚗 Handover',toDone:'✅ Fertig',noneStage:'Keine Bestellungen',saving:'wird gespeichert …',saved:'✓ gespeichert',leftMin:'Min',lateMin:'überfällig',platformFail:'Auf der Plattform nicht übernommen',doneAgo:'erledigt vor {n} Min',details:'▼ Details',hide:'▲ Weniger',itemsN:'{n} Artikel'},
+    tabPrepare:'Zubereitung',tabHandover:'Übergabe',tabDone:'Erledigt',deliveryTime:'Lieferzeit',toHandover:'🚗 Handover',toDone:'✅ Fertig',noneStage:'Keine Bestellungen',saving:'wird gespeichert …',saved:'✓ gespeichert',leftMin:'Min',lateMin:'überfällig',platformFail:'Auf der Plattform nicht übernommen',doneAgo:'erledigt vor {n} Min',details:'▼ Details',hide:'▲ Weniger',itemsN:'{n} Artikel',prn:'🖨️ Drucken',prnBusy:'Druckt …',prnOk:'✓ gedruckt',prnFail:'⚠️ Druck fehlgeschlagen',prnBrowser:'⚠️ Drucker steht auf „Browser“ – in den Druckeinstellungen auf Windows/Netzwerk stellen',kKitchen:'Küche',kCustomer:'Kunde',kDriver:'Fahrer',printSet:'🖨️ Drucken',printType:'Bon-Typ',autoPrint:'Automatisch drucken bei Annahme'},
   ar:{title:'تجميع المنصات',waiting:'بانتظار الموافقة',none:'ما في طلبات بانتظار الموافقة ✅',accept:'✅ استلام',accepting:'عم ينقبل …',retry:'🔁 جرّب مرة ثانية',failed:'فشل الاستلام',
     prep:'وقت التحضير',min:'د',delivery:'🛵 توصيل',pickup:'🛍 استلام من المحل',cash:'💶 دفع كاش',online:'💳 مدفوع أونلاين',asap:'بأسرع وقت',at:'الساعة',now:'هلق',ago:'قبل {n} د',
     queue:'🍳 بالمطبخ هلق: {n}',sounds:'⚙️ الأصوات',enableSound:'🔊 اضغط لتفعيل الصوت',volume:'مستوى الصوت',repeat:'كرّر كل',off:'بلا',test:'جرّب',close:'سكّر',offline:'ما في اتصال',live:'Live',
     short:'قصير',double:'مرتين',long:'طويل',triple:'ثلاث مرات',rising:'صاعد',falling:'نازل',bell:'جرس',siren:'صفّارة',mute:'بلا صوت',web:'الموقع',sec:'{n} ث',errGeneric:'غلط: ',
-    tabPrepare:'قيد التحضير',tabHandover:'تسليم',tabDone:'خلصت',deliveryTime:'وقت التوصيل',toHandover:'🚗 جاهز للتسليم',toDone:'✅ تم التسليم',noneStage:'ما في طلبات',saving:'عم ينحفظ …',saved:'✓ انحفظ',leftMin:'د',lateMin:'متأخر',platformFail:'ما انتقل عند المنصة',doneAgo:'خلص قبل {n} د',details:'▼ التفاصيل',hide:'▲ أقل',itemsN:'{n} أصناف'},
+    tabPrepare:'قيد التحضير',tabHandover:'تسليم',tabDone:'خلصت',deliveryTime:'وقت التوصيل',toHandover:'🚗 جاهز للتسليم',toDone:'✅ تم التسليم',noneStage:'ما في طلبات',saving:'عم ينحفظ …',saved:'✓ انحفظ',leftMin:'د',lateMin:'متأخر',platformFail:'ما انتقل عند المنصة',doneAgo:'خلص قبل {n} د',details:'▼ التفاصيل',hide:'▲ أقل',itemsN:'{n} أصناف',prn:'🖨️ طباعة',prnBusy:'عم يطبع …',prnOk:'✓ انطبع',prnFail:'⚠️ فشلت الطباعة',prnBrowser:'⚠️ الطابعة على وضع «المتصفح» — غيّرها لـWindows أو شبكة من إعدادات الطباعة',kKitchen:'مطبخ',kCustomer:'زبون',kDriver:'سائق',printSet:'🖨️ الطباعة',printType:'نوع التذكرة',autoPrint:'طباعة تلقائية عند قبول الطلب'},
   en:{title:'Platform hub',waiting:'waiting for acceptance',none:'No orders waiting ✅',accept:'✅ Accept',accepting:'Accepting …',retry:'🔁 Try again',failed:'Accept failed',
     prep:'Prep time',min:'min',delivery:'🛵 Delivery',pickup:'🛍 Pickup',cash:'💶 Cash',online:'💳 Paid online',asap:'As soon as possible',at:'at',now:'now',ago:'{n} min ago',
     queue:'🍳 In kitchen now: {n}',sounds:'⚙️ Sounds',enableSound:'🔊 Tap to enable sound',volume:'Volume',repeat:'Repeat every',off:'off',test:'Test',close:'Close',offline:'No connection',live:'Live',
     short:'Short',double:'Double',long:'Long',triple:'Triple',rising:'Rising',falling:'Falling',bell:'Bell',siren:'Siren',mute:'Mute',web:'Website',sec:'{n} s',errGeneric:'Error: ',
-    tabPrepare:'Preparing',tabHandover:'Handover',tabDone:'Done',deliveryTime:'Delivery time',toHandover:'🚗 Handover',toDone:'✅ Done',noneStage:'No orders',saving:'saving …',saved:'✓ saved',leftMin:'min',lateMin:'late',platformFail:'Not applied on the platform',doneAgo:'done {n} min ago',details:'▼ Details',hide:'▲ Less',itemsN:'{n} items'}
+    tabPrepare:'Preparing',tabHandover:'Handover',tabDone:'Done',deliveryTime:'Delivery time',toHandover:'🚗 Handover',toDone:'✅ Done',noneStage:'No orders',saving:'saving …',saved:'✓ saved',leftMin:'min',lateMin:'late',platformFail:'Not applied on the platform',doneAgo:'done {n} min ago',details:'▼ Details',hide:'▲ Less',itemsN:'{n} items',prn:'🖨️ Print',prnBusy:'Printing …',prnOk:'✓ printed',prnFail:'⚠️ Print failed',prnBrowser:'⚠️ Printer is set to “browser” – switch it to Windows/network in print settings',kKitchen:'Kitchen',kCustomer:'Customer',kDriver:'Driver',printSet:'🖨️ Printing',printType:'Ticket type',autoPrint:'Auto-print when order is accepted'}
 };
 const lang=()=>{try{return window.NARA_LANG?NARA_LANG.get():'de'}catch(e){return 'de'}};
 const t=(k,n)=>{const v=((T[lang()]||T.de)[k]);const s=v!=null?v:(T.de[k]!=null?T.de[k]:k);return n==null?s:s.replace('{n}',n)};
@@ -310,6 +315,8 @@ function ringHtml(o){
 function stepHtml(lbl,val,a,b,dis){
   return '<div class="timerow"><span class="lbl">'+lbl+'</span><div class="step"><button type="button" data-act="'+a+'"'+(dis?' disabled':'')+'>−5</button><b>'+val+' '+t('min')+'</b><button type="button" data-act="'+b+'"'+(dis?' disabled':'')+'>+5</button></div></div>';
 }
+let ppKind='kitchen',ppAuto=true;
+const prnBtn=()=>'<button type="button" class="prn" data-act="print">'+t('prn')+' · '+t(ppKind==='driver'?'kDriver':(ppKind==='customer'?'kCustomer':'kKitchen'))+'</button>';
 function cardHtml(o){
   const id=String(o.id),pc=PC[o.source]||'#37474f',stg=stageOf(o);
   const badges='<span class="badge">'+esc(PN[o.source]||o.source)+'</span>'+(o.brand&&o.brand!==PN[o.source]?'<span class="badge brand">'+esc(o.brand)+'</span>':'')+'<b class="code">#'+esc(o.displayCode)+'</b>';
@@ -324,6 +331,7 @@ function cardHtml(o){
       +stepsHtml(stepHtml(t('prep'),m,'minus','plus',busyNow),stepHtml(t('deliveryTime'),d,'dminus','dplus',busyNow),pick)
       +'<div class="saved">'+t('queue',o.queue||0)+'</div>'
       +((st==='FAILED'||localErr[id])?'<div class="err">⚠️ '+t('failed')+(o.error||localErr[id]?': '+esc(o.error||localErr[id]):'')+'</div>':'')
+      +prnBtn()
       +'<button type="button" class="go'+(st==='FAILED'?' retry':'')+'" data-act="accept"'+(busyNow?' disabled':'')+'>'+(busyNow?t('accepting'):(st==='FAILED'?t('retry'):t('accept')))+'</button>'
       +'</article>';
   }
@@ -339,7 +347,7 @@ function cardHtml(o){
     btn=stg==='PREPARE'?'<button type="button" class="go next" data-act="next">'+t('toHandover')+'</button>':'<button type="button" class="go fin" data-act="next">'+t('toDone')+'</button>';
   }
   const ml0=stg==='DONE'?null:minsLeft(o),urg=ml0==null?'':(ml0<0?' late':(ml0<=10?' warn':''));
-  return '<article class="card '+stg+urg+'" style="--pc:'+pc+'" data-id="'+esc(id)+'">'+head+body+times+syncTxt+(localErr[id]?'<div class="err">⚠️ '+esc(localErr[id])+'</div>':'')+btn+'</article>';
+  return '<article class="card '+stg+urg+'" style="--pc:'+pc+'" data-id="'+esc(id)+'">'+head+body+times+syncTxt+(localErr[id]?'<div class="err">⚠️ '+esc(localErr[id])+'</div>':'')+prnBtn()+btn+'</article>';
 }
 function render(force){
   const need=needAction().length;
@@ -392,6 +400,17 @@ $('#list').addEventListener('click',async e=>{
   const o=orders.find(x=>String(x.id)===id);if(!o)return;
   const act=b.dataset.act,stg=stageOf(o);
   if(act==='toggle'){if(open.has(id))open.delete(id);else open.add(id);render(true);return}
+  if(act==='print'){
+    const label=b.textContent;b.disabled=true;b.textContent=t('prnBusy');let msg=t('prnOk');
+    try{
+      const r=await fetch('/api/platform-orders/print',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:id})});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok)throw Error(j.error||r.status);
+      if(j.mode==='browser')msg=t('prnBrowser');
+    }catch(err){msg=t('prnFail')+': '+String(err.message||err)}
+    b.textContent=msg;setTimeout(()=>{b.disabled=false;b.textContent=label},msg===t('prnOk')?1800:4500);
+    return;
+  }
   if(act==='minus'||act==='plus'||act==='dminus'||act==='dplus'){
     const dp=act==='plus'?5:(act==='minus'?-5:0),dd=act==='dplus'?5:(act==='dminus'?-5:0);
     if(stg==='WAIT'){
@@ -426,6 +445,17 @@ $('#list').addEventListener('click',async e=>{
   }
 });
 
+// ───── إعدادات الطباعة (نوع التذكرة + تلقائي عند القبول) ─────
+function buildPrint(){
+  $('#ppKind').innerHTML=[['kitchen','kKitchen'],['driver','kDriver'],['customer','kCustomer']].map(([k,l])=>'<option value="'+k+'"'+(k===ppKind?' selected':'')+'>'+t(l)+'</option>').join('');
+  $('#ppAuto').checked=!!ppAuto;
+}
+async function loadPrint(){try{const r=await fetch('/api/platform-orders/print-settings',{cache:'no-store'});if(r.ok){const j=await r.json();ppKind=j.kind||'kitchen';ppAuto=j.onAccept!==false;buildPrint();render(true)}}catch(e){}}
+async function savePrint(body){try{const r=await fetch('/api/platform-orders/print-settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(r.ok){ppKind=j.kind;ppAuto=j.onAccept;render(true)}}catch(e){}buildPrint()}
+$('#ppKind').onchange=e=>savePrint({kind:e.target.value});
+$('#ppAuto').onchange=e=>savePrint({onAccept:e.target.checked});
+loadPrint();
+
 // ───── إعدادات الأصوات ─────
 function buildSettings(){
   const toneOpts=sel=>Object.keys(TONES).concat(['off']).map(k=>'<option value="'+k+'"'+(k===sel?' selected':'')+'>'+t(k==='off'?'mute':k)+'</option>').join('');
@@ -436,7 +466,7 @@ function buildSettings(){
 function syncMute(){const b=$('#muteBtn');if(!b)return;b.textContent=muted()?'🔇':'🔊';if(b.classList)b.classList.toggle('muted',muted())}
 if($('#muteBtn'))$('#muteBtn').onclick=()=>{lsSet('nara-sound-muted',muted()?'0':'1');unlock();syncMute();if(!muted())playStyle('short')};
 syncMute();
-$('#openSet').onclick=()=>{unlock();buildSettings();$('#set').style.display='flex'};
+$('#openSet').onclick=()=>{unlock();buildSettings();buildPrint();$('#set').style.display='flex'};
 $('#closeSet').onclick=()=>{$('#set').style.display='none'};
 $('#setRows').addEventListener('change',e=>{const s=e.target.closest('select[data-p]');if(s){lsSet('nara-sound-'+s.dataset.p,s.value);playStyle(s.value)}});
 $('#setRows').addEventListener('click',e=>{const b=e.target.closest('button[data-test]');if(b){unlock();playFor(b.dataset.test)}});

@@ -14,7 +14,7 @@ class El {
 }
 
 function boot({ lang = 'de', orders = [] } = {}) {
-  const state = { orders, posts: [], times: [], stages: [], tones: 0, lang, acceptStatus: 200 };
+  const state = { orders, posts: [], times: [], stages: [], prints: [], pp: { kind: 'kitchen', onAccept: true }, printMode: 'network', tones: 0, lang, acceptStatus: 200 };
   const els = {}, intervals = [], winHandlers = {}, docHandlers = {};
   const $ = s => (els[s] ||= new El());
   const document = { title: 'Plattformen · Flamo', documentElement: { lang: 'de' }, querySelector: s => $(s), querySelectorAll: () => [], addEventListener: (t, f) => { (docHandlers[t] ||= []).push(f); } };
@@ -38,6 +38,8 @@ function boot({ lang = 'de', orders = [] } = {}) {
     if (u.includes('/accept')) { state.posts.push(body); if (state.acceptStatus < 400) { const o = find(body.orderId); if (o) o.state = 'ACCEPTING'; } return res(state.acceptStatus < 400, state.acceptStatus, state.acceptStatus < 400 ? { ok: true, state: 'ACCEPTING' } : { error: 'Wird bereits angenommen' }); }
     if (u.includes('/times')) { state.times.push(body); const o = find(body.orderId); if (o) { o.prepMinutes = body.prepMinutes; o.deliveryMinutes = body.deliveryMinutes; } return res(true, 200, { ok: true }); }
     if (u.includes('/stage')) { state.stages.push(body); const o = find(body.orderId); if (o) o.stage = body.stage; return res(true, 200, { ok: true }); }
+    if (u.includes('/print-settings')) { if (opts && opts.method === 'POST') Object.assign(state.pp, body); return res(true, 200, { ok: true, ...state.pp }); }
+    if (u.includes('/platform-orders/print')) { state.prints.push(body); return res(true, 200, { ok: true, kind: state.pp.kind, mode: state.printMode }); }
     return res(false, 404, {});
   };
   const ctx = vm.createContext({ ...win, window: win, localStorage: win.localStorage, fetch: fetchStub, console, Date, JSON, Math, Number, String, Object, Array, Set, Promise,
@@ -157,4 +159,15 @@ test('Seite: neue wartende Bestellung schaltet auf den Reiter „Wartend“ um',
   const p = boot({ orders: [acc()] }); await p.tick();
   p.state.orders.push(order({ id: 'n1', displayCode: 'NEW1' })); await p.poll();
   assert.match(p.$('#list').innerHTML, /#NEW1/); assert.ok(p.$('#cnt').cls.has('hot'));
+});
+
+test('Seite: 🖨️ Drucken auf jeder Karte in allen Phasen; Typ und Automatik-Annahme einstellbar', async () => {
+  const p = boot({ orders: [order({ id: 'w1' }), order({ id: 'p1', stage: 'PREPARE', state: 'ACCEPTED' }), order({ id: 'h1', stage: 'HANDOVER', state: 'ACCEPTED' }), order({ id: 'd1', stage: 'DONE', state: 'ACCEPTED' })] }); await p.tick();
+  for (const t of ['WAIT', 'PREPARE', 'HANDOVER', 'DONE']) { p.tab(t); assert.match(p.$('#list').innerHTML, /data-act="print"/, 'Druckknopf in ' + t); }
+  // Wartende Karte: Drucken ändert weder Zustand noch Stufe
+  p.tab('WAIT'); await p.click('print', 'w1'); assert.deepEqual(p.state.prints, [{ orderId: 'w1' }]); assert.equal(p.state.stages.length, 0); assert.equal(p.state.posts.length, 0);
+  // Einstellungen: Typ + automatisch bei Annahme (ein / aus)
+  p.$('#openSet').onclick(); assert.match(p.$('#ppKind').innerHTML, /<option value="kitchen" selected>/); assert.equal(p.$('#ppAuto').checked, true);
+  p.$('#ppKind').onchange({ target: { value: 'driver' } }); await p.tick(); assert.equal(p.state.pp.kind, 'driver'); assert.match(p.$('#list').innerHTML, /Fahrer/);
+  p.$('#ppAuto').onchange({ target: { checked: false } }); await p.tick(); assert.equal(p.state.pp.onAccept, false); assert.equal(p.state.pp.kind, 'driver');
 });

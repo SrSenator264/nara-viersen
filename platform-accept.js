@@ -192,12 +192,19 @@ function complete(data, p, now = Date.now()) {
 }
 
 // أي أوراق بتنطبع لهالطلب تلقائياً → [[kind, flag], ...]. opts.onAccept = انقبل من التابلت (أو من المنصة).
+const PP_FLAG = { kitchen: 'autoKitchenPrintedAt', customer: 'autoReceiptPrintedAt', driver: 'autoDriverPrintedAt' };
 function printJobs(o, cfg, opts) {
   const acc = !!(opts && opts.onAccept), auto = (cfg && cfg.auto) || {};
   const web = /^WEB$/i.test(str(o && o.source)) && auto.webOrder !== false;
+  const pp = cfg && cfg.platformPrint;           // إعداد التجميع: نوع واحد + تشغيل/إلغاء عند القبول
+  const useCfg = !!pp && acc && !web;
   const jobs = [];
-  if ((web || auto.kitchenOnPlatformOrder || (acc && auto.kitchenOnAccept)) && !o.autoKitchenPrintedAt) jobs.push(['kitchen', 'autoKitchenPrintedAt']);
-  if ((web || auto.receiptOnPlatformOrder || (acc && auto.receiptOnAccept)) && !o.autoReceiptPrintedAt) jobs.push(['customer', 'autoReceiptPrintedAt']);
+  if ((web || auto.kitchenOnPlatformOrder || (!useCfg && acc && auto.kitchenOnAccept)) && !o.autoKitchenPrintedAt) jobs.push(['kitchen', 'autoKitchenPrintedAt']);
+  if ((web || auto.receiptOnPlatformOrder || (!useCfg && acc && auto.receiptOnAccept)) && !o.autoReceiptPrintedAt) jobs.push(['customer', 'autoReceiptPrintedAt']);
+  if (useCfg && pp.onAccept) {
+    const flag = PP_FLAG[pp.kind];
+    if (flag && !o[flag] && !jobs.some(j => j[0] === pp.kind)) jobs.push([pp.kind, flag]);
+  }
   return jobs;
 }
 
