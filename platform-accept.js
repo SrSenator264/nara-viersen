@@ -351,4 +351,17 @@ function board(data, now, deps) {
   return { changed: base.changed, orders, counts, count: wait.length, needAction: base.needAction };
 }
 
-module.exports = { stageOf, board, setTimes, requestStage, printJobs, isWaiting, lieferandoNeedsAccept, onImport, requestAccept, claim, complete, sweep, pending, suggest, reset, TIMEOUT_MS };
+// Lieferando-Lieferung ohne Plattform-QR: Druck bis zu QR_HOLD_MS warten (Bridge fängt den Scoober-QR kurz nach dem Import ein)
+const QR_HOLD_MS = 10000;
+function markQrHold(o, now) {
+  if (!o || o.deliveryQrUrl || !/^LIEFERANDO$/i.test(str(o.source || o.platform))) return false;
+  const t = str(o.type || o.orderType).toUpperCase();
+  if (t !== 'DELIVERY' && !(o.delivery && (o.delivery.address || o.delivery.street))) return false;
+  o.qrHoldUntil = now + QR_HOLD_MS; return true;
+}
+function qrHoldMs(o, now) {
+  if (!o || o.deliveryQrUrl || !o.qrHoldUntil) return 0;
+  return Math.max(0, o.qrHoldUntil - now);
+}
+
+module.exports = { QR_HOLD_MS, markQrHold, qrHoldMs, stageOf, board, setTimes, requestStage, printJobs, isWaiting, lieferandoNeedsAccept, onImport, requestAccept, claim, complete, sweep, pending, suggest, reset, TIMEOUT_MS };
