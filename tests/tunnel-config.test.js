@@ -19,7 +19,7 @@ test('Tunnel-Config: erlaubte Pfade (Fahrer + Kunde) sind offen', () => {
     '/web-prototype/c.html', '/web-prototype/c/mascot.webp', '/web-prototype/menu.json',
     '/api/auth/login', '/api/auth/logout', '/api/auth/me', '/api/auth/employees', '/api/attendance', '/api/menu', '/api/web-orders', '/api/web-orders/status',
     '/api/pay/enabled', '/api/pay/door', '/api/flamo/chat', '/api/flamo/status', '/api/delivery/scan', '/api/delivery/route-link', '/api/delivery/quote', '/api/delivery/zones',
-    '/api/driver/position', '/api/driver/start', '/api/driver/delivered', '/api/driver/finish', '/api/driver/proof', '/api/driver/door-pay', '/api/driver/routes'])
+    '/api/driver/position', '/api/driver/start', '/api/driver/delivered', '/api/driver/finish', '/api/driver/proof', '/api/driver/door-pay', '/api/driver/routes', '/api/driver/claim'])
     assert.ok(open(p), 'sollte offen sein: ' + p);
 });
 
