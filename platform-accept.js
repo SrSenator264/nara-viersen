@@ -5,6 +5,7 @@
 // وبيرجّع النتيجة ← ACCEPTED (وبتنطبع التذكرة) أو FAILED (البطاقة حمرا وبتقدر تعيد المحاولة).
 // الطابور بالذاكرة بس: لو السيرفر عمل restart، الأمر الضايع بينتهي بـ FAILED بعد المهلة والموظف بيعيد.
 
+const bizDay = require('./business-day.js');
 const MIN = 60000;
 const WAITING = new Set(['PENDING', 'ACCEPTING', 'FAILED']);
 const TIMEOUT_MS = 90000;           // الجسر ما رجّع نتيجة خلال 90 ثانية = فشل
@@ -309,7 +310,7 @@ function board(data, now, deps) {
   const base = pending(data, now, deps);
   const waitIds = new Set(base.orders.map(x => String(x.id)));
   const wait = base.orders.map(x => ({ ...x, stage: 'WAIT', deliveryMinutes: x.type === 'pickup' ? 0 : DEFAULT_DELIVERY_MIN }));
-  const DAY = 24 * 60 * MIN, DONE_KEEP = 3 * 60 * MIN;
+  const DAY = 24 * 60 * MIN, today = bizDay.day(now);
   const rest = [];
   for (const o of ((data && data.orders) || [])) {
     if (waitIds.has(String(o.id)) || isWaiting(o)) continue;
@@ -318,8 +319,8 @@ function board(data, now, deps) {
     if (!placed || now - placed > DAY) continue;
     const stage = stageOf(o);
     if (stage === 'DONE' && str(o.status).toUpperCase() === 'CANCELLED') continue;
-    const doneAt = Date.parse(o.completedAt || o.liveStageUpdatedAt || o.updatedAt || '') || placed;
-    if (stage === 'DONE' && now - doneAt > DONE_KEEP) continue;
+    // «خلصت» = طلبات يوم الشغل الحالي بس (القطع 05:00)، حسب وقت الطلب الحقيقي مو وقت التحديث/المزامنة
+    if (stage === 'DONE' && bizDay.day(placed) !== today) continue;
     const v = deps.view(o);
     const due = Date.parse(o.promisedDueAt || o.dueAt || o.etaAt || '') || 0;
     const pm = str(o.payment && o.payment.method || o.paymentMethod).toUpperCase();

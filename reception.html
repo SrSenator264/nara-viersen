@@ -232,7 +232,7 @@ const BASE=document.title;
 const clamp=n=>Math.min(240,Math.max(5,n));
 const clampD=n=>Math.min(180,Math.max(0,n));
 const fmt=iso=>{const d=Date.parse(iso||'');return d?new Date(d).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):''};
-const agoOf=iso=>{const d=Date.parse(iso||'');if(!d)return '';const m=Math.floor((Date.now()-d)/60000);return m<1?t('now'):t('ago',m)};
+const agoOf=iso=>{const d=Date.parse(iso||'');if(!d)return '';const m=Math.floor((Date.now()-d)/60000);if(m>=60)return new Date(d).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});return m<1?t('now'):t('ago',m)};
 const minsLeft=o=>{const d=Date.parse(o.dueAt||'');return d?Math.round((d-Date.now())/60000):null};
 const stageOf=o=>localStage[String(o.id)]||o.stage;
 
@@ -330,7 +330,8 @@ function cardHtml(o){
   const e=ed[id],prep=e?e.prep:(o.prepMinutes||25),del=e?e.del:(o.deliveryMinutes!=null?o.deliveryMinutes:15);
   const stateTxt=e?(e.state==='ok'?t('saved'):(e.state==='err'?'⚠️ '+esc(e.msg||''):t('saving'))):(Date.now()-(savedAt[id]||0)<3000?t('saved'):'');
   const syncTxt=o.sync&&o.sync.state==='FAILED'?'<div class="sync2">⚠️ '+t('platformFail')+(o.sync.error?': '+esc(o.sync.error):'')+'</div>':'';
-  let head='<div class="head">'+(stg==='DONE'?'':ringHtml(o))+'<div class="top">'+badges+'<span class="age" data-ts="'+esc(o.stageAt||o.acceptedAt||o.placedAt||'')+'">'+esc(agoOf(o.stageAt||o.acceptedAt||o.placedAt))+'</span></div></div>';
+  const ageTs=stg==='DONE'?(o.placedAt||o.stageAt||o.acceptedAt):(o.stageAt||o.acceptedAt||o.placedAt);
+  let head='<div class="head">'+(stg==='DONE'?'':ringHtml(o))+'<div class="top">'+badges+'<span class="age" data-ts="'+esc(ageTs||'')+'">'+esc(agoOf(ageTs))+'</span></div></div>';
   let body='<div class="meta">'+metaHtml(o)+'</div>'+contactHtml(o)+(o.notes?'<div class="notes">📝 '+esc(o.notes)+'</div>':'')+itemsBlock(o,id,stg);
   let times='',btn='';
   if(stg!=='DONE'){

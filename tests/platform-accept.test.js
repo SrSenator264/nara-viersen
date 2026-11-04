@@ -284,3 +284,21 @@ test('Board/Zeiten/Stufe: Wartende zuerst, Uber intern, Abholung ohne Lieferzeit
   const s1 = A.requestStage(data, 'p1', 'HANDOVER', null, NOW); assert.deepEqual([s1.from, s1.stage, s1.pushed], ['PREPARE', 'HANDOVER', false], 'Nicht-Lieferando: nur intern');
   assert.equal(A.requestStage(data, 'p1', 'HANDOVER', null, NOW).already, true);
 });
+
+test('Board/Erledigt: nur Bestellungen des aktuellen Geschäftstags (Schnitt 05:00), nach Bestellzeit – nicht nach Update-/Sync-Zeit', () => {
+  const view = o => ({ displayCode: o.displayCode, type: 'delivery', customerName: '', city: '', notes: '', items: [] });
+  const deps = { forecast: () => { throw new Error('x'); }, view };
+  const done = (id, placed, extra = {}) => mk({ id, displayCode: id, source: 'UBER_EATS', platform: 'UBER_EATS', needsAccept: undefined, status: 'COMPLETED', liveStage: 'DONE', placedAt: placed, updatedAt: new Date(NOW - 4 * 60000).toISOString(), ...extra });
+  const now = Date.parse('2026-10-28T10:00:00Z'); // 11:00 Berlin
+  const data = { orders: [
+    done('gestern', '2026-10-27T18:00:00Z'),                 // gestern Abend, aber gerade neu synchronisiert (updatedAt = jetzt)
+    done('nacht', '2026-10-28T00:30:00Z'),                   // 01:30 Berlin → noch Geschäftstag 27.10.
+    done('heute', '2026-10-28T08:00:00Z'),                   // heute 09:00 Berlin
+  ] };
+  const b = A.board(data, now, deps);
+  assert.deepEqual(b.orders.map(o => o.id), ['heute']); assert.equal(b.counts.DONE, 1);
+  // nach Mitternacht (01:30 Berlin) zählt eine Bestellung von 23:00 noch zum selben Geschäftstag
+  const late = Date.parse('2026-10-28T00:30:00Z');
+  const b2 = A.board({ orders: [done('spaet', '2026-10-27T21:00:00Z')] }, late, deps);
+  assert.equal(b2.counts.DONE, 1);
+});
