@@ -115,3 +115,8 @@ test('server exposes POST /api/driver/claim and driver.html has the scan button 
   assert.match(h, /id="scanbtn"/); assert.match(h, /\/api\/driver\/claim/); assert.match(h, /capPlug\('BarcodeScanner'\)/);
   for (const k of ['NOT_FOUND', 'NOT_DELIVERY', 'DELIVERED', 'TAKEN', 'FULL', 'DRIVERS_ONLY']) assert.ok(h.includes(k + ':'), k);
 });
+
+test('driver.html: unknown server errors (e.g. old server answering 404 "Not found") are NOT shown as "no order for this QR"', () => {
+  const h = fs.readFileSync(path.join(__dirname, '..', 'driver.html'), 'utf8');
+  assert.match(h, /X\[j\.code\]\|\|\(X\.srv/); assert.ok(!/X\.NOT_FOUND\}\)/.test(h)); assert.ok(h.includes('srv:'));
+});
