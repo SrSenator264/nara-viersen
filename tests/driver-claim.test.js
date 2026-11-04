@@ -120,3 +120,8 @@ test('driver.html: unknown server errors (e.g. old server answering 404 "Not fou
   const h = fs.readFileSync(path.join(__dirname, '..', 'driver.html'), 'utf8');
   assert.match(h, /X\[j\.code\]\|\|\(X\.srv/); assert.ok(!/X\.NOT_FOUND\}\)/.test(h)); assert.ok(h.includes('srv:'));
 });
+
+test('driver.html: the user chip (name + logout) is moved into the header, not left floating at the bottom', () => {
+  const h = fs.readFileSync(path.join(__dirname, '..', 'driver.html'), 'utf8');
+  assert.match(h, /header #na-chip\{position:static!important/); assert.match(h, /h\.appendChild\(c\)/);
+});
