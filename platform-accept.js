@@ -199,6 +199,8 @@ function printJobs(o, cfg, opts) {
   const pp = cfg && cfg.platformPrint;           // إعداد التجميع: نوع واحد + تشغيل/إلغاء عند القبول
   const useCfg = !!pp && acc && !web;
   const jobs = [];
+  // مفتاح واحد: مطفي = ما بتنطبع ولا ورقة تلقائياً لطلبات المنصات (طلبات الموقع بإعدادها المنفصل)
+  if (pp && pp.onAccept === false && !web) return jobs;
   if ((web || auto.kitchenOnPlatformOrder || (!useCfg && acc && auto.kitchenOnAccept)) && !o.autoKitchenPrintedAt) jobs.push(['kitchen', 'autoKitchenPrintedAt']);
   if ((web || auto.receiptOnPlatformOrder || (!useCfg && acc && auto.receiptOnAccept)) && !o.autoReceiptPrintedAt) jobs.push(['customer', 'autoReceiptPrintedAt']);
   if (useCfg && pp.onAccept) {

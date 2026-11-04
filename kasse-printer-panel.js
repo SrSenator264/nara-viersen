@@ -36,7 +36,7 @@
       +(cfg.printers.length>1?'<button type="button" data-rm="'+i+'" title="'+esc(t('remove'))+'">✕</button>':'')+'</div></div>';
   }
   // مفتاح كبير: طباعة الفاتورة + ورقة المطبخ لحالها لما تنقبل طلبات المنصات (receiptOnAccept + kitchenOnAccept)
-  const acceptOn=()=>!!(cfg.auto.receiptOnAccept||cfg.auto.kitchenOnAccept);
+  const acceptOn=()=>!!(cfg.platformPrint?cfg.platformPrint.onAccept!==false:(cfg.auto.receiptOnAccept||cfg.auto.kitchenOnAccept));
   function acceptSwitch(){const on=acceptOn();return '<button type="button" id="npp-accept" class="npp-master '+(on?'on':'off')+'" aria-pressed="'+on+'"><span>🖨️ '+esc(t('aAccept'))+'</span><b>'+(on?'🟢 '+esc(t('aOn')):'🔴 '+esc(t('aOff')))+'</b></button><small class="npp-sub">'+esc(t('aAcceptHint'))+'</small>'}
   function draw(){
     const m=document.getElementById('npp');if(!m||m.hidden||!cfg)return;
@@ -85,7 +85,7 @@
     if(el.classList.contains('npp-save')){await save();return}
     if(el.id==='npp-add'){cfg.printers.push({id:'p'+Date.now().toString(36),name:t('printers')+' '+(cfg.printers.length+1),mode:'browser',winName:'',ip:'',port:9100,width:80,cut:'full'});draw();return}
     if(el.dataset.rm!==undefined){const i=+el.dataset.rm,id=cfg.printers[i].id;cfg.printers.splice(i,1);for(const k of Object.keys(cfg.routes))if(cfg.routes[k]===id)cfg.routes[k]=cfg.printers[0].id;draw();return}
-    if(el.id==='npp-accept'){const prev={r:cfg.auto.receiptOnAccept,k:cfg.auto.kitchenOnAccept},next=!acceptOn();cfg.auto.receiptOnAccept=next;cfg.auto.kitchenOnAccept=next;await save();if(msg!==t('saved')){cfg.auto.receiptOnAccept=prev.r;cfg.auto.kitchenOnAccept=prev.k;draw()}return}
+    if(el.id==='npp-accept'){const next=!acceptOn();try{const r=await fetch('/api/platform-orders/print-settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({onAccept:next})});const jr=await r.json().catch(()=>({}));if(r.ok){cfg.platformPrint={kind:jr.kind,onAccept:jr.onAccept}}}catch(e){}draw();return}
     if(el.dataset.test){
       // التجربة بتستعمل الإعدادات المحفوظة: احفظ أول
       await save();if(/⚠|Nur|بس صاحب|Only/.test(msg))return;

@@ -6,10 +6,10 @@ const A = require('../platform-accept.js');
 
 const panel = fs.readFileSync(path.join(__dirname, '..', 'kasse-printer-panel.js'), 'utf8');
 
-test('printer panel: big accept-print switch exists and toggles both on-accept flags', () => {
+test('printer panel: big accept-print switch exists and drives the single platform print setting', () => {
   assert.match(panel, /id="npp-accept"/);
-  assert.match(panel, /cfg\.auto\.receiptOnAccept=next/);
-  assert.match(panel, /cfg\.auto\.kitchenOnAccept=next/);
+  assert.match(panel, /\/api\/platform-orders\/print-settings/);
+  assert.match(panel, /cfg\.platformPrint=/);
   for (const k of ['aAccept', 'aOn', 'aOff', 'aAcceptHint']) assert.equal((panel.match(new RegExp(k + ':', 'g')) || []).length, 3, k + ' in de/ar/en');
 });
 

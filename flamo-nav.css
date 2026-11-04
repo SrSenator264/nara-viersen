@@ -76,3 +76,6 @@ body.fn-on #na-chip{display:none!important}
 /* Kasse: Navigationslinks stehen jetzt in der Seitenleiste – der Kassenkopf zeigt nur Werkzeuge (Status, Drucker, Kundensuche) */
 body.fn-on header .header-actions #nara-live-orders-link,body.fn-on header .header-actions #nara-dispatch-link,body.fn-on header .header-actions #nara-kitchen-link,body.fn-on header .header-actions #nara-custlog-link,body.fn-on header .header-actions #nara-connect-link{display:none!important}
 @media(max-width:700px){.fn-find{display:none}.fn-bar{gap:6px;padding-inline:8px}.fn-who{padding-inline-start:6px}.fn-who button{padding:0 9px;font-size:.8rem}.fn-sp{flex:1}}
+
+/* the floating user/logout chip duplicates the top bar's user + logout and covers cards at the bottom */
+body:has(.fn-bar) #na-chip{display:none!important}
