@@ -52,8 +52,8 @@
       const r=await job;
       // طلب بالمحل: ورقة للطاولة (نسخة الزبون بدون دفع) أول ما ينبعت للمطبخ
       if(kind==='kitchen'&&(o.type==='local'||o.orderType==='DINE_IN')&&window.NARA_PRINT_TABLE_SLIP!==false&&!(r&&r.error))offerTableSlip(o);
-      $('#message').textContent=r&&r.error?'⚠ '+r.error:t('sent');return}
-    showSheet(o,kind);$('#message').textContent=t('sent')}
+      if(r&&r.error)$('#message').textContent='⚠ '+r.error;return}
+    showSheet(o,kind)}
   function mount(){
     const cart=$('#cart');if(!cart||document.getElementById('nara-print-tools'))return;
     const box=document.createElement('div');box.id='nara-print-tools';box.innerHTML='<div class="nara-order-identity"><span data-pl="code">'+esc(t('code'))+'</span><strong id="nara-order-code">—</strong></div><div class="nara-print-actions"><button type="button" data-print-kind="kitchen" data-pl="kitchen">'+esc(t('kitchen'))+'</button><button type="button" data-print-kind="customer" data-pl="customer">'+esc(t('customer'))+'</button><button type="button" data-print-kind="driver" data-pl="driver">'+esc(t('driver'))+'</button><button type="button" data-print-kind="reprint" data-pl="reprint">'+esc(t('reprint'))+'</button></div>';
