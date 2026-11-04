@@ -120,7 +120,7 @@ const RULES = [
   ['GET', /^\/api\/delivery\/auto-plan$/, CASH],
   ['POST', /^\/api\/kitchen\/estimate$/, CASH],
   ['*', /^\/api\/kasse\/settings$/, CASH],
-  ['POST', /^\/api\/driver\/(position|start|delivered|finish|proof|door-pay)$/, STAFF],
+  ['POST', /^\/api\/driver\/(position|start|delivered|finish|proof|door-pay|claim)$/, STAFF],
   ['GET', /^\/api\/delivery\/proof$/, CASH],
   ['GET', /^\/api\/driver\/routes$/, STAFF],
   ['POST', /^\/api\/delivery\/(assign|cancel|move|swap|reorder|order-pref|driver-pref)$/, CASH],
