@@ -304,4 +304,4 @@ function weekStrip(data, endDay, n = 7) {
   return out;
 }
 
-module.exports = { weekStrip, build, status, makeRecord, nextNumber, reprintAudit, rateResolver, allocate, isDrinkName, ClosingError };
+module.exports = { weekStrip, build, status, makeRecord, nextNumber, reprintAudit, rateResolver, allocate, weightsOf, isDrinkName, ClosingError };
