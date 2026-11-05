@@ -26,8 +26,10 @@ function create({ env = process.env, fetchFn = (...a) => fetch(...a), onAction, 
     try { res = await onAction(String(cq.data || ''), nameOf(cq.from)); } catch (e) { log('[NARA][TG-ACTION]', e && e.message); }
     await api('answerCallbackQuery', { callback_query_id: cq.id, text: res ? res.answer : '⚠️' }).catch(() => {});
     if (res && res.edit) {
-      const base = String(cq.message.text || '').split('\n✅ انطلب')[0];
-      await api('editMessageText', { chat_id: cq.message.chat.id, message_id: cq.message.message_id, text: `${base}\n${res.edit}`, reply_markup: { inline_keyboard: [] } }).catch(() => {});
+      const base = String(cq.message.text || '').split('\n✅ انطلب')[0].split('\n⏳ لسا')[0];
+      // "لسا": الأزرار بتضل (انطلب لسا شغال). "انطلب": بنشيل الأزرار.
+      const markup = res.keepButtons && cq.message.reply_markup ? cq.message.reply_markup : { inline_keyboard: [] };
+      await api('editMessageText', { chat_id: cq.message.chat.id, message_id: cq.message.message_id, text: `${base}\n${res.edit}`, reply_markup: markup }).catch(() => {});
     }
     return true;
   }

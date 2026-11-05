@@ -115,6 +115,7 @@ test('أزرار تلغرام: انطلب بيسجّل باسم الضاغط، �
   assert.ok(d.edit.includes('Sami'));
   const l = R.handleCallback(s0, 'rem:later:bread', 'Sami', now);
   assert.equal(l.state, undefined); assert.ok(l.answer);
+  assert.ok(l.edit.includes('لسا') && l.edit.includes('Sami')); assert.equal(l.keepButtons, true);
   assert.equal(R.handleCallback(s0, 'rem:done:milk', 'x'), null);
   assert.equal(R.handleCallback(s0, 'x', 'x'), null);
   assert.equal(R.buttons('bread')[0][0].callback_data, 'rem:done:bread');

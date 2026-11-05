@@ -86,7 +86,7 @@ function handleCallback(state, data, who = '', now = Date.now()) {
   if (/^rem:test:(done|later)$/.test(str(data))) return { answer: 'الزر شغال ✅ (تجربة، ما تسجل شي)', edit: '✅ الزر شغال (تجربة)' };
   const m = /^rem:(done|later):(\w+)$/.exec(str(data));
   if (!m || !IDS.includes(m[2])) return null;
-  if (m[1] === 'later') return { answer: 'تمام، بنذكّركم 👍' };
+  if (m[1] === 'later') return { answer: 'تمام، بنذكّركم 👍', edit: `⏳ لسا${who ? ' — ' + who : ''} (رح نذكّركم)`, keepButtons: true }; // بيعدّل الرسالة ليبين إنو انكبس، وبيخلّي الأزرار
   const cur = status(state, now)[m[2]];
   if (cur.orderedToday) return { answer: 'تسجلت قبل ✅', edit: `✅ انطلب${cur.last && cur.last.by ? ' — ' + cur.last.by : ''}` }; // شخص ثاني ضغط قبلك: ما بنسجّل مرتين
   const r = markDone(state, m[2], who, now);

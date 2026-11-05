@@ -21,11 +21,14 @@ test('ضغطة من شات غريب مرفوضة بدون ما تنفّذ شي',
   assert.equal(n, 0); assert.equal(calls.length, 0);
 });
 
-test('"لسا" بيردّ بس بدون تعديل الرسالة، وفشل التنفيذ ما بيوقّف شي', async () => {
+test('"لسا" بيردّ وبيعدّل الرسالة وبيخلّي الأزرار، وفشل التنفيذ ما بيوقّف شي', async () => {
   let calls = [];
-  const t = mk(async () => ({ answer: 'تمام' }), calls);
-  await t.handle(cq(-100, 'rem:later:bread'));
-  assert.deepEqual(calls.map(c => c.m), ['answerCallbackQuery']);
+  const kb = { inline_keyboard: [[{ text: 'انطلب ✅', callback_data: 'rem:done:bread' }]] };
+  const t = mk(async () => ({ answer: 'تمام', edit: '⏳ لسا — Sami K (رح نذكّركم)', keepButtons: true }), calls);
+  const u = cq(-100, 'rem:later:bread'); u.callback_query.message.reply_markup = kb;
+  await t.handle(u);
+  assert.deepEqual(calls.map(c => c.m), ['answerCallbackQuery', 'editMessageText']);
+  assert.deepEqual(calls[1].b.reply_markup, kb); assert.ok(calls[1].b.text.endsWith('⏳ لسا — Sami K (رح نذكّركم)'));
   const t2 = mk(async () => { throw new Error('boom'); }, calls = []);
   assert.equal(await t2.handle(cq(-100, 'rem:done:bread')), true);
 });
