@@ -57,7 +57,28 @@ function rateResolver(data) {
     if (!isDrink) return food;
     return milk && isTakeaway(order) ? milkTakeaway : drink;
   };
-  return { rateOf, food, drink };
+  // ── منيو (أكل + مشروب بسعر واحد): تقسيم سعر المنيو حسب أسعار البيع المنفردة (حكم BFH XI R 19/23) ──
+  // حصة المشروب = مشروب ÷ (برغر + بطاطا + دِب + مشروب)؛ المشروب 19%، والباقي بنسبة الأكل. القيم الافتراضية بالإعدادات.
+  const fries = finite(acc.menuFriesCents) ? int(acc.menuFriesCents) : 300;
+  const dip = finite(acc.menuDipCents) ? int(acc.menuDipCents) : 149;
+  const menuDrink = finite(acc.menuDrinkCents) ? int(acc.menuDrinkCents) : 199;
+  const nameOf = p => String((p && (p.name || p.n)) || '');
+  const priceOf = p => int(p.priceCents != null ? p.priceCents : p.cents != null ? p.cents : p.menuData && p.menuData.cents);
+  const MENU_WORD = /(^|[^a-zäöüß])(menu|menü)([^a-zäöüß]|$)/i;
+  const isMenuProduct = p => MENU_WORD.test(nameOf(p)) && /getränk|getraenk|cola/i.test(String(p.description || p.d || (p.menuData && p.menuData.d) || ''));
+  const norm = s => String(s || '').toLowerCase().replace(/[’`]/g, "'").replace(/\((menu|menü)\)/gi, ' ').replace(/(^|[^a-zäöüß])(menu|menü)(?![a-zäöüß])/gi, ' ').replace(/\s+/g, ' ').trim();
+  const single = new Map();
+  for (const p of data.products || []) if (!isMenuProduct(p)) single.set(norm(nameOf(p)), p);
+  const splitOf = it => {
+    if (finite(it.vatRate)) return null;
+    const p = productOf(it);
+    if (!p || finite(p.vatRate) || !isMenuProduct(p)) return null;
+    const base = priceOf(p); if (base <= 0) return null;
+    const bp = single.get(norm(nameOf(p))), burger = bp ? priceOf(bp) : 0;
+    const total = burger > 0 ? burger + fries + dip + menuDrink : Math.max(base, menuDrink + 1); // بدون برغر مقابل: بدون خصم
+    return { base, share: Math.min(1, menuDrink / total), rate: drink };
+  };
+  return { rateOf, splitOf, food, drink };
 }
 
 // توزيع مبلغ على مفاتيح حسب أوزان (أكبر باقي) — المجموع دايماً = total بالضبط
@@ -74,12 +95,15 @@ function allocate(total, weights, fallbackKey) {
   return out;
 }
 
-const weightsOf = (order, rateOf) => {
-  const w = new Map();
+const weightsOf = (order, rateOf, splitOf) => {
+  const w = new Map(), add = (r, c) => w.set(r, (w.get(r) || 0) + c);
   for (const it of (order && order.cart) || []) {
     if (/TIP/.test(up(it.kind))) continue;
-    const c = int(it.unitCents) * (finite(it.quantity) ? int(it.quantity) : 1);
-    if (c > 0) { const r = rateOf(it, order); w.set(r, (w.get(r) || 0) + c); }
+    const q = finite(it.quantity) ? int(it.quantity) : 1, c = int(it.unitCents) * q;
+    if (c <= 0) continue;
+    const sp = splitOf && splitOf(it);
+    if (sp) { const dc = Math.round(Math.min(sp.base, int(it.unitCents)) * q * sp.share); if (dc > 0) add(sp.rate, dc); if (c - dc > 0) add(rateOf(it, order), c - dc); }
+    else add(rateOf(it, order), c);
   }
   return w;
 };
@@ -100,7 +124,7 @@ function build(data, day, opts = {}) {
   const orders = data.orders || [], byId = new Map(orders.map(o => [String(o.id), o]));
   const inRange = iso => bizDay.dayOf(iso) === day && (!since || ms(iso) > since);
   const own = o => !SL.platformOf(o) && (all ? true : training ? o.training === true : !o.isTest && !o.training);
-  const { rateOf, food } = rateResolver(data);
+  const { rateOf, splitOf, food } = rateResolver(data);
 
   const pays = (data.payments || []).filter(p => {
     if (p.status !== 'COMPLETED' || !inRange(p.createdAt)) return false;
@@ -110,7 +134,7 @@ function build(data, day, opts = {}) {
 
   // المبيعات
   const gByRate = new Map();
-  const addRate = (order, cents, sign) => { for (const [r, c] of allocate(cents, weightsOf(order, rateOf), food)) gByRate.set(r, (gByRate.get(r) || 0) + sign * c); };
+  const addRate = (order, cents, sign) => { for (const [r, c] of allocate(cents, weightsOf(order, rateOf, splitOf), food)) gByRate.set(r, (gByRate.get(r) || 0) + sign * c); };
   let grossC = 0, discC = 0, tipC = 0, tipCashC = 0;
   for (const p of pays) {
     grossC += int(p.amountCents); discC += int(p.discount && p.discount.amountCents); tipC += int(p.tipCents);

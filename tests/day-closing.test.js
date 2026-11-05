@@ -256,3 +256,41 @@ test('إعداد milkDrinkTakeawayVatRate=19 بيعطّل 7% للفرابيه', 
   const d = frappeData(); d.settings = { accounting: { milkDrinkTakeawayVatRate: 19 } };
   assert.equal(DC.rateResolver(d).rateOf(itf('f1', 'Mango Frappuccino', 500), { type: 'delivery' }), 19);
 });
+
+// ── منيو: تقسيم حسب أسعار البيع المنفردة (بطاطا 3,00، دِب 1,49، كولا 1,99) ──────────
+const menuData = () => mkData({ products: [
+  { id: 'b10', name: 'Joppie Beef burger', category: 'Burger', priceCents: 849 },
+  { id: 'm102', name: 'Joppie Beef burger (Menu)', category: 'Burger', priceCents: 1449, description: 'Joppie Beef Burger, Pommes, Dip und Getränk nach Wahl.' },
+  { id: 'm100', name: 'Flamin Hot Beef Menu', category: 'Burger', priceCents: 1999, description: 'Burger, Pommes, Cola und eine große Käsesauce.' },
+  { id: 'f1', name: 'Falafel-Menü', category: 'Falafel', priceCents: 549, description: 'Falafel mit Salat.' },
+  { id: 'd1', name: 'Cola', category: 'Getränke', priceCents: 199 }] });
+
+test('منيو Joppie Beef 14,49: مشروب 1,93 بـ19% والباقي 7%، ضريبة 1,13', () => {
+  const d = menuData(); sale(d, { id: 'm', cart: [it('m102', 'Joppie Beef burger (Menu)', 1449)] });
+  const r = DC.build(d, DAY);
+  assert.deepEqual(r.vat.rows.map(x => [x.rate, x.grossCents]), [[7, 1256], [19, 193]]);
+  assert.equal(r.vat.grossCents, 1449); assert.equal(r.vat.vatCents, 113); assert.equal(r.vat.netCents + r.vat.vatCents, 1449);
+});
+
+test('منيو بدون برغر مقابل (Flamin Hot): بدون خصم، حصة المشروب = كولا ÷ سعر المنيو', () => {
+  const d = menuData(); sale(d, { id: 'm', cart: [it('m100', 'Flamin Hot Beef Menu', 1999)] });
+  assert.deepEqual(DC.build(d, DAY).vat.rows.map(x => [x.rate, x.grossCents]), [[7, 1800], [19, 199]]);
+});
+
+test('"Menü" بدون مشروب بالوصف (Falafel-Menü) = 7% كامل، وكمية 2 بتضاعف التقسيم', () => {
+  const d = menuData(); sale(d, { id: 'm', cart: [it('f1', 'Falafel-Menü', 549)] });
+  assert.deepEqual(DC.build(d, DAY).vat.rows.map(x => [x.rate, x.grossCents]), [[7, 549]]);
+  const d2 = menuData(); sale(d2, { id: 'n', cart: [it('m102', 'Joppie Beef burger (Menu)', 1449, 2)] });
+  assert.deepEqual(DC.build(d2, DAY).vat.rows.map(x => [x.rate, x.grossCents]), [[7, 2513], [19, 385]]);
+});
+
+test('إضافة فوق سعر المنيو بتبقى بنسبة الأكل، وvatRate صريح على الصنف بيتقدّم', () => {
+  const d = menuData(); sale(d, { id: 'm', cart: [{ ...it('m102', 'Joppie Beef burger (Menu)', 1449 + 100) }, { id: 'x-1730000000000', name: 'Getränk-Aufpreis', unitCents: 107, quantity: 1, vatRate: 19 }] });
+  assert.deepEqual(DC.build(d, DAY).vat.rows.map(x => [x.rate, x.grossCents]), [[7, 1356], [19, 300]]);
+});
+
+test('إعدادات menuFriesCents/menuDipCents/menuDrinkCents بتغيّر الحصة', () => {
+  const d = menuData(); d.settings = { accounting: { menuFriesCents: 0, menuDipCents: 0, menuDrinkCents: 849 } };
+  sale(d, { id: 'm', cart: [it('m102', 'Joppie Beef burger (Menu)', 1449)] });
+  assert.deepEqual(DC.build(d, DAY).vat.rows.map(x => [x.rate, x.grossCents]), [[7, 724], [19, 725]]);
+});
