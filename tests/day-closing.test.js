@@ -219,3 +219,40 @@ test('وضع ALL (مجموع فعلي + تدريب): بيجمع الاثنين،
   assert.equal(g('REAL').net.grossCents, 1000); assert.equal(g('TRAINING').net.grossCents, 450);
   const all = g('ALL'); assert.equal(all.net.grossCents, 1450); assert.equal(all.mode, 'ALL'); assert.equal(all.counts.orders, 2);
 });
+
+// ── فرابيه: 7% توصيل/استلام، 19% جوا؛ باقي المشروبات 19% دايماً ─────────────────
+const frappeData = () => mkData({ categories: [{ id: 'cF', name: 'Frappuccino Series' }, { id: 'cD', name: 'Alkoholfreie Getränke' }, { id: 'cI', name: 'Iced Coffee' }, { id: 'cT', name: 'Iced Tea' }],
+  products: [{ id: 'p1', name: 'Burger', category: 'Burger' }, { id: 'f1', name: 'Mango Frappuccino', categoryId: 'cF' }, { id: 'd2', name: 'Mezzo Mix', categoryId: 'cD' }, { id: 'i1', name: 'Iced Latte', categoryId: 'cI' }, { id: 't1', name: 'Peach', categoryId: 'cT' }] });
+const itf = (pid, name, c) => ({ id: pid + '-1730000000000', name, unitCents: c, quantity: 1 });
+
+test('فرابيه: 7% بالتوصيل والاستلام، 19% جوا المطعم', () => {
+  const d = frappeData(); const { rateOf } = DC.rateResolver(d);
+  const fr = itf('f1', 'Mango Frappuccino', 500);
+  assert.equal(rateOf(fr, { type: 'delivery' }), 7); assert.equal(rateOf(fr, { type: 'pickup' }), 7);
+  assert.equal(rateOf(fr, { type: 'local' }), 19); assert.equal(rateOf(fr), 19);
+});
+
+test('باقي المشروبات 19% دايماً (حتى بالتوصيل)، والأكل 7%', () => {
+  const { rateOf } = DC.rateResolver(frappeData()); const o = { type: 'delivery' };
+  for (const [p, n] of [['d2', 'Mezzo Mix'], ['i1', 'Iced Latte'], ['t1', 'Peach']]) assert.equal(rateOf(itf(p, n, 300), o), 19);
+  assert.equal(rateOf(itf('p1', 'Burger', 900), o), 7);
+});
+
+test('فرابيه بدون ربط بالمنتج (اسم + category بالصنف): نفس القاعدة', () => {
+  const { rateOf } = DC.rateResolver(frappeData());
+  assert.equal(rateOf({ id: 'zz-1', name: 'Oreo Frappe' }, { type: 'delivery' }), 7); assert.equal(rateOf({ id: 'zz-1', name: 'Oreo Frappe' }, { type: 'local' }), 19);
+});
+
+test('تقفيلة: توصيل فيه برغر + فرابيه + مشروب = 7% و19%، وجوا الفرابيه كلها 19%', () => {
+  const d = frappeData();
+  sale(d, { id: 'x1', cart: [itf('p1', 'Burger', 1000), itf('f1', 'Mango Frappuccino', 500), itf('d2', 'Mezzo Mix', 300)], order: { type: 'delivery' } });
+  sale(d, { id: 'x2', cart: [itf('f1', 'Mango Frappuccino', 500)], order: { type: 'local' } });
+  const r = DC.build(d, DAY);
+  assert.deepEqual(r.vat.rows.map(x => [x.rate, x.grossCents]), [[7, 1500], [19, 800]]);
+  assert.equal(r.vat.grossCents, 2300); assert.equal(r.vat.netCents + r.vat.vatCents, 2300);
+});
+
+test('إعداد milkDrinkTakeawayVatRate=19 بيعطّل 7% للفرابيه', () => {
+  const d = frappeData(); d.settings = { accounting: { milkDrinkTakeawayVatRate: 19 } };
+  assert.equal(DC.rateResolver(d).rateOf(itf('f1', 'Mango Frappuccino', 500), { type: 'delivery' }), 19);
+});

@@ -4,6 +4,7 @@
 // - المبلغ المدفوع (payment.amountCents) هو الأساس: بعد الخصم، بدون بقشيش. البقشيش سطر مستقل (Durchlaufposten).
 // - الضريبة: بنوزّع المبلغ المدفوع على نسب الضريبة حسب أصناف سلة الطلب (أكبر باقي)، وبعدين صافي/ضريبة لكل نسبة.
 //   النسبة لكل صنف: item.vatRate ← product.vatRate ← اسم تصنيف المشروبات (19%) ← الأكل (7%). تقدير، مو استشارة ضريبية.
+//   الفرابيه: 7% بطلبات delivery/pickup و19% بطلبات local (جوا)، بشرط وصفة موثّقة ≥75% حليب.
 // - Storno: بيتسجّل بيوم الـStorno (مو يوم البيع الأصلي). الاسترجاع بنفس طريقة الدفع الأصلية (افتراض).
 // - بيانات الـTSE بتنعرض كما هي (موقّع/غير موقّع). هالملف ما بيحكم إنو الكاشير مطابق قانونياً.
 const bizDay = require('./business-day.js');
@@ -22,14 +23,18 @@ const ms = v => Date.parse(v || '');
 
 // ── نسبة الضريبة ──────────────────────────────────────────────────────────────
 // كلمات اللاتيني بحدود كلمة (عشان "Saftiges" و"Schweine" و"Steak" ما يتحسبوا مشروبات)؛ العربي بـ includes.
-const DRINK_LATIN = /\b(getr(ä|ae)nke?|drinks?|beverages?|softdrinks?|limo(nade)?|cola|coca-cola|fanta|sprite|wasser|water|saft|säfte|juice|bier|beer|wein|wine|ayran|tee|tea|kaffee|coffee|red ?bull|eistee|smoothies?|shakes?)\b/i;
-const DRINK_ARABIC = ['مشروب', 'عصير', 'مياه', 'ماء', 'شاي', 'قهوة', 'عيران', 'كولا', 'بيرة'];
+const DRINK_LATIN = /\b(getr(ä|ae)nke?|drinks?|beverages?|softdrinks?|limo(nade)?|cola|coca-cola|fanta|sprite|wasser|water|saft|säfte|juice|bier|beer|wein|wine|ayran|tee|tea|kaffee|coffee|red ?bull|eistee|smoothies?|shakes?|frapp\w*)\b/i;
+const DRINK_ARABIC = ['مشروب', 'عصير', 'مياه', 'ماء', 'شاي', 'قهوة', 'عيران', 'كولا', 'بيرة', 'فراب'];
 const isDrinkName = s => { const t = String(s || ''); return DRINK_LATIN.test(t) || DRINK_ARABIC.some(w => t.includes(w)); };
+// مشروب حليبي (فرابيه): 7% بالتوصيل/الاستلام بشرط ≥75% حليب بالمنتج الجاهز (الوصفة لازم تكون موثّقة)، و19% جوا المطعم دايماً (نشرة ZDH 2026).
+const isMilkDrinkName = s => { const t = String(s || ''); return /frapp/i.test(t) || t.includes('فراب'); };
+const isTakeaway = o => !!o && (o.type === 'delivery' || o.type === 'pickup');
 
 function rateResolver(data) {
   const acc = (data.settings && data.settings.accounting) || {};
   const food = finite(acc.defaultSalesVatRate) ? Number(acc.defaultSalesVatRate) : finite(data.settings && data.settings.defaultVatRate) ? Number(data.settings.defaultVatRate) : 7;
   const drink = finite(acc.drinkVatRate) ? Number(acc.drinkVatRate) : 19;
+  const milkTakeaway = finite(acc.milkDrinkTakeawayVatRate) ? Number(acc.milkDrinkTakeawayVatRate) : 7; // حطّ 19 بالإعدادات لو بدك تعطّل 7% للفرابيه
   const cats = new Map((data.categories || []).map(c => [String(c.id), c]));
   const prods = new Map((data.products || []).map(p => [String(p.id), p]));
   const catName = p => {
@@ -37,11 +42,20 @@ function rateResolver(data) {
     return [p.category, p.categoryName, p.c, c && (c.name || c.nameDe || (c.names && c.names.de))].filter(Boolean).join(' ');
   };
   const productOf = it => prods.get(String(it.productId != null ? it.productId : String(it.id || '').replace(/-\d{10,}$/, '')));
-  const rateOf = it => {
+  const rateOf = (it, order) => {
     if (finite(it.vatRate)) return Number(it.vatRate);
     const p = productOf(it);
-    if (p) { if (finite(p.vatRate)) return Number(p.vatRate); const cn = catName(p); return isDrinkName(cn) || (!cn && isDrinkName(p.name || p.n)) ? drink : food; }
-    return isDrinkName(it.name) ? drink : food;
+    let isDrink, milk;
+    if (p) {
+      if (finite(p.vatRate)) return Number(p.vatRate);
+      const cn = catName(p), pn = p.name || p.n;
+      isDrink = isDrinkName(cn) || (!cn && isDrinkName(pn)); milk = isMilkDrinkName(cn) || isMilkDrinkName(pn);
+    } else {
+      const txt = [it.name, it.category].filter(Boolean).join(' ');
+      isDrink = isDrinkName(txt); milk = isMilkDrinkName(txt);
+    }
+    if (!isDrink) return food;
+    return milk && isTakeaway(order) ? milkTakeaway : drink;
   };
   return { rateOf, food, drink };
 }
@@ -65,7 +79,7 @@ const weightsOf = (order, rateOf) => {
   for (const it of (order && order.cart) || []) {
     if (/TIP/.test(up(it.kind))) continue;
     const c = int(it.unitCents) * (finite(it.quantity) ? int(it.quantity) : 1);
-    if (c > 0) { const r = rateOf(it); w.set(r, (w.get(r) || 0) + c); }
+    if (c > 0) { const r = rateOf(it, order); w.set(r, (w.get(r) || 0) + c); }
   }
   return w;
 };
