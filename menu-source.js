@@ -494,6 +494,8 @@ for(const a of addedItems){
   catalog.push({id:a.id,n:a.n,c:a.c,cents:a.cents,p:a.cents/100,d:a.d,img:null,verified:true,optionsPending:false,...(dips?{dips}:{})});
 }
 
+// Inhaber 2026-11-06: Flamin Hot Menüs (19,99 €) sind eigene Gerichte und sichtbar, nicht im versteckten Burger-Menü.
+for(const p of catalog.filter(p=>p.id===100||p.id===101))Object.assign(p,{c:'Flamin Hot',hidden:false,optionsPending:false,requiredGroups:[],dips:[],img:null});
 // ── Preise aus Loyverse (Export 2026-10-28, vom Inhaber freigegeben: alles = Loyverse) ──
 // Einzige Stelle für die Preis-Angleichung: id → Cent. Nicht erfasst: Hummus (nicht verfügbar), Falafel-Menü ("ab"-Preis),
 // Artikel mit Loyverse-Preis "variable" und Artikel ohne Treffer in Loyverse.
