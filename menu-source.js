@@ -168,7 +168,7 @@ for(const b of bundleDefinitions){
  catalog.push({id:b.id,n:b.n,c:'Crispyburger Bundels',cents:b.cents,p:b.cents/100,d:b.d,img:'assets/bundle-'+b.id+'.png',verified:true,optionsPending:false,requiredGroups:[...new Set(dips.map(d=>d.group))],dips});
 }
 // French Tacos: owner-confirmed descriptions; Extra doubles tortilla and ingredients.
-const tacoDesserts=[['caramel','Crispy Caramel-gefüllte Donut',0,true],['chocolate','Rich Chocolate Muffin',445,false],['berry','Filly Berry-gefüllte Donut',0,true],['nougat','Choconougat muffin Pof',445,false],['apple','Filly Apple Cinnamon muffin',0,true]].map(([id,name,cents,unavailable])=>({id:'dessert-'+id,name,cents,unavailable,priceUnknown:unavailable,group:'Ihr Dessert'}));
+const tacoDesserts=[['caramel','Crispy Caramel-gefüllte Donut',0,true],['chocolate','Rich Chocolate Muffin',445,false],['nougat','Choconougat muffin Pof',445,false],['apple','Filly Apple Cinnamon muffin',0,true]].map(([id,name,cents,unavailable])=>({id:'dessert-'+id,name,cents,unavailable,priceUnknown:unavailable,group:'Ihr Dessert'}));
 const tacoOptions=[...burgerExtras,...tacoDesserts,...burgerDrinks];
 const tacoPairs=[
  [150,151,'Falafel Taco',849,1499,'Tortillas, Falafel, Tahinisauce, Tomaten, Salat, eingelegte Rote und Pommes frites.','falafel'],
@@ -233,7 +233,7 @@ const falafelDesserts=[
  ['blueberry','Blue Berry Muffin',0,true],
  ['apple-cinnamon','Filly Apple Cinnamon muffin',0,true],
  ['chocolate','Rich Chocolate Muffin',445,false],
- ['berry-donut','Filly Berry-gefüllte Donut',0,true],
+ 
  ['caramel-donut','Crispy Caramel-gefüllte Donut',399,false]
 ].map(([id,name,cents,unavailable])=>({id:'falafel-dessert-'+id,name,cents,unavailable,priceUnknown:unavailable,group:'Ihr Dessert'}));
 const falafelDrinks=[
@@ -470,6 +470,30 @@ const icedTeaItems=[
 ];
 for(const [id,n,cents,d] of icedTeaItems)catalog.push({id,n,cents,p:cents/100,d,c:'Iced Tea',img:null,verified:true,optionsPending:false});
 
+// Inhaber 2026-11-06: Artikel vom Papier-Menü ergänzt, Filly Berry als eigenes Dessert, Heiße Kaffees neu.
+const addedItems=[
+ {id:25,n:'IU Gene Burger',c:'Beef Burger',cents:1199,d:'100 g Rindfleisch & 100 g Chicken Patty, Cheddar, Salat, Gurken, rote Zwiebeln, Tomaten und IU Gene Soße.',burger:true},
+ {id:26,n:'BBQ Chik’n Burger',c:'Chicken Burger',cents:799,d:'Chicken Patty, 2 knusprige Bacon (Halal), Cheddar, Salat, Gurken, rote Zwiebeln, Tomaten und BBQ-Soße.',burger:true},
+ {id:254,n:'Chilli Cheese Sandwich',c:'Sandwiches',cents:999,d:'Rindfleisch, Chili-Cheese-Soße, Tomaten, Zwiebeln, Jalapeños und Salat.',sandwich:true},
+ {id:255,n:'Milchreis Pudding',c:'Desserts',cents:349,d:'Milchreis mit Zimt.'},
+ {id:256,n:'Apple Cinnamon Muffin',c:'Desserts',cents:449,d:'Apfel-Zimt-Muffin.'},
+ {id:257,n:'Filly Berry-gefüllte Donut',c:'Desserts',cents:399,d:'Donut mit Beerenfüllung.'},
+ {id:540,n:'Espresso',c:'Coffee',cents:299,d:'Espresso.'},
+ {id:541,n:'Double Espresso',c:'Coffee',cents:399,d:'Doppelter Espresso.'},
+ {id:542,n:'Americano',c:'Coffee',cents:440,d:'Espresso mit heißem Wasser.'},
+ {id:543,n:'Coffee Latte',c:'Coffee',cents:385,d:'Espresso mit warmer Milch.'},
+ {id:544,n:'Flat White',c:'Coffee',cents:495,d:'Espresso mit mikroschaumiger Milch.'},
+ {id:545,n:'Coffee Mocha',c:'Coffee',cents:490,d:'Espresso mit Schokoladensirup und Milch.'},
+ {id:546,n:'Choco Macchiato',c:'Coffee',cents:480,d:'Espresso mit Milchschaum und Schokoladensirup.'},
+ {id:547,n:'Caramel Macchiato',c:'Coffee',cents:480,d:'Espresso mit Milchschaum und Karamellsirup.'},
+ {id:548,n:'Hot Chocolate',c:'Coffee',cents:490,d:'Heiße Schokolade.'},
+];
+for(const a of addedItems){
+  const burgerDips=[...burgerExtras,...wingsDips.map(d=>({...d,group:'Dips'}))];
+  const dips=a.burger?burgerDips:a.sandwich?sandwichDips:undefined;
+  catalog.push({id:a.id,n:a.n,c:a.c,cents:a.cents,p:a.cents/100,d:a.d,img:null,verified:true,optionsPending:false,...(dips?{dips}:{})});
+}
+
 // ── Preise aus Loyverse (Export 2026-10-28, vom Inhaber freigegeben: alles = Loyverse) ──
 // Einzige Stelle für die Preis-Angleichung: id → Cent. Nicht erfasst: Hummus (nicht verfügbar), Falafel-Menü ("ab"-Preis),
 // Artikel mit Loyverse-Preis "variable" und Artikel ohne Treffer in Loyverse.
@@ -480,7 +504,7 @@ const loyversePrices={
  5:585, // Cheese chicken burger
  6:849, // Taco Pollo
  10:749, // Joppie Beef burger
- 11:749, // Joppie Chicken Burger
+ 11:799, // Joppie Chicken Burger
  12:599, // Crunchy Chik’n Burger
  14:1399, // XXXL Beef Burger
  15:1299, // XXXL Chik’n Burger
@@ -515,29 +539,57 @@ const loyversePrices={
  186:599, // Cheese Back-Camembert (3 Stück)
  189:549, // Chicken Pops
  198:499, // Falafel Sandwich
- 199:750, // Falafel Sandwich Extra
- 201:410, // Jalangi
+ 199:749, // Falafel Sandwich Extra
+ 201:549, // Jalangi
  206:699, // Hotdog Classic
  208:699, // Hotdog BBQ
  209:699, // Hot Dog Pommes
- 218:899, // Beef Jalo Sandwich
+ 218:1099, // Beef Jalo Sandwich
  220:1299, // Jumbo Philly Beef Sandwich
  221:899, // Crunchy Chicken Cheesy Sandwich
  222:599, // Pommes Sandwich
  223:1699, // Crispy Chicken Filet Menü
  224:699, // Crispy Chicken Filet (4 Stück)
- 227:380, // Rich Chocolate Muffin
- 228:380, // Blue Berry Muffin
- 230:215, // Crispy Caramel-gefüllte Donut
+ 227:449, // Rich Chocolate Muffin
+ 228:449, // Blue Berry Muffin
+ 230:399, // Crispy Caramel-gefüllte Donut
  202:499, // Hummus
- 232:185, // White Donut
+ 232:199, // White Donut
  266:99, // Aioli
  269:99, // Chillicheese Sauce
  270:99, // Cheese Sauce
  276:99, // Haus Sauce
  277:100, // Garlic Sauce
  279:345, // Cranberry-Moloko 0,25 l
- 508:445, // Iced Mocha
+ 508:599, // Iced Mocha
+ 13:899, // Mega Crispy Chicken Zinger (Scharf)
+ 19:799, // Chill cheese Crunchy Chicken
+ 20:799, // Chill Cheese Beef Burger
+ 30:1099, // Korean Classic Yangnyeom Wings
+ 31:1099, // Creamy Cheese Bomb Wings
+ 32:1099, // Original Korean Chili Wings
+ 33:1099, // Tokyo Teriyaki Wings
+ 34:1099, // Truffle Mayo Gourmet Wings
+ 35:1099, // Spicy Buffalo Wings (US-Style)
+ 170:499, // Double Fries
+ 171:599, // Chilli-Cheese Fries (scharf)
+ 173:599, // Joppie Fries
+ 174:799, // Beef Loaded Fries
+ 175:799, // Chick’n Loaded Fries
+ 181:599, // Crispy Shrimp Torpedo (6 Stück)
+ 184:649, // Virginia Chicken Wings BBQ (6 Stück)
+ 185:649, // Buffalo Chicken Wings (6 Stück, sehr scharf)
+ 187:1149, // Special-Mix-Box
+ 205:749, // Hotdog Cheddar Dream
+ 207:699, // Hotdog Chili (scharf)
+ 210:749, // Currywurst mit Pommes Frites
+ 214:999, // Shawarma doppelt (Fleisch)
+ 215:1199, // Shawarma Arabi Platte
+ 216:1349, // Shawarma Fleisch Arabi Platte
+ 217:799, // Falafel doppelt (vegan)
+ 233:349, // Brownie
+ 234:499, // Tiramisu cafe
+ 236:399, // Soufflé Al Cioccolato
 };
 for(const p of catalog){const c=loyversePrices[p.id];if(c!=null)Object.assign(p,{cents:c,p:c/100});}
 // Burger-Menüpreis folgt dem (versteckten) Menü-Artikel, genau wie oben bei burgerMenuPairs.

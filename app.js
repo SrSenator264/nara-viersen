@@ -157,7 +157,7 @@ function setHeroSlide(index){heroIndex=(index+heroSlides.length)%heroSlides.leng
 function startHeroTimer(){if(typeof setInterval==='function'&&(typeof window==='undefined'||!window.matchMedia||window.matchMedia('(prefers-reduced-motion: no-preference)').matches)){clearInterval(heroTimer);heroTimer=setInterval(()=>setHeroSlide(heroIndex+1),5000);}}
 function renderMenu(){
  const names=[...new Set(catalog.filter(x=>!x.hidden).map(x=>x.c).filter(name=>!['Angebot','Angebot 3 für 2'].includes(name)))];
- const categoryOrder=['Chicken Buckets & Deals (New)','Fried Chicken','Korean & Fusion Wings','Crispyburger Bundels','Beef Burger','Chicken Burger','Veggie Burger','Kindergerichte','French Tacos','Sandwiches','Hot Dogs','Falafel','Specials','Salate','Dips','Frappuccino Series','Desserts','Alkoholfreie Getränke'];
+ const categoryOrder=['Chicken Buckets & Deals (New)','Fried Chicken','Korean & Fusion Wings','Crispyburger Bundels','Beef Burger','Chicken Burger','Veggie Burger','Kindergerichte','French Tacos','Sandwiches','Hot Dogs','Falafel','Specials','Salate','Dips','Frappuccino Series','Desserts','Coffee','Iced Coffee','Iced Tea','Alkoholfreie Getränke'];
  names.sort((a,b)=>{const ai=categoryOrder.indexOf(a),bi=categoryOrder.indexOf(b);return (ai<0?categoryOrder.length:ai)-(bi<0?categoryOrder.length:bi);});
  $('#categories').innerHTML=names.map(x=>'<button data-category="'+x+'" aria-pressed="'+(category===x)+'">'+escapeHtml(localizedCategory(x))+'</button>').join('');
  const term=$('#menu-search').value.toLocaleLowerCase('de');
