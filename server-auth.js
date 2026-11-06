@@ -247,6 +247,8 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
       readJson(req, res, 5000, b => {
         const role = A.normalizeRole(b.role); if (!role) return reply(res, 422, { error: 'Rolle ungültig.' });
         if ((role === 'OWNER' || (store.accounts[b.id]?.role === 'OWNER')) && req.naraUser.role !== 'OWNER') return reply(res, 403, { error: 'Nur der Inhaber verwaltet Inhaber-Konten.', code: 'FORBIDDEN' });
+        // gleiche Regel wie /api/auth/set-pin: ein Manager ändert nicht das Konto (PIN, Rolle, aktiv) eines ANDEREN Managers — nur der Inhaber
+        if (b.id && store.accounts[b.id] && A.MANAGERS.includes(store.accounts[b.id].role) && req.naraUser.role !== 'OWNER' && req.naraUser.id !== b.id) return reply(res, 403, { error: 'Nur der Inhaber ändert Manager-Konten.', code: 'FORBIDDEN' });
         const prevO = store.accounts[b.id];
         if (prevO && prevO.role === 'OWNER' && prevO.active !== false && (b.active === false || role !== 'OWNER') && !Object.entries(store.accounts).some(([k, x]) => k !== b.id && x.role === 'OWNER' && x.active !== false))
           return reply(res, 409, { error: 'Der letzte Inhaber kann nicht herabgestuft oder deaktiviert werden.', code: 'LAST_OWNER' });

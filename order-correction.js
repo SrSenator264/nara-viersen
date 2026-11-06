@@ -101,7 +101,11 @@ function stornoOrder(data, opts) {
   data.orders = data.orders.map(x => x.id === stored.id
     ? { ...x, status: 'STORNIERT', correctionId: correction.id, stornoAt: now, stornoReason: why, ...(newOrder ? { correctedBy: newOrder.id, correctedByCode: newOrder.displayCode } : {}) } : x);
   if (newOrder) data.orders.push(newOrder);
-  return { mode: 'STORNO', correction, payment, receipt, fiscal, newOrder };
+  // A4-Rechnung zu dieser Bestellung? → automatisch Stornorechnung (sonst bliebe eine gültige Rechnung mit USt. ohne Umsatz stehen)
+  const invBy = user ? { id: user.id || null, name: user.name || '' } : null;
+  const invoices = require('./sales-invoice.js').cancelForOrder(data, stored.id, { reason: 'Storno der Bestellung: ' + why, by: invBy, now });
+  for (const inv of invoices) data.auditEvents.push({ id: newId('audit'), type: 'SALES_INVOICE_CANCELLED', orderId: stored.id, createdAt: now, details: { invoiceId: inv.id, number: inv.number, cancellationNumber: inv.cancellationNumber, reason: inv.cancelReason, auto: true } });
+  return { mode: 'STORNO', correction, payment, receipt, fiscal, newOrder, cancelledInvoices: invoices.map(i => i.number) };
 }
 
 module.exports = { stornoOrder, blocker, buildCorrectionOrder, isTraining, isPlatformOrder, codeOf, CorrectionError, MIN_REASON, CLOSED };

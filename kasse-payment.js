@@ -89,13 +89,15 @@
       const dc = discCents(), amount = curAmount(), locked = paidBefore > 0;
       const chip = (label, on, attrs) => '<button type="button" class="np-chip' + (on ? ' on' : '') + '" ' + attrs + '>' + label + '</button>';
       const isD = (ty, v) => st.disc && st.disc.type === ty && Number(st.disc.value) === v;
+      const isMgr = () => { try { const u = window.NARA_AUTH && NARA_AUTH.user && NARA_AUTH.user(); return !!u && (u.role === 'OWNER' || u.role === 'MANAGER'); } catch (e) { return false; } };
       let h = '<h2>' + t('title') + '</h2>';
       h += '<div class="np-sum"><div><span>' + t('total') + '</span><b>' + euro(gross) + '</b></div>' + (dc ? '<div class="np-disc"><span>' + t('discount') + (st.disc.type === 'PERCENT' ? ' ' + st.disc.value + '%' : st.disc.type === 'EMPLOYEE' ? ' · ' + t('staffOk') : '') + '</span><b>−' + euro(dc) + '</b></div>' : '')
         + (paidBefore ? '<div><span>' + t('paid') + '</span><b>' + euro(paidBefore) + '</b></div>' : '') + '<div class="np-big"><span>' + (paidBefore ? t('open') : t('toPay')) + '</span><b>' + euro(remaining()) + '</b></div></div>';
       // الخصم
       h += '<fieldset class="np-row"' + (locked ? ' disabled' : '') + '><legend>' + t('discount') + '</legend>'
         + chip(t('none'), !st.disc, 'data-d="none"')
-        + [10, 12, 20].map(v => chip(v + '%', isD('PERCENT', v), 'data-d="p" data-v="' + v + '"')).join('')
+        // Kassierer: bis 10 % / 5 € (der Server prüft das auch); Inhaber/Manager sehen alle Knöpfe
+        + [10, 12, 20].filter(v => isMgr() || v <= 10).map(v => chip(v + '%', isD('PERCENT', v), 'data-d="p" data-v="' + v + '"')).join('')
         + [100, 200, 300].map(v => chip('−' + (v / 100) + ' €', isD('AMOUNT', v), 'data-d="a" data-v="' + v + '"')).join('')
         + '<span class="np-custom"><input id="np-cp" inputmode="decimal" placeholder="%" value="' + (st.disc && st.disc.type === 'PERCENT' && ![10, 12, 20].includes(Number(st.disc.value)) ? st.disc.value : '') + '"><input id="np-ce" inputmode="decimal" placeholder="€" value="' + (st.disc && st.disc.type === 'AMOUNT' && ![100, 200, 300].includes(Number(st.disc.value)) ? (st.disc.value / 100) : '') + '"></span>'
         + chip(t('staff'), st.disc && st.disc.type === 'EMPLOYEE', 'data-d="staff"')
@@ -158,6 +160,8 @@
     }
 
     async function submit() {
+      // gleiche Kennung bei erneutem Senden (Netz weg) → der Server bucht die Zahlung nicht doppelt; neue Kennung erst nach Erfolg/Fehlermeldung vom Server
+      if (!st.reqId) st.reqId = 'pr_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
       const amount = curAmount();
       if (st.split === 'items' && st.owners.some(x => x == null)) { setMsg(t('assignAll')); return; }
       if (amount <= 0) { setMsg(t('err')); return; }
@@ -165,13 +169,18 @@
       if (st.method === 'CARD') lines.push({ method: 'CARD', amountCents: amount });
       else if (st.method === 'CASH') { const g = st.given === '' ? amount : cents(st.given); if (g < amount) { setMsg(t('notEnough')); return; } lines.push({ method: 'CASH', amountCents: amount, amountReceivedCents: g }); }
       else { const c = Math.min(amount, cents(st.cashPart)); const g = st.given === '' ? c : cents(st.given); if (c > 0 && g < c) { setMsg(t('notEnough')); return; } if (c > 0) lines.push({ method: 'CASH', amountCents: c, amountReceivedCents: g }); if (amount - c > 0) lines.push({ method: 'CARD', amountCents: amount - c }); }
-      const payload = { paymentLines: lines };
+      const payload = { paymentLines: lines, paymentRequestId: st.reqId };
       if (paidBefore === 0 && st.disc) { if (st.disc.type === 'EMPLOYEE') payload.employeeDiscountCode = st.disc.employeeCode; else payload.discount = { type: st.disc.type, value: st.disc.value }; }
       if (st.split !== 'none') { payload.partial = true; payload.splitOf = st.n; payload.splitLabel = t('part') + ' ' + (st.partIdx + 1); }
       const go = d.querySelector('.np-go'); go.disabled = true;
       try {
-        if (paidBefore === 0) await ctx.send('ORDER_SYNC');
-        const res = await ctx.send('FINALIZE_PAYMENT', payload);
+        // Zweiter Versuch nach Netzfehler: NICHT zuerst ORDER_SYNC (wäre die Zahlung schon gebucht, würde die Kasse sonst eine neue Bestellungs-Nr. anlegen und doppelt kassieren)
+        const retry = st.reqSent === st.reqId; st.reqSent = st.reqId;
+        if (paidBefore === 0 && !retry) await ctx.send('ORDER_SYNC');
+        let res;
+        try { res = await ctx.send('FINALIZE_PAYMENT', payload); }
+        catch (e) { if (retry && e && e.status === 404) { await ctx.send('ORDER_SYNC'); res = await ctx.send('FINALIZE_PAYMENT', payload); } else throw e; }
+        st.reqId = null;
         if (!kitchenDone) {
           kitchenDone = true; // الدفع نجح: أي خطأ هون ما بيوقفه
           try {
@@ -189,6 +198,7 @@
         render(); setMsg(t('partDone').replace('{n}', doneN).replace('{m}', st.partIdx + 1));
       } catch (e) {
         if (String(e.message).toLowerCase().includes('abgeschlossen') || String(e.message).toLowerCase().includes('completed')) { d.close(); const soft = ctx.freshSoft ? ctx.freshSoft() : false; if (!soft) { ctx.fresh(); location.reload(); } return; }
+        if (e && e.status) st.reqId = null; // der Server hat geantwortet (nichts gebucht) → nächster Versuch ist eine neue Zahlung
         setMsg(e.message || t('err')); go.disabled = false;
       }
     }

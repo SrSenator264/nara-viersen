@@ -58,16 +58,21 @@ function handle(req, res, url, ctx) {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Length': Buffer.byteLength(body) }); res.end(body); return true;
   }
 
+  // Stornorechnung (eigene Nummer <Nummer>-S) als druckbare Seite
+  mm = /^\/api\/sales-invoices\/([^/]+)\/storno-html$/.exec(p);
+  if (mm && m === 'GET') {
+    const inv = (readAdminData().salesInvoices || []).find(i => i.id === decodeURIComponent(mm[1]));
+    if (!inv) { reply(res, 404, { error: 'Rechnung nicht gefunden.', code: 'NOT_FOUND' }); return true; }
+    let body; try { body = SI.stornoHtml(inv, { autoPrint: url.searchParams.get('print') === '1' }); } catch (e) { fail(e); return true; }
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Content-Length': Buffer.byteLength(body) }); res.end(body); return true;
+  }
+
   mm = /^\/api\/sales-invoices\/([^/]+)\/cancel$/.exec(p);
   if (mm && m === 'POST') {
     naraJsonBody(req, res, 2000, b => {
       const data = readAdminData(), inv = (data.salesInvoices || []).find(i => i.id === decodeURIComponent(mm[1]));
-      if (!inv) return reply(res, 404, { error: 'Rechnung nicht gefunden.', code: 'NOT_FOUND' });
-      if (inv.status === 'CANCELLED') return reply(res, 409, { error: 'Bereits storniert.', code: 'ALREADY_CANCELLED' });
-      const reason = String(b.reason || '').trim().slice(0, 200);
-      if (!reason) return reply(res, 400, { error: 'Grund fehlt.', code: 'REASON_REQUIRED' });
-      inv.status = 'CANCELLED'; inv.cancelledAt = new Date().toISOString(); inv.cancelledBy = by; inv.cancelReason = reason;
-      data.auditEvents.push({ id: adminId('audit'), type: 'SALES_INVOICE_CANCELLED', orderId: inv.orderId, createdAt: inv.cancelledAt, details: { invoiceId: inv.id, number: inv.number, reason, by: by && by.name } });
+      try { SI.cancel(inv, { reason: b.reason, by, now: new Date().toISOString() }); } catch (e) { return fail(e); }
+      data.auditEvents.push({ id: adminId('audit'), type: 'SALES_INVOICE_CANCELLED', orderId: inv.orderId, createdAt: inv.cancelledAt, details: { invoiceId: inv.id, number: inv.number, cancellationNumber: inv.cancellationNumber, reason: inv.cancelReason, by: by && by.name } });
       writeAdminData(data); reply(res, 200, { ok: true, invoice: inv });
     });
     return true;

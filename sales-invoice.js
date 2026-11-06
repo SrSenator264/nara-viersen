@@ -37,6 +37,11 @@ const isTip = it => /TIP/i.test(str(it && it.kind));
 function build(data, order, customerIn, opts = {}) {
   if (!order || !Array.isArray(order.cart)) throw new InvoiceError(404, 'ORDER_NOT_FOUND', 'Bestellung nicht gefunden.');
   if (order.isTest || order.training === true) throw new InvoiceError(422, 'TRAINING_ORDER', 'Für Trainings-Bestellungen gibt es keine Rechnung.');
+  // Keine Rechnung für stornierte/abgebrochene Bestellungen: eine Rechnung mit USt. ohne echten Umsatz schuldet die Steuer trotzdem (§ 14c UStG).
+  // Offene Bestellungen sind erlaubt (die Kasse druckt die Firmenrechnung vor dem Kassieren); wird die Bestellung danach geändert,
+  // abgebrochen oder storniert, storniert der Server die Rechnung automatisch (cancelForOrder).
+  if (order.status === 'STORNIERT' || order.correctedBy || order.stornoAt) throw new InvoiceError(409, 'ORDER_STORNO', 'Die Bestellung ist storniert — keine Rechnung möglich.');
+  if (order.status === 'CANCELLED') throw new InvoiceError(409, 'ORDER_CANCELLED', 'Die Bestellung wurde abgebrochen — keine Rechnung möglich.');
   const items = order.cart.filter(it => !isTip(it) && int(it.unitCents) * (finite(it.quantity) ? int(it.quantity) : 1) > 0);
   if (!items.length) throw new InvoiceError(422, 'EMPTY_ORDER', 'Die Bestellung hat keine Positionen.');
   const customer = cleanCustomer(customerIn);
@@ -68,8 +73,26 @@ function build(data, order, customerIn, opts = {}) {
   };
 }
 
+// Rechnung stornieren = Stornorechnung mit eigener Nummer (<Nummer>-S) und Bezug auf das Original; das Original bleibt unverändert im Archiv (nur Status).
+function cancel(inv, { reason, by, now }) {
+  if (!inv) throw new InvoiceError(404, 'NOT_FOUND', 'Rechnung nicht gefunden.');
+  if (inv.status === 'CANCELLED') throw new InvoiceError(409, 'ALREADY_CANCELLED', 'Bereits storniert.');
+  const why = String(reason || '').trim().slice(0, 200);
+  if (!why) throw new InvoiceError(400, 'REASON_REQUIRED', 'Grund fehlt.');
+  inv.status = 'CANCELLED'; inv.cancelledAt = now; inv.cancelledBy = by || null; inv.cancelReason = why;
+  inv.cancellationNumber = inv.number + '-S';
+  return inv;
+}
+// Bestellung wurde storniert → ihre offene Rechnung automatisch stornieren. Gibt die stornierten Rechnungen zurück.
+function cancelForOrder(data, orderId, { reason, by, now }) {
+  const out = [];
+  for (const inv of data.salesInvoices || []) if (String(inv.orderId) === String(orderId) && inv.status === 'ISSUED') out.push(cancel(inv, { reason, by, now }));
+  return out;
+}
+
 const METHOD_DE = { CASH: 'Bar', CARD: 'Karte' };
 function html(inv, opts = {}) {
+  if (opts.storno) return stornoHtml(inv, opts);
   const s = inv.seller, c = inv.customer;
   const rateTxt = l => l.mixed ? '7/19 %' : l.rate + ' %';
   const rows = inv.lines.map((l, i) => `<tr><td>${i + 1}</td><td>${esc(l.name)}</td><td class="r">${l.quantity}</td><td class="r">${eur(l.unitCents)}</td><td class="r">${rateTxt(l)}</td><td class="r">${eur(l.totalCents)}</td></tr>`).join('');
@@ -90,4 +113,18 @@ function html(inv, opts = {}) {
 ${opts.autoPrint ? '<script>window.addEventListener("load",function(){setTimeout(function(){window.print()},300)})</script>' : ''}</body></html>`;
 }
 
-module.exports = { build, html, nextNumber, sellerOf, cleanCustomer, DEFAULT_SELLER, InvoiceError, eur };
+// Stornorechnung: gleiche Positionen mit negativen Beträgen, eigene Nummer, Verweis auf die Originalrechnung
+function stornoHtml(inv, opts = {}) {
+  if (inv.status !== 'CANCELLED' || !inv.cancellationNumber) throw new InvoiceError(409, 'NOT_CANCELLED', 'Rechnung ist nicht storniert.');
+  const neu = { ...inv, number: inv.cancellationNumber, issuedAt: inv.cancelledAt, status: 'ISSUED',
+    payment: { methods: [], paidCents: 0, paid: false } };
+  let page = html(neu, { autoPrint: opts.autoPrint });
+  // Titel, Bezug und Vorzeichen anpassen (Positionen und Steuer negativ)
+  page = page.replace('<title>Rechnung ', '<title>Stornorechnung ').replace('<h1>Rechnung</h1>', '<h1>Stornorechnung</h1><p>zur Rechnung <b>' + esc(inv.number) + '</b> vom ' + dmy(inv.issuedAt) + ' · Grund: ' + esc(inv.cancelReason || '') + '</p>');
+  page = page.replace('<td>Rabatt</td><td></td><td></td><td></td><td class="r">− ', '<td>Rabatt</td><td></td><td></td><td></td><td class="r">+ ');
+  page = page.replace(/<td class="r">((?:\d{1,3}(?:\.\d{3})*|\d+),\d{2} €)<\/td>/g, (m, v) => '<td class="r">− ' + v + '</td>');
+  page = page.replace('Der Betrag ist sofort zahlbar.', 'Der Rechnungsbetrag der Originalrechnung wird hiermit storniert.');
+  return page;
+}
+
+module.exports = { build, html, stornoHtml, cancel, cancelForOrder, nextNumber, sellerOf, cleanCustomer, DEFAULT_SELLER, InvoiceError, eur };

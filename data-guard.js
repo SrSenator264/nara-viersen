@@ -67,7 +67,9 @@ async function gzipTo(src, dest) {
 }
 
 // Einmal pro Tag. Gibt { created, pruned, skipped } zurück; Fehler pro Datei landen in errors (Aufrufer alarmiert).
-async function dailyBackup(files, backupsDir, { keep = 14, now = Date.now() } = {}) {
+// Optionen: monthlyDir = Monatsarchiv (1. Backup jedes Monats, wird NIE gelöscht — Aufbewahrungspflicht Kassendaten 10 Jahre);
+//           mirrorDir = zweites Ziel (z. B. NAS-Freigabe): Tages- und Monatskopien werden dorthin gespiegelt, dort wird nichts gelöscht.
+async function dailyBackup(files, backupsDir, { keep = 14, now = Date.now(), monthlyDir = null, mirrorDir = null } = {}) {
   const day = localDay(now), dir = path.join(backupsDir, day), out = { day, created: [], pruned: [], skipped: [], errors: [] };
   fs.mkdirSync(dir, { recursive: true });
   for (const f of files) {
@@ -75,6 +77,17 @@ async function dailyBackup(files, backupsDir, { keep = 14, now = Date.now() } = 
     const dest = path.join(dir, path.basename(f) + '.gz');
     if (fs.existsSync(dest)) { out.skipped.push(path.basename(f)); continue; }
     try { await gzipTo(f, dest); out.created.push(path.basename(f)); } catch (e) { out.errors.push({ file: path.basename(f), error: e.message }); }
+  }
+  // Monatsarchiv: gibt es für diesen Monat noch keins → Kopie des heutigen (geprüften) Tages-Backups
+  const copyDir = (from, to) => { fs.mkdirSync(to, { recursive: true }); for (const f of fs.readdirSync(from)) { const src = path.join(from, f), dst = path.join(to, f); if (fs.statSync(src).isFile() && !fs.existsSync(dst)) { fs.copyFileSync(src, dst + '.tmp-' + process.pid); fs.renameSync(dst + '.tmp-' + process.pid, dst); } } };
+  const month = day.slice(0, 7);
+  if (monthlyDir) {
+    try { const m = path.join(monthlyDir, month); if (!fs.existsSync(m) || !fs.readdirSync(m).length) { copyDir(dir, m); out.monthly = month; } }
+    catch (e) { out.errors.push({ file: 'monthly ' + month, error: e.message }); }
+  }
+  if (mirrorDir) {
+    try { copyDir(dir, path.join(mirrorDir, 'daily', day)); if (monthlyDir && fs.existsSync(path.join(monthlyDir, month))) copyDir(path.join(monthlyDir, month), path.join(mirrorDir, 'monthly', month)); out.mirrored = true; }
+    catch (e) { out.errors.push({ file: 'mirror', error: 'Zweites Backup-Ziel nicht erreichbar (' + mirrorDir + '): ' + e.message }); }
   }
   const days = fs.readdirSync(backupsDir).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
   for (const d of days.slice(0, Math.max(0, days.length - keep))) { fs.rmSync(path.join(backupsDir, d), { recursive: true, force: true }); out.pruned.push(d); }

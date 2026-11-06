@@ -36,10 +36,14 @@ function rateResolver(data) {
   const drink = finite(acc.drinkVatRate) ? Number(acc.drinkVatRate) : 19;
   const milkTakeaway = finite(acc.milkDrinkTakeawayVatRate) ? Number(acc.milkDrinkTakeawayVatRate) : 7; // حطّ 19 بالإعدادات لو بدك تعطّل 7% للفرابيه
   const cats = new Map((data.categories || []).map(c => [String(c.id), c]));
-  const prods = new Map((data.products || []).map(p => [String(p.id), p]));
+  // Produkte unter ihrer id UND ihrer Katalog-id (sourceId / menuData.id): die Kasse legt Artikel als "<sourceId>-<Zeit>" in den Warenkorb,
+  // gespeichert ist das Produkt aber als "menu_<sourceId>". Ohne den zweiten Schlüssel fiel die Steuer auf den Namen zurück (Mezzo Mix → 7 %).
+  const prods = new Map();
+  for (const p of data.products || []) { prods.set(String(p.id), p); }
+  for (const p of data.products || []) for (const k of [p.sourceId, p.menuData && p.menuData.id]) if (k != null && !prods.has(String(k))) prods.set(String(k), p);
   const catName = p => {
     const c = cats.get(String(p.categoryId));
-    return [p.category, p.categoryName, p.c, c && (c.name || c.nameDe || (c.names && c.names.de))].filter(Boolean).join(' ');
+    return [p.category, p.categoryName, p.c, p.menuData && p.menuData.c, c && (c.name || c.nameDe || (c.names && c.names.de))].filter(Boolean).join(' ');
   };
   const productOf = it => prods.get(String(it.productId != null ? it.productId : String(it.id || '').replace(/-\d{10,}$/, '')));
   const rateOf = (it, order) => {
@@ -79,6 +83,21 @@ function rateResolver(data) {
     return { base, share: Math.min(1, menuDrink / total), rate: drink };
   };
   return { rateOf, splitOf, food, drink };
+}
+
+// نسبة الضريبة بتنثبّت على أصناف السلة وقت الدفع (السيرفر بيقرر، مو المتصفح):
+// - أي vatRate جاي من الكاشير بينشال وبينحسب من جديد من المنتج/التصنيف.
+// - أصناف المنيو (أكل + مشروب) ما بتاخد نسبة وحدة، بتضل بدون vatRate لحتى يضل التقسيم 7/19 شغّال.
+function stampVat(data, order) {
+  if (!order || !Array.isArray(order.cart)) return order;
+  const { rateOf, splitOf } = rateResolver(data);
+  order.cart = order.cart.map(it => {
+    if (!it || typeof it !== 'object') return it;
+    const clean = { ...it }; delete clean.vatRate;
+    if (/TIP/.test(up(clean.kind)) || splitOf(clean)) return clean;
+    return { ...clean, vatRate: rateOf(clean, order) };
+  });
+  return order;
 }
 
 // توزيع مبلغ على مفاتيح حسب أوزان (أكبر باقي) — المجموع دايماً = total بالضبط
@@ -304,4 +323,4 @@ function weekStrip(data, endDay, n = 7) {
   return out;
 }
 
-module.exports = { weekStrip, build, status, makeRecord, nextNumber, reprintAudit, rateResolver, allocate, weightsOf, isDrinkName, ClosingError };
+module.exports = { weekStrip, build, status, makeRecord, nextNumber, reprintAudit, rateResolver, stampVat, allocate, weightsOf, isDrinkName, ClosingError };

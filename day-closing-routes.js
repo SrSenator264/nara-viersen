@@ -84,7 +84,8 @@ function handle(req, res, url, ctx) {
       const data = readAdminData(), rec = (data.dayClosings || []).find(s => s && s.id === String(body.id || ''));
       if (!rec) return reply(res, 404, { error: 'Abschluss nicht gefunden.', code: 'NOT_FOUND' });
       const audit = DC.reprintAudit(data, rec, user, new Date().toISOString(), adminId), copyNumber = audit.details.copyNumber;
-      const done = r => { data.auditEvents.push(audit); writeAdminData(data); reply(res, 200, { ok: true, mode: r.mode, copyNumber, record: rec }); };
+      // nach dem Drucken (await) frisch lesen und nur das Audit anhängen — sonst würde eine alte Kopie Zahlungen überschreiben, die während des Drucks kamen
+      const done = r => { const fresh = readAdminData(); (fresh.auditEvents ||= []).push(audit); writeAdminData(fresh); reply(res, 200, { ok: true, mode: r.mode, copyNumber, record: rec }); };
       if (!ctx.printService || !ctx.printService.printClosing) return done({ mode: 'browser' });
       // أولاً الطباعة، وبعدين التدوين — إذا فشلت الطابعة ما بنحسب نسخة
       Promise.resolve(ctx.printService.printClosing(data, rec, { copyNumber })).then(done, e => reply(res, 502, { error: 'Druck fehlgeschlagen: ' + (e && e.message || e), code: 'PRINT_FAILED' }));

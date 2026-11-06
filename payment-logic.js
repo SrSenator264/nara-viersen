@@ -9,14 +9,19 @@ const grossOf = order => (order.cart || []).reduce((s, i) => s + (Number(i.unitC
 
 class PayError extends Error { constructor(status, message, code) { super(message); this.status = status; this.code = code; } }
 
+// Personalrabatt nur mit dem persönlichen Code (employeeCode oder QR-Token) — NICHT mit der internen id (die steht z. B. in der Login-Liste).
 function findEmployee(employees, code) {
   const c = String(code || '').trim().toLowerCase();
   if (!c) return null;
-  return (employees || []).find(x => x.active !== false && [x.employeeCode, x.qrToken, x.id].some(v => String(v || '').trim().toLowerCase() === c)) || null;
+  return (employees || []).find(x => x.active !== false && [x.employeeCode, x.qrToken].some(v => v && String(v).trim().toLowerCase() === c)) || null;
 }
 
+// Rabatt-Grenze für die Kasse: Kassierer bis 10 % bzw. 5 €; mehr nur Inhaber/Manager. Personalrabatt (mit Code) ist davon ausgenommen.
+const CASHIER_MAX_PERCENT = 10, CASHIER_MAX_CENTS = 500;
+const canDiscountFreely = role => role === 'OWNER' || role === 'MANAGER';
+
 // discount من المتصفح: {type:'PERCENT', value:10} | {type:'AMOUNT', value:200 (cents)} | employeeDiscountCode
-function computeDiscount(gross, payload, employees) {
+function computeDiscount(gross, payload, employees, role) {
   const code = String(payload.employeeDiscountCode || (payload.discount && payload.discount.employeeCode) || '').trim();
   if (code) {
     const e = findEmployee(employees, code);
@@ -30,11 +35,13 @@ function computeDiscount(gross, payload, employees) {
   if (type === 'PERCENT') {
     const v = Number(d.value);
     if (!(v > 0 && v <= 100)) throw new PayError(422, 'Rabatt in % muss zwischen 0 und 100 liegen.', 'BAD_DISCOUNT');
+    if (!canDiscountFreely(role) && v > CASHIER_MAX_PERCENT) throw new PayError(403, `Kassierer dürfen höchstens ${CASHIER_MAX_PERCENT} % Rabatt geben — mehr nur Inhaber/Manager.`, 'DISCOUNT_LIMIT');
     return { type: 'PERCENT', value: v, amountCents: Math.min(gross, Math.round(gross * v / 100)), reason: String(d.reason || 'Kundenrabatt').slice(0, 120) };
   }
   if (type === 'AMOUNT') {
     const v = Math.round(Number(d.value));
     if (!(Number.isInteger(v) && v > 0)) throw new PayError(422, 'Rabattbetrag ungültig.', 'BAD_DISCOUNT');
+    if (!canDiscountFreely(role) && v > CASHIER_MAX_CENTS) throw new PayError(403, `Kassierer dürfen höchstens ${(CASHIER_MAX_CENTS / 100).toFixed(2).replace('.', ',')} € Rabatt geben — mehr nur Inhaber/Manager.`, 'DISCOUNT_LIMIT');
     return { type: 'AMOUNT', value: v, amountCents: Math.min(gross, v), reason: String(d.reason || 'Kundenrabatt').slice(0, 120) };
   }
   throw new PayError(422, 'Unbekannte Rabattart.', 'BAD_DISCOUNT');
@@ -45,14 +52,15 @@ function paidSoFar(payments, orderId) {
 }
 
 // بيرجّع {payment, order, completed, remainingCents}. ما بيعدّل شي، المتّصل بيحفظ.
-function finalize({ order, payments, payload, employees, now, newId }) {
+// role: Rolle des angemeldeten Benutzers (für die Rabatt-Grenze). Ohne Rolle (alte Aufrufer/lokaler Dienst) gilt die Kassierer-Grenze.
+function finalize({ order, payments, payload, employees, now, newId, role }) {
   if (!order) throw new PayError(404, 'Bestellung nicht gefunden.');
   if (order.status === 'COMPLETED') throw new PayError(409, 'Zahlung wurde bereits abgeschlossen.', 'ALREADY_PAID');
   if (order.status === 'CANCELLED' || order.status === 'STORNIERT') throw new PayError(409, 'Bestellung ist storniert.');
   const gross = grossOf(order);
   const mine = (payments || []).filter(p => p.orderId === order.id && p.status === 'COMPLETED');
   // الخصم: إذا في دفعات قبل، الخصم تثبّت من أول دفعة
-  const discount = mine.length ? (order.billDiscount || null) : computeDiscount(gross, payload || {}, employees);
+  const discount = mine.length ? (order.billDiscount || null) : computeDiscount(gross, payload || {}, employees, role);
   const discountCents = Math.min(gross, Math.max(0, Number(discount && discount.amountCents) || 0));
   const expected = gross - discountCents;
   const already = paidSoFar(payments, order.id);
@@ -66,6 +74,7 @@ function finalize({ order, payments, payload, employees, now, newId }) {
   if (!lines.length || lines.some(l => !['CASH', 'CARD'].includes(l.method) || !Number.isInteger(l.amountCents) || l.amountCents <= 0))
     throw new PayError(422, 'Zahlungsart oder Betrag ungültig.', 'BAD_LINES');
   const amount = lines.reduce((s, l) => s + l.amountCents, 0);
+  if (payload.tipCents != null && !(Number.isInteger(payload.tipCents) && payload.tipCents >= 0)) throw new PayError(422, 'Trinkgeld ungültig.', 'BAD_TIP');
   const partial = !!payload.partial;
   if (partial ? (amount > remaining) : (amount !== remaining))
     throw new PayError(422, partial ? 'Teilbetrag ist größer als der offene Betrag.' : 'Zahlungsaufteilung muss exakt dem offenen Betrag entsprechen.', 'AMOUNT_MISMATCH');
@@ -84,4 +93,4 @@ function finalize({ order, payments, payload, employees, now, newId }) {
   return { payment, order: next, completed, remainingCents: remaining - amount, expectedCents: expected, discount };
 }
 
-module.exports = { finalize, computeDiscount, grossOf, PayError, paidSoFar };
+module.exports = { finalize, computeDiscount, grossOf, PayError, paidSoFar, CASHIER_MAX_PERCENT, CASHIER_MAX_CENTS };
