@@ -496,6 +496,8 @@ for(const a of addedItems){
 
 // Inhaber 2026-11-06: Flamin Hot Menüs (19,99 €) sind eigene Gerichte unter Beef bzw. Chicken Burger und sichtbar, nicht im versteckten Burger-Menü.
 for(const p of catalog.filter(p=>p.id===100||p.id===101))Object.assign(p,{c:p.id===100?'Beef Burger':'Chicken Burger',hidden:false,optionsPending:false,requiredGroups:[],dips:[],img:null});
+// Inhaber 2026-11-06: Falafel doppelt liegt jetzt im Falafel-Bereich, nicht bei den Sandwiches.
+Object.assign(catalog.find(p=>p.id===217),{c:'Falafel'});
 // ── Preise aus Loyverse (Export 2026-10-28, vom Inhaber freigegeben: alles = Loyverse) ──
 // Einzige Stelle für die Preis-Angleichung: id → Cent. Nicht erfasst: Hummus (nicht verfügbar), Falafel-Menü ("ab"-Preis),
 // Artikel mit Loyverse-Preis "variable" und Artikel ohne Treffer in Loyverse.
