@@ -27,7 +27,8 @@ function handle(req, res, url, ctx) {
     const day = q('day') || bizDay.today(), mode = (m0 => m0 === 'TRAINING' || m0 === 'ALL' ? m0 : 'REAL')(String(q('mode') || '').toUpperCase());
     if (!ISO.test(day)) return reply(res, 400, { error: 'Ungültiger Tag.', code: 'BAD_DAY' }), true;
     if (mode !== 'REAL' && !(user && MGR.has(user.role))) return reply(res, 403, { error: 'Keine Berechtigung.', code: 'FORBIDDEN' }), true;
-    const data = readAdminData();
+    // alter Tag (älter als 3 Monate) → aus dem Archiv mitlesen (nur lesen)
+    const data = ctx.withArchive ? ctx.withArchive(readAdminData(), day, day) : readAdminData();
     const report = DC.build(data, day, { mode, openingCents: num('opening'), countedCents: num('counted'), leaveCents: num('leave') });
     reply(res, 200, { ok: true, day, mode, report, status: mode === 'REAL' ? DC.status(data, day) : null });
     return true;

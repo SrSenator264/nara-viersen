@@ -76,7 +76,7 @@ function create({ alerts, platformStatus, dataFile, dataDir, backupsDir, guard, 
 
   async function runBackup() {
     try {
-      const r = await guard.dailyBackup(backupFiles || [dataFile], backupsDir, { keep: 14, now: now(), monthlyDir: path.join(path.dirname(backupsDir), 'backups-monthly'), mirrorDir: String(env.NARA_BACKUP_MIRROR_DIR || '').trim() || null });
+      const r = await guard.dailyBackup((typeof backupFiles === 'function' ? backupFiles() : backupFiles) || [dataFile], backupsDir, { keep: 14, now: now(), monthlyDir: path.join(path.dirname(backupsDir), 'backups-monthly'), mirrorDir: String(env.NARA_BACKUP_MIRROR_DIR || '').trim() || null });
       lastBackup = new Date(now()).toISOString();
       backupError = r.errors.length ? r.errors.map(e => `${e.file}: ${e.error}`).join('; ') : null;
       if (r.created.length) log('[NARA][BACKUP]', r.day, r.created.join(', '));

@@ -36,6 +36,7 @@ table{width:100%;border-collapse:collapse}td{padding:7px 4px;border-bottom:1px s
     mem:{de:'Arbeitsspeicher',ar:'الذاكرة',en:'Memory'},disk:{de:'Freier Speicher',ar:'المساحة الفاضية',en:'Free disk'},
     data:{de:'Datendatei',ar:'ملف البيانات',en:'Data file'},dataHint:{de:'ab 40 MB Archivierung einplanen',ar:'من 40 MB لازم أرشفة',en:'plan archiving above 40 MB'},
     backup:{de:'Tages-Backup',ar:'النسخة الاحتياطية',en:'Daily backup'},days:{de:'Tage gesichert',ar:'يوم محفوظ',en:'days stored'},last:{de:'zuletzt',ar:'آخر وحدة',en:'latest'},none:{de:'noch keins',ar:'لسا ما في',en:'none yet'},
+    arc:{de:'🗄️ Wochen-Archiv',ar:'🗄️ الأرشفة الأسبوعية',en:'🗄️ Weekly archive'},arcNever:{de:'noch nicht gelaufen (montags ab 4 Uhr)',ar:'لسا ما اشتغلت (كل اثنين بعد 4 الصبح)',en:'not run yet (Mondays after 4 am)'},arcMoved:{de:'Bestellungen verschoben',ar:'طلب انتقل للأرشيف',en:'orders moved'},arcMonths:{de:'Monate im Archiv',ar:'شهر بالأرشيف',en:'months archived'},arcHint:{de:'Ab 3 Monate alt, nur mit Tagesabschluss. Nichts wird gelöscht.',ar:'الأقدم من 3 شهور ويومها مقفّل بس. ما بينمحي شي.',en:'Older than 3 months, closed days only. Nothing is deleted.'},
     bridges:{de:'Plattform-Brücken',ar:'جسور المنصات',en:'Platform bridges'},
     ok:{de:'läuft',ar:'شغّال',en:'running'},login:{de:'Login nötig',ar:'لازم تسجيل دخول',en:'login needed'},down:{de:'offline',ar:'واقف',en:'offline'},never:{de:'noch nie gestartet',ar:'لسا ما اشتغل',en:'never started'},nodata:{de:'keine Daten',ar:'ما في بيانات',en:'no data'},
     alerts:{de:'Letzte Warnungen',ar:'آخر التنبيهات',en:'Recent alerts'},noAlerts:{de:'Keine Warnungen 🎉',ar:'ما في تنبيهات 🎉',en:'No alerts 🎉'},
@@ -62,6 +63,7 @@ table{width:100%;border-collapse:collapse}td{padding:7px 4px;border-bottom:1px s
       card(t('backup'),'<div class="big">'+dot(d.backups.error?'bad':d.backups.count?'':'warn')+d.backups.count+' '+esc(t('days'))+'</div><small>'+esc(t('last'))+': '+esc(d.backups.last||t('none'))+(d.backups.error?' · '+esc(d.backups.error):'')+'</small>')+
       card(t('tg'),'<div class="big">'+dot(d.telegram?'':'warn')+esc(d.telegram?t('tgOn'):'–')+'</div>'+(d.telegram?'<button id="tgtest" type="button" style="margin-top:8px;padding:8px 12px;border-radius:9px;border:1px solid var(--line);background:var(--paper);font:inherit;cursor:pointer">'+esc(t('test'))+'</button> <small id="tgres"></small>':'<small>'+esc(t('tgOff'))+'</small>'))+
       card(t('dms'),'<div class="big">'+dot(d.deadManSwitch?'':'warn')+esc(d.deadManSwitch?t('on'):t('off'))+'</div><small>'+esc(t('dmsHint'))+'</small>')+
+      (()=>{const a=d.archive||{},bad=!!a.error;return card(t('arc'),'<div class="big">'+dot(bad?'bad':'')+(a.lastRunAt?esc(new Date(a.lastRunAt).toLocaleDateString())+' · '+(a.moved||0)+' '+esc(t('arcMoved')):esc(t('arcNever')))+'</div><small>'+(bad?'⚠️ '+esc(a.error):(a.months||[]).length+' '+esc(t('arcMonths'))+' · '+esc(t('arcHint')))+'</small>')})()+
       card(t('bridges'),'<table>'+(br||'<tr><td>–</td></tr>')+'</table>',true)+
       card(t('alerts'),'<table>'+(al||'<tr><td>'+esc(t('noAlerts'))+'</td></tr>')+'</table>',true);
     $('#err').hidden=true;
