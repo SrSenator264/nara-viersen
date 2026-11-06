@@ -1,9 +1,8 @@
-// Menü-Aufpreis an der Kasse: hat der Artikel einen eigenen Menüpreis (z. B. Burger aus Loyverse),
-// zählt der Unterschied Menüpreis − Einzelpreis; sonst gilt die allgemeine Regel (Einstellung, Standard 4,50 €).
+// Menü-Aufpreis an der Kasse: fester Betrag für ALLE Artikel (Einstellung, Standard 3,00 €).
+// Nur wenn keine Einstellung vorhanden ist, zählt der eigene Menüpreis − Einzelpreis.
 (function (root) {
   'use strict';
   function naraMenuSurcharge(p, globalCents) {
-    if (p && Number.isInteger(p.menuCents) && Number.isInteger(p.cents) && p.menuCents > p.cents) return p.menuCents - p.cents;
     if (Number.isInteger(globalCents)) return globalCents;
     return Math.max(0, ((p && (p.menuCents || p.cents)) || 0) - ((p && p.cents) || 0));
   }

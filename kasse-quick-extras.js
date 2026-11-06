@@ -4,7 +4,7 @@
 //    الصنف اللي صار منيو بيطلع عليه "🍟 منيو ✓" وبيفتح نفس النافذة للتعديل.
 // 2) "➕ Extra" تحت السلة: شي مو موجود بالمنيو (بندورة زيادة، كاسة بلاستيك…): سعر بكبسة، والاسم والملاحظة والصنف كلهم اختياري،
 //    إما سطر لحاله أو ملزوق على صنف معيّن (بيطلع تحته بالمطبخ والفاتورة).
-// سعر المنيو بيجي من إعدادات السيرفر (/api/kasse/settings)، الافتراضي 4 €.
+// سعر المنيو بيجي من إعدادات السيرفر (/api/kasse/settings)، الافتراضي 3 € ثابتة لكل الأصناف.
 // قاعدة وحدة لزر المنيو على سطر السلة (بتتختبر بـ tests/kasse-menu-rules.test.js)
 //  'none' = بلا زر | 'add' = "زيد منيو" | 'edit' = "منيو ✓" (تعديل)
 function naraMenuAction(it,product,menuOK){
@@ -34,7 +34,7 @@ if(typeof module!=='undefined'&&module.exports)module.exports={naraMenuAction};
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const eur=c=>(c/100).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
   const SKIP=new Set(['DELIVERY_FEE','EXTRA']);
-  let menuCents=450;window.NARA_MENU_SURCHARGE=menuCents; // نفس سعر المنيو لكل الأصناف (من الإعدادات)
+  let menuCents=300;window.NARA_MENU_SURCHARGE=menuCents; // نفس سعر المنيو لكل الأصناف (من الإعدادات)
   fetch('/api/kasse/settings',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Number.isInteger(j.menuSurchargeCents)){menuCents=j.menuSurchargeCents;window.NARA_MENU_SURCHARGE=menuCents;decorate()}}).catch(()=>{});
 
   const productOf=it=>{const list=(typeof catalog!=='undefined'&&Array.isArray(catalog))?catalog:[];const pid=String(it.id||'').replace(/-\d+$/,'');return list.find(p=>p.id===pid)||list.find(p=>p.n===it.name)||null};
