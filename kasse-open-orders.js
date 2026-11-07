@@ -138,7 +138,8 @@
     let d0 = null;
     drawer.addEventListener('pointerdown', e => { d0 = e.clientX; });
     drawer.addEventListener('pointerup', e => { if (d0 == null) return; const dx = (e.clientX - d0) * (rtl() ? -1 : 1); d0 = null; if (dx < -70) setOpen(false); });
-    document.addEventListener('click', e => { if (isOpen && !drawer.contains(e.target) && !tab.contains(e.target)) setOpen(false); });
+    // زر 📋 بشريط الموبايل (kasse-phone.js) بيفتح اللوحة بنفسه — ما لازم الضغطة تسكّرها مباشرة
+    document.addEventListener('click', e => { if (isOpen && !drawer.contains(e.target) && !tab.contains(e.target) && !e.target.closest('#km-oo')) setOpen(false); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
     drawer.addEventListener('click', e => {
       if (e.target.closest('.oo-x')) { setOpen(false); return; }

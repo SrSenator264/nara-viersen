@@ -100,6 +100,12 @@ test('open-orders drawer: refreshes on open, polls every 5 s while open, pulses 
   assert.match(j, /classList\.add\('pulse'\)/);
 });
 
+test('phone: the 📋 button opens the drawer and the outside-click guard does not close it right away', () => {
+  const j = read('kasse-open-orders.js');
+  assert.match(j, /!e\.target\.closest\('#km-oo'\)/);
+  assert.match(read('kasse-phone.js'), /id="km-oo"/);
+});
+
 test('cards: dine-in/pickup never show the driver stage; served state keeps type for wording', () => {
   const r = cards([{ id: 'l', type: 'local', table: '3', cart: [item(849)] }, { id: 'd', type: 'delivery', cart: [item(500)] }],
     { l: { kitchen: true, kitchenStatus: 'PICKED_UP' }, d: { kitchen: true, kitchenStatus: 'PICKED_UP' } }, '', T);
