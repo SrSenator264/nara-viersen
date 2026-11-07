@@ -1,0 +1,173 @@
+/* kasse-mobile.css — وضع التلفون الجديد (طلب سريع بإيد وحدة). طبقة شكل بس، كلها تحت html.km.
+   html.km بينحط بـkasse.html: عرض ≤ 640px، أو ?m=1. و ?m=0 = الشكل القديم (kasse-phone.css).
+   ما بيغيّر أي id ولا منطق طلبات/دفع/طباعة. التابلت ما بيتأثر لأنو ما عندو class "km". */
+
+html.km{--km-bar:72px;--km-cat:70px;--km-safe:env(safe-area-inset-bottom,0px);--km-ink:#1c1e1a;--km-dark:#1e201c;--km-flame:#ef491d;--km-soft:#f2f4ef;--km-line:#e1e3dc}
+html.km,html.km body{max-width:100%;overflow-x:hidden}
+html.km body{overflow:hidden;-webkit-tap-highlight-color:transparent}
+html.km body button{touch-action:manipulation}
+
+/* الراس: بس شريط التنقّل (☰ / رجوع / 🏠). الباقي (طابعة، منصات…) مخفي على التلفون */
+html.km body>header{display:none!important}
+html.km body .fn-bar{min-height:40px;padding:2px 8px}
+html.km body .fn-bar .fn-who,html.km body .fn-bar .fn-find{display:none}
+html.km #flamo-night-btn,html.km #oo-tab,html.km .nara-kasse-monitor,html.km .nara-order-identity,html.km #nara-print-tools{display:none!important}
+
+/* التخطيط: المنيو بكل الشاشة، تحت: شريط الأقسام + شريط السلة */
+html.km body main{display:flex;flex-direction:column;gap:8px;height:calc(100dvh - var(--fn-bar-h,0px));padding:6px 8px calc(var(--km-bar) + var(--km-cat) + var(--km-safe) + 6px);box-sizing:border-box}
+
+/* نوع الطلب: 3 أزرار كبار */
+html.km body .order-strip{flex:none;display:flex;flex-wrap:wrap;gap:8px;padding:6px;border-radius:16px;background:#fff;box-shadow:0 1px 0 var(--km-line)}
+html.km body .order-types{display:flex;width:100%;gap:8px}
+html.km body .order-types button{flex:1 1 0;min-width:0;min-height:56px;padding:0 4px;border-radius:14px;font-size:1rem;font-weight:800;line-height:1.1;background:var(--km-soft);color:var(--km-ink);border:2px solid transparent}
+html.km body .order-types button.selected{background:var(--km-ink);color:#fff}
+html.km body:not(.km-details-open) .order-strip>:not(.order-types):not(#km-row){display:none!important}
+html.km body .order-strip .table-picker,html.km body .order-strip .open-orders,html.km body #order-hub-fields{flex:1 1 100%;min-width:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+html.km body .order-strip .table-picker[hidden]{display:none!important}
+html.km body .order-strip select,html.km body .order-strip input,html.km body .order-strip button:not(.selected):not([data-order-type]),html.km body #order-hub-fields select,html.km body #order-hub-fields input{flex:1 1 auto;min-width:0;min-height:56px;font-size:1rem;border-radius:12px}
+html.km body #order-hub-fields label{flex:1 1 100%;display:flex;flex-direction:column;gap:4px;font-size:.85rem;font-weight:700}
+
+/* السطر التاني: ملخّص الطلب ▾ · 📋 مفتوحة · 🔗/📱 · ⋯ */
+html.km body .order-strip #new-order{min-height:56px;height:auto}
+html.km #km-row{display:flex;width:100%;gap:8px}
+html.km #km-row button{min-height:56px;border:0;border-radius:12px;background:var(--km-soft);color:var(--km-ink);font:inherit;font-weight:800;font-size:.95rem;padding:0 12px;flex:none}
+html.km #km-row #km-details{flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:start}
+html.km #km-details .km-sum{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+html.km body.km-details-open #km-details .km-arr{transform:rotate(180deg)}
+html.km #km-oo b{display:inline-block;min-width:22px;padding:0 6px;margin-inline-start:4px;border-radius:999px;background:var(--km-flame);color:#fff}
+html.km #km-oo[data-n="0"]{opacity:.45}
+html.km #km-mode{position:relative}
+html.km #km-mode[data-mode="dev"]{background:#fff3d6;color:#8a4b00}
+html.km #km-mode i{position:absolute;top:6px;inset-inline-end:6px;width:9px;height:9px;border-radius:50%;background:#16a34a}
+html.km #km-mode[data-sync="off"] i{background:#dc2626}
+html.km #km-more{font-size:1.3rem!important;letter-spacing:1px}
+
+/* المنيو */
+html.km body .menu-panel{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:8px;padding:6px;border-radius:16px;height:auto;max-height:none;overflow:hidden}
+html.km body .menu-panel>.section-head{display:none}
+html.km body #menu-search{display:none;flex:none;min-height:56px;font-size:16px;padding:0 14px;border-radius:14px;width:100%;box-sizing:border-box}
+html.km body.km-search #menu-search{display:block}
+
+/* الأصناف: كروت كبار بعمودين، اسم + سعر، بلا صور ولا وصف (أسرع) */
+html.km body #products{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(92px,auto);gap:8px;padding:2px 0 10px;align-content:start}
+html.km body .product{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:8px;min-height:92px;padding:12px 12px 10px;border-radius:16px;border:2px solid var(--km-line);border-inline-start:7px solid var(--c,#999);background:#fff;color:var(--km-ink);text-align:start;box-shadow:none;transform:none}
+html.km body .product .product-image,html.km body .product .product-desc{display:none!important}
+html.km body .product .product-name{font-size:1.06rem;font-weight:800;line-height:1.2;overflow-wrap:anywhere}
+html.km body .product b{align-self:flex-start;padding:4px 12px;font-size:1.05rem;border-radius:999px}
+html.km body .product:hover{background:#fff;color:var(--km-ink);transform:none;box-shadow:none;border-color:var(--km-line)}
+html.km body .product:hover b{background:color-mix(in srgb,var(--c,#888) 14%,#fff);color:var(--c,var(--km-ink))}
+html.km body .product:active,html.km body .product.km-hit{background:var(--c,var(--km-ink));border-color:var(--c,var(--km-ink));color:#fff;transform:scale(.97)}
+html.km body .product.km-in{border-color:var(--c,var(--km-ink));background:color-mix(in srgb,var(--c,#888) 9%,#fff)}
+html.km .km-q{position:absolute;top:-7px;inset-inline-end:-5px;min-width:30px;height:30px;padding:0 8px;box-sizing:border-box;border-radius:999px;background:var(--km-flame);color:#fff;font-style:normal;font-weight:900;font-size:1rem;display:grid;place-items:center;box-shadow:0 2px 6px #0003}
+
+/* شريط الأقسام تحت (للإبهام) */
+html.km #km-catbar{position:fixed;inset-inline:0;bottom:calc(var(--km-bar) + var(--km-safe));z-index:40;height:var(--km-cat);display:flex;align-items:center;gap:8px;padding:6px 8px;box-sizing:border-box;background:#f7f8f4;border-top:1px solid var(--km-line)}
+html.km #km-catbar>button{flex:none;width:56px;height:56px;border:0;border-radius:14px;background:var(--km-ink);color:#fff;font-size:1.35rem}
+html.km #km-catbar>#km-find{background:#fff;color:var(--km-ink);border:2px solid var(--km-line)}
+html.km body.km-search #km-catbar>#km-find{background:var(--km-flame);color:#fff;border-color:var(--km-flame)}
+html.km body #km-catbar #categories{flex:1 1 auto;min-width:0;display:flex;flex-direction:row;gap:8px;margin:0;padding:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-behavior:smooth}
+html.km body #km-catbar #categories::-webkit-scrollbar{display:none}
+html.km body #km-catbar .category{flex:none;min-height:56px;min-width:0;padding:0 16px;white-space:nowrap;border-radius:14px;border:0;border-bottom:5px solid var(--c,#999);font-size:1rem;font-weight:800;background:#fff;color:var(--km-ink)}
+html.km body #km-catbar .category.selected{background:var(--c,var(--km-ink));color:#fff;border-bottom-color:transparent}
+
+/* شريط السلة: 🛒 عدد · مجموع | 💶 كاش | 💳 كرت */
+html.km #km-bar{position:fixed;inset-inline:0;bottom:0;z-index:50;display:flex;gap:8px;height:calc(var(--km-bar) + var(--km-safe));padding:6px 8px calc(6px + var(--km-safe));box-sizing:border-box;background:var(--km-dark);box-shadow:0 -6px 20px #0003}
+html.km #km-bar button{border:0;border-radius:14px;font:inherit;font-weight:900;color:#fff;min-width:0}
+html.km #km-bar .km-cart{flex:1 1 44%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;background:#ffffff14}
+html.km #km-bar .km-n{min-width:32px;height:32px;padding:0 8px;box-sizing:border-box;border-radius:999px;background:var(--km-flame);display:grid;place-items:center;font-size:1.05rem}
+html.km #km-bar[data-empty="1"] .km-n{background:#ffffff33}
+html.km #km-bar .km-tot{font-size:1.3rem;font-variant-numeric:tabular-nums;direction:ltr;white-space:nowrap}
+html.km #km-bar .km-cash,html.km #km-bar .km-card,html.km #km-bar .km-cod{flex:1 1 28%;font-size:1.05rem;line-height:1.1;padding:0 6px}
+html.km #km-bar .km-cash{background:#16a34a}
+html.km #km-bar .km-card{background:#2563eb}
+html.km #km-bar .km-cod{flex:1 1 56%;background:#ff7a1a;color:#1a0d02}
+html.km #km-bar button:disabled{opacity:.35}
+html.km #km-bar button[hidden]{display:none}
+html.km #km-bar.bump .km-tot{animation:km-bump .32s ease}
+@keyframes km-bump{40%{transform:scale(1.18)}}
+
+/* السلة: صفحة كاملة بتطلع من تحت */
+html.km body .cart-panel{position:fixed;inset:var(--fn-bar-h,0px) 0 0 0;z-index:60;height:auto;max-height:none;width:100vw;max-width:100vw;border-radius:0;transform:translateY(105%);visibility:hidden;transition:transform .24s ease,visibility 0s .24s;overflow-y:auto;overflow-x:hidden;padding-bottom:var(--km-safe)}
+html.km body.km-cart-open .cart-panel{transform:none;visibility:visible;transition:transform .24s ease}
+html.km body.km-cart-open #km-bar,html.km body.km-cart-open #km-catbar{visibility:hidden}
+html.km #km-close{order:0;flex:none;min-height:56px;margin:8px 10px 0;border:0;border-radius:14px;background:#ffffff1a;color:#fff;font:inherit;font-size:1.05rem;font-weight:800}
+html.km body .cart-panel .cart-item{padding:12px 10px}
+html.km body .cart-panel .cart-controls{display:flex;flex-wrap:wrap;gap:8px}
+html.km body .cart-panel .cart-controls button{min-width:56px;min-height:56px;font-size:1.15rem;border-radius:14px}
+html.km body .cart-panel .cart-controls b{min-width:34px;font-size:1.25rem;text-align:center;align-self:center}
+html.km body .cart-panel #total{font-size:2rem}
+html.km body .cart-panel .pay-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+html.km body .cart-panel .pay-actions #cash,html.km body .cart-panel .pay-actions #card{min-height:68px;font-size:1.2rem}
+html.km body .cart-panel .pay-actions .secondary:not(#cash):not(#card),html.km body .cart-panel #qx-extra,html.km body .cart-panel .qx-menu,html.km body .cart-panel #dl-chip,html.km body .cart-panel .ghost,html.km body .cart-panel #cod-btn,html.km body .cart-panel #cod-now{min-height:56px}
+html.km body .cart-panel input,html.km body .cart-panel textarea,html.km body .cart-panel select{max-width:100%;font-size:16px}
+html.km body #message{position:fixed;top:auto;bottom:calc(var(--km-bar) + var(--km-cat) + var(--km-safe) + 8px);inset-inline:8px;transform:none;max-width:none;text-align:center;z-index:9500;pointer-events:none}
+html.km body.km-cart-open #message{bottom:auto;top:calc(var(--fn-bar-h,0px) + 72px)}
+html.km body .cart-panel #cart{flex:none;max-height:none;overflow:visible;min-height:0}
+html.km body #message:empty{display:none}
+
+/* بيانات التوصيل وأي حقول: ملء الشاشة وعمود واحد. فوق السلة لأنها بتنفتح منها */
+html.km body .delivery-card{z-index:70}html.km #dl-scrim{z-index:65}html.km #qx-modal{z-index:80}
+html.km body .delivery-card{width:100vw;max-width:100vw;border-radius:0;padding:12px 14px 24px;box-sizing:border-box}
+html.km body .delivery-grid{grid-template-columns:1fr!important}
+html.km body .delivery-card input,html.km body .delivery-card textarea{font-size:16px;min-height:52px}
+html.km body .delivery-card button{min-height:56px}
+
+/* نافذة الصنف: ملء الشاشة، مربعات وأزرار أكبر */
+html.km #npd{padding:0;align-items:stretch}
+html.km #npd .npd-card{width:100%;max-height:100dvh;height:100dvh;border-radius:0}
+html.km #npd .npd-x{width:56px;height:56px}
+html.km #npd .npd-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+html.km #npd .npd-tile{min-height:72px}
+html.km #npd .npd-tile .n{font-size:1rem}
+html.km #npd .npd-seg button{min-height:80px}
+html.km #npd .npd-chips button,html.km #npd .npd-tg{min-height:56px;padding:6px 14px}
+html.km #npd .npd-note{height:56px;font-size:16px}
+html.km #npd .npd-foot{padding:10px 10px calc(10px + var(--km-safe))}
+html.km #npd .npd-qty button{width:56px;height:64px}
+html.km #npd .npd-go{min-height:64px;font-size:1.15rem}
+
+/* شاشة الدفع: المبلغ + كاش/كرت + زر الدفع كبار فوق. الخصم والتقسيم مطويين تحت «⋯ أكتر» (بس عرض — المنطق بـkasse-payment.js) */
+html.km #np-dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;border-radius:0;padding:12px 12px calc(12px + var(--km-safe));box-sizing:border-box;display:flex;flex-direction:column;gap:8px}
+html.km #np-dialog:not([open]){display:none}
+html.km #np-dialog h2{margin:0;font-size:1.2rem}
+html.km #np-dialog .np-sum{margin:0;grid-template-columns:repeat(2,minmax(0,1fr))}
+html.km #np-dialog .np-sum .np-big{grid-column:1/-1}
+html.km #np-dialog .np-sum .np-big b{font-size:2.1rem}
+html.km #np-dialog:not(.km-more) .np-sum>div:not(.np-big):not(.np-disc){display:none}
+html.km #np-dialog:not(.km-more) .np-row,html.km #np-dialog:not(.km-more) .np-items,html.km #np-dialog:not(.km-more) .np-parts{display:none}
+html.km #np-dialog .np-pay{order:2;padding:10px}
+html.km #np-dialog .np-amount{display:none}
+html.km #np-dialog .np-methods .np-chip{min-height:64px;font-size:1.15rem}
+html.km #np-dialog:not(.km-more) .np-methods [data-m="MIXED"]{display:none}
+html.km #np-dialog .np-quick .np-chip{flex:1 1 0;min-width:0;min-height:56px;padding:0 4px}
+html.km #np-dialog label{flex-wrap:wrap}
+html.km #np-dialog label input,html.km #np-dialog .np-custom input,html.km #np-dialog .np-staff input{min-height:56px;font-size:16px}
+html.km #np-dialog label input{width:100%;min-height:56px;font-size:16px;box-sizing:border-box}
+html.km #np-dialog .np-chip{min-height:56px}
+html.km #np-dialog .np-p{width:56px;height:56px}
+html.km[dir=rtl] #np-dialog .np-sum b,html.km[dir=rtl] #np-dialog .np-quick .np-chip,html.km[dir=rtl] #np-dialog .np-change b,html.km[dir=rtl] #np-dialog .np-part b{direction:ltr;unicode-bidi:isolate}
+html.km #np-dialog .km-more-btn{order:3;min-height:56px;border:2px dashed #cfd6dd;border-radius:14px;background:#fff;color:#4b5560;font:inherit;font-weight:800;font-size:1rem}
+html.km #np-dialog.km-more .km-more-btn{border-style:solid;background:#f4f6f8}
+html.km #np-dialog.km-more .np-row,html.km #np-dialog.km-more .np-items,html.km #np-dialog.km-more .np-parts{order:4;margin:0}
+html.km #np-dialog .np-msg{order:5;margin:0}
+html.km #np-dialog .np-acts{order:6;margin-top:auto;position:sticky;bottom:0;background:#fff;padding-top:6px}
+html.km #np-dialog .np-acts button{min-height:68px;font-size:1.15rem}
+html.km #np-dialog .np-acts .np-cancel{flex:0 0 32%}
+
+/* لوحات «⋯» و«كل الأقسام» */
+html.km .km-sheet{position:fixed;inset:0;z-index:9100;display:flex;flex-direction:column;justify-content:flex-end;background:#10130f99}
+html.km .km-sheet[hidden]{display:none}
+html.km .km-panel{max-height:88dvh;overflow-y:auto;background:#fff;color:var(--km-ink);border-radius:22px 22px 0 0;padding:14px 12px calc(14px + var(--km-safe));display:grid;gap:10px}
+html.km .km-panel h3{margin:2px 4px 0;font-size:1.15rem}
+html.km .km-panel p{margin:0 4px;color:#5f645b;font-size:.92rem;line-height:1.4}
+html.km .km-panel .km-x{min-height:56px;border:0;border-radius:14px;background:var(--km-soft);font:inherit;font-weight:800;font-size:1.05rem;color:var(--km-ink)}
+html.km .km-langs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+html.km .km-opt{display:grid;gap:4px;min-height:64px;padding:12px 14px;border:2px solid var(--km-line);border-radius:16px;background:#fff;color:var(--km-ink);font:inherit;text-align:start}
+html.km .km-opt b{font-size:1.05rem}
+html.km .km-opt span{color:#5f645b;font-size:.9rem;line-height:1.35}
+html.km .km-opt.on{border-color:var(--km-ink);background:var(--km-ink);color:#fff}
+html.km .km-opt.on span{color:#d7dbd1}
+html.km .km-langs .km-opt{min-height:56px;text-align:center;place-items:center}
+html.km .km-catgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+html.km .km-catgrid button{min-height:68px;padding:8px 12px;border:0;border-radius:16px;border-inline-start:7px solid var(--c,#999);background:var(--km-soft);color:var(--km-ink);font:inherit;font-weight:800;font-size:1rem;text-align:start;line-height:1.2}
+html.km .km-catgrid button.on{background:var(--c,var(--km-ink));color:#fff}
