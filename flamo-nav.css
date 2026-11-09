@@ -1,6 +1,6 @@
 /* Flamo-Navigation — gleiche Farben wie die Kasse (Feuer-Orange, Papier, Tinte). */
 :root{--fn-fire:#ef491d;--fn-ink:#20231f;--fn-paper:#f8f5ea;--fn-mute:#62675f;--fn-line:#dce0d7;--fn-w:244px}
-.fn-bar,.fn-side,.fn-pal,.fn-backdrop{font:15px/1.4 Tahoma,Arial,sans-serif;color:var(--fn-ink)}
+.fn-bar,.fn-side,.fn-pal,.fn-backdrop{font:15px/1.4 FlamoAr,Tahoma,Arial,sans-serif;color:var(--fn-ink)}
 .fn-bar *,.fn-side *,.fn-pal *{box-sizing:border-box}
 
 /* Kopfleiste */
@@ -14,7 +14,7 @@ html[dir=rtl] .fn-arrow{display:inline-block;transform:scaleX(-1)}
 .fn-crumb{color:var(--fn-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fn-crumb em{font-style:normal;opacity:.6}.fn-crumb b{color:var(--fn-ink)}
 .fn-sp{flex:1}
 .fn-find{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:99px;background:var(--fn-paper)!important;border:1px solid var(--fn-line)!important;color:var(--fn-mute)!important}
-.fn-find kbd{font:12px Arial;background:#fff;border:1px solid var(--fn-line);border-radius:5px;padding:1px 6px}
+.fn-find kbd{font:12px FlamoAr,Arial;background:#fff;border:1px solid var(--fn-line);border-radius:5px;padding:1px 6px}
 .fn-status{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
 .fn-status i{width:10px;height:10px;border-radius:50%;background:#2f9e5b;box-shadow:0 0 0 3px #2f9e5b33}
 .fn-status.net i{background:#e8a317;box-shadow:0 0 0 3px #e8a31733}.fn-status.srv i{background:#d6361f;box-shadow:0 0 0 3px #d6361f33}
@@ -37,7 +37,7 @@ html{scroll-padding-top:58px}
 .fn-foot{margin-top:auto;padding:12px 4px 2px;border-top:1px solid var(--fn-line);display:grid;gap:8px}
 .fn-user{display:flex;flex-direction:column;padding:0 8px}.fn-user small{color:var(--fn-mute)}
 .fn-lang{display:flex;gap:6px;padding:0 6px}
-.fn-lang button{flex:1;height:34px;border-radius:9px;border:1px solid var(--fn-line);background:#fff;font:700 14px Arial;cursor:pointer}
+.fn-lang button{flex:1;height:34px;border-radius:9px;border:1px solid var(--fn-line);background:#fff;font:700 14px FlamoAr,Arial;cursor:pointer}
 .fn-lang button.on{background:var(--fn-ink);color:#fff;border-color:var(--fn-ink)}
 .fn-out{height:36px;margin:0 6px;border-radius:9px;border:1px solid var(--fn-line);background:var(--fn-paper);font:inherit;font-weight:700;cursor:pointer}
 
@@ -59,7 +59,7 @@ html{scroll-padding-top:58px}
 /* Suche (Strg+K) */
 .fn-pal{position:fixed;inset:0;z-index:1000;background:#0007;display:grid;place-items:start center;padding:12vh 14px 0}
 .fn-pal-box{width:min(560px,100%);background:#fff;border-radius:16px;box-shadow:0 20px 60px #0006;overflow:hidden}
-.fn-pal-box input{width:100%;border:0;border-bottom:1px solid var(--fn-line);padding:16px 18px;font:18px Tahoma,Arial,sans-serif;outline:0}
+.fn-pal-box input{width:100%;border:0;border-bottom:1px solid var(--fn-line);padding:16px 18px;font:18px FlamoAr,Tahoma,Arial,sans-serif;outline:0}
 .fn-pal-list{max-height:52vh;overflow:auto;padding:8px}
 .fn-none{padding:18px;color:var(--fn-mute);text-align:center}
 @media print{.fn-bar,.fn-side,.fn-backdrop,.fn-pal{display:none!important}body.fn-full{padding:0}}

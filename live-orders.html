@@ -9,7 +9,7 @@
 <style>
 :root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--warn:#e0a100;--late:#d1342f;--chip:#e9f4fb}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 "Segoe UI",system-ui,Arial,sans-serif}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 FlamoAr,"Segoe UI",system-ui,Arial,sans-serif}
 button{font:inherit;cursor:pointer}
 header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;height:64px;padding:0 24px;background:#fff;box-shadow:0 1px 0 var(--line)}
 .brand{display:flex;align-items:center;gap:8px;color:var(--brand);font-weight:800;font-size:1.35rem;text-decoration:none}
@@ -105,7 +105,7 @@ main{max-width:1320px;margin:0 auto;padding:22px 24px;display:grid;grid-template
 .rsum{margin-top:18px;border-top:2px solid var(--ink);padding-top:10px}.rsum div{display:flex;justify-content:space-between;padding:3px 0}.rsum .big{font-size:1.25rem;font-weight:800}
 @media (max-width:900px){main{grid-template-columns:1fr;padding:14px}.cards{max-height:none}header{padding:0 14px}}
 </style>
-<link rel="stylesheet" href="flamo-night.css?v=20261031b"><script src="flamo-night.js?v=20261031b"></script></head>
+<link rel="stylesheet" href="flamo-night.css?v=20261031b"><script src="flamo-night.js?v=20261031b"></script><link rel="stylesheet" href="flamo-font.css?v=20261109a"></head>
 <body>
 <header>
   <a class="brand" href="kasse.html"><i>🍴</i> Live Orders</a>
@@ -317,7 +317,7 @@ function printOrder(o){
   // السيرفر بيبعتها للطابعة المختارة (Epson لطلبات المنصات)، أو نافذة المتصفح
   if(R&&R.print){R.print(o,'customer');return}
   if(R&&R.ready){sheet.innerHTML=R.html(o,'customer')}
-  else sheet.innerHTML='<div style="font:14px Arial"><b>#'+esc(code(o))+'</b><br>'+'<bdi>'+esc(title(o))+'</bdi>'+'<br>'+'<bdi>'+esc(custName(o))+'</bdi>'+'</div>';
+  else sheet.innerHTML='<div style="font:14px FlamoAr,Arial"><b>#'+esc(code(o))+'</b><br>'+'<bdi>'+esc(title(o))+'</bdi>'+'<br>'+'<bdi>'+esc(custName(o))+'</bdi>'+'</div>';
   setTimeout(()=>window.print(),50);
 }
 
@@ -370,7 +370,7 @@ function drawRep(){const [y,m,d]=$('#rday').value.split('-').map(Number);$('#rbo
   document.querySelectorAll('[data-tst]').forEach(b=>b.onclick=async()=>{if(!confirm(t('markTestQ')))return;b.disabled=true;try{const r=await fetch('/api/orders/mark-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:b.dataset.tst})});if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||r.status);const o=all.find(x=>String(x.id)===b.dataset.tst);if(o)o.isTest=true;drawRep();render()}catch(e){b.disabled=false;alert(e.message)}})}
 let isMgr=false;fetch('/api/auth/me',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{const role=j&&(j.user||j).role;isMgr=['OWNER','MANAGER'].includes(role)}).catch(()=>{});
 $('#rday').onchange=drawRep;$('#rclose').onclick=()=>{$('#rep').hidden=true};
-$('#rprint').onclick=()=>{const sh=$('#nara-print-sheet');sh.innerHTML='<div style="font:12px Arial"><b style="font-size:16px">'+esc(t('report'))+' '+esc($('#rday').value)+'</b>'+$('#rbody').innerHTML+'</div>';setTimeout(()=>window.print(),50)};
+$('#rprint').onclick=()=>{const sh=$('#nara-print-sheet');sh.innerHTML='<div style="font:12px FlamoAr,Arial"><b style="font-size:16px">'+esc(t('report'))+' '+esc($('#rday').value)+'</b>'+$('#rbody').innerHTML+'</div>';setTimeout(()=>window.print(),50)};
 // الأرشيف: كل طلبات المنصات بيوم شغل معيّن (بس للقراءة)
 function openArc(){const a=$('#aday');if(!a.value)a.value=isoDay(Date.now()-DAY_START_H*3600000-86400000);drawArc();$('#arc').hidden=false;wantFull().then(drawArc)}
 function drawArc(){

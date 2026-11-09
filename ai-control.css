@@ -32,8 +32,8 @@ body{background:var(--ai-bg)}
 @media(max-width:650px){.page{padding:0 10px}.manager-messages{height:430px;padding:14px}.manager-compose{flex-wrap:wrap}.manager-tools{order:2;width:100%}.manager-compose button{flex:1}.manager-bubble{max-width:92%}}
 
 /* AI Manager owns its typography so the restaurant landing-page styles cannot distort it. */
-body:has(#ai-manager){font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important;background:#f3f5f8!important}
-body:has(#ai-manager) h1,body:has(#ai-manager) h2,body:has(#ai-manager) h3{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important;letter-spacing:normal!important;line-height:1.25!important}
+body:has(#ai-manager){font-family:FlamoAr,system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important;background:#f3f5f8!important}
+body:has(#ai-manager) h1,body:has(#ai-manager) h2,body:has(#ai-manager) h3{font-family:FlamoAr,system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important;letter-spacing:normal!important;line-height:1.25!important}
 body:has(#ai-manager) .topbar h1{font-size:1.25rem!important;font-weight:700!important;white-space:nowrap}
 body:has(#ai-manager) .page>section:first-child h2{font-size:1.8rem!important}
 body:has(#ai-manager) #manager-chat>h2{font-size:1.45rem!important}

@@ -22,7 +22,7 @@
     close();
     box = document.createElement('div');
     box.dataset.k = key;
-    box.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:#0007;display:flex;align-items:center;justify-content:center;padding:16px;font-family:system-ui,Segoe UI,Arial,sans-serif';
+    box.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:#0007;display:flex;align-items:center;justify-content:center;padding:16px;font-family:FlamoAr,system-ui,Segoe UI,Arial,sans-serif';
     const card = document.createElement('div');
     card.style.cssText = 'background:#fff;color:#1d2327;border-radius:20px;padding:20px;max-width:420px;width:100%;box-shadow:0 10px 40px #0005';
     for (const id of items) {

@@ -1,0 +1,7 @@
+/* flamo-font.css — Cairo للنص العربي بكل البرنامج (محلي، بدون إنترنت).
+   unicode-range = العربي بس، فالألماني والإنجليزي والأرقام والإيموجي بيضلوا بخطهم. */
+@font-face{font-family:FlamoAr;src:url(fonts/cairo-600.woff) format('woff');font-weight:100 600;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF,U+200C-200F,U+060C,U+061B,U+061F}
+@font-face{font-family:FlamoAr;src:url(fonts/cairo-700.woff) format('woff');font-weight:700;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF,U+200C-200F,U+060C,U+061B,U+061F}
+@font-face{font-family:FlamoAr;src:url(fonts/cairo-800.woff) format('woff');font-weight:800 1000;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF,U+200C-200F,U+060C,U+061B,U+061F}
+/* شبكة أمان للصفحات اللي ما عندها خط خاص: الإنجليزي بيضل بالخط الافتراضي */
+html{font-family:FlamoAr,serif}

@@ -1,4 +1,4 @@
-:root{--f:#ef491d;--ink:#20231f;--p:#f8f5ea;--l:#e4e0d2;--g:#2f9e5b;--mute:#767b72;font:16px Tahoma,Arial,sans-serif;color:var(--ink);background:var(--p)}*{box-sizing:border-box}body{margin:0}
+:root{--f:#ef491d;--ink:#20231f;--p:#f8f5ea;--l:#e4e0d2;--g:#2f9e5b;--mute:#767b72;font:16px FlamoAr,Tahoma,Arial,sans-serif;color:var(--ink);background:var(--p)}*{box-sizing:border-box}body{margin:0}
 button{font:inherit;cursor:pointer;border:1px solid var(--l);border-radius:12px;padding:10px 16px;background:#fff;color:var(--ink);font-weight:700}button.pri,.btn.pri{background:var(--f);border-color:var(--f);color:#fff}
 input,textarea,select{font:inherit;padding:10px;border:1px solid #ccd2c8;border-radius:10px;background:#fff;color:var(--ink)}
 .top{display:flex;align-items:center;gap:10px;padding:12px 22px;background:#fff;border-bottom:1px solid var(--l)}.top h1{margin:0;font-size:22px}.logo{font-size:28px}.sp{flex:1}.top-actions{display:flex;gap:8px;flex-wrap:wrap}

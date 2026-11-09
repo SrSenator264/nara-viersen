@@ -9,7 +9,7 @@
 html[dir=rtl]{--t-dir:-1}
 html,body{height:100%}
 body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;background:var(--t-surface);
-  font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,Tahoma,Arial,sans-serif;
+  font-family:FlamoAr,"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,Tahoma,Arial,sans-serif;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation}
 button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .warning{flex:none;padding:3px 12px;font-size:12px;font-weight:600}

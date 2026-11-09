@@ -1,5 +1,5 @@
 /* kasse-payment.css — شاشة الدفع */
-#np-dialog{width:min(760px,96vw);max-height:94vh;border:0;border-radius:22px;padding:22px 24px;box-shadow:0 30px 80px #0006;color:#16202a;font:16px/1.4 "Segoe UI",system-ui,Arial,sans-serif;overflow:auto}
+#np-dialog{width:min(760px,96vw);max-height:94vh;border:0;border-radius:22px;padding:22px 24px;box-shadow:0 30px 80px #0006;color:#16202a;font:16px/1.4 FlamoAr,"Segoe UI",system-ui,Arial,sans-serif;overflow:auto}
 #np-dialog::backdrop{background:#17202a99;backdrop-filter:blur(3px)}
 #np-dialog h2{margin:0 0 12px;font-size:1.5rem}
 .np-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
