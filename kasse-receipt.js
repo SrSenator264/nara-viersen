@@ -61,8 +61,9 @@
   const VAT_RATES=[19,7,10.7,5.5,0];
   function vatLine(pd){
     const g=String(pd||'').split('^')[1];if(!g)return '';
-    const parts=g.split('_').map((v,i)=>{const c=Math.round(Number(v)*100),r=VAT_RATES[i];if(!c||!r)return '';return String(r).replace('.',',')+' %: '+eur(Math.round(c*r/(100+r)))}).filter(Boolean);
-    return parts.length?'<div>inkl. MwSt '+esc(parts.join(' · '))+'</div>':'';
+    // nur die Steuersätze (Pflicht nach §33 UStDV), ohne Steuerbetrag
+    const parts=g.split('_').map((v,i)=>{const c=Math.round(Number(v)*100),r=VAT_RATES[i];return c&&r?String(r).replace('.',',')+' %':''}).filter(Boolean);
+    return parts.length?'<div>inkl. '+esc(parts.join(' / '))+' MwSt</div>':'';
   }
   function tseHtml(x){
     let h='<div class="rc-tse rc-small rc-c">'+(x.type==='STORNO'?'<div><b>STORNO</b></div>':'')+vatLine(x.processData)+'<div>Beleg '+esc(x.receiptNumber)+'</div>';
