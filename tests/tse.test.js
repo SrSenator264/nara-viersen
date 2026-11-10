@@ -178,3 +178,10 @@ test('Server: USB weg → Verkauf läuft weiter als TSE_FAILED; wieder dran → 
   fs.rmSync(off);
   assert.equal((await sell('tse-back', [{ method: 'CARD', amountCents: 2000 }])).receipt.tse.status, 'SIGNED');
 });
+
+test('Server: /api/print liefert die Steuersätze je Zeile (Essen 7 %, Getränk 19 %) für den Bon', async () => {
+  const r = await call('POST', '/api/print', { orderId: 'tse-card', kind: 'customer' }, S.owner);
+  assert.equal(r.status, 200);
+  const rates = Object.fromEntries(r.json.receiptCart.map(i => [i.name, i.vatRates]));
+  assert.deepEqual(rates, { Burger: [7], Cola: [19] });
+});

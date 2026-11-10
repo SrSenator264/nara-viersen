@@ -29,11 +29,12 @@
     else if(type==='DELIVERY')method='CASH';                              // طلب توصيل مباشر: بيتحصّل عند الزبون
     const noteParts=[d.bell&&('Klingel: '+d.bell),d.extra,d.notes,o.remarks].filter((x,i,a)=>x&&a.indexOf(x)===i);
     return {
-      deliveryQrUrl:o.deliveryQrUrl||o.ownDeliveryQrUrl||'', // QR المنصة (Scoober) أولاً: السواقين بيمسحوه بتطبيق Lieferando؛ QR تبعنا fallbackdisplayCode:code,externalOrderCode:code,placedAt:o.createdAt||o.placedAt||new Date().toISOString(),platform:plat,
+      deliveryQrUrl:o.deliveryQrUrl||o.ownDeliveryQrUrl||'', // QR المنصة (Scoober) أولاً: السواقين بيمسحوه بتطبيق Lieferando؛ QR تبعنا fallback
+      displayCode:code,externalOrderCode:code,placedAt:o.createdAt||o.placedAt||new Date().toISOString(),platform:plat,
       orderType:type,table:o.table||'',customerName:d.name||'',customerPhone:d.phone||'',
       delivery:{address:[d.street,d.house].filter(Boolean).join(' '),floor:d.floor||'',postalCode:d.postal||'',city:d.city||'',notes:noteParts.join(' · ')},
       cart:items.map(i=>({quantity:Number(i.quantity)||1,name:i.name,totalCents:(Number(i.unitCents)||0)*(Number(i.quantity)||0),discountCents:Number(i.discountCents)||0,
-        options:(i.options||[]).map(x=>({name:String(x.name||'').split(' / ')[0].trim(),quantity:x.quantity||1,totalCents:isPlat?(Number(x.totalCents)||0):0})).filter(x=>x.name&&!/^einzel$/i.test(x.name)),notes:i.note||'',category:isPlat?String(i.category||''):''})),
+        options:(i.options||[]).map(x=>({name:String(x.name||'').split(' / ')[0].trim(),quantity:x.quantity||1,totalCents:isPlat?(Number(x.totalCents)||0):0})).filter(x=>x.name&&!/^einzel$/i.test(x.name)),notes:i.note||'',category:isPlat?String(i.category||''):'',vat:Array.isArray(i.vatRates)?i.vatRates:null})),
       subtotalCents:isPlat&&Number(o.subtotalCents)>0?Number(o.subtotalCents):null,fees:{delivery:feeCents||(isPlat?Number(o.fees&&o.fees.delivery)||0:0),service:Number(o.fees&&o.fees.service)||0,small:Number(o.fees&&o.fees.small)||0},verificationCode:o.verificationCode||'',discountsCents:discount,totalCents:total,cashDueCents:Number(o.cashDueCents)||total,
       payment:{method},assignment:o.assignment||null,remarks:''
     };
@@ -58,15 +59,17 @@
   function brandOf(o){o=o||{};const b=String(o.brand||o.brandName||'');if(/loco/i.test(b)||/^LOCO$/i.test(String(o.station||''))||/^SIDES/i.test(String(o.source||'')))return 'LOCO CHICKEN';if(/smash/i.test(b))return 'JUST SMASHED';return 'IU GENE'}
   // Kassenbon = Kleinbetragsrechnung (§33 UStDV): kurz halten. MwSt je Satz als eine Zeile, TSE-Daten nur im QR-Code (DSFinV-K).
   // Ausführliche Rechnung mit allen Angaben: A4-Rechnung über die Verkäufe-Seite.
-  const VAT_RATES=[19,7,10.7,5.5,0];
-  function vatLine(pd){
-    const g=String(pd||'').split('^')[1];if(!g)return '';
-    // nur die Steuersätze (Pflicht nach §33 UStDV), ohne Steuerbetrag
-    const parts=g.split('_').map((v,i)=>{const c=Math.round(Number(v)*100),r=VAT_RATES[i];return c&&r?String(r).replace('.',',')+' %':''}).filter(Boolean);
-    return parts.length?'<div>inkl. '+esc(parts.join(' / '))+' MwSt</div>':'';
+  // feste Buchstaben je Steuersatz (immer gleich auf jedem Bon): A = 7 %, B = 19 %
+  const VAT_LETTER={'7':'A','19':'B','10.7':'C','5.5':'D','0':'E'};
+  const letterOf=r=>VAT_LETTER[String(Number(r))]||'';
+  function vatLetters(rates){return Array.isArray(rates)?[...new Set(rates.map(letterOf).filter(Boolean))].sort().join('/'):''}
+  function vatKey(cart){
+    const set=new Set();for(const i of cart||[])if(Array.isArray(i.vat))for(const r of i.vat)if(letterOf(r))set.add(Number(r));
+    if(!set.size)return '';
+    return [...set].sort((a,b)=>letterOf(a).localeCompare(letterOf(b))).map(r=>letterOf(r)+' = '+String(r).replace('.',',')+' %').join(' · ')+' MwSt inkl.';
   }
   function tseHtml(x){
-    let h='<div class="rc-tse rc-small rc-c">'+(x.type==='STORNO'?'<div><b>STORNO</b></div>':'')+vatLine(x.processData)+'<div>Beleg '+esc(x.receiptNumber)+'</div>';
+    let h='<div class="rc-tse rc-small rc-c">'+(x.type==='STORNO'?'<div><b>STORNO</b></div>':'')+'<div>Beleg '+esc(x.receiptNumber)+'</div>';
     if(x.status!=='SIGNED')return h+'<div><b>⚠ TSE ausgefallen</b></div></div>';
     if(x.simulated)h+='<div><b>TSE-SIMULATION – kein gültiger Beleg</b></div>';
     let qr='';try{if(window.NARA_QR&&x.qr)qr='<div class="rc-qr">'+window.NARA_QR.svg(x.qr,{level:'L',quiet:1})+'</div>'}catch(e){console.warn('[NARA][TSE_QR_FAILED]',e.message)}
@@ -84,7 +87,7 @@
     // الترويسة
     // مباشر (كاشير/موقع): الشعار الأسود بالاسم. طلب منصة: كلمة Flamo صغيرة بس (اسم المنصة بالصندوق تحتها). غير هيك (Loco/Smashed): اسم البراند.
     const isPlatOrder=/^(LIEFERANDO|UBER|WOLT|LANCH)/i.test(String(r.platform||'')),own=brandOf(o)==='IU GENE';
-    rows.push((own&&!isPlatOrder?'<div class="rc-c"><img class="rc-logo" alt="Flamo" src="'+FLAMO_LOGO+'"></div>':'<div class="rc-brand'+(own?' rc-brand-sm':'')+'">'+esc(own?'Flamo':brandOf(o))+'</div>')+'<div class="rc-small rc-c">Gereonstraße 1 · 41747 Viersen</div><div class="rc-small rc-c">'+t.tel+' 02162 5013538</div>');
+    rows.push((own&&!isPlatOrder?'<div class="rc-c"><img class="rc-logo" alt="Flamo" src="'+FLAMO_LOGO+'"></div>':'<div class="rc-brand'+(own?' rc-brand-sm':'')+'">'+esc(own?'Flamo':brandOf(o))+'</div>')+'<div class="rc-small rc-c">Gereonstraße 1 · 41747 Viersen</div><div class="rc-small rc-c">'+t.tel+' 02162 5013538</div>'+(own&&!isPlatOrder&&kind!=='driver'?'<div class="rc-small rc-c">USt-IdNr. DE357658231</div>':''));
     // رقم الطلب + المنصة + الوقت
     const pb=platBox(r.platform);if(pb)rows.push(pb);
     rows.push('<div class="rc-code">'+esc(r.displayCode)+'</div>');
@@ -110,7 +113,9 @@
     let lastCat='';
     const items=r.cart.map(i=>{
       let h='';if(i.category&&i.category!==lastCat){lastCat=i.category;h+='<div class="rc-cat">'+esc(i.category)+'</div>'}
-      h+='<div class="rc-item"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span><span class="rc-price">'+(i.discountCents?'<s class="rc-old">'+eur(i.totalCents)+'</s> '+eur(i.totalCents-i.discountCents):eur(i.totalCents))+'</span></div>';
+      // حرف الضريبة جنب السعر (A = 7 %، B = 19 %)؛ منيو بنسبتين = A/B. الأسعار (vat) بيحطها السيرفر من /api/print للبيع المباشر
+      const vl=kind!=='driver'?vatLetters(i.vat):'';
+      h+='<div class="rc-item"><span class="rc-qty">'+esc(i.quantity)+'×</span><span class="rc-iname">'+esc(i.name)+'</span><span class="rc-price">'+(i.discountCents?'<s class="rc-old">'+eur(i.totalCents)+'</s> '+eur(i.totalCents-i.discountCents):eur(i.totalCents))+(vl?' <span class="rc-vl">'+esc(vl)+'</span>':'')+'</span></div>';
       (i.options||[]).forEach(op=>{h+='<div class="rc-opt"><span>+ '+(op.quantity>1?esc(op.quantity)+'× ':'')+esc(op.name)+'</span>'+(op.totalCents>0?'<span class="rc-op">+'+eur(op.totalCents)+'</span>':'')+'</div>'});
       if(i.notes)h+='<div class="rc-inote">👉 '+esc(i.notes)+'</div>';
       return h});
@@ -132,6 +137,8 @@
     else pay='<div class="rc-pay"><div class="rc-pay-l">'+t.open+'</div><div class="rc-pay-amt">'+eur(r.totalCents)+'</div></div>';
     rows.push(pay);
     if(r.verificationCode)rows.push('<div class="rc-small rc-c">'+esc(t.vcode)+': '+esc(r.verificationCode)+'</div>');
+    // Steuersätze (§ 33 UStDV): "A = 7 % · B = 19 % MwSt inkl."
+    if(kind!=='driver'){const vk=vatKey(r.cart);if(vk)rows.push('<div class="rc-small rc-c">'+esc(vk)+'</div>')}
     // TSE (KassenSichV): nur Kundenbeleg, Daten kommen vom Server (/api/print). Pflichtangaben immer auf Deutsch.
     if(kind!=='driver'&&o&&Array.isArray(o.tseReceipts))for(const x of o.tseReceipts)rows.push(tseHtml(x));
     // السائق
@@ -140,8 +147,10 @@
     // QR محلي (بدون إنترنت)
     // Lieferando: نفس QR تبعهم ("Zum Liefern scannen")؛ غير هيك QR داخلي
     const payload=r.deliveryQrUrl||('FLAMO|'+(r.platform||'')+'|'+r.displayCode);
-    let qr='';try{if(window.NARA_QR)qr='<div class="rc-qr">'+window.NARA_QR.svg(payload,{level:'M',quiet:1})+'</div>'}catch(e){console.warn('[NARA][RECEIPT_QR_FAILED]',e.message)}
-    rows.push(qr+'<div class="rc-small rc-c">'+esc(r.deliveryQrUrl?t.scanDeliver:t.scan)+'</div>'+(o&&Array.isArray(o.tseReceipts)&&o.tseReceipts.length?'':'<div class="rc-small rc-c rc-nb">'+esc(t.notBill)+'</div>')+'<div class="rc-thanks">'+esc(t.thanks)+'</div>');
+    // QR الطلب (للسواق) بس عالتوصيل وطلبات المنصات؛ البيع جوا المحل/الاستلام بدون QR (ما بيلزم، وبيضل QR الـ TSE لحاله)
+    const wantQr=isDel||!!r.deliveryQrUrl||isPlatOrder;
+    let qr='';try{if(wantQr&&window.NARA_QR)qr='<div class="rc-qr">'+window.NARA_QR.svg(payload,{level:'M',quiet:1})+'</div>'}catch(e){console.warn('[NARA][RECEIPT_QR_FAILED]',e.message)}
+    rows.push(qr+(wantQr?'<div class="rc-small rc-c">'+esc(r.deliveryQrUrl?t.scanDeliver:t.scan)+'</div>':'')+(o&&Array.isArray(o.tseReceipts)&&o.tseReceipts.length?'':'<div class="rc-small rc-c rc-nb">'+esc(t.notBill)+'</div>')+'<div class="rc-thanks">'+esc(t.thanks)+'</div>');
     return '<div class="nara-rc">'+rows.join('')+'</div>';
   }
 
@@ -246,7 +255,7 @@
     }
     if(r.error)toast(M.fail+' · '+M.browser,true);else toast(r.mode==='browser'?M.browser:M.ok,false);
     if(r.mode==='browser'){
-      if(r.tseReceipts&&o&&typeof o==='object')o={...o,tseReceipts:r.tseReceipts};
+      if(o&&typeof o==='object'&&(r.tseReceipts||r.receiptCart))o={...o,...(r.tseReceipts?{tseReceipts:r.tseReceipts}:{}),...(r.receiptCart?{cart:r.receiptCart}:{})};
       let sheet=document.getElementById('nara-print-sheet');
       if(!sheet){sheet=document.createElement('section');sheet.id='nara-print-sheet';document.body.appendChild(sheet)}
       sheet.innerHTML=kind==='kitchen'?kitchenHtml(o):(html(o,kind==='driver'?'driver':'customer')+(r.promo?'<div style="break-before:page;page-break-before:always"></div>'+promoHtml(o):''));

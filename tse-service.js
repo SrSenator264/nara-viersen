@@ -31,6 +31,19 @@ function vatSplit(data, order, amountCents) {
   return amountCents < 0 ? out.map(c => -c) : out;
 }
 
+// Steuersatz je Warenkorb-Zeile für den Kassenbon (A = 7 %, B = 19 %): Menü (Essen + Getränk) hat zwei Sätze.
+// Rein für die Anzeige; die Steuer-Wahrheit bleibt vatSplit/day-closing. Trinkgeld-Zeilen bekommen keinen Satz.
+function annotateRates(data, order) {
+  if (!order || !Array.isArray(order.cart)) return order;
+  const { rateOf, splitOf } = DC.rateResolver(data || {});
+  const cart = order.cart.map(it => {
+    if (!it || typeof it !== 'object' || /TIP/.test(up(it.kind))) return it;
+    const sp = splitOf(it), r = Number(rateOf(it, order));
+    return { ...it, vatRates: sp ? [r, Number(sp.rate)] : [r] };
+  });
+  return { ...order, cart };
+}
+
 function paymentPart(payment) {
   const lines = Array.isArray(payment.paymentLines) && payment.paymentLines.length ? payment.paymentLines : [{ method: payment.method, amountCents: payment.amountCents }];
   let bar = 0, unbar = 0;
@@ -146,4 +159,4 @@ function create({ env = process.env, alerts = null, dataDir = path.join(__dirnam
   return { mode, active, clientId, provider: () => (driver ? driver.provider : null), sign, recover, status, health };
 }
 
-module.exports = { create, processDataOf, vatSplit, paymentPart, qrOf, summaryOf, applyResult, failPending, receiptsTseOf, PROCESS_TYPE, fmt };
+module.exports = { create, annotateRates, processDataOf, vatSplit, paymentPart, qrOf, summaryOf, applyResult, failPending, receiptsTseOf, PROCESS_TYPE, fmt };

@@ -55,3 +55,4 @@
 .nara-rc .rc-brand.rc-brand-sm{font-size:16px;letter-spacing:.04em}
 /* TSE-Block auf dem Kundenbeleg (KassenSichV) */
 .nara-rc .rc-tse{border-top:1px dashed #000;margin-top:8px;padding-top:6px;word-break:break-all;overflow-wrap:anywhere}
+.nara-rc .rc-vl{font-size:11px;font-weight:700;margin-left:3px}
