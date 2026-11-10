@@ -52,8 +52,8 @@ function qrOf(t) {
 }
 
 function summaryOf(f) {
-  if (f.status !== 'SIGNED') return { status: f.status, error: f.error || '', clientId: f.clientId || '' };
-  return { status: 'SIGNED', simulated: !!f.simulated, clientId: f.clientId, serial: f.tseSerialNumber, transactionNumber: f.transactionNumber,
+  if (f.status !== 'SIGNED') return { status: f.status, error: f.error || '', clientId: f.clientId || '', processData: f.processData || '' };
+  return { status: 'SIGNED', processData: f.processData || '', simulated: !!f.simulated, clientId: f.clientId, serial: f.tseSerialNumber, transactionNumber: f.transactionNumber,
     signatureCounter: f.signatureCounter, start: f.startTime, finish: f.logTime, signature: f.signature, algorithm: f.signatureAlgorithm,
     timeFormat: f.timeFormat, publicKey: f.publicKey, qr: qrOf(f) };
 }

@@ -56,15 +56,20 @@
   // Flamo-Logo (Gesicht + Name) als 1-Bit-Raster für Thermodruck; Datei: brand/flamo-logo-receipt.png
   const FLAMO_LOGO='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARgAAAB8AQAAAACa55LZAAAEeklEQVR42q2Yv27bVhTGfzy6LTkY1h1VoLX4CB4zBDD7Bn2EPELayUvhG6BDxjyChwJdO3e6QZeO7tqhZYMMngomEILr5Iqnw6VEyhIpDeEiGPp0/n7nO4fOlKOPcCrm/QkYdVOYTAHeLZujdopwQswfT8BMBpQwBn9CfeoTMM0JmHACJp6AaY9iIvpZ+g64Y5jAVBFP99VMFjph6rPjdrxMNkNVVZkz19FHAHQy9eSrhSocwcTjuVcBW05QWkBpgDhOaUm0KO1ENwQiNdUUpQUCHoopSqvWV6BhFvKJGtY1GWaC9QJej1RJgAYDbdOOzrQq5yw1ZnWmqvFwPMp7SkRvdYzWiT8V4MZ7rxFQbYEb1bgc40+W4H5EG+RRymEsHuk1KMLbgxgDWXIowN/vyiHiLUKYdWjXxeKb+yHmZ9Amd3NVJXdz1f9m2lLPBkm1c+0Hq6iA2vBmN5gWBIrKAtgywAceykcRWwQoAVwJEB8KeDWERBCwFuCZt0P7u7nXnJfAcqxZDQJlliai2FTcyW7hH2lUuWemCEgixs5K2/nLxWTnteNBhhEMHp98ratXBK0MYIEvd+zUbSPgVgQa7gAK4En68gWdNNXyEe6AmhV4DCw98MKqu9kUTHQjBmt4xiyxSN0Kfnu/LmjvFelnym3jNR9pIegqsoIgwbVdYbx2AUFAoeF5S0OGwcc+g0H2jppbuIVoIEDB4vFIvE7+XyCphtqQ9wusqnu5UsBLQ5NvpiIAPNwNFnULaydgFwAsNk3kca1lw0CM7dlQfjVcxQJFquGs18yC0sE5XwPPMQL5PvcWiewlgZcg9VZSBqOfe5QSgQwKAfgJ+Lfnlh/OvMEKGesfgbLqo0G/cUm6GoFSgIhD2Tq1g5PJAZUgfHKetmkGvA87cyaAqRLRk7e571pX7epzTdwq2PO99SIYoufRTeLnbjDRAqwd8N3OANqDt4Q/MK9u6t7YUXMnHYMPomJm2zh6t/wzZK4Av9QlJv9rGOibTSn0PkOA64uaeH0x0Bw3YBJICWS/8sklLd+yL/aeUjyXnG2p4DfV85tfCaxTMXrRraiovkDS1waBt0n67++HJbzdalqBQJ1c17FH2MwW7ltQHBaxwbfvHGp92xSpFlbOpLj83ilQ8SzFfPeSN4PlVphZzP05gHuSuS7dh4zZJoAKs+jxeQumGPTcAr8/7aexO+EFqnSTpQ+e7vTtj27wyuSvNAcOoDTvhkWnG8XeJpDtR55+n++v9qzrhfRD5Ks9phVbc9XY7kpbFEXVAzNV9i6N0N8bDLiz8+RdGM5R0gKajd5alYd5Vhe0MnXT2ksWkzdtWVNUGEs0oxjbYDyUhGIUUwSkJlY0dvwem6nOtVH1V+O3aAs/8OehVmzttKjW5IfKvLWTOceCYryEoOqXqtxomI3ZMVA2oBDMxN1rVwDcLSYwZ50ElBPxtNyoahxNS1FVN1fVJpvE1JmqunwSE7jSyNUoJlMg42w18YYqdIdNfuTd6gK4PvauF1iOv+qleD7D/0n+B/GG/02VE0oTAAAAAElFTkSuQmCC';
   function brandOf(o){o=o||{};const b=String(o.brand||o.brandName||'');if(/loco/i.test(b)||/^LOCO$/i.test(String(o.station||''))||/^SIDES/i.test(String(o.source||'')))return 'LOCO CHICKEN';if(/smash/i.test(b))return 'JUST SMASHED';return 'IU GENE'}
+  // Kassenbon = Kleinbetragsrechnung (§33 UStDV): kurz halten. MwSt je Satz als eine Zeile, TSE-Daten nur im QR-Code (DSFinV-K).
+  // Ausführliche Rechnung mit allen Angaben: A4-Rechnung über die Verkäufe-Seite.
+  const VAT_RATES=[19,7,10.7,5.5,0];
+  function vatLine(pd){
+    const g=String(pd||'').split('^')[1];if(!g)return '';
+    const parts=g.split('_').map((v,i)=>{const c=Math.round(Number(v)*100),r=VAT_RATES[i];if(!c||!r)return '';return String(r).replace('.',',')+' %: '+eur(Math.round(c*r/(100+r)))}).filter(Boolean);
+    return parts.length?'<div>inkl. MwSt '+esc(parts.join(' · '))+'</div>':'';
+  }
   function tseHtml(x){
-    const dt=v=>{try{return v?new Date(v).toLocaleString('de-DE',{timeZone:'Europe/Berlin'}):''}catch(e){return String(v||'')}};
-    const L=(k,v)=>'<div><b>'+esc(k)+':</b> '+esc(v)+'</div>';
-    let h='<div class="rc-tse rc-small">'+(x.type==='STORNO'?'<div class="rc-c"><b>STORNO</b></div>':'')+L('Beleg-Nr.',x.receiptNumber);
-    if(x.status!=='SIGNED')return h+'<div class="rc-c"><b>⚠ TSE ausgefallen – Beleg ohne Signatur</b></div></div>';
-    if(x.simulated)h+='<div class="rc-c"><b>TSE-SIMULATION – kein gültiger Kassenbeleg</b></div>';
-    h+=L('Kassen-Seriennr.',x.clientId)+L('TSE-Seriennr.',x.serial)+L('TSE-Transaktion',x.transactionNumber)+L('Signaturzähler',x.signatureCounter)+L('Start',dt(x.start))+L('Ende',dt(x.finish))+L('Signatur',x.signature);
+    let h='<div class="rc-tse rc-small rc-c">'+(x.type==='STORNO'?'<div><b>STORNO</b></div>':'')+vatLine(x.processData)+'<div>Beleg '+esc(x.receiptNumber)+'</div>';
+    if(x.status!=='SIGNED')return h+'<div><b>⚠ TSE ausgefallen</b></div></div>';
+    if(x.simulated)h+='<div><b>TSE-SIMULATION – kein gültiger Beleg</b></div>';
     let qr='';try{if(window.NARA_QR&&x.qr)qr='<div class="rc-qr">'+window.NARA_QR.svg(x.qr,{level:'L',quiet:1})+'</div>'}catch(e){console.warn('[NARA][TSE_QR_FAILED]',e.message)}
-    return h+qr+'</div>';
+    return h+qr+'<div>TSE-Daten im QR-Code</div></div>';
   }
   api.tseHtml=tseHtml;
   function html(o,kind){
@@ -135,7 +140,7 @@
     // Lieferando: نفس QR تبعهم ("Zum Liefern scannen")؛ غير هيك QR داخلي
     const payload=r.deliveryQrUrl||('FLAMO|'+(r.platform||'')+'|'+r.displayCode);
     let qr='';try{if(window.NARA_QR)qr='<div class="rc-qr">'+window.NARA_QR.svg(payload,{level:'M',quiet:1})+'</div>'}catch(e){console.warn('[NARA][RECEIPT_QR_FAILED]',e.message)}
-    rows.push(qr+'<div class="rc-small rc-c">'+esc(r.deliveryQrUrl?t.scanDeliver:t.scan)+'</div><div class="rc-small rc-c rc-nb">'+esc(t.notBill)+'</div><div class="rc-thanks">'+esc(t.thanks)+'</div>');
+    rows.push(qr+'<div class="rc-small rc-c">'+esc(r.deliveryQrUrl?t.scanDeliver:t.scan)+'</div>'+(o&&Array.isArray(o.tseReceipts)&&o.tseReceipts.length?'':'<div class="rc-small rc-c rc-nb">'+esc(t.notBill)+'</div>')+'<div class="rc-thanks">'+esc(t.thanks)+'</div>');
     return '<div class="nara-rc">'+rows.join('')+'</div>';
   }
 
