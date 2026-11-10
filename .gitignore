@@ -44,3 +44,6 @@ dist/.openai/
 
 test-results/
 playwright-report/
+
+# Swissbit-SDK (proprietär, darf NICHT auf GitHub)
+tse-sdk/
