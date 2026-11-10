@@ -128,7 +128,6 @@ const RULES = [
   ['POST', /^\/api\/delivery\/(assign|cancel|move|swap|reorder|order-pref|driver-pref)$/, CASH],
   ['POST', /^\/api\/live-orders\/stage$/, KITCH],
   ['POST', /^\/api\/live-orders\/archive-day$/, CASH],
-  ['POST', /^\/api\/tse-demo\/receipt$/, CASH],
   ['GET', /^\/api\/day-closing(\/|$)/, ACCT], // تقفيلة اليوم: عرض (المحاسب كمان)
   ['POST', /^\/api\/day-closing(\/|$)/, MANAGERS], // إنشاء تقفيلة / Nachtrag / إعادة طباعة: مالك أو مدير بس
   ['GET', /^\/api\/delivery\/(scan|route-link)$/, STAFF],
@@ -173,7 +172,7 @@ const FRONTEND_JS = new Set([
   'kasse-helpers.js', 'kasse-invoice-a4.js', 'kasse-lanch-file-preview.js', 'kasse-lanch-import.js', 'kasse-lieferando-bridge.js', 'kasse-live-orders-link.js',
   'kasse-monitor.js', 'kasse-open-orders.js', 'kasse-order-hub.js', 'kasse-payment.js', 'kasse-phone-lookup.js', 'kasse-phone.js', 'kasse-platform-sync.js', 'kasse-print-lifecycle.js',
   'kasse-print-sound.js', 'kasse-printer-panel.js', 'kasse-product-dialog.js', 'kasse-quick-extras.js', 'kasse-receipt.js',
-  'kasse-settlement.js', 'kasse-sync.js', 'kasse-touch.js', 'kasse-training.js', 'kasse-tse-demo.js', 'kasse.js',
+  'kasse-settlement.js', 'kasse-sync.js', 'kasse-touch.js', 'kasse-training.js', 'kasse.js',
   'live-orders-trend.js', 'manager-pending-actions.js', 'menu-source.js', 'menu-surcharge.js', 'nara-3d-scene.js', 'nara-auth.js', 'nara-emoji.js', 'nara-i18n.js',
   'nara-lang.js', 'nara-receipt-core.mjs', 'nara-sidebar-chef.js', 'operations/core.js', 'reports.js', 'staff.js', 'sw.js',
   'vendor/qrcode.bundle.js',
