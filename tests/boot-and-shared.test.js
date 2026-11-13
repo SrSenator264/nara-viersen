@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-boot-'));
 const port = 4900 + Math.floor(Math.random() * 400), base = `http://127.0.0.1:${port}`;
 const KEY = 'test-manager-key';
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'nara-worker-deploy-archive-backup-20261007']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'nara-worker-deploy-archive-backup-20261007']);
 const dataFile = path.join(tmp, 'data', 'nara-admin.json');
 const NOW = Date.now(), iso = d => new Date(NOW - d * 864e5).toISOString();
 const tr = require('../menu-translations.json');
@@ -45,7 +45,7 @@ test.before(async () => {
   for (let i = 0; i < 60; i++) { try { await fetch(base + '/api/health'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start:\n' + out);
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
 const get = async u => { const r = await fetch(base + u, { headers: { 'x-nara-manager-key': KEY } }); return { status: r.status, json: await r.json().catch(() => null) }; };
 
 test('boot: option library is migrated, products linked, backup written', () => {

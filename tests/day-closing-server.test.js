@@ -5,7 +5,7 @@ const fs = require('node:fs'), os = require('node:os'), path = require('node:pat
 const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-dayclose-'));
 const port = 4900 + Math.floor(Math.random() * 400), base = `http://127.0.0.1:${port}`;
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'nara-worker-deploy-archive-backup-20261007']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'nara-worker-deploy-archive-backup-20261007']);
 let proc; const S = {};
 test.before(async () => {
   fs.cpSync(root, tmp, { recursive: true, filter: s => !SKIP.has(path.basename(s)) && !/\.(backup|mvp-backup)/.test(s) });
@@ -15,7 +15,7 @@ test.before(async () => {
   for (let i = 0; i < 50; i++) { try { await fetch(base + '/api/auth/me'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start');
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
 
 async function call(method, url, body, cookie) {
   const r = await fetch(base + url, { method, redirect: 'manual', headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, body: body ? JSON.stringify(body) : undefined });

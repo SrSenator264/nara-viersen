@@ -11,7 +11,7 @@ test('Tunnel-Config: letzte Regel ist 404 (Catch-all) und hostname gesetzt', () 
   assert.match(text.trim().split('\n').pop(), /service: http_status:404$/);
   assert.ok(/hostname: app\.flamo\.co\.de/.test(text));
   assert.ok(svc.length >= 4);
-  assert.ok(!/\.json\s*$/m.test(text.replace(/credentials-file:.*\n/, '')), 'keine Schlüsseldatei außer credentials-file');
+  assert.ok(!/\.json\s*$/m.test(text.replace(/credentials-file:.*\r?\n/, '')), 'keine Schlüsseldatei außer credentials-file');
 });
 
 test('Tunnel-Config: erlaubte Pfade (Fahrer + Kunde) sind offen', () => {

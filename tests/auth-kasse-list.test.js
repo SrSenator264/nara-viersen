@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-kasse-list-'));
 const port = 4800 + Math.floor(Math.random() * 400);
 const KASSE_HOST = 'kasse.flamo.co.de', MAIL = 'me@example.com';
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'nara-worker-deploy-archive-backup-20261007']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'nara-worker-deploy-archive-backup-20261007']);
 let proc;
 
 test.before(async () => {
@@ -18,7 +18,7 @@ test.before(async () => {
   for (let i = 0; i < 50; i++) { try { await req('GET', '/api/auth/me'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start');
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
 
 // node:http statt fetch, damit der Host-Header frei gesetzt werden kann.
 function req(method, url, body, headers = {}) {

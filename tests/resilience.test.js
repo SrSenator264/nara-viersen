@@ -9,7 +9,7 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-res-'));
 const port = 4800 + Math.floor(Math.random() * 400), base = `http://127.0.0.1:${port}`;
 const dataFile = path.join(tmp, 'data', 'nara-admin.json');
 let proc, cookie = '', tg, telegramMsgs = [];
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'android-app', 'tests', 'web-prototype', 'backups']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'android-app', 'tests', 'web-prototype', 'backups']);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function up() {
@@ -51,7 +51,7 @@ test.before(async () => {
   await api('GET', '/api/kasse-state?days=1'); // erzeugt die Datendatei
   await down(); seed(DAYS); await up();
 });
-test.after(async () => { await down(); tg && tg.close(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(async () => { await down(); tg && tg.close(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
 
 test('Health: /api/health ist öffentlich und schnell; Details nur für Manager', async () => {
   const pub = await api('GET', '/api/health', null, { cookie: '' }); assert.equal(pub.status, 200); assert.equal(pub.json.ok, true); assert.ok(pub.ms < 500);

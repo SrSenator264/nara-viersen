@@ -69,7 +69,7 @@ test('run: التقفيلة، سجل المبيعات، الضريبة والز�
   const all = OA.withArchive(s.get(), dir);
   assert.equal(all.orders.length, before.orders.length); assert.equal(all.payments.length, before.payments.length);
   assert.equal(all.__archiveView, true);
-  fs.rmSync(dir, { recursive: true, force: true });
+  fs.rmSync(dir, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 });
 });
 
 test('انقطاع كهرباء بعد كتابة الأرشيف وقبل الملف الأساسي: ما في تكرار ولا ضياع', () => {
@@ -82,7 +82,7 @@ test('انقطاع كهرباء بعد كتابة الأرشيف وقبل الم
   OA.clearCache();
   const r = OA.run({ readAdminData: store.readAdminData, writeAdminData: store.writeAdminData, dir, now: NOW }); assert.equal(r.moved, 5);
   assert.equal(OA.withArchive(store.get(), dir).orders.length, before.orders.length);
-  fs.rmSync(dir, { recursive: true, force: true });
+  fs.rmSync(dir, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 });
 });
 
 test('الجدول: الاثنين بعد 4 الصبح (برلين)، مرة بالأسبوع', () => {
@@ -94,7 +94,7 @@ test('الجدول: الاثنين بعد 4 الصبح (برلين)، مرة ب�
 
 // ───────── السيرفر الحقيقي: التقرير القديم نفسه بعد الأرشفة، والمسار للمدير بس ─────────
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-arc-srv-')), port = 4300 + Math.floor(Math.random() * 300), base = `http://127.0.0.1:${port}`;
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'nara-worker-deploy-archive-backup-20261007']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'nara-worker-deploy-archive-backup-20261007']);
 let proc; const S = {};
 test.before(async () => {
   fs.cpSync(root, dir, { recursive: true, filter: s => !SKIP.has(path.basename(s)) && !/\.(backup|mvp-backup)/.test(s) });
@@ -108,7 +108,7 @@ test.before(async () => {
   for (let i = 0; i < 60; i++) { try { await fetch(base + '/api/auth/me'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start');
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(dir, { recursive: true, force: true }); });
+test.after(() => { proc && proc.kill(); fs.rmSync(dir, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
 async function call(method, url, body, cookie) {
   const r = await fetch(base + url, { method, headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const text = await r.text(); let json = null; try { json = JSON.parse(text); } catch { /* */ }

@@ -5,7 +5,7 @@ const fs = require('node:fs'), os = require('node:os'), path = require('node:pat
 const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-track-'));
 const port = 5900 + Math.floor(Math.random() * 400), base = `http://127.0.0.1:${port}`;
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'nara-worker-deploy-archive-backup-20261007']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'nara-worker-deploy-archive-backup-20261007']);
 let proc;
 async function call(method, url, body, ck) {
   const r = await fetch(base + url, { method, headers: { 'content-type': 'application/json', ...(ck ? { cookie: ck } : {}) }, body: body ? JSON.stringify(body) : undefined });
@@ -19,7 +19,7 @@ test.before(async () => {
   proc = spawn(process.execPath, ['server.js'], { cwd: tmp, env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', NARA_SERVICE_KEY: '', NARA_MANAGER_KEY: '', NARA_GEOCODE: 'off', QONTO_LOGIN: '', QONTO_SECRET: '' }, stdio: 'ignore' });
   for (let i = 0; i < 80; i++) { try { await fetch(base + '/api/auth/me'); break; } catch { await new Promise(r => setTimeout(r, 150)); } }
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
 
 test('Traccar-Token: Verwaltung nur für Chef, Meldung per Token landet in auto-plan, falsche Tokens/Koordinaten werden abgelehnt', async () => {
   // ohne Login: Token-Verwaltung gesperrt, Meldung ohne/mit falschem Token = 401 (nicht 404)

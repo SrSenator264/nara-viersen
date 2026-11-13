@@ -97,7 +97,7 @@ test('QR-Code: Aufbau nach DSFinV-K (V0;Kasse;Typ;Daten;TA;Zähler;Start;Ende;Al
 const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-tse-srv-'));
 const port = 6400 + Math.floor(Math.random() * 300), base = `http://127.0.0.1:${port}`;
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'nara-worker-deploy-archive-backup-20261007']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'nara-worker-deploy-archive-backup-20261007']);
 let proc;
 async function call(method, url, body, cookie) {
   const r = await fetch(base + url, { method, redirect: 'manual', headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, body: body ? JSON.stringify(body) : undefined });
@@ -123,7 +123,7 @@ test('Server: Start mit NARA_TSE_MODE=sim', async () => {
   for (let i = 0; i < 60; i++) { try { await fetch(base + '/api/auth/me'); break; } catch { await new Promise(r => setTimeout(r, 150)); } }
   const b = await call('POST', '/api/auth/bootstrap', { name: 'Chef', pin: '739402' }); assert.equal(b.status, 200); S.owner = b.cookie;
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); });
 
 test('Server: Barzahlung wird signiert (Transaktionsnr., Signatur, Beleg FL-…)', async () => {
   const r = await sell('tse-cash', [{ method: 'CASH', amountCents: 2000 }]);

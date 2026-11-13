@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "koffi": "^3.3.7",
     "playwright": "^1.63.0"
   },
   "scripts": {

@@ -5,7 +5,7 @@ const fs = require('node:fs'), os = require('node:os'), path = require('node:pat
 const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-door-'));
 const port = 4900 + Math.floor(Math.random() * 400), base = `http://127.0.0.1:${port}`;
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'nara-worker-deploy-archive-backup-20261007']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'nara-worker-deploy-archive-backup-20261007']);
 let proc, cookie;
 const env = off => ({ ...process.env, PORT: String(port), HOST: '127.0.0.1', NARA_SERVICE_KEY: '', NARA_MANAGER_KEY: '', NARA_GEOCODE: 'off', QONTO_LOGIN: '', QONTO_SECRET: '', ...(off ? { NARA_PAY_IBAN: '', NARA_PAY_PAYEE: '' } : { NARA_PAY_IBAN: 'DE89370400440532013000', NARA_PAY_PAYEE: 'IU GENE' }) });
 async function start(off) {
@@ -25,7 +25,7 @@ test.before(async () => {
   await start(false);
   const b = await call('POST', '/api/auth/bootstrap', { name: 'Chef', pin: '739402' }); assert.equal(b.status, 200);
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
 
 async function seed() {
   // Bestellung + Tour direkt in die Daten schreiben (Server liest bei jedem Aufruf neu)

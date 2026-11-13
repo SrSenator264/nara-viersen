@@ -32,7 +32,7 @@ test('Kasse-Host: fremde/keine Mail, fehlender Tunnel-Header oder Nicht-Loopback
 const root = path.resolve(__dirname, '..'), tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-kg-'));
 const port = 4900 + Math.floor(Math.random() * 300);
 let proc;
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'nara-worker-deploy-archive-backup-20261007']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'nara-worker-deploy-archive-backup-20261007']);
 test.before(async () => {
   fs.cpSync(root, tmp, { recursive: true, filter: s => !SKIP.has(path.basename(s)) && !/\.(backup|mvp-backup)/.test(s) });
   fs.mkdirSync(path.join(tmp, 'data'));
@@ -40,7 +40,7 @@ test.before(async () => {
   for (let i = 0; i < 60; i++) { try { await get('app.flamo.co.de', '/api/auth/me'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start');
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
 const get = (host, p, headers = {}) => new Promise((res, rej) => {
   const r = http.request({ host: '127.0.0.1', port, path: p, headers: { host, ...headers } }, x => { let b = ''; x.on('data', c => b += c); x.on('end', () => res({ status: x.statusCode, body: b })); });
   r.on('error', rej); r.end();

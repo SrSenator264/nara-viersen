@@ -69,7 +69,7 @@ test('النسخ الاحتياطي: أرشيف شهري ما بينمحي + ن�
   const blocked = path.join(d, 'file-not-dir'); fs.writeFileSync(blocked, 'x');
   const r = await G.dailyBackup([f], b, { keep: 2, now: day(10, 4), monthlyDir: m, mirrorDir: blocked });
   assert.deepEqual(r.created, ['nara-admin.json']); assert.ok(r.errors.some(e => e.file === 'mirror'));
-  fs.rmSync(d, { recursive: true, force: true });
+  fs.rmSync(d, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 });
 });
 
 // حارس: ممنوع مسار يقرا البيانات، يستنى (await)، وبعدين يكتب النسخة القديمة — هيك بتنمحي دفعات صارت بالنص
@@ -89,7 +89,7 @@ test('ما في كتابة لنسخة قديمة بعد await (smart-plan, invoi
 
 // ───────── السيرفر الحقيقي (data/ فاضي) ─────────
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-fix-')), port = 4600 + Math.floor(Math.random() * 300), base = `http://127.0.0.1:${port}`;
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'nara-worker-deploy-archive-backup-20261007']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'nara-worker-deploy-archive-backup-20261007']);
 let proc; const S = {};
 test.before(async () => {
   fs.cpSync(root, tmp, { recursive: true, filter: s => !SKIP.has(path.basename(s)) && !/\.(backup|mvp-backup)/.test(s) });
@@ -98,7 +98,7 @@ test.before(async () => {
   for (let i = 0; i < 60; i++) { try { await fetch(base + '/api/auth/me'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start');
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
 async function call(method, url, body, cookie) {
   const r = await fetch(base + url, { method, headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const text = await r.text(); let json = null; try { json = JSON.parse(text); } catch { /* html */ }

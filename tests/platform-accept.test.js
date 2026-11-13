@@ -137,7 +137,7 @@ const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-accept-'));
 const port = 4900 + Math.floor(Math.random() * 400), base = `http://127.0.0.1:${port}`;
 let proc, cookie;
-const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'nara-worker-deploy-archive-backup-20261007']);
+const SKIP = new Set(['.git', 'data', 'node_modules', 'logs', '.env', 'dist', 'tse-sdk', 'nara-worker-deploy-archive-backup-20261007']);
 async function call(method, url, body, ck) {
   const r = await fetch(base + url, { method, headers: { 'content-type': 'application/json', ...(ck ? { cookie: ck } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const text = await r.text(); let json = null; try { json = JSON.parse(text); } catch { /* kein JSON */ }
@@ -160,7 +160,7 @@ test.describe('End-to-End', () => {
     const b = await call('POST', '/api/auth/bootstrap', { name: 'Chef', pin: '739402' });
     assert.equal(b.status, 200); cookie = b.cookie;
   });
-  test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true }); });
+  test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
 
   test('ohne Anmeldung: Tablet-API gesperrt', async () => {
     assert.equal((await call('GET', '/api/platform-orders/pending')).status, 401);
