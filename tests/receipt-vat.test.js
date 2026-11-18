@@ -26,11 +26,11 @@ test('annotateRates: Menü (Burger + Getränk zum Menüpreis) hat beide Sätze 7
   assert.deepEqual(o.cart[0].vatRates, [7, 19]);
 });
 
-test('Bon vor Ort: Buchstabe je Zeile, Legende, USt-IdNr., KEIN Flamo-QR', () => {
+test('Bon vor Ort: Buchstabe je Zeile, Legende, KEIN Flamo-QR, minimale Daten (keine USt-IdNr./Tel.)', () => {
   const h = load().html(own(), 'customer');
   assert.match(h, /rc-vl">A</); assert.match(h, /rc-vl">B</);
   assert.ok(h.includes('A = 7 % · B = 19 % MwSt inkl.'));
-  assert.ok(h.includes('USt-IdNr. DE357658231'));
+  assert.ok(!h.includes('USt-IdNr')); assert.ok(!h.includes('02162'));
   assert.ok(!h.includes('data-flamo-qr')); assert.ok(!h.includes('QR-Code scannen'));
 });
 
@@ -73,4 +73,25 @@ test('Bon zeigt Bestellnummer und Datum/Uhrzeit (Ausstellungsdatum ist Pflicht, 
   assert.equal(r.displayCode, 'FLAMO-AB12CD'); assert.ok(r.placedAt); assert.equal(r.platform, 'FLAMO');
   const h = R.html(own({ displayCode: 'FLAMO-AB12CD', createdAt: '2026-11-10T17:19:00Z' }), 'customer');
   assert.ok(h.includes('FLAMO-AB12CD')); assert.match(h, /\d{2}\.\d{2}\.2026 · \d{2}:\d{2}/);
+});
+
+const tse = [{ receiptNumber: 'FL-1', status: 'SIGNED', type: 'SALE', qr: 'V0;K;...' }];
+test('Bezahlte Lieferung mit TSE: nur TSE-QR, kein Fahrer-QR, kein "Beim Kunden kassieren", Gebühr mit A', () => {
+  const R = load();
+  const h = R.html(own({ type: 'delivery', status: 'COMPLETED', delivery: { street: 'Weg' }, cart: [...cart, { kind: 'DELIVERY_FEE', name: 'Lieferkosten', unitCents: 100, quantity: 1 }], tseReceipts: tse }), 'customer');
+  assert.equal((h.match(/data-flamo-qr/g) || []).length, 1); // nur der TSE-QR (Mock)
+  assert.ok(!h.includes('Beim Kunden kassieren')); assert.ok(!h.includes('QR-Code scannen, um die Bestellung'));
+  assert.match(h, /Lieferkosten<\/span><span>[^<]*<span class="rc-vl">A</);
+  const c = R.html(own({ type: 'delivery', status: 'OPEN', delivery: { street: 'Weg' }, tseReceipts: tse }), 'customer');
+  assert.ok(!c.includes('Beim Kunden kassieren'));
+});
+
+test('Fahrer-Zettel behält den Liefer-QR', () => {
+  const h = load().html(own({ type: 'delivery', tseReceipts: tse }), 'driver');
+  assert.ok(h.includes('data-flamo-qr'));
+});
+
+test('Storno-Nachdruck: nur der STORNO-Beleg', () => {
+  const h = load().html(own({ tseReceipts: [tse[0], { receiptNumber: 'FL-2', status: 'SIGNED', type: 'STORNO', qr: 'V0;S' }] }), 'customer');
+  assert.ok(h.includes('Beleg FL-2')); assert.ok(!h.includes('Beleg FL-1'));
 });

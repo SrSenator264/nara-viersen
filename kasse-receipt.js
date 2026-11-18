@@ -79,7 +79,7 @@
   }
   api.tseHtml=tseHtml;
   function html(o,kind){
-    const r=toReceiptOrder(o,kind),t=TX[lang()]||TX.de,d=r.delivery||{},isDel=r.orderType==='DELIVERY',pm=r.payment.method;
+    const r=toReceiptOrder(o,kind),t=TX[lang()]||TX.de,d=r.delivery||{},isDel=r.orderType==='DELIVERY';let pm=r.payment.method;
     // خصم على الأصناف (عرض المنصة): السعر الأصلي مشطوب + السعر الجديد؛ والباقي من الخصم بسطر "Rabatt"
     const itemDisc=r.cart.reduce((s,i)=>s+(i.discountCents||0),0);
     const subtotal=r.subtotalCents!=null?r.subtotalCents:r.cart.reduce((s,i)=>s+i.totalCents-(i.discountCents||0),0);
@@ -89,7 +89,9 @@
     // الترويسة
     // مباشر (كاشير/موقع): الشعار الأسود بالاسم. طلب منصة: كلمة Flamo صغيرة بس (اسم المنصة بالصندوق تحتها). غير هيك (Loco/Smashed): اسم البراند.
     const isPlatOrder=/^(LIEFERANDO|UBER|WOLT|LANCH)/i.test(String(r.platform||'')),own=brandOf(o)==='IU GENE';
-    rows.push('<div class="rc-brand'+(own&&isPlatOrder?' rc-brand-sm':'')+'">'+esc(own?LEGAL_NAME:brandOf(o))+'</div>'+'<div class="rc-small rc-c">Gereonstraße 1 · 41747 Viersen</div><div class="rc-small rc-c">'+t.tel+' 02162 5013538</div>'+(own&&!isPlatOrder&&kind!=='driver'?'<div class="rc-small rc-c">USt-IdNr. DE357658231</div>':''));
+    const hasTse=kind!=='driver'&&!!o&&Array.isArray(o.tseReceipts)&&o.tseReceipts.length>0,ownBon=own&&!isPlatOrder&&kind!=='driver';
+    const stornos=hasTse?o.tseReceipts.filter(x=>x&&x.type==='STORNO'):[],tseList=hasTse?(stornos.length?[stornos[stornos.length-1]]:o.tseReceipts):[];
+    rows.push('<div class="rc-brand'+(own&&isPlatOrder?' rc-brand-sm':'')+'">'+esc(own?LEGAL_NAME:brandOf(o))+'</div>'+'<div class="rc-small rc-c">Gereonstraße 1 · 41747 Viersen</div>'+(own&&!isPlatOrder&&kind!=='driver'?'':'<div class="rc-small rc-c">'+t.tel+' 02162 5013538</div>'));
     // رقم الطلب + المنصة + الوقت
     const pb=platBox(r.platform);if(pb)rows.push(pb);
     rows.push('<div class="rc-code">'+esc(r.displayCode)+'</div>');
@@ -126,12 +128,13 @@
     let tot='<div class="rc-line2"><span>'+t.sub+'</span><span>'+eur(subtotal)+'</span></div>';
     if(r.fees&&r.fees.service)tot+='<div class="rc-line2"><span>'+t.serv+'</span><span>'+eur(r.fees.service)+'</span></div>';
     if(r.fees&&r.fees.small)tot+='<div class="rc-line2"><span>'+t.small+'</span><span>'+eur(r.fees.small)+'</span></div>';
-    if(r.fees&&r.fees.delivery)tot+='<div class="rc-line2"><span>'+t.deliv+'</span><span>'+eur(r.fees.delivery)+'</span></div>';
+    if(r.fees&&r.fees.delivery)tot+='<div class="rc-line2"><span>'+t.deliv+'</span><span>'+eur(r.fees.delivery)+(ownBon?' <span class="rc-vl">A</span>':'')+'</span></div>';
     if(restDisc)tot+='<div class="rc-line2"><span>'+t.disc+'</span><span>−'+eur(restDisc)+'</span></div>';
     tot+='<div class="rc-total"><span>'+t.total+'</span><span>'+eur(r.totalCents)+'</span></div>';
     rows.push('<div class="rc-totals">'+tot+'</div>');
     // الدفع
     let pay;
+    if(hasTse&&pm==='CASH')pm='PAID_CASH'; // TSE-Beleg existiert erst nach der Zahlung → nie "Beim Kunden kassieren"
     if(pm==='CASH')pay='<div class="rc-pay"><div class="rc-pay-l">'+t.cash+'</div><div class="rc-pay-amt">'+eur(r.cashDueCents||r.totalCents)+'</div><div class="rc-small rc-c">'+t.collect+'</div></div>';
     else if(pm==='PAID_CARD')pay='<div class="rc-pay rc-paid"><div class="rc-pay-l">✓ '+t.paidCard+'</div></div>';
     else if(pm==='PAID_CASH')pay='<div class="rc-pay rc-paid"><div class="rc-pay-l">✓ '+t.paidCash+'</div></div>';
@@ -140,9 +143,9 @@
     rows.push(pay);
     if(r.verificationCode)rows.push('<div class="rc-small rc-c">'+esc(t.vcode)+': '+esc(r.verificationCode)+'</div>');
     // Steuersätze (§ 33 UStDV): "A = 7 % · B = 19 % MwSt inkl."
-    if(kind!=='driver'){const vk=vatKey(r.cart);if(vk)rows.push('<div class="rc-small rc-c">'+esc(vk)+'</div>')}
+    if(kind!=='driver'){const vk=vatKey(ownBon&&r.fees&&r.fees.delivery?[...(r.cart||[]),{vat:[7]}]:r.cart);if(vk)rows.push('<div class="rc-small rc-c">'+esc(vk)+'</div>')}
     // TSE (KassenSichV): nur Kundenbeleg, Daten kommen vom Server (/api/print). Pflichtangaben immer auf Deutsch.
-    if(kind!=='driver'&&o&&Array.isArray(o.tseReceipts))for(const x of o.tseReceipts)rows.push(tseHtml(x));
+    if(kind!=='driver'&&o&&Array.isArray(o.tseReceipts))for(const x of tseList)rows.push(tseHtml(x));
     // السائق
     const a=r.assignment;
     if(a&&(a.driverName||a.roundId))rows.push('<div class="rc-driver">'+(a.driverName?'<div><b>'+esc(t.driver)+':</b> '+esc(a.driverName)+'</div>':'')+(a.roundId?'<div><b>'+esc(t.round)+':</b> '+esc(a.roundId)+'</div>':'')+(a.etaAt?'<div><b>'+esc(t.eta)+':</b> '+esc(hhmm(a.etaAt))+'</div>':'')+'</div>');
@@ -150,7 +153,7 @@
     // Lieferando: نفس QR تبعهم ("Zum Liefern scannen")؛ غير هيك QR داخلي
     const payload=r.deliveryQrUrl||('FLAMO|'+(r.platform||'')+'|'+r.displayCode);
     // QR الطلب (للسواق) بس عالتوصيل وطلبات المنصات؛ البيع جوا المحل/الاستلام بدون QR (ما بيلزم، وبيضل QR الـ TSE لحاله)
-    const wantQr=isDel||!!r.deliveryQrUrl||isPlatOrder;
+    const wantQr=(isDel||!!r.deliveryQrUrl||isPlatOrder)&&!(ownBon&&hasTse);
     let qr='';try{if(wantQr&&window.NARA_QR)qr='<div class="rc-qr">'+window.NARA_QR.svg(payload,{level:'M',quiet:1})+'</div>'}catch(e){console.warn('[NARA][RECEIPT_QR_FAILED]',e.message)}
     rows.push(qr+(wantQr?'<div class="rc-small rc-c">'+esc(r.deliveryQrUrl?t.scanDeliver:t.scan)+'</div>':'')+(o&&Array.isArray(o.tseReceipts)&&o.tseReceipts.length?'':'<div class="rc-small rc-c rc-nb">'+esc(t.notBill)+'</div>')+'<div class="rc-thanks">'+esc(t.thanks)+'</div>');
     return '<div class="nara-rc">'+rows.join('')+'</div>';
