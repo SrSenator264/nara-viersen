@@ -1,6 +1,11 @@
 // kasse-ui.spec.mjs — الكاشير بالضغط الفعلي: منتج → مطبخ → دفع كاش. بعد الدفع ما بصير أي إعادة تحميل (بلا وميض).
 import { test, expect } from 'playwright/test';
 
+// تذكيرات الخبز/Loco/اللحم بتغطي الشاشة كاملة وبتمنع الضغط → نأجّلها قبل ما تفتح الصفحة
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => { for (const id of ['bread', 'loco', 'meat']) localStorage.setItem('flamo-rem-snooze-' + id, String(Date.now() + 3600000)); });
+});
+
 async function addProduct(page) {
   await page.locator('button.product').first().click();
   await page.getByRole('button', { name: /Hinzufügen/ }).click();
