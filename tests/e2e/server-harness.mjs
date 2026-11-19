@@ -51,7 +51,7 @@ export async function startTestServer() {
   for (const [k, v] of Object.entries(process.env)) if (!SECRET_ENV.test(k)) env[k] = v;
   Object.assign(env, {
     PORT: String(E2E_PORT), HOST: '127.0.0.1', NODE_ENV: 'test',
-    NARA_MANAGER_KEY: E2E_KEY, NARA_NO_MONITOR: '1', NARA_GEOCODE: 'off',
+    NARA_MANAGER_KEY: E2E_KEY, NARA_NO_MONITOR: '1', NARA_GEOCODE: 'off', NARA_TSE_MODE: 'sim',
   });
   const child = spawn(process.execPath, ['server.js'], { cwd: dir, env, stdio: ['ignore', 'pipe', 'pipe'] });
   let log = '';
