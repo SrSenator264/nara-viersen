@@ -83,7 +83,7 @@ function monthChecklist(data, year, month, today) {
   const closedDays = new Set((data.dayClosings || []).filter(s => s && s.mode !== 'TRAINING' && s.type === 'CLOSING' && s.day >= from && s.day <= to).map(s => s.day));
   const missingClosings = [...salesDays].filter(d => !closedDays.has(d) && d < today).sort();
   const bankUnmatched = (data.bankTransactions || []).filter(x => x.status === 'UNMATCHED' && inRange(x.date)).length;
-  const belegePending = (data.documents || []).filter(x => /PENDING/.test(up(x.extractionStatus || x.status)) && inRange(x.documentDate || x.createdAt)).length;
+  const belegePending = (data.documents || []).filter(x => (/PENDING/.test(up(x.extractionStatus || x.status)) || (up(x.type) === 'SUPPLIER_INVOICE' && !x.invoiceId && up(x.extractionStatus) === 'NOT_RUN')) && inRange(x.documentDate || x.createdAt)).length;
   const journalOpen = (data.journalEntries || []).filter(x => x.status !== 'POSTED' && inRange(x.date)).length;
   const tseMissing = l.own.totals.tseMissing || 0;
   const periodClosed = (data.accountingPeriods || []).some(p => p.status === 'CLOSED' && p.from <= from && p.to >= to);

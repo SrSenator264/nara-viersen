@@ -2,10 +2,20 @@
 // telegram-actions.js — بيستقبل ضغطات الأزرار من رسائل التلغرام (long polling: السيرفر هو اللي بيسأل تلغرام، ما بيحتاج رابط عام).
 // بيقبل الضغطات بس من الشاتات المضبوطة (TELEGRAM_CHAT_ID، ممكن أكتر من واحد بفاصلة). وأمر /id بيردّ برقم الشات. ما في تلغرام مضبوط = ما بيشتغل.
 // onAction(data, whoName) → { answer, edit? } | null
-function create({ env = process.env, fetchFn = (...a) => fetch(...a), onAction, log = console.error, pollSec = 25 } = {}) {
+// onMessage(msg, { reply, download, isOwner }) → اختياري: رسائل (صور/ملفات/نص) من الشاتات المسموحة أو شات المالك (TELEGRAM_OWNER_CHAT_ID)
+function create({ env = process.env, fetchFn = (...a) => fetch(...a), onAction, onMessage = null, log = console.error, pollSec = 25 } = {}) {
   let offset = 0, stopped = false, running = false;
   const ids = () => String(env.TELEGRAM_CHAT_ID || '').split(',').map(x => x.trim()).filter(Boolean);
-  const configured = () => !!(env.TELEGRAM_BOT_TOKEN && ids().length);
+  const ownerIds = () => String(env.TELEGRAM_OWNER_CHAT_ID || '').split(',').map(x => x.trim()).filter(Boolean);
+  const configured = () => !!(env.TELEGRAM_BOT_TOKEN && (ids().length || ownerIds().length));
+  // ملف من تلغرام (حد البوت 20 MB)
+  async function download(fileId) {
+    const j = await api('getFile', { file_id: fileId });
+    const p = j && j.result && j.result.file_path; if (!p) return null;
+    const base = String(env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
+    const r = await fetchFn(`${base}/file/bot${env.TELEGRAM_BOT_TOKEN}/${p}`, { signal: AbortSignal.timeout(60000) });
+    return r.ok ? { buffer: Buffer.from(await r.arrayBuffer()), path: p } : null;
+  }
   const api = async (method, body, timeoutMs = 10000) => {
     const base = String(env.TELEGRAM_API_BASE || 'https://api.telegram.org').replace(/\/+$/, '');
     const r = await fetchFn(`${base}/bot${env.TELEGRAM_BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body || {}), signal: AbortSignal.timeout(timeoutMs) });
@@ -19,6 +29,14 @@ function create({ env = process.env, fetchFn = (...a) => fetch(...a), onAction, 
     if (msg && msg.chat && /^\/id(@\w+)?\s*$/i.test(String(msg.text || '').trim())) {
       await api('sendMessage', { chat_id: msg.chat.id, text: `رقم هالشات: ${msg.chat.id}` }).catch(() => {});
       return true;
+    }
+    if (msg && msg.chat && onMessage && !/^\//.test(String(msg.text || ''))) {
+      const chat = String(msg.chat.id), isOwner = ownerIds().includes(chat);
+      if (isOwner || ids().includes(chat)) {
+        const reply = text => api('sendMessage', { chat_id: msg.chat.id, text: String(text).slice(0, 4000), reply_to_message_id: msg.message_id }).catch(() => {});
+        try { const out = await onMessage(msg, { reply, download, isOwner, who: nameOf(msg.from) }); if (out) await reply(out); } catch (e) { log('[NARA][TG-MSG]', e && e.message); }
+        return true;
+      }
     }
     const cq = update && update.callback_query;
     if (!cq || !cq.message || !ids().includes(String(cq.message.chat && cq.message.chat.id))) return false;
@@ -48,6 +66,6 @@ function create({ env = process.env, fetchFn = (...a) => fetch(...a), onAction, 
     }
     running = false;
   }
-  return { handle, pollOnce, start: () => { stopped = false; loop(); }, stop: () => { stopped = true; }, configured };
+  return { handle, pollOnce, download, start: () => { stopped = false; loop(); }, stop: () => { stopped = true; }, configured };
 }
 module.exports = { create };
