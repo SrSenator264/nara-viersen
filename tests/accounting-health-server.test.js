@@ -76,3 +76,12 @@ test('EÜR-Endpunkt', async () => {
   const r = await call('GET', '/api/accounting/euer?year=2026', null, S.acct); assert.equal(r.status, 200); assert.equal(r.json.euer.year, 2026); assert.ok(Array.isArray(r.json.euer.warnings));
   assert.equal((await call('GET', '/api/accounting/euer?year=1900', null, S.acct)).status, 422);
 });
+test('Manager-Endpunkte: Status, Chat ohne Schlüssel 503, Aufgaben leer, Buchhaltung/Kasse 403', async () => {
+  const st = await call('GET', '/api/manager/status', null, S.owner); assert.equal(st.status, 200); assert.equal(st.json.configured, false);
+  assert.equal((await call('POST', '/api/manager/chat', { message: 'hi' }, S.owner)).json.code, 'NO_AI_KEY');
+  assert.deepEqual((await call('GET', '/api/manager/tasks', null, S.owner)).json.tasks, []);
+  assert.equal((await call('POST', '/api/manager/tasks/status', { id: 'x', status: 'DONE' }, S.owner)).status, 422);
+  assert.equal((await call('POST', '/api/manager/chat', { message: 'hi' }, S.cashier)).status, 403);
+  assert.equal((await call('POST', '/api/manager/chat', { message: 'hi' }, S.acct)).status, 403);
+  assert.equal((await call('GET', '/manager.html', null, S.owner)).status, 200);
+});

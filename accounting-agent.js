@@ -187,9 +187,9 @@ function systemPrompt({ lang, today, regime }) {
 }
 
 // ───────── Adapter (Claude / Gemini) ─────────
-function anthropicAdapter({ key, model, base, fetchImpl = fetch, maxTokens = 1500 }) {
+function anthropicAdapter({ key, model, base, fetchImpl = fetch, maxTokens = 1500, toolDefs = TOOLS }) {
   const url = (base || 'https://api.anthropic.com').replace(/\/$/, '') + '/v1/messages';
-  const tools = TOOLS.map((t, i) => ({ name: t.name, description: t.description, input_schema: t.parameters, ...(i === TOOLS.length - 1 ? { cache_control: { type: 'ephemeral' } } : {}) }));
+  const tools = toolDefs.map((t, i) => ({ name: t.name, description: t.description, input_schema: t.parameters, ...(i === toolDefs.length - 1 ? { cache_control: { type: 'ephemeral' } } : {}) }));
   return {
     name: 'anthropic:' + model,
     init: (system, history, user) => ({ system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }], messages: [...history, { role: 'user', content: user }] }),
@@ -209,9 +209,9 @@ function anthropicAdapter({ key, model, base, fetchImpl = fetch, maxTokens = 150
   };
 }
 
-function geminiAdapter({ key, model, fetchImpl = fetch, maxTokens = 2000 }) {
+function geminiAdapter({ key, model, fetchImpl = fetch, maxTokens = 2000, toolDefs = TOOLS }) {
   const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent';
-  const decl = [{ functionDeclarations: TOOLS.map(t => ({ name: t.name, description: t.description, parameters: t.parameters })) }];
+  const decl = [{ functionDeclarations: toolDefs.map(t => ({ name: t.name, description: t.description, parameters: t.parameters })) }];
   return {
     name: 'gemini:' + model,
     init: (system, history, user) => ({ system, contents: [...history.map(h => ({ role: h.role === 'assistant' ? 'model' : 'user', parts: [{ text: h.content }] })), { role: 'user', parts: [{ text: user }] }] }),
@@ -229,18 +229,15 @@ function geminiAdapter({ key, model, fetchImpl = fetch, maxTokens = 2000 }) {
   };
 }
 
-function providerFromEnv(env = process.env, fetchImpl = fetch) {
-  const pick = low(env.NARA_ACCOUNTING_PROVIDER) || (env.ANTHROPIC_API_KEY ? 'anthropic' : env.GEMINI_API_KEY ? 'gemini' : '');
-  if (pick === 'anthropic' && env.ANTHROPIC_API_KEY) return anthropicAdapter({ key: str(env.ANTHROPIC_API_KEY).trim(), model: str(env.NARA_ACCOUNTING_MODEL) || 'claude-sonnet-5-5', base: env.NARA_AI_BASE_URL, fetchImpl });
-  if (pick === 'gemini' && env.GEMINI_API_KEY) return geminiAdapter({ key: str(env.GEMINI_API_KEY).trim(), model: str(env.NARA_ACCOUNTING_MODEL) || str(env.GEMINI_MODEL) || 'gemini-flash-latest', fetchImpl });
+function providerFromEnv(env = process.env, fetchImpl = fetch, { toolDefs = TOOLS, prefix = 'NARA_ACCOUNTING', maxTokens } = {}) {
+  const pick = low(env[prefix + '_PROVIDER']) || (env.ANTHROPIC_API_KEY ? 'anthropic' : env.GEMINI_API_KEY ? 'gemini' : '');
+  if (pick === 'anthropic' && env.ANTHROPIC_API_KEY) return anthropicAdapter({ key: str(env.ANTHROPIC_API_KEY).trim(), model: str(env[prefix + '_MODEL']) || 'claude-sonnet-5-5', base: env.NARA_AI_BASE_URL, fetchImpl, toolDefs, ...(maxTokens ? { maxTokens } : {}) });
+  if (pick === 'gemini' && env.GEMINI_API_KEY) return geminiAdapter({ key: str(env.GEMINI_API_KEY).trim(), model: str(env[prefix + '_MODEL']) || str(env.GEMINI_MODEL) || 'gemini-flash-latest', fetchImpl, toolDefs, ...(maxTokens ? { maxTokens } : {}) });
   return null;
 }
 
-// ───────── Ein Gesprächsschritt ─────────
-async function chat(input, { data, adapter, today, maxRounds = 8 }) {
-  const lang = ['de', 'en', 'ar'].includes(input.lang) ? input.lang : 'ar';
-  today = today || bizDay.today();
-  const history = (Array.isArray(input.history) ? input.history : []).slice(-10)
+function cleanHistory(raw) {
+  const history = (Array.isArray(raw) ? raw : []).slice(-10)
     .map(t => (t && typeof t.text !== 'string' && typeof t.content === 'string' ? { role: t.role, text: t.content } : t))
     .filter(t => t && (t.role === 'user' || t.role === 'assistant') && typeof t.text === 'string' && t.text.trim())
     .map(t => ({ role: t.role, content: t.text.slice(0, 2500) }));
@@ -248,6 +245,14 @@ async function chat(input, { data, adapter, today, maxRounds = 8 }) {
   while (history.length && history[0].role !== 'user') history.shift();
   const merged = []; for (const h of history) { const last = merged[merged.length - 1]; if (last && last.role === h.role) last.content += '\n' + h.content; else merged.push({ ...h }); }
   if (merged.length && merged[merged.length - 1].role === 'user') merged.pop();
+  return merged;
+}
+
+// ───────── Ein Gesprächsschritt ─────────
+async function chat(input, { data, adapter, today, maxRounds = 8 }) {
+  const lang = ['de', 'en', 'ar'].includes(input.lang) ? input.lang : 'ar';
+  today = today || bizDay.today();
+  const merged = cleanHistory(input.history);
   const message = str(input.message).trim().slice(0, 3000);
   if (!message) return { ok: false, code: 'EMPTY_MESSAGE' };
   const regime = (data.settings && data.settings.accounting && data.settings.accounting.vatRegime) || '';
@@ -284,4 +289,4 @@ function usageStore(file, now = () => new Date()) {
   };
 }
 
-module.exports = { TOOLS, makeTools, systemPrompt, anthropicAdapter, geminiAdapter, providerFromEnv, chat, usageStore };
+module.exports = { TOOLS, makeTools, systemPrompt, anthropicAdapter, geminiAdapter, providerFromEnv, chat, usageStore, cleanHistory };

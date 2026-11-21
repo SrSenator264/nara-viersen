@@ -34,7 +34,7 @@
     { k: 'team', f: 'team.html', i: '🔑', g: 'ops', n: L('Team & PINs', 'الفريق والرموز', 'Team & PINs') },
     { k: 'reminders', f: 'reminders.html', i: '🔔', g: 'ops', n: L('Erinnerungen', 'تنبيهات', 'Reminders') },
     { k: 'status', f: 'status.html', i: '🩺', g: 'system', n: L('Betriebsstatus', 'حالة الشغل', 'System status') },
-    { k: 'ai', f: 'ai-control.html', i: '🤖', g: 'system', n: L('AI Manager', 'AI Manager', 'AI Manager') },
+    { k: 'ai', f: 'manager.html', i: '🧠', g: 'system', n: L('KI-Manager', 'المدير الذكي', 'AI manager') },
     { k: 'guide', f: 'anleitung.html', i: '📖', g: 'system', n: L('Anleitung', 'دليل الكاشير', 'Till guide') },
     { k: 'site', f: 'web-prototype/c.html', i: '🔥', g: 'system', n: L('Kundenseite', 'موقع الزبون', 'Customer site') },
   ];

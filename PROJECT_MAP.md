@@ -1,0 +1,433 @@
+# PROJECT_MAP — Flamo (automatisch erzeugt)
+
+Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand bearbeiten.
+
+## Seiten (HTML) (34)
+
+- `accounting-agent.html` — Flamo · KI-Buchhalter
+- `accounting-home.html` — Flamo · Buchhaltung
+- `accounting.html` — Flamo · Buchhaltung
+- `admin-foundation.html` — Flamo · Menüverwaltung
+- `ai-control.html` — Flamo · AI Manager
+- `android-app/www/index.html` — Flamo Fahrer
+- `anleitung.html` — Flamo · Kassen-Anleitung
+- `banking.html` — Flamo · Bank
+- `connect.html` — Tablets verbinden · Flamo
+- `customer-book.html` — Flamo · Kundenkartei
+- `customers.html` — Flamo · الزباين
+- `delivery.html` — Flamo · Lieferung
+- `dispatch.html` — Flamo · التوزيع
+- `driver.html` — Flamo · Fahrer
+- `index.html` — Flamo
+- `inventory-foundation.html` — Flamo · Lager
+- `join.html` — Flamo · Fahrer-Konto
+- `kasse-settlement.html` — Flamo · Tagesabschluss
+- `kasse.html` — Flamo · Kasse
+- `kitchen.html` — Flamo · المطبخ
+- `live-orders.html` — Live Orders · Flamo
+- `manager.html` — Flamo · KI-Manager
+- `menu-anleitung.html` — Flamo · Menü-Anleitung
+- `nara-app.html` — Flamo
+- `pay.html` — Zahlung
+- `reception.html` — Plattformen · Flamo
+- `reminders.html` — Flamo · Erinnerungen
+- `reports.html` — Flamo · GuV
+- `sales.html` — Flamo · Verkäufe
+- `staff.html`
+- `status.html` — Flamo · Status
+- `team.html` — Flamo · Team
+- `update.html` — Flamo · Update
+- `web-prototype/c.html` — Halle in Farbe
+
+## Code (Server & Frontend) (164)
+
+- `accounting-agent.js` — المحاسب الذكي: وكيل مخصص للحسابات بس. · benutzt von: manager-agent.js, server.js
+- `accounting-anomalies.js` — "شي مو طبيعي" بالحسابات. قراءة بس، كل نتيجة = تنبيه مع سبب، والقرار عند عمر. · benutzt von: accounting-agent.js, accounting-weekly.js, server.js
+- `accounting-export.js` — Export der gebuchten Journal-Einträge für den Steuerberater. · benutzt von: server.js
+- `accounting-health.js` — "مركز المحاسبة": صورة واحدة بسيطة عن وضع الدفاتر. · benutzt von: accounting-agent.js, accounting-weekly.js, server.js
+- `accounting-weekly.js` — ملخص المحاسبة الأسبوعي على Telegram، كل اثنين الساعة 09:00 (برلين) عن الأسبوع اللي فات (اثنين → أحد). · benutzt von: server.js
+- `accounting.js` — Buchhaltungszentrum (DE · AR · EN). Ein Skript, ein Wörterbuch; die Bereiche werden hier aufgebaut. · benutzt von: accounting.html
+- `admin-foundation.js` — Menüverwaltung: Karten statt Tabelle. Karten-Aktionen speichern sofort; Dialoge für Details. · benutzt von: admin-foundation.html
+- `admin-history.js` — Änderungsverlauf für Menü-Daten (Produkte, Kategorien, Optionen) mit Rückgängig. Nur Server. · benutzt von: server.js
+- `admin-menu-translations.js` — Übersetzungen der Speisekarte prüfen & freigeben (EN · AR). Entwürfe stammen aus menu-translations.json; nur freigegebene Texte erscheinen an der Kasse und auf der Website. · benutzt von: admin-foundation.html
+- `ai-manager-cashier-agents.js` · benutzt von: ai-control.html
+- `ai-manager-command-center.js` · benutzt von: ai-control.html
+- `ai-manager-i18n-fix.js` · benutzt von: ai-control.html
+- `ai-manager.js` · benutzt von: ai-control.html
+- `alerts.js` — Warnungen aufs Handy (Telegram). Zugangsdaten NUR in .env (nie im Code/Git): · benutzt von: server.js
+- `allergen-data.js`
+- `android-app/patch_manifest.py`
+- `app.js`
+- `audit-groups.mjs` — لكل مجموعة إضافات: أي كاتيغوريات/أصناف بتستخدمها وبأي أسعار. قراءة فقط.
+- `audit-options.mjs` — تدقيق الإضافات (قراءة فقط). ما بيعدّل ولا بيحذف أي شي.
+- `auth.js` — Rechte: PIN, Sitzungen, welche Rolle welche Seite/API darf, erlaubte Dateien · benutzt von: server-auth.js, server.js
+- `bank-ai.js` — Claude بيقرا كشف حساب البنك (PDF أو صورة) وبيطلع الحركات. معاينة بس، الاستيراد بعد موافقة عمر. · benutzt von: server.js
+- `bank-match.js` — اقتراحات مطابقة البنك (قراءة بس). عمر بيضغط ✅ والمطابقة بتنحفظ عن طريق /api/accounting/bank-transactions/match. · benutzt von: accounting-agent.js, server.js
+- `bank-pay.js` — Zahlung per Banküberweisung (Pay-first). Reine Logik, ohne I/O, daher testbar. · benutzt von: server.js
+- `body-reader.js` — JSON-Body sicher lesen (Server-Modul, auth.js SERVER_FILES). · benutzt von: server-auth.js, server.js
+- `business-day.js` — "يوم الشغل": المحل بيسكّر بعد نص الليل، فأي شي قبل ساعة البداية (افتراضياً 5 الصبح) · benutzt von: accounting-agent.js, accounting-anomalies.js, accounting-export.js, accounting-health.js, customer-db.js
+- `catalog.js` — Legacy preview records followed by sourced corrections. Owner approval still required before launch. · benutzt von: kasse.html
+- `clean-options.mjs` — clean-options.mjs (v2) — ترتيب قوائم الإضافات على الهيكل المتفق عليه:
+- `compact-benchmark-evidence.py`
+- `compact-ocr-evidence.py`
+- `customer-book.js` — سجل الزباين (جدول + بطاقة بتتحفظ أوتوماتيك). · benutzt von: server.js
+- `customer-chef.js` — Customer-facing Chef Flamo layer: conversation UX and order-building shortcuts.
+- `customer-db.js` — قاعدة الزباين الخارجية: ملف لحالو (data/customers-db.json) منفصل عن nara-admin.json. · benutzt von: server.js
+- `customer-sidebar.js`
+- `customers-sync.js` — دمج دفتر الزبائن بين الأجهزة (السيرفر هو المرجع). كل شي بيتخزّن بملف بيانات السيرفر. · benutzt von: server.js
+- `daily-report.js` — تقرير آخر اليوم على Telegram (قراءة بس، ما بيغيّر أي بيانات). · benutzt von: server.js
+- `data-guard.js` — Datei-Schutz für das Geschäfts-PC-Setup (Strom weg, Platte voll, halb geschriebene Datei): · benutzt von: server.js
+- `day-closing-print.js` — مؤقتاً: الورقة بتنطبع باسم المحل القانوني الحالي (IU GENE) لحد ما نغيّر الفورمة رسمياً. لتغييره: بدّل PRINT_NAME بس. · benutzt von: kasse-settlement.html, print-service.js
+- `day-closing-routes.js` — مسارات /api/day-closing/* (التقفيلة). السيرفر بيمرّر ctx؛ الصلاحيات بـ auth.js (GET = ACCT، POST = OWNER/MANAGER). · benutzt von: server.js, tests/day-closing-routes.test.js
+- `day-closing.js` — تقفيلة اليوم (Tagesabschluss). حساب نقي من بيانات الأدمن، بدون I/O (السيرفر بيحفظ). · benutzt von: daily-report.js, day-closing-routes.js, sales-invoice.js, server.js, tse-service.js
+- `deepseek-benchmark.js`
+- `delivery-quote.js` — اقتراح وقت التسليم لطلب جديد من المنصات (قبل ما نقبله ونطبعه). · benutzt von: server.js
+- `delivery-rules.js` — قواعد التوصيل: مناطق (PLZ)، رسوم الزبون، الحد الأدنى للطلب، وأجر السائق. · benutzt von: server.js
+- `discover.mjs`
+- `dish-cost.js` — تكلفة كل وجبة من الوصفة + آخر سعر شراء لكل مادة، والهامش مقابل سعر البيع. قراءة بس. · benutzt von: accounting-agent.js
+- `dispatch-engine.js` — عقل التوزيع: هدفه الوحيد إنو كل طلب يوصل بأسرع وقت. · benutzt von: delivery-quote.js, dispatch-service.js, platform-trips.js, server.js
+- `dispatch-learning.js` — البرنامج بيتعلّم من التوصيلات الحقيقية. · benutzt von: dispatch-service.js, platform-trips.js
+- `dispatch-service.js` — بيجهّز معطيات عقل التوزيع من بيانات NARA: · benutzt von: customer-db.js, delivery-quote.js, platform-trips.js, server.js
+- `driver-tracker.js` · benutzt von: server.js
+- `euer-draft.js` — مسودة EÜR (Einnahmenüberschussrechnung) لسنة كاملة. قراءة بس، تحضير للمراجعة، مو إقرار. · benutzt von: accounting-agent.js, server.js
+- `extra-category.js` — كاتيغوري "Extra / اكسترا" بالكاشير + خيار "دبل مكونات" للساندويشات والهوت دوغ. · benutzt von: server.js
+- `fcm.js` — Firebase Cloud Messaging (HTTP v1) fuer die Fahrer-APK, ohne Fremdbibliothek (nur node:crypto + fetch). · benutzt von: server.js
+- `flamo-ai.js` — Flamo, der KI-Verkäufer der Kundenseite. · benutzt von: server.js
+- `Flamo-Fehlende-Lieferando.mjs` — Einmaliges Nachtragen von 6 Lieferando-Bestellungen (Dienstag 20.10.2026), die NARA nicht erreicht haben.
+- `flamo-home.js` · benutzt von: accounting-agent.html, accounting-home.html, accounting.html, admin-foundation.html, ai-control.html
+- `flamo-icons.js` · benutzt von: kasse-settlement.html
+- `flamo-nav.js` — EIN Navigations-System für alle internen Flamo-Seiten (Seitenleiste, Zurück-Knopf, Suche, Status).
+- `flamo-night.js` · benutzt von: accounting-agent.html, accounting-home.html, accounting.html, banking.html, driver.html
+- `flamo-t.js` — kleine Übersetzungshilfe für Seiten mit eigenem Wörterbuch (de · ar · en). · benutzt von: accounting-agent.html, accounting-home.html, accounting.html, admin-foundation.html, banking.html
+- `inventory-foundation.js` · benutzt von: inventory-foundation.html
+- `invoice-extraction-provider.js` · benutzt von: deepseek-benchmark.js, server.js
+- `invoice-review-model.js`
+- `kasse-agent-suite.js` · benutzt von: kasse.html
+- `kasse-customer-directory.js` · benutzt von: kasse.html
+- `kasse-delivery-fee.js` — يعرض للكاشير رسم التوصيل والحد الأدنى حسب الرمز البريدي (من /api/delivery/quote). · benutzt von: kasse.html
+- `kasse-domain.js` · benutzt von: kasse.html
+- `kasse-external-payment-guard.js` · benutzt von: kasse.html
+- `kasse-gate.js` — Kasse über den Tunnel NUR für freigegebene Cloudflare-Access-Konten (z. B. nur dein Handy/Mail). · benutzt von: server-auth.js, server.js
+- `kasse-header-tidy.js` · benutzt von: kasse.html
+- `kasse-helpers.js` — مساعدات صغيرة للكاشير: · benutzt von: kasse.html
+- `kasse-invoice-a4.js` · benutzt von: kasse.html
+- `kasse-lanch-file-preview.js`
+- `kasse-lanch-import.js`
+- `kasse-lieferando-bridge.js` · benutzt von: kasse.html
+- `kasse-live-orders-link.js` · benutzt von: kasse.html
+- `kasse-monitor.js` · benutzt von: kasse.html
+- `kasse-open-orders.js` — الطلبات المفتوحة بالكاشير ككروت بلوحة جانبية بتنسحب من الحافة (ما بتغطي الكاشير). · benutzt von: kasse.html
+- `kasse-order-hub.js` · benutzt von: kasse.html
+- `kasse-payment.js` — شاشة الدفع الجديدة بالكاشير. · benutzt von: kasse.html
+- `kasse-phone-lookup.js` — لما الكاشير يكتب رقم الهاتف بطلب توصيل، بتظهر اقتراحات من دفتر الزبائن (nara-customers)؛ بلمسة بتتعبّى البيانات. · benutzt von: kasse.html
+- `kasse-phone.js` — الكاشير على التلفون. · benutzt von: kasse.html
+- `kasse-platform-sync.js`
+- `kasse-print-lifecycle.js` — الورقة المطبوعة (فاتورة/تذكرة) بتضل ألماني أو إنجليزي، مو عربي · benutzt von: kasse.html
+- `kasse-print-sound.js` — نصوص إعدادات صوت الطلبات (de / ar / en)
+- `kasse-printer-panel.js` — لوحة 🖨️ بالكاشير: الطابعات الحقيقية ومين بيطبع شو. كل شي قابل للتعديل ومحفوظ عالسيرفر. · benutzt von: kasse.html
+- `kasse-product-dialog.js` — نافذة الصنف الجديدة بالكاشير (بدل القائمة الطويلة). · benutzt von: kasse.html
+- `kasse-quick-extras.js` — بالكاشير: · benutzt von: kasse.html
+- `kasse-receipt.js` — فاتورة موحّدة للكاشير: نفس قالب nara-receipt-core (شكل ورقة Lieferando) لكل المصادر. · benutzt von: kasse.html, kitchen.html, live-orders.html
+- `kasse-reminders.js` — بوب-أب تذكير الخبز/Loco على الكاشير (بدون زر ثابت). بيطلع لما التذكير مستحق، "لاحقاً" بيخبّيه 30 دقيقة. · benutzt von: kasse.html
+- `kasse-settlement.js` · benutzt von: kasse-settlement.html
+- `kasse-sync.js` — السيرفر هو المرجع: دفتر الزبائن والطلبات المفتوحة بتنحفظ عالسيرفر وبتظهر على كل الأجهزة. · benutzt von: kasse.html
+- `kasse-touch.js` — سلوك واجهة اللمس: ألوان الأقسام، درج بيانات التوصيل، شريحة العنوان، نبضة المجموع. · benutzt von: kasse.html
+- `kasse-training.js` · benutzt von: kasse.html
+- `kasse-window.js` — Fenster für /api/kasse-state: letzte N Tage + alles, was noch offen ist (die Kasse/Live Orders brauchen nicht die ganze Historie alle 5 s). · benutzt von: server.js
+- `kasse.js` — Kasse: Warenkorb, Produkte, Zahlung, Druck (Hauptlogik der Kassen-Seite) · benutzt von: kasse.html
+- `kitchen.js` — منطق شاشة المطبخ: شكل الطلب للمطبخ (بدون أي مبلغ) وتغيير حالته. · benutzt von: delivery-quote.js, dispatch-service.js, prep-learning.js, server.js
+- `lieferando-playwright-bridge.mjs` — lieferando-playwright-bridge.mjs  (النسخة الكاملة)
+- `live-orders-trend.js` · benutzt von: live-orders.html
+- `local-coordinate-benchmark.js` — Development-only compact OCR parser/scoring harness. Reference is scoring-only.
+- `local-invoice-hybrid.js` · benutzt von: local-invoice-preparser.js, server.js
+- `local-invoice-parser-poc.py`
+- `local-invoice-preparser.js` — Controlled development hook. Disabled unless explicitly enabled. · benutzt von: local-preparser-diagnostic.js, run-local-ocr-generalization-controlled.js, server.js
+- `local-ocr-test.py`
+- `local-ocr-worker-manager.js` · benutzt von: local-invoice-preparser.js
+- `local-ocr-worker.py`
+- `local-preparser-diagnostic.js`
+- `local-whisper-transcribe.py` — PyAV 19 removed the metadata_errors keyword that faster-whisper still passes.
+- `manager-agent.js` — المدير الذكي ("عقل المشروع"): عمر بيحكي معو بس. · benutzt von: server.js
+- `manager-pending-actions.js` · benutzt von: ai-control.html
+- `menu-price-sync.js` — Einmalige Preis-Angleichung der Menü-Datenbank (data/nara-admin.json) an eine Preisliste. · benutzt von: server.js
+- `menu-source.js` — Read from the rendered public Lieferando menu on 2026-09-09. · benutzt von: kasse.html
+- `menu-surcharge.js` — Menü-Aufpreis an der Kasse: fester Betrag für ALLE Artikel (Einstellung, Standard 3,00 €). · benutzt von: kasse.html
+- `menu-sync.js` — Adds NEW items from the code catalog (menu-source.js) to the stored menu. · benutzt von: server.js
+- `menu-translations-lib.js` — Übersetzungs-Entwürfe (EN/AR) fürs Menü. Aus server.js herausgelöst (testbar, Verhalten unverändert). · benutzt von: server.js
+- `monitor.js` — Wächter für den Geschäfts-PC, damit du aus der Ferne siehst, wenn etwas hängt: · benutzt von: server.js
+- `nara-3d-scene.js`
+- `nara-agent-suite.js` · benutzt von: server.js
+- `nara-auth.js` — اللغة: NARA_LANG إذا موجود، وإلا localStorage مباشرة (هالملف بينحقن قبل nara-lang.js)
+- `nara-emoji.js` · benutzt von: admin-foundation.html, kasse.html, kitchen.html, live-orders.html
+- `nara-i18n.js` · benutzt von: ai-control.html
+- `nara-lang.js` — لغة وحدة لكل شاشات NARA (de / ar / en). · benutzt von: accounting-agent.html, accounting-home.html, accounting.html, admin-foundation.html, anleitung.html
+- `nara-receipt-core.mjs` — قالب الفاتورة الموحّد (بدون أي اعتماد على Node): يشتغل بالمتصفح (الكاشير) وبالسيرفر (الجسر/الطابعة).
+- `nara-receipt.mjs` — القالب الموحّد (من nara-receipt-core.mjs) + بايتات ESC/POS + الإرسال للطابعة بالشبكة.
+- `nara-sidebar-chef.js`
+- `note-translate.js` — ترجمة ملاحظة الزبون (EN + AR) مرة وحدة وبتنحفظ مع الطلب (order.noteI18n). · benutzt von: dispatch-service.js, server.js
+- `operations/core.js` — data;#catalog;
+- `option-library.js` — Optionen/Extras als gemeinsame Bibliothek (data.optionGroups) statt Kopien pro Produkt. · benutzt von: extra-category.js, server.js, web-order.js
+- `order-archive.js` — أرشفة أسبوعية: الطلبات القديمة بتنتقل من nara-admin.json لملفات data/archive/YYYY-MM.json (ملف لكل شهر). · benutzt von: server.js
+- `order-correction.js` — Storno nach Zahlung + Korrekturbestellung ("✏️ تصحيح"). Reine Logik ohne I/O (wie payment-logic.js). · benutzt von: server.js
+- `payment-logic.js` — الدفع بالكاشير: خصم للزبون (٪ أو €)، خصم موظف (بكود)، تقسيم الفاتورة، كاش + كرت. · benutzt von: server.js
+- `platform-accept.js` — استلام طلبات المنصات من تابلت واحد. · benutzt von: server.js
+- `platform-statement.js` — كشوف المنصات (Lieferando / Uber Eats / Sides-Loco): Claude بيقرا الكشف أو فاتورة العمولة، · benutzt von: accounting-agent.js, server.js
+- `platform-status.js` — حالة جسور المنصات (Lieferando، لاحقاً Uber Eats…) بالذاكرة. · benutzt von: server.js
+- `platform-trips.js` — NARA بيتعلّم الخريطة من سواقينّا وهني عم يشتغلوا بتطبيق Lieferando. · benutzt von: server.js
+- `playwright.config.mjs` — اختبارات E2E لـ Flamo.  التشغيل: npm run test:e2e
+- `prep-learning.js` — البرنامج بيتعلّم قديش كل صنف بياخد بالمطبخ، وبيتوقع إيمتى الطلب بيخلص. · benutzt von: delivery-quote.js, dispatch-service.js, server.js
+- `print-service.js` — الطباعة من السيرفر مباشرة، بلا نافذة طباعة. · benutzt von: server.js, tests/day-closing-routes.test.js
+- `project-agent-tools.js` — Restricted tool gateway for the NARA project assistant. · benutzt von: server.js
+- `project-change-worker.js` — NARA change worker: approval gate only. It never executes arbitrary code.
+- `project-map.js` — خريطة المشروع: كل ملف شو بيعمل (من أول تعليق فيه)، شو API بيعرّف، ومين بيستعملو. · benutzt von: manager-agent.js
+- `push.js` — Web Push (RFC 8030 + RFC 8291 aes128gcm + VAPID RFC 8292) ohne Fremdbibliothek, nur node:crypto. · benutzt von: server.js
+- `qonto-sync.js` — liest eingehende Zahlungen von Qonto (Business API, nur Lesen) und legt sie als bankTransactions ab. · benutzt von: server.js
+- `reminders.js` — تذكيرات يومية (خبز + Loco) على تلغرام وبوب-أب بالكاشير. · benutzt von: server.js
+- `reports.js` · benutzt von: reports.html
+- `run-local-ocr-generalization-controlled.js`
+- `sales-invoice-routes.js` — /api/sales-invoices/* (A4-Rechnungen). Speicher: data.salesInvoices. Rechte: auth.js (Erstellen/Ansehen = Kasse, Stornieren/Absender = Inhaber/Manager). · benutzt von: server.js
+- `sales-invoice.js` — A4-Rechnung (Ausgangsrechnung) aus einer Kassen-Bestellung. Rein (kein I/O): Berechnung + HTML. · benutzt von: order-correction.js, sales-invoice-routes.js, server.js
+- `sales-ledger.js` — سجل المبيعات للمحاسب، قسمين منفصلين: · benutzt von: accounting-agent.js, accounting-anomalies.js, accounting-health.js, accounting-weekly.js, day-closing.js
+- `server-auth.js` — ربط auth.js بالسيرفر: بوابة الصلاحيات، تسجيل الدخول بالـPIN، الجلسات، إدارة الفريق. · API: /api/auth/ · benutzt von: server.js
+- `server.js` — Hauptserver: alle /api-Routen, Daten (data/nara-admin.json), Zeitpläne (Berichte, Telegram, Backups) · API: /api/accounting/accounts, /api/accounting/auto-post-platform-commissions, /api/accounting/agent, /api/accounting/assistant, /api/accounting/agent/status, /api/accounting/anomalies, /api/accounting/bank-suggestions, /api/accounting/bank-statement/read …
+- `settlement-ledger.js` — rows(byDay, day, fees) -> { rows:{KEY:{amount,count,commission,rate}}, gross, fee } · benutzt von: day-closing.js
+- `sides-bridge.mjs` — جسر Loco Chicken: بيقرا طلبات Sides (SimplyPOS) وبيسجّلها بـ NARA.
+- `sides-normalize.mjs` — بيحوّل طلب Sides (SimplyPOS: showSingleOrderdata) لشكل طلب NARA.
+- `staff.js` — اللغة (قسم الإدارة): DE / ع / EN · benutzt von: staff.html
+- `sw.js` — بس كي ينزل NARA كتطبيق عالتلفون. ما في تخزين (كل شي دايماً من السيرفر، كي ما تشوف بيانات قديمة).
+- `system-update.js` — "حدّث النظام" (للمالك): النسخة الحالية، هل في جديد على GitHub، وإطلاق مهمة Flamo-Update. · benutzt von: server.js
+- `telegram-accounting.js` — المحاسبة من التلغرام: · benutzt von: server.js
+- `telegram-actions.js` — بيستقبل ضغطات الأزرار من رسائل التلغرام (long polling: السيرفر هو اللي بيسأل تلغرام، ما بيحتاج رابط عام). · benutzt von: server.js
+- `tse-service.js` — الربط بين الكاشير والـ TSE (KassenSichV). واجهة وحدة، والـ "سائق" قابل للتبديل: · benutzt von: server.js
+- `tse-sim.js` — محاكي TSE (نفس واجهة tse-swissbit.js) لحتى نبني ونختبر الربط قبل ما توصل مكتبة Swissbit. · benutzt von: tse-service.js
+- `tse-swissbit.js` — الـ Swissbit USB-TSE الحقيقي (نفس واجهة tse-sim.js). مبني على WormAPI.dll من Swissbit SDK 6.0.1 عبر koffi. · benutzt von: tse-service.js
+- `uber-bridge.mjs` — جسر Uber Eats: بيقرا الطلبات من Uber Eats Orders (merchants.ubereats.com/orders) وبيسجّلها بـ NARA.
+- `uber-discover.mjs` — خطوة أولى لجسر Uber Eats (طلبات NARA / Just Smashed على Uber Eats Manager).
+- `uber-normalize.mjs` — طلب Uber Eats Orders (merchants.ubereats.com/orders، GraphQL getActiveOrders) → شكل طلب NARA.
+- `web-order.js` — طلبات الموقع (بلا عمولة): بيتحقق من السلة بالسيرفر وبيحسب الأسعار من بيانات NARA، ما منثق بأسعار المتصفح. · benutzt von: server.js
+
+## Skripte & Startdateien (57)
+
+- `Create-Desktop-Shortcut.cmd`
+- `Flamo-Autostart-Einrichten.cmd` — Startet NARA-Autostart-Komplett.ps1 mit Administrator-Rechten (Windows fragt einmal nach: "Ja" klicken).
+- `Flamo-Daten-Entpacken.cmd`
+- `Flamo-Fehlende-Lieferando.cmd` — Einmalig: 6 Lieferando-Bestellungen vom 20.10. nachtragen (Backup, Duplikat-Schutz, Rueckfrage j/n).
+- `Flamo-Git-Installieren.cmd`
+- `Flamo-Nightly-Tests-Einrichten.cmd` — Plant die naechtlichen Tests (03:30) im Windows-Aufgabenplaner. Einmal ausfuehren.
+- `Flamo-Tunnel-Aktivieren.cmd`
+- `Flamo-Tunnel-Einrichten.cmd`
+- `Flamo-Tunnel-Einrichten.ps1` — Flamo Shop-PC: Cloudflare-Tunnel vorbereiten (NICHT starten). Admin noetig.
+- `Flamo-Update-Einrichten.cmd`
+- `Flamo-Update-Einrichten.ps1` — Einmalig (Admin): Aufgabe Flamo-Update anlegen. Laeuft NUR auf Knopfdruck (kein Trigger), als SYSTEM.
+- `Flamo-Update.ps1` — Flamo: sicheres Update. Nur der SERVER wird neu gestartet, die Plattform-Bruecken laufen weiter. Keine Geheimnisse im Skript.
+- `NARA-Autostart-Installieren.ps1` — NARA-Autostart-Installieren.ps1
+- `NARA-Autostart-Komplett.ps1` — NARA-Autostart-Komplett.ps1  (Flamo Shop-PC: alles startet von selbst)
+- `NARA-Demo-Loeschen.cmd`
+- `NARA-Demo.cmd` — Demo-Bestellungen fuer Kueche/Live Orders/Fahrer. "NARA-Demo.cmd clear" loescht sie wieder (storniert).
+- `NARA-Lieferando.cmd` — NARA Lieferando-Bridge: liest die Live-Bestellungen (Playwright) und schickt sie an die Kasse.
+- `NARA-Owner-Wiederherstellen.cmd` — Inhaber-Rolle zurueckholen (nur auf diesem PC).
+- `NARA-PIN-Reset.cmd` — PIN vom Inhaber neu setzen (nur auf diesem PC). Stoppt NARA, setzt den PIN, startet NARA wieder.
+- `NARA-Sides-Login.cmd` — Sides Auto-Login: Zugangsdaten einmal verschluesselt speichern (nur auf diesem PC).
+- `NARA-Sides.cmd` — NARA Sides-Bridge (Loco Chicken): liest die Sides-Bestellungen (nur lesen) und schickt sie an die Kasse.
+- `NARA-Start.cmd`
+- `NARA-Stop.cmd`
+- `NARA-Tablet-Freigabe.cmd` — Einmalig: NARA fuer Tablets/Handys im Laden-WLAN freigeben (HOST=0.0.0.0) und Verbindungsseite mit QR-Codes oeffnen.
+- `NARA-Uber-Discover.cmd` — Einmalig: Uber Eats Orders (merchants.ubereats.com/orders) oeffnen und die Datenstruktur der Bestellungen aufzeichnen.
+- `NARA-Uber.cmd` — NARA Uber-Bridge: liest die Uber-Eats-Bestellungen (merchants.ubereats.com/orders) (nur lesen) und schickt sie an die Kasse.
+- `repair-local-ocr.ps1`
+- `restart-nara.cmd`
+- `restart-nara.ps1`
+- `run-local-ocr-generalization-controlled.ps1`
+- `run-local-ocr-generalization.cmd`
+- `run-local-ocr-test.cmd`
+- `scripts/build-guide-menu.mjs`
+- `scripts/build-menu-translations.py`
+- `scripts/build.mjs`
+- `scripts/demo-orders.mjs` — طلبات وهمية لتجربة شاشة المطبخ / Live Orders / التوزيع.
+- `scripts/i18n-audit.mjs` — Prüft, welche Seiten dreisprachig sind (DE · AR · EN). Nutzung: node scripts/i18n-audit.mjs [--json]
+- `scripts/list-printers.ps1` — list-printers.ps1 - Namen aller installierten Windows-Drucker (eine Zeile pro Drucker)
+- `scripts/nightly-e2e.cjs` — nightly-e2e.cjs — كل ليلة بيشغّل اختبارات Playwright (سيرفر تجريبي معزول، ما بيلمس النظام الحقيقي) وبيبعت الملخص على Telegram.
+- `scripts/project-map.mjs` — بيكتب PROJECT_MAP.md (خريطة المشروع للمدير الذكي وللمطوّر). node scripts/project-map.mjs
+- `scripts/qonto-check.mjs` — Qonto read-only connectivity test. Prints NO secret. Reads QONTO_LOGIN + QONTO_SECRET from .env.
+- `scripts/raw-print.ps1` — raw-print.ps1 - schickt ESC/POS-Bytes direkt an einen Windows-Drucker (ohne Druckdialog).
+- `scripts/reset-cashier-sales.mjs` — Flamo: مسح مبيعات الكاشير (طلبات + دفعات + إيصالات + سجلات TSE التجريبية) قبل اليوم.
+- `scripts/reset-owner-pin.cjs` — reset-owner-pin.cjs — PIN vom Inhaber/Manager neu setzen, wenn er vergessen wurde.
+- `scripts/restore-owner.cjs` — restore-owner.cjs — حساب مدير بيرجع "صاحب المحل" (يشتغل محلياً على جهاز المحل والسيرفر مطفي).
+- `scripts/run-nightly.cmd` — Startet die naechtlichen Tests (wird vom Aufgabenplaner aufgerufen).
+- `scripts/tse-check.mjs` — scripts/tse-check.mjs — فحص للقراءة فقط للـ Swissbit TSE (بدون setup وبدون معاملات وبدون أي تغيير على الـ USB).
+- `scripts/tse-setup.mjs` — scripts/tse-setup.mjs — التهيئة الأولى للـ Swissbit TSE (مرة وحدة بالعمر!).
+- `scripts/tse-test-tx.mjs` — Real-USB test: ONE test transaction (start + finish). Run: node scripts/tse-test-tx.mjs D:
+- `scripts/update-check.cjs` — update-check.cjs — فحص سريع للكود قبل ما نوقف السيرفر الشغّال (بيستعمله Flamo-Update.ps1).
+- `scripts/wise-check.mjs` — Wise read-only connectivity test. Prints NO token. Reads WISE_API_TOKEN (and optional
+- `scripts/wise-keygen.mjs` — Generates an RSA key pair for Wise SCA. Writes OUTSIDE the repo (default: ~/wise-keys). Never commit the private key.
+- `sides-login-save.ps1` — Speichert die Sides-Zugangsdaten verschlüsselt (Windows DPAPI, nur dieser Windows-Benutzer auf diesem PC kann sie lesen).
+- `Start_NARA_AI_Test.cmd`
+- `start-nara-hidden.ps1`
+- `start-nara.cmd`
+- `Tunnel-Config-Aktualisieren.ps1` — Tunnel-Config-Aktualisieren.ps1
+
+## Dokumente & Pläne (41)
+
+- `ACCOUNTING_AGENT_SYSTEM.md` — NARA Accounting Agent System
+- `AI_AGENT_SYSTEM.md` — NARA · AI Orchestrator Behavior
+- `AI-MANAGER-PLAN.md` — خطة المدير الذكي + Flamo البائع الذكي (مؤجّلة)
+- `android-app/README.md` — Flamo Fahrer – Android-APK
+- `BETRIEB-FERNUEBERWACHUNG.md` — مراقبة المطعم عن بعد (Telegram + نسخ احتياطي)
+- `CUSTOMER-SMART-SELLER-PROMPT.md` — NARA Customer Smart Seller
+- `DELIVERY-OPERATIONS-PLAN.md` — NARA Delivery Operations Plan
+- `DELIVERY-WORKFORCE-MASTER-IMPLEMENTATION-PROMPT.md` — NARA — برومبت التنفيذ الشامل: التشغيل والتوصيل والموظفون
+- `FLAMO.md` — Flamo – Charakter-Datei
+- `NARA_AGENT.md` — NARA Agent Context
+- `NARA_PROJECT_HANDOFF.md` — NARA — Project Memory
+- `NARA-FUTURE-PLAN.md` — NARA — خطة مؤجلة
+- `NARA-TUNNEL-HANDOFF.md` — Übergabe: Zugriff ohne VPN (Cloudflare Tunnel) – Stand 14.10.2026
+- `plans/ACCOUNTING_AUDIT.md` — جرد قسم المحاسبة (المرحلة 0)
+- `plans/ACCOUNTING_STRATEGY.md` — استراتيجية المحاسبة الكاملة — Flamo
+- `plans/BURGER_BUILDER_SPEC.md` — Burger-Builder ("✏️ عدّل / اصنع برغرك") — Spezifikation
+- `plans/PLAN_ACCOUNTING.md` — خطة: قسم المحاسبة الشاملة في Flamo
+- `plans/PLAN_AGENTS_HUB.md` — خطة: مركز الوكلاء (Agents Hub) — وكلاء بيشتغلوا لحالهم (Flamo)
+- `plans/PLAN_CASHIER_BOOKLET.md` — خطة: دفتر الكاشير التفاعلي (Anleitung) — دليل الموظفين + Bedienungsanleitung للـ Finanzamt
+- `plans/PLAN_EMAIL_INVOICES.md` — خطة: سحب الفواتير من إيميلات Gmail تلقائيًا (Flamo)
+- `plans/PLAN_FINANZAMT_EXPORT.md` — خطة: زر "Finanzamt Export" + وثائق التفتيش (Kassen-Nachschau)
+- `plans/PLAN_FLAMO_3D_BURGER.md` — خطة: Flamo بموقع الزبون يحكي ويبني البرغر 3D (مؤجّلة)
+- `plans/PLAN_INVOICE_A4.md` — PLAN: Große A4-Rechnung + handschriftliche Quittung
+- `plans/PLAN_INVOICES_A4.md` — خطة: فاتورة A4 رسمية + طباعة QR التوصيل من المنصات (Flamo)
+- `plans/PLAN_MARKETING_AGENTS.md` — خطة: فريق وكلاء تسويق لـ Flamo (مؤجّلة)
+- `plans/PLAN_MARKETING_VIDEO.md` — خطة فيديوهات التسويق (للتنفيذ لما نبدأ قسم التسويق)
+- `plans/PLAN_ORDER_CORRECTION.md` — Plan: Order correction ("✏️ تصحيح") from the Sales page
+- `plans/PLAN_PLAYWRIGHT.md` — خطة: Playwright لفحص Flamo + استكشاف المواقع
+- `plans/PLAN_SERVERLESS.md` — خطة: Serverless لاستقبال طلبات الموقع لما ينقطع نت المحل (Flamo)
+- `plans/PLAN_STAFF_SHIFTS.md` — PLAN_STAFF_SHIFTS — دوام الموظفين والسواقين (المرحلة 1)
+- `plans/PLAN_TOOLS_SUMMARY.md` — ملخص: كل الأدوات والأفكار اللي ممكن نستعملها (تحديث 2026-11-01)
+- `plans/PLAN_TSE_SWISSBIT.md` — خطة: ربط Swissbit USB TSE بالكاشير (الإطلاق 1 نوفمبر 2026)
+- `plans/PLAN_UI_SKILLS.md` — PLAN: UI skills for Flamo pages (2026-10-27)
+- `plans/PLAN_VIRTUAL_OFFICE.md` — PLAN: Flamo Virtual Office (مكتب Flamo الافتراضي ثلاثي الأبعاد)
+- `plans/PLAN_WATCHDOG.md` — خطة: Watchdog للطلبات + تقرير يومي (Flamo)
+- `plans/PROMPT_NIGHT_2H.md` — برومبت شغل الليل (ساعتين، بدون تدخل)
+- `PRIORITY-DELIVERY-WORKFORCE-ROUTING.md` — أولوية عليا: توزيع الطلبات ومسار الموظفين التشغيلي
+- `PROJECT_CONTEXT.md` — NARA · Project Context
+- `PROJECT_MAP.md` — PROJECT_MAP — Flamo (automatisch erzeugt)
+- `README.md` — NARA – Restaurant Operations Platform
+- `web-prototype/README.md` — Website-Prototyp (Kunden-Seite)
+
+## Tests (107)
+
+- `tests/accounting-agent.test.js`
+- `tests/accounting-export.test.js`
+- `tests/accounting-health-server.test.js`
+- `tests/accounting-health.test.js`
+- `tests/accounting-smart.test.js`
+- `tests/admin-history.test.js`
+- `tests/alerts-monitor.test.js`
+- `tests/android-app.test.js`
+- `tests/auth-kasse-list.test.js`
+- `tests/auth-restore-owner.test.js`
+- `tests/auth-server.test.js`
+- `tests/auth.test.js`
+- `tests/bank-pay.test.js`
+- `tests/body-reader.test.js`
+- `tests/boot-and-shared.test.js`
+- `tests/business-day.test.js`
+- `tests/customer-book.test.js`
+- `tests/customer-db.test.js`
+- `tests/customers-sync.test.js`
+- `tests/daily-report.test.js`
+- `tests/data-guard.test.js`
+- `tests/day-closing-name.test.js`
+- `tests/day-closing-print.test.js`
+- `tests/day-closing-routes.test.js`
+- `tests/day-closing-server.test.js`
+- `tests/day-closing.test.js`
+- `tests/delivery-qr.test.js`
+- `tests/delivery-quote.test.js`
+- `tests/delivery-rules.test.js`
+- `tests/dispatch-engine.test.js`
+- `tests/dispatch-manual.test.js`
+- `tests/dispatch-scenarios.test.js`
+- `tests/dispatch-service.test.js`
+- `tests/door-pay-server.test.js`
+- `tests/driver-claim-server.test.js`
+- `tests/driver-claim.test.js`
+- `tests/driver-track-server.test.js`
+- `tests/driver-tracker.test.js`
+- `tests/e2e/e2e-env.mjs`
+- `tests/e2e/helpers/flow.mjs`
+- `tests/e2e/kasse-ui.spec.mjs`
+- `tests/e2e/order-flow.spec.mjs`
+- `tests/e2e/README.md`
+- `tests/e2e/receipt-flow.spec.mjs`
+- `tests/e2e/server-harness.mjs`
+- `tests/e2e/smoke.spec.mjs`
+- `tests/extra-category.test.js`
+- `tests/fcm.test.js`
+- `tests/fixtures/admin-menu-sample.json`
+- `tests/flamo-ai.test.js`
+- `tests/i18n-pages.test.js`
+- `tests/kasse-category-order.test.js`
+- `tests/kasse-extra-attach.test.js`
+- `tests/kasse-gate.test.js`
+- `tests/kasse-menu-rules.test.js`
+- `tests/kasse-open-orders.test.js`
+- `tests/kasse-window.test.js`
+- `tests/kitchen.test.js`
+- `tests/learning.test.js`
+- `tests/live-orders-kasse-actions.test.js`
+- `tests/live-orders-trend.test.js`
+- `tests/manager-agent.test.js`
+- `tests/menu-price-sync.test.js`
+- `tests/menu-surcharge.test.js`
+- `tests/menu-sync.test.js`
+- `tests/menu-translations.test.js`
+- `tests/nav-registry.test.js`
+- `tests/note-translate.test.js`
+- `tests/option-library.test.js`
+- `tests/order-archive.test.js`
+- `tests/order-correction-server.test.js`
+- `tests/order-correction.test.js`
+- `tests/payment.test.js`
+- `tests/platform-accept.test.js`
+- `tests/platform-print-switch.test.js`
+- `tests/platform-status.test.js`
+- `tests/platform-trips.test.js`
+- `tests/print-service.test.js`
+- `tests/printer-panel-accept-switch.test.js`
+- `tests/push.test.js`
+- `tests/qonto-sync.test.js`
+- `tests/qr-print-hold.test.js`
+- `tests/qr-token-security.test.js`
+- `tests/receipt-branding.test.js`
+- `tests/receipt-qr-priority.test.js`
+- `tests/receipt-vat.test.js`
+- `tests/reception-page.test.js`
+- `tests/reminders.test.js`
+- `tests/resilience.test.js`
+- `tests/restore-owner-script.test.js`
+- `tests/review-fixes.test.js`
+- `tests/sales-invoice.test.js`
+- `tests/sales-ledger.test.js`
+- `tests/sales-proof-photo.test.js`
+- `tests/settlement-ledger.test.js`
+- `tests/sides.test.js`
+- `tests/system-update.test.js`
+- `tests/telegram-accounting.test.js`
+- `tests/telegram-actions.test.js`
+- `tests/tse-swissbit.test.js`
+- `tests/tse.test.js`
+- `tests/tunnel-config.test.js`
+- `tests/tunnel-helpers.test.js`
+- `tests/uber.test.js`
+- `tests/vat-catalog.test.js`
+- `tests/web-order-ratelimit.test.js`
+- `tests/web-order.test.js`
+
+## Daten/Konfiguration (8)
+
+- `allergen-ingredients.json`
+- `android-app/capacitor.config.json`
+- `android-app/package.json`
+- `generalization-benchmark.json`
+- `local-invoice-templates.json`
+- `local-preparser-dev-map.json`
+- `local-preparser-settings.json`
+- `package.json`
+
