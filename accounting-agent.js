@@ -9,6 +9,8 @@ const path = require('node:path');
 const SL = require('./sales-ledger.js');
 const AH = require('./accounting-health.js');
 const bizDay = require('./business-day.js');
+const AN = require('./accounting-anomalies.js');
+const BM = require('./bank-match.js');
 
 const str = v => (v == null ? '' : String(v));
 const low = v => str(v).toLowerCase();
@@ -52,6 +54,10 @@ const TOOLS = [
     parameters: { type: 'object', properties: { from: { type: 'string' }, to: { type: 'string' }, account: { type: 'string' } } } },
   { name: 'order', description: 'Eine Bestellung/Bon nach Code (Bestellcode, Plattform-Nr. oder ID) mit Zahlung, TSE und Positionen.',
     parameters: { type: 'object', properties: { code: { type: 'string' } }, required: ['code'] } },
+  { name: 'anomalies', description: 'Auffälligkeiten der letzten Wochen: doppelte Rechnungen, Preissprünge beim Einkauf, Kassendifferenzen, ungewöhnlich schwache Umsatztage, alte offene Bankbuchungen, Rechnungen ohne Beleg, USt-Konflikt Kleinunternehmer.',
+    parameters: { type: 'object', properties: { days: { type: 'integer' } } } },
+  { name: 'bank_suggestions', description: 'Vorschläge, welche offene Bankbuchung zu welcher Rechnung / Plattform-Auszahlung / Lohnzahlung passt (mit Sicherheit high/medium/low).',
+    parameters: { type: 'object', properties: {} } },
   { name: 'cashbook', description: 'Kassenbuch-Einträge (Anfangsbestand, Einlagen, Entnahmen, Abschluss) im Zeitraum.',
     parameters: { type: 'object', properties: { from: { type: 'string' }, to: { type: 'string' } } } },
 ];
@@ -134,6 +140,8 @@ function makeTools(data, { today } = {}) {
       const fisc = (data.fiscalTransactions || []).filter(f => pays.some(p => p.id === f.paymentId)).map(f => ({ status: f.status, transactionNumber: f.transactionNumber || null, simulated: !!f.simulated, signedAt: f.signedAt || null }));
       return { found: true, code: o.displayCode || null, platform: SL.platformOf(o), brand: SL.brandOf(o), externalCode: o.externalOrderCode || null, status: o.status, businessDay: dayOf(o.placedAt || o.createdAt), totalCents: o.totalCents ?? null, training: !!(o.training || o.isTest), items: (o.cart || []).slice(0, 40).map(i => ({ name: i.name, qty: i.quantity || 1, cents: i.totalCents ?? i.cents ?? null })), payments: pays, tse: fisc };
     },
+    anomalies: a => ({ items: AN.detect(data, { today, lookbackDays: Math.max(7, Math.min(365, num(a.days) || 60)) }).slice(0, 40) }),
+    bank_suggestions: () => { const s = BM.suggest(data); return { count: s.length, suggestions: s.slice(0, 30) }; },
     cashbook: a => {
       const rows = (data.cashbooks || []).filter(x => inRange(str(x.date), a.from, a.to)).sort((x, y) => str(x.date).localeCompare(str(y.date)));
       return { count: rows.length, balanceCents: rows.reduce((s, x) => s + num(x.inCents) - num(x.outCents), 0), rows: rows.slice(-80) };

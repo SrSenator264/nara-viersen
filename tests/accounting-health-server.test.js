@@ -53,3 +53,13 @@ test('KI-Buchhalter: Status, ohne Schlüssel 503 NO_AI_KEY, Kasse 403, alte Assi
   assert.equal((await call('POST', '/api/accounting/agent', { message: 'x' })).status, 401);
   const pg = await call('GET', '/accounting-agent.html', null, S.acct); assert.equal(pg.status, 200);
 });
+test('Smart-Endpunkte: Auffälligkeiten, Bank-Vorschläge, Auszug ohne Schlüssel, Wochenbericht-Test, Kasse 403', async () => {
+  const a = await call('GET', '/api/accounting/anomalies', null, S.acct); assert.equal(a.status, 200); assert.ok(Array.isArray(a.json.anomalies));
+  assert.ok(a.json.anomalies.some(x => x.type === 'VAT_ON_KLEIN'), 'KLEIN + 7 % aus vorherigem Test');
+  const b = await call('GET', '/api/accounting/bank-suggestions', null, S.acct); assert.equal(b.status, 200); assert.deepEqual(b.json.suggestions, []);
+  const r = await call('POST', '/api/accounting/bank-statement/read', { filename: 'a.pdf', mime: 'application/pdf', data: 'JVBERi0x' }, S.owner); assert.equal(r.status, 503); assert.equal(r.json.code, 'NO_AI_KEY');
+  assert.equal((await call('POST', '/api/accounting/bank-statement/read', { filename: 'a.exe', data: 'x' }, S.owner)).status, 422);
+  const w = await call('POST', '/api/accounting/weekly/test', {}, S.owner); assert.equal(w.status, 200); assert.match(w.json.text, /ملخص المحاسبة/);
+  assert.equal((await call('GET', '/api/accounting/anomalies', null, S.cashier)).status, 403);
+  assert.equal((await call('GET', '/banking.html', null, S.acct)).status, 200);
+});

@@ -54,7 +54,7 @@
   // Arbeitsbildschirme: Seitenleiste nur auf Knopfdruck (volle Breite für Kasse/Küche)
   const COMPACT = new Set(['kasse.html', 'anleitung.html', 'reception.html', 'kitchen.html', 'live-orders.html', 'dispatch.html', 'connect.html']);
   // Seiten, deren Inhalt früher von nara-shell.js in .main gepackt wurde (Abstand/Breite bleibt gleich)
-  const WRAP = new Set(['accounting.html', 'admin-foundation.html', 'ai-control.html', 'banking.html', 'inventory-foundation.html', 'reports.html', 'sales.html', 'staff.html']);
+  const WRAP = new Set(['accounting.html', 'admin-foundation.html', 'ai-control.html', 'inventory-foundation.html', 'reports.html', 'sales.html', 'staff.html']);
   const MANAGERS = ['OWNER', 'MANAGER'];
 
   const me = document.currentScript;

@@ -1,3 +1,176 @@
-<!doctype html><html lang="de" dir="ltr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Flamo · Bank</title><link rel="stylesheet" href="nara-shell.css"><style>body{margin:0;background:#f4f6f9;color:#162033;font-family:FlamoAr,Arial,sans-serif}.page{max-width:1100px;margin:auto;padding:40px 28px}.card{background:#fff;border:1px solid #e4e9f0;border-radius:16px;padding:24px;margin-bottom:20px}h1{margin:0 0 8px}.muted{color:#68758a}input,button{padding:11px;border:1px solid #d5dce6;border-radius:8px;font:inherit}button{background:#c83b1d;color:#fff;cursor:pointer}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.tx{padding:12px 0;border-bottom:1px solid #e4e9f0;display:flex;justify-content:space-between;gap:12px}.unmatched{color:#b26a00}.matched{color:#18834b}</style><link rel="stylesheet" href="flamo-night.css?v=20261031b"><script src="flamo-night.js?v=20261031b"></script><link rel="stylesheet" href="flamo-font.css?v=20261109a"></head><body><main class="page"><section class="card"><p class="muted" data-t="eyebrow"></p><h1 data-t="h1"></h1><p class="muted" data-t="sub"></p><div class="row"><input id="file" type="file" accept=".csv,text/csv"><button id="import" data-t="imp"></button><button id="refresh" data-t="refresh"></button></div><p id="status"></p></section><section class="card"><h2 data-t="txh"></h2><div id="transactions" data-t="loading"></div></section></main><script src="/nara-lang.js?v=20261018" data-section="banking"></script><script src="/flamo-t.js"></script><script>(async()=>{
-const T={title:{de:'Bank',ar:'البنك',en:'Bank'},eyebrow:{de:'Buchhaltung · Bank-/Kassenabgleich',ar:'المحاسبة · مطابقة البنك والكاشير',en:'Accounting · Bank/cash reconciliation'},h1:{de:'Kontoauszüge und Abgleich',ar:'كشوف البنك والتسوية',en:'Bank statements & reconciliation'},sub:{de:'CSV hochladen. Buchungen werden erst nach Abgleich und Freigabe verbucht.',ar:'ارفع ملف CSV. الحركات ما بتنرحّل محاسبياً قبل المطابقة والموافقة.',en:'Upload a CSV. Transactions are not posted until matched and approved.'},imp:{de:'Auszug importieren',ar:'استيراد الكشف',en:'Import statement'},refresh:{de:'Aktualisieren',ar:'تحديث',en:'Refresh'},txh:{de:'Banktransaktionen',ar:'الحركات البنكية',en:'Bank transactions'},loading:{de:'Wird geladen…',ar:'عم يحمّل…',en:'Loading…'},noDesc:{de:'ohne Beschreibung',ar:'بدون وصف',en:'no description'},matched:{de:'abgeglichen',ar:'مطابقة',en:'matched'},unmatched:{de:'nicht abgeglichen',ar:'غير مطابقة',en:'unmatched'},approve:{de:'Freigeben',ar:'اعتماد',en:'Approve'},none:{de:'Noch keine Banktransaktionen',ar:'ما في حركات بنكية لسا',en:'No bank transactions yet'},ask:{de:'Vorgangs- oder Rechnungsnummer eingeben',ar:'دخّل رقم العملية أو الفاتورة المرتبطة',en:'Enter the linked transaction or invoice number'},ok:{de:'Abgleich freigegeben',ar:'تم اعتماد المطابقة',en:'Match approved'},noOk:{de:'Abgleich konnte nicht freigegeben werden',ar:'تعذر اعتماد المطابقة',en:'Could not approve the match'},pick:{de:'Bitte zuerst eine CSV-Datei wählen',ar:'اختار ملف CSV أولاً',en:'Choose a CSV file first'},imported:{de:'{n} Buchungen importiert',ar:'تم استيراد {n} حركة',en:'{n} transactions imported'},impFail:{de:'Import fehlgeschlagen',ar:'تعذر الاستيراد',en:'Import failed'}};
-let last=null;const $=id=>document.getElementById(id);async function load(){last=await (await fetch('/api/accounting/bank-transactions?ts='+Date.now())).json();draw()}function draw(){const j=last||{};$('transactions').innerHTML=(j.transactions||[]).map(x=>`<div class="tx"><span>${x.date} · ${x.description||FT.t('noDesc')} · ${(x.amountCents/100).toFixed(2)} €</span><span class="${x.status==='MATCHED'?'matched':'unmatched'}">${FT.t(x.status==='MATCHED'?'matched':'unmatched')} <button data-id="${x.id}">${FT.t('approve')}</button></span></div>`).join('')||FT.t('none');document.querySelectorAll('[data-id]').forEach(b=>b.onclick=async()=>{const id=b.dataset.id;const ref=prompt(FT.t('ask'));if(!ref)return;const r=await fetch('/api/accounting/bank-transactions/match',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transactionId:id,status:'MATCHED',entityType:'MANUAL',entityId:ref})});$('status').textContent=FT.t(r.ok?'ok':'noOk');load()})}$('import').onclick=async()=>{const f=$('file').files[0];if(!f)return $('status').textContent=FT.t('pick');const r=await fetch('/api/accounting/bank-transactions/csv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({csv:await f.text()})});const j=await r.json();$('status').textContent=r.ok?FT.t('imported',{n:j.addedCount}):(j.error||FT.t('impFail'));load()};$('refresh').onclick=load;FT.init(T,{onChange:draw});load()})()</script><script src="flamo-home.js?v=20261031a" defer></script></body></html>
+<!doctype html>
+<html lang="de" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flamo · Bank</title>
+<script src="/nara-lang.js?v=20261018" data-section="banking"></script>
+<script src="/flamo-t.js"></script>
+<link rel="stylesheet" href="flamo-night.css?v=20261031b"><script src="flamo-night.js?v=20261031b"></script>
+<style>
+:root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--bad:#d1342f;--soft:#fff4ea}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 FlamoAr,"Segoe UI",system-ui,Arial,sans-serif}
+button,input{font:inherit;color:inherit}
+header{padding:14px 16px;background:#fff;box-shadow:0 1px 0 var(--line)}
+header h1{margin:0;font-size:1.3rem;color:var(--brand)}
+header p{margin:2px 0 0;color:var(--mute);font-size:.92rem}
+main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 1px 0 var(--line)}
+.card h2{margin:0 0 8px;font-size:1.15rem}
+.mute{color:var(--mute);font-size:.9rem}
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px;border:2px dashed var(--line);border-radius:16px;cursor:pointer;text-align:center}
+.drop span{font-size:2rem}
+.drop input{display:none}
+.btn{min-height:50px;border:0;border-radius:14px;background:var(--brand);color:#fff;font-weight:800;cursor:pointer;padding:0 16px}
+.btn.ghost{background:#eef0ea;color:var(--ink)}
+.btn.small{min-height:40px;font-size:.92rem;padding:0 12px}
+.btn:disabled{opacity:.5}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.chip{border:0;border-radius:999px;padding:8px 14px;background:#f1eee9;cursor:pointer;font-weight:700}
+.chip.on{background:var(--brand);color:#fff}
+.tx{padding:12px 0;border-top:1px solid var(--line)}
+.tx:first-of-type{border-top:0}
+.tx .top{display:flex;gap:10px;align-items:center}
+.tx .e{font-size:1.3rem;width:30px;text-align:center}
+.tx .d{flex:1;min-width:0}
+.tx .d small{display:block;color:var(--mute)}
+.amt{font-weight:800;white-space:nowrap}
+.amt.in{color:var(--ok)}.amt.out{color:var(--ink)}
+.sug{margin:8px 0 0;padding:10px;border-radius:12px;background:var(--soft);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sug .l{flex:1;min-width:160px}
+.badge{font-size:.75rem;border-radius:8px;padding:2px 8px;background:#eee}
+.badge.high{background:#d9f2e3;color:var(--ok)}.badge.medium{background:#ffe8cc;color:#9a5200}
+.prev{max-height:420px;overflow:auto}
+.prev label{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.prev label.dup{opacity:.5}
+.prev input{width:20px;height:20px}
+.okc{color:var(--ok);font-weight:800}.badc{color:var(--bad);font-weight:800}
+#status{min-height:1.4em;margin-top:8px}
+</style>
+<link rel="stylesheet" href="flamo-font.css?v=20261109a"></head>
+<body>
+<header><h1>🏦 <span data-t="h1"></span></h1><p data-t="sub"></p></header>
+<main>
+  <section class="card">
+    <h2>📥 <span data-t="upTitle"></span></h2>
+    <label class="drop"><span>📄</span><b data-t="upPick"></b><small class="mute" data-t="upHint"></small><input id="file" type="file" accept=".csv,text/csv,.pdf,application/pdf,image/png,image/jpeg"></label>
+    <div id="status" class="mute" role="status"></div>
+  </section>
+  <section class="card" id="c-prev" hidden></section>
+  <section class="card">
+    <h2>🔗 <span data-t="txh"></span></h2>
+    <div class="chips"><button class="chip on" data-f="open" type="button" data-t="fOpen"></button><button class="chip" data-f="all" type="button" data-t="fAll"></button></div>
+    <div id="transactions" class="mute" data-t="loading"></div>
+  </section>
+</main>
+<script>
+FT.init({
+  title:{de:'Bank',ar:'البنك',en:'Bank'},
+  h1:{de:'Bank & Abgleich',ar:'البنك والمطابقة',en:'Bank & matching'},
+  sub:{de:'Kontoauszug hochladen, Vorschläge bestätigen. Gebucht wird erst nach deiner Freigabe.',ar:'ارفع كشف الحساب وأكّد الاقتراحات. ما في شي بيترحّل قبل موافقتك.',en:'Upload a statement, confirm suggestions. Nothing is posted before you approve.'},
+  upTitle:{de:'Kontoauszug hochladen',ar:'رفع كشف الحساب',en:'Upload statement'},
+  upPick:{de:'Datei wählen',ar:'اختار ملف',en:'Choose file'},
+  upHint:{de:'PDF oder Foto (liest die KI) · oder CSV (Wise/Qonto)',ar:'PDF أو صورة (بيقراه الذكاء الاصطناعي) · أو CSV (Wise/Qonto)',en:'PDF or photo (read by AI) · or CSV (Wise/Qonto)'},
+  reading:{de:'KI liest den Auszug… (kann 1–2 Minuten dauern)',ar:'الذكاء الاصطناعي عم يقرا الكشف… (ممكن ياخد دقيقة أو دقيقتين)',en:'AI is reading the statement… (may take 1–2 minutes)'},
+  noKey:{de:'Für PDF/Foto braucht es ANTHROPIC_API_KEY in der .env auf dem Kassen-PC. CSV geht immer.',ar:'للـ PDF أو الصورة لازم ANTHROPIC_API_KEY بملف .env على كمبيوتر المحل. الـ CSV بيمشي دايماً.',en:'PDF/photo needs ANTHROPIC_API_KEY in .env on the shop PC. CSV always works.'},
+  readFail:{de:'Konnte den Auszug nicht lesen — bitte nochmal oder als CSV.',ar:'ما قدرت إقرا الكشف — جرّب كمان مرة أو ارفعو CSV.',en:'Could not read the statement — try again or upload CSV.'},
+  prevTitle:{de:'Gelesen: {n} Buchungen',ar:'انقرا: {n} حركة',en:'Read: {n} transactions'},
+  balOK:{de:'✅ Saldo stimmt (Anfang + Buchungen = Ende)',ar:'✅ الرصيد مزبوط (البداية + الحركات = النهاية)',en:'✅ Balance checks out (opening + lines = closing)'},
+  balBAD:{de:'⚠️ Saldo stimmt nicht — bitte Buchungen prüfen',ar:'⚠️ الرصيد مو مزبوط — راجع الحركات',en:'⚠️ Balance does not match — please check the lines'},
+  balUNK:{de:'Saldo im Auszug nicht gefunden',ar:'ما لقيت الرصيد بالكشف',en:'No balance found on the statement'},
+  dup:{de:'schon vorhanden',ar:'موجودة من قبل',en:'already there'},
+  importSel:{de:'{n} Buchungen übernehmen',ar:'استورد {n} حركة',en:'Import {n} transactions'},
+  cancel:{de:'Abbrechen',ar:'إلغاء',en:'Cancel'},
+  imported:{de:'{n} Buchungen importiert ✅',ar:'انستوردت {n} حركة ✅',en:'{n} transactions imported ✅'},
+  impFail:{de:'Import fehlgeschlagen',ar:'ما زبط الاستيراد',en:'Import failed'},
+  txh:{de:'Buchungen',ar:'الحركات',en:'Transactions'},
+  fOpen:{de:'Offen',ar:'المفتوحة',en:'Open'},
+  fAll:{de:'Alle',ar:'الكل',en:'All'},
+  loading:{de:'Wird geladen…',ar:'عم يحمّل…',en:'Loading…'},
+  none:{de:'Keine Buchungen',ar:'ما في حركات',en:'No transactions'},
+  noneOpen:{de:'Alles abgeglichen ✅',ar:'كلو متطابق ✅',en:'All matched ✅'},
+  noDesc:{de:'ohne Beschreibung',ar:'بدون وصف',en:'no description'},
+  matchedTo:{de:'Abgeglichen: {r}',ar:'متطابقة مع: {r}',en:'Matched: {r}'},
+  sugg:{de:'Vorschlag',ar:'اقتراح',en:'Suggestion'},
+  high:{de:'sehr sicher',ar:'أكيد تقريباً',en:'very likely'},
+  medium:{de:'wahrscheinlich',ar:'محتمل',en:'likely'},
+  low:{de:'unsicher',ar:'مو أكيد',en:'unsure'},
+  yes:{de:'Passt',ar:'صح',en:'Yes'},
+  manual:{de:'Selbst zuordnen',ar:'اربطها بإيدك',en:'Match manually'},
+  ask:{de:'Rechnungs- oder Vorgangsnummer eingeben',ar:'اكتب رقم الفاتورة أو العملية',en:'Enter invoice or reference number'},
+  ok:{de:'Abgleich gespeichert ✅',ar:'انحفظت المطابقة ✅',en:'Match saved ✅'},
+  noOk:{de:'Abgleich konnte nicht gespeichert werden',ar:'ما انحفظت المطابقة',en:'Could not save the match'},
+  pick:{de:'Bitte zuerst eine Datei wählen',ar:'اختار ملف أول',en:'Choose a file first'},
+},{onChange(){draw();drawPrev()}});
+
+const $=id=>document.getElementById(id);
+const t=(k,v)=>FT.t(k,v);
+const tk=(k,v)=>FT.t(k,v); // dynamic keys
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=c=>new Intl.NumberFormat(FT.locale(),{style:'currency',currency:'EUR'}).format((Number(c)||0)/100);
+const fmtD=s=>{try{return new Intl.DateTimeFormat(FT.locale(),{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(String(s).slice(0,10)+'T00:00:00Z'))}catch(e){return s}};
+let TX=[],SUG=new Map(),filter='open',PREV=null;
+const say=k=>{$('status').textContent=k};
+
+async function load(){
+  try{
+    const [a,b]=await Promise.all([fetch('/api/accounting/bank-transactions?ts='+Date.now()),fetch('/api/accounting/bank-suggestions?ts='+Date.now())]);
+    TX=(a.ok?(await a.json()).transactions:[])||[];
+    SUG=new Map(((b.ok?(await b.json()).suggestions:[])||[]).map(s=>[s.transactionId,s.candidates]));
+  }catch(e){TX=[];SUG=new Map()}
+  draw();
+}
+function draw(){
+  const list=TX.filter(x=>filter==='all'||x.status==='UNMATCHED').sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filter));
+  $('transactions').innerHTML=list.map(x=>{
+    const inn=x.amountCents>0,cands=SUG.get(x.id)||[];
+    const sug=x.status==='UNMATCHED'?cands.map((c,i)=>`<div class="sug"><span class="l">💡 <b>${esc(t('sugg'))}:</b> ${esc(c.label)} · ${esc(eur(c.amountCents))} <span class="badge ${c.confidence}">${esc(tk(c.confidence))}</span></span><button class="btn small" type="button" data-ok="${esc(x.id)}" data-i="${i}">✅ ${esc(t('yes'))}</button></div>`).join(''):'';
+    const st=x.status==='MATCHED'?`<small>🔗 ${esc(t('matchedTo',{r:x.matchedEntityId||''}))}</small>`:'';
+    return `<div class="tx"><div class="top"><span class="e">${x.status==='MATCHED'?'✅':inn?'⬇️':'⬆️'}</span><span class="d"><b>${esc(x.description||t('noDesc'))}</b><small>${esc(fmtD(x.date))}${x.reference?' · '+esc(x.reference):''}</small>${st}</span><span class="amt ${inn?'in':'out'}">${esc(eur(x.amountCents))}</span></div>${sug}${x.status==='UNMATCHED'?`<button class="btn ghost small" type="button" data-man="${esc(x.id)}" style="margin-top:8px">✍️ ${esc(t('manual'))}</button>`:''}</div>`;
+  }).join('')||esc(t(filter==='open'&&TX.length?'noneOpen':'none'));
+  document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{const c=(SUG.get(b.dataset.ok)||[])[Number(b.dataset.i)];if(c)match(b.dataset.ok,c.entityType,c.entityId)});
+  document.querySelectorAll('[data-man]').forEach(b=>b.onclick=()=>{const ref=prompt(t('ask'));if(ref)match(b.dataset.man,'MANUAL',ref)});
+}
+async function match(id,type,ref){
+  try{const r=await fetch('/api/accounting/bank-transactions/match',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transactionId:id,status:'MATCHED',entityType:type,entityId:ref})});say(t(r.ok?'ok':'noOk'))}catch(e){say(t('noOk'))}
+  load();
+}
+function drawPrev(){
+  const el=$('c-prev');if(!PREV){el.hidden=true;return}el.hidden=false;
+  const s=PREV.statement,n=s.transactions.length;
+  const bal=s.balanceCheck==='OK'?`<p class="okc">${esc(t('balOK'))}</p>`:s.balanceCheck==='MISMATCH'?`<p class="badc">${esc(t('balBAD'))}</p>`:`<p class="mute">${esc(t('balUNK'))}</p>`;
+  el.innerHTML=`<h2>🤖 ${esc(t('prevTitle',{n}))}</h2><p class="mute">${esc([s.bankName,s.ibanLast4?'•••• '+s.ibanLast4:'',s.periodFrom&&s.periodTo?fmtD(s.periodFrom)+' – '+fmtD(s.periodTo):''].filter(Boolean).join(' · '))}</p>${bal}
+    <div class="prev">${s.transactions.map((x,i)=>`<label class="${x.duplicate?'dup':''}"><input type="checkbox" data-p="${i}" ${x.duplicate?'':'checked'}><span style="flex:1"><b>${esc(x.description)}</b><br><small class="mute">${esc(fmtD(x.date))}${x.duplicate?' · '+esc(t('dup')):''}</small></span><span class="amt ${x.amountCents>0?'in':'out'}">${esc(eur(x.amountCents))}</span></label>`).join('')}</div>
+    <div style="display:flex;gap:10px;margin-top:12px"><button class="btn" id="pImp" type="button" style="flex:1"></button><button class="btn ghost" id="pCancel" type="button">${esc(t('cancel'))}</button></div>`;
+  const upd=()=>{$('pImp').textContent='📥 '+t('importSel',{n:el.querySelectorAll('[data-p]:checked').length})};
+  el.querySelectorAll('[data-p]').forEach(c=>c.onchange=upd);upd();
+  $('pCancel').onclick=()=>{PREV=null;drawPrev()};
+  $('pImp').onclick=async()=>{
+    const pick=[...el.querySelectorAll('[data-p]:checked')].map(c=>s.transactions[Number(c.dataset.p)]).map(x=>({date:x.date,amountCents:x.amountCents,description:x.description,reference:x.reference,balanceCents:x.balanceCents}));
+    if(!pick.length)return;$('pImp').disabled=true;
+    try{const r=await fetch('/api/accounting/bank-transactions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transactions:pick,sourceDocumentId:PREV.documentId})});const j=await r.json();say(r.ok?t('imported',{n:j.addedCount||pick.length}):(j.error||t('impFail')));if(r.ok){PREV=null;drawPrev()}}catch(e){say(t('impFail'))}
+    load();
+  };
+}
+const b64=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result));r.onerror=no;r.readAsDataURL(f)});
+$('file').onchange=async()=>{
+  const f=$('file').files[0];if(!f)return say(t('pick'));
+  if(/\.csv$/i.test(f.name)||f.type==='text/csv'){
+    try{const r=await fetch('/api/accounting/bank-transactions/csv',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({csv:await f.text()})});const j=await r.json();say(r.ok?t('imported',{n:j.addedCount}):(j.error||t('impFail')))}catch(e){say(t('impFail'))}
+    $('file').value='';return load();
+  }
+  say(t('reading'));
+  try{
+    const r=await fetch('/api/accounting/bank-statement/read',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename:f.name,mime:f.type,data:await b64(f)})});
+    const j=await r.json().catch(()=>({}));
+    if(r.ok&&j.statement){PREV=j;say('');drawPrev()}else say(t(j.code==='NO_AI_KEY'?'noKey':'readFail'));
+  }catch(e){say(t('readFail'))}
+  $('file').value='';
+};
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{filter=c.dataset.f;draw()});
+load();
+</script>
+<script src="flamo-home.js?v=20261031a" defer></script></body>
+</html>

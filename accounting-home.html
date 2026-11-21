@@ -73,6 +73,7 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
   <section class="card alert" id="c-alert" hidden></section>
   <section class="card" id="c-klein"></section>
   <section class="card" id="c-month"></section>
+  <section class="card" id="c-an"></section>
   <section class="card" id="c-dl"></section>
   <section class="card">
     <h2>🧰 <span data-t="tools"></span></h2>
@@ -99,6 +100,7 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
       <label class="cb"><input id="s-minijob" type="checkbox"><span data-t="sMinijob"></span></label>
     </div>
     <button class="btn" id="save" type="button" style="width:100%;margin-top:12px">💾 <span data-t="save"></span></button>
+    <button class="btn ghost" id="weekly" type="button" style="width:100%;margin-top:10px">📨 <span data-t="weeklyTest"></span></button>
     <div id="msg" class="mute" role="status"></div>
   </section>
   <p class="note" data-t="disclaimer"></p>
@@ -170,6 +172,18 @@ FT.init({
   dlNote:{de:'Fristen ungefähr: Wochenende → Montag, Feiertage nicht berücksichtigt.',ar:'المواعيد تقريبية: السبت والأحد بينزاحوا للاثنين، العطل مو محسوبة.',en:'Approximate: weekends move to Monday, holidays not included.'},
   tAgent:{de:'KI-Buchhalter',ar:'المحاسب الذكي',en:'AI accountant'},
   tAgentHint:{de:'Frag alles zu deinen Zahlen',ar:'اسأل أي شي عن أرقامك',en:'Ask anything about your figures'},
+  anTitle:{de:'Auffälligkeiten',ar:'شي مو طبيعي',en:'Anomalies'},
+  anNone:{de:'Nichts Auffälliges in den letzten Wochen ✅',ar:'ما في شي غريب بالأسابيع الأخيرة ✅',en:'Nothing unusual in recent weeks ✅'},
+  a_DUP_INVOICE:{de:'Doppelte Rechnung? {s} {n}',ar:'فاتورة مكررة؟ {s} {n}',en:'Duplicate invoice? {s} {n}'},
+  a_PRICE_JUMP:{de:'{i}: Einkaufspreis +{p} %',ar:'{i}: سعر الشراء طلع {p} %',en:'{i}: purchase price +{p} %'},
+  a_CASH_DIFF:{de:'Kassendifferenz {a} ({n})',ar:'فرق بالصندوق {a} ({n})',en:'Cash difference {a} ({n})'},
+  a_LOW_SALES_DAY:{de:'Schwacher Tag: {a} statt ca. {u}',ar:'يوم ضعيف: {a} بدل تقريباً {u}',en:'Weak day: {a} instead of about {u}'},
+  a_OLD_UNMATCHED:{de:'{c} Bankbuchungen seit über 30 Tagen offen',ar:'{c} حركات بنك مفتوحة من أكتر من 30 يوم',en:'{c} bank lines open for over 30 days'},
+  a_NO_DOCUMENT:{de:'Rechnung ohne Beleg: {s} {n}',ar:'فاتورة بدون مستند: {s} {n}',en:'Invoice without document: {s} {n}'},
+  a_VAT_ON_KLEIN:{de:'Kleinunternehmer, aber Kasse rechnet {r} % USt',ar:'Kleinunternehmer بس الكاشير عم يحسب {r} % ضريبة',en:'Small business, but till charges {r} % VAT'},
+  weeklyTest:{de:'Wochenbericht jetzt an Telegram senden',ar:'ابعت الملخص الأسبوعي على Telegram هلق',en:'Send weekly summary to Telegram now'},
+  weeklyOk:{de:'Gesendet ✅ (jeden Montag 9 Uhr automatisch)',ar:'انبعت ✅ (كل اثنين الساعة 9 لحالو)',en:'Sent ✅ (automatically every Monday 9 am)'},
+  weeklyNo:{de:'Telegram nicht eingerichtet',ar:'Telegram مو مركّب',en:'Telegram not set up'},
   tools:{de:'Werkzeuge',ar:'الأدوات',en:'Tools'},
   tJournal:{de:'Buchungsjournal',ar:'دفتر القيود',en:'Journal'},
   tJournalHint:{de:'Konten, Buchungen, Export',ar:'الحسابات والقيود والتصدير',en:'Accounts, entries, export'},
@@ -209,6 +223,15 @@ const monthShort=m=>{try{return new Intl.DateTimeFormat(FT.locale(),{month:'narr
 let H=null,S=null,Y=null,M=null;
 
 const LINK={closings:'kasse-settlement.html',tse:'sales.html',bank:'banking.html',belege:'inventory-foundation.html',journal:'accounting.html',period:'accounting.html'};
+const AN_ICON={DUP_INVOICE:'👯',PRICE_JUMP:'📈',CASH_DIFF:'💵',LOW_SALES_DAY:'📉',OLD_UNMATCHED:'🏦',NO_DOCUMENT:'📎',VAT_ON_KLEIN:'🚨'};
+const AN_LINK={DUP_INVOICE:'inventory-foundation.html',PRICE_JUMP:'inventory-foundation.html',CASH_DIFF:'kasse-settlement.html',LOW_SALES_DAY:'sales.html',OLD_UNMATCHED:'banking.html',NO_DOCUMENT:'inventory-foundation.html',VAT_ON_KLEIN:'accounting-home.html'};
+let AN=null;
+function drawAn(){
+  const el=$('c-an');if(!AN){el.hidden=true;return}el.hidden=false;
+  const rows=AN.slice(0,8).map(a=>{const txt=tk('a_'+a.type,{s:a.supplier||'',n:a.invoiceNumber||a.number||'',i:a.item||'',p:a.changePct||'',a:eur(a.differenceCents!=null?a.differenceCents:a.salesCents),u:eur(a.usualCents),c:a.count||'',r:a.rate||''});
+    return `<a class="check" href="${AN_LINK[a.type]||'#'}"><span class="e">${AN_ICON[a.type]||'⚠️'}</span><span class="t"><b>${esc(txt)}</b><small>${a.date?esc(fmtD(a.date)):''}</small></span><span class="go">›</span></a>`}).join('');
+  el.innerHTML=`<h2>🕵️ ${esc(t('anTitle'))}</h2>${rows||`<p class="mute">${esc(t('anNone'))}</p>`}`;
+}
 const DL_ICON={minijobReport:'👥',minijobPay:'💸',monthClose:'📅',gewstPre:'🏛️',estPre:'🏛️',ustVa:'🧾',annual:'📑',kassenmeldung:'🧮'};
 
 function drawAsk(){
@@ -278,7 +301,7 @@ function drawSettings(){
   $('s-kmdone').checked=!!S.kassenmeldungDone;
   $('s-minijob').checked=S.minijob!==false;
 }
-function draw(){if(!H)return;drawAsk();drawKlein();drawMonth();drawDl();drawSettings()}
+function draw(){if(!H)return;drawAsk();drawKlein();drawMonth();drawAn();drawDl();drawSettings()}
 
 async function load(){
   try{
@@ -287,6 +310,7 @@ async function load(){
     if(!a.ok||!b.ok)throw 0;
     H=await a.json();S=(await b.json()).settings||{};
     if(!Y){Y=H.month.year;M=H.month.month}
+    try{const c=await fetch('/api/accounting/anomalies',{cache:'no-store'});AN=c.ok?(await c.json()).anomalies||[]:null}catch(e){AN=null}
     draw();
   }catch(e){$('msg').textContent=t('err')}
 }
@@ -302,6 +326,7 @@ $('save').onclick=()=>{
   mr[y]=cents($('s-mcur').value);mr[y-1]=cents($('s-mprev').value);
   saveSettings({vatRegime:$('s-regime').value,manualRevenueCents:mr,kasseInUseSince:$('s-since').value||'',kassenmeldungDone:$('s-kmdone').checked,minijob:$('s-minijob').checked});
 };
+$('weekly').onclick=async()=>{try{const r=await fetch('/api/accounting/weekly/test',{method:'POST'});const j=await r.json();$('msg').textContent=t(j.sent?'weeklyOk':'weeklyNo')}catch(e){$('msg').textContent=t('err')}};
 load();
 </script>
 <script src="flamo-home.js?v=20261031a" defer></script></body>
