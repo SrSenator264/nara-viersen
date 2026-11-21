@@ -77,6 +77,7 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
   <section class="card">
     <h2>🧰 <span data-t="tools"></span></h2>
     <div class="tiles">
+      <a class="tile" href="accounting-agent.html" style="background:var(--soft)"><span>🤖</span><b data-t="tAgent"></b><small data-t="tAgentHint"></small></a>
       <a class="tile" href="accounting.html"><span>📒</span><b data-t="tJournal"></b><small data-t="tJournalHint"></small></a>
       <a class="tile" href="kasse-settlement.html"><span>📊</span><b data-t="tClose"></b><small data-t="tCloseHint"></small></a>
       <a class="tile" href="sales.html"><span>💶</span><b data-t="tSales"></b><small data-t="tSalesHint"></small></a>
@@ -167,6 +168,8 @@ FT.init({
   d_annual:{de:'Steuererklärungen {y} (ohne Steuerberater)',ar:'الإقرارات الضريبية لسنة {y} (بدون Steuerberater)',en:'Tax returns {y} (without adviser)'},
   d_kassenmeldung:{de:'Kassenmeldung bei ELSTER (§ 146a Abs. 4 AO)',ar:'تسجيل الكاشير بـ ELSTER (§ 146a Abs. 4 AO)',en:'Till registration in ELSTER (§ 146a(4) AO)'},
   dlNote:{de:'Fristen ungefähr: Wochenende → Montag, Feiertage nicht berücksichtigt.',ar:'المواعيد تقريبية: السبت والأحد بينزاحوا للاثنين، العطل مو محسوبة.',en:'Approximate: weekends move to Monday, holidays not included.'},
+  tAgent:{de:'KI-Buchhalter',ar:'المحاسب الذكي',en:'AI accountant'},
+  tAgentHint:{de:'Frag alles zu deinen Zahlen',ar:'اسأل أي شي عن أرقامك',en:'Ask anything about your figures'},
   tools:{de:'Werkzeuge',ar:'الأدوات',en:'Tools'},
   tJournal:{de:'Buchungsjournal',ar:'دفتر القيود',en:'Journal'},
   tJournalHint:{de:'Konten, Buchungen, Export',ar:'الحسابات والقيود والتصدير',en:'Accounts, entries, export'},

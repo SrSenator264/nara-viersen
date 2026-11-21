@@ -38,6 +38,9 @@ async function requestWithRetry(model,body,key,maxAttempts=2){
 }
 async function extract({files=[],mimeTypes=[]}){
   const totalStarted=Date.now(),prepStarted=Date.now();
+  if(process.env.ANTHROPIC_API_KEY&&String(process.env.NARA_INVOICE_PROVIDER||'').toLowerCase()!=='gemini'){
+    try{const parsed=await extractClaude({files,mimeTypes});if(Array.isArray(parsed.lines)&&parsed.lines.length)return parsed;console.warn('[NARA][CLAUDE_INVOICE] keine Positionen, Fallback Gemini')}catch(error){console.warn('[NARA][CLAUDE_INVOICE] Fehler, Fallback Gemini:',error.code||error.message);if(!process.env.GEMINI_API_KEY)throw Object.assign(new Error('AI invoice reading is temporarily unavailable. Your invoice data has not been changed. Please try again shortly.'),{code:'CLAUDE_UNAVAILABLE',cause:error})}
+  }
   const key=process.env.GEMINI_API_KEY;
   if(!key)throw Object.assign(new Error('Gemini API ist noch nicht konfiguriert.'),{code:'MISSING_KEY'});
   const parts=[{text:'Extrahiere ausschließlich sichtbare Rechnungsdaten. Erfinde niemals Werte. Fehlende Werte null. Bewahre Artikelcodes und Originalbeschreibungen. Erzeuge zusätzlich pro Zeile suggestedInventoryName: einen kurzen, eindeutigen und aussagekräftigen Inventarnamen aus 2 bis 5 Wörtern ohne Marke, Werbewörter, Halal- oder Tiefkühlhinweise und ohne Packungsgröße. Deutsche Dezimalzahlen als JSON-Zahlen. Konvertiere 2.5 kg explizit zu 2500 g und 10 L explizit zu 10000 ml, niemals kg zu ml. Antworte nur JSON gemäß Schema.'}];
@@ -66,6 +69,31 @@ async function extract({files=[],mimeTypes=[]}){
   console.log('[NARA][FINAL_SELECTION]',{selection:'FALLBACK',model:escalation});
   console.log('[NARA][INVOICE_TIMING] total='+(Date.now()-totalStarted)+'ms');return parsed;
 }
+// Claude (Anthropic) als Rechnungsleser: PDF/Bild direkt, strukturierte Antwort über ein erzwungenes Tool.
+// Aktiv, wenn ANTHROPIC_API_KEY gesetzt ist (NARA_INVOICE_PROVIDER=gemini schaltet zurück). Fällt bei Fehler auf Gemini zurück.
+const toClaudeSchema=node=>{if(!node||typeof node!=='object')return node;if(Array.isArray(node))return node.map(toClaudeSchema);const out={};for(const [k,v] of Object.entries(node)){if(k==='nullable')continue;out[k]=toClaudeSchema(v)}if(node.nullable&&typeof node.type==='string')out.type=[node.type,'null'];return out};
+const CLAUDE_PROMPT='Lies diese Eingangsrechnung eines Restaurants. Extrahiere ausschließlich sichtbare Daten, erfinde niemals Werte, fehlende Werte = null. Bewahre Artikelcodes und Originalbeschreibungen. Jede Rechnungsposition als eigene Zeile (auch Pfand, Rabatt, Fracht). suggestedInventoryName: kurzer eindeutiger Inventarname aus 2 bis 5 Wörtern ohne Marke, Werbewörter, Halal-/Tiefkühlhinweise und ohne Packungsgröße. Zahlen als JSON-Zahlen (deutsches Komma -> Punkt). Datumsangaben als YYYY-MM-DD. vatRate als Prozentzahl (7, 19, 0). Wenn die Rechnung keine USt ausweist (z.B. Kleinunternehmer), vatAmount=0. Rufe das Tool save_invoice genau einmal auf.';
+async function extractClaude({files=[],mimeTypes=[]},fetchImpl=fetch){
+  const key=String(process.env.ANTHROPIC_API_KEY||'').trim();
+  if(!key)throw Object.assign(new Error('Claude API ist noch nicht konfiguriert.'),{code:'CLAUDE_MISSING_KEY'});
+  const started=Date.now(),model=process.env.NARA_INVOICE_MODEL||'claude-sonnet-5-5';
+  const content=[...files.map((data,i)=>mimeTypes[i]==='application/pdf'?{type:'document',source:{type:'base64',media_type:'application/pdf',data}}:{type:'image',source:{type:'base64',media_type:mimeTypes[i]||'image/jpeg',data}}),{type:'text',text:CLAUDE_PROMPT}];
+  const body={model,max_tokens:8000,tools:[{name:'save_invoice',description:'Speichert die gelesenen Rechnungsdaten.',input_schema:toClaudeSchema(schema)}],tool_choice:{type:'tool',name:'save_invoice'},messages:[{role:'user',content}]};
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),90000);
+  try{
+    const r=await fetchImpl('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify(body),signal:controller.signal});
+    let payload=null;try{payload=await r.json()}catch{}
+    console.log('[NARA][CLAUDE_INVOICE] status='+r.status+' model='+model+' pages='+files.length+' ms='+(Date.now()-started));
+    if(!r.ok)throw Object.assign(new Error('Claude HTTP '+r.status+(payload?.error?.message?': '+String(payload.error.message).slice(0,200):'')),{status:r.status,code:'CLAUDE_PROVIDER_ERROR'});
+    const block=(payload?.content||[]).find(b=>b.type==='tool_use'&&b.name==='save_invoice');
+    if(!block||!block.input||typeof block.input!=='object')throw Object.assign(new Error('Claude lieferte keine Rechnungsdaten.'),{code:'CLAUDE_EMPTY'});
+    const parsed=block.input;if(!Array.isArray(parsed.lines))parsed.lines=[];
+    Object.defineProperty(parsed,'__validation',{value:validateExtraction(parsed),enumerable:false});
+    Object.defineProperty(parsed,'__provider',{value:'claude:'+model,enumerable:false});
+    return parsed;
+  }catch(error){if(error.name==='AbortError')error=Object.assign(new Error('Claude Timeout'),{code:'CLAUDE_TIMEOUT'});throw error}
+  finally{clearTimeout(timer)}
+}
 async function extractDeepSeek({files=[],mimeTypes=[]}){
   const started=Date.now(),key=process.env.DEEPSEEK_API_KEY;
   if(!key)throw Object.assign(new Error('DeepSeek API ist noch nicht konfiguriert.'),{code:'DEEPSEEK_MISSING_KEY'});
@@ -86,4 +114,4 @@ async function extractDeepSeek({files=[],mimeTypes=[]}){
   }catch(error){if(error.name==='AbortError')error=Object.assign(new Error('DeepSeek Timeout'),{code:'DEEPSEEK_TIMEOUT'});console.error('[NARA][DEEPSEEK_ERROR]',{code:error.code||null,status:error.status||null,message:error.message||null});throw error}
   finally{clearTimeout(timer)}
 }
-module.exports={extract,extractDeepSeek,validateExtraction};
+module.exports={extract,extractClaude,extractDeepSeek,validateExtraction,toClaudeSchema};

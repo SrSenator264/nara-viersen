@@ -11,7 +11,7 @@ test.before(async () => {
   fs.cpSync(root, tmp, { recursive: true, filter: s => !SKIP.has(path.basename(s)) && !/\.(backup|mvp-backup)/.test(s) });
   fs.mkdirSync(path.join(tmp, 'data'));
   fs.writeFileSync(path.join(tmp, '.env'), 'SECRET_KEY=topsecret\n');
-  proc = spawn(process.execPath, ['server.js'], { cwd: tmp, env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', NARA_SERVICE_KEY: '', NARA_MANAGER_KEY: '' }, stdio: 'ignore' });
+  proc = spawn(process.execPath, ['server.js'], { cwd: tmp, env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', NARA_SERVICE_KEY: '', NARA_MANAGER_KEY: '', ANTHROPIC_API_KEY: '', GEMINI_API_KEY: '' }, stdio: 'ignore' });
   for (let i = 0; i < 50; i++) { try { await fetch(base + '/api/auth/me'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start');
 });
@@ -44,4 +44,12 @@ test('Einstellungen: Regime + manueller Umsatz wirken auf die Grenze', async () 
 });
 test('Seite: accounting-home.html für Buchhaltung erreichbar', async () => {
   const r = await call('GET', '/accounting-home.html', null, S.acct); assert.equal(r.status, 200); assert.match(r.text, /api\/accounting\/health/);
+});
+test('KI-Buchhalter: Status, ohne Schlüssel 503 NO_AI_KEY, Kasse 403, alte Assistant-Route gleich', async () => {
+  const st = await call('GET', '/api/accounting/agent/status', null, S.acct); assert.equal(st.status, 200); assert.equal(st.json.configured, false); assert.equal(st.json.usage.calls, 0);
+  const a = await call('POST', '/api/accounting/agent', { message: 'Umsatz gestern?' }, S.owner); assert.equal(a.status, 503); assert.equal(a.json.code, 'NO_AI_KEY');
+  assert.equal((await call('POST', '/api/accounting/assistant', { message: 'x' }, S.owner)).json.code, 'NO_AI_KEY');
+  assert.equal((await call('POST', '/api/accounting/agent', { message: 'x' }, S.cashier)).status, 403);
+  assert.equal((await call('POST', '/api/accounting/agent', { message: 'x' })).status, 401);
+  const pg = await call('GET', '/accounting-agent.html', null, S.acct); assert.equal(pg.status, 200);
 });
