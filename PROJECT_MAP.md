@@ -39,7 +39,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `update.html` — Flamo · Update
 - `web-prototype/c.html` — Halle in Farbe
 
-## Code (Server & Frontend) (164)
+## Code (Server & Frontend) (167)
 
 - `accounting-agent.js` — المحاسب الذكي: وكيل مخصص للحسابات بس. · benutzt von: manager-agent.js, server.js
 - `accounting-anomalies.js` — "شي مو طبيعي" بالحسابات. قراءة بس، كل نتيجة = تنبيه مع سبب، والقرار عند عمر. · benutzt von: accounting-agent.js, accounting-weekly.js, server.js
@@ -135,6 +135,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `kasse-training.js` · benutzt von: kasse.html
 - `kasse-window.js` — Fenster für /api/kasse-state: letzte N Tage + alles, was noch offen ist (die Kasse/Live Orders brauchen nicht die ganze Historie alle 5 s). · benutzt von: server.js
 - `kasse.js` — Kasse: Warenkorb, Produkte, Zahlung, Druck (Hauptlogik der Kassen-Seite) · benutzt von: kasse.html
+- `kassenbuch.js` — Kassenbuch (دفتر الصندوق) لشهر، مبني من التقفيلات المحفوظة (سجلات ثابتة ما بتتعدّل). قراءة بس. · benutzt von: accounting-agent.js, server.js
 - `kitchen.js` — منطق شاشة المطبخ: شكل الطلب للمطبخ (بدون أي مبلغ) وتغيير حالته. · benutzt von: delivery-quote.js, dispatch-service.js, prep-learning.js, server.js
 - `lieferando-playwright-bridge.mjs` — lieferando-playwright-bridge.mjs  (النسخة الكاملة)
 - `live-orders-trend.js` · benutzt von: live-orders.html
@@ -180,6 +181,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `project-agent-tools.js` — Restricted tool gateway for the NARA project assistant. · benutzt von: server.js
 - `project-change-worker.js` — NARA change worker: approval gate only. It never executes arbitrary code.
 - `project-map.js` — خريطة المشروع: كل ملف شو بيعمل (من أول تعليق فيه)، شو API بيعرّف، ومين بيستعملو. · benutzt von: manager-agent.js
+- `purchase-categories.js` — المشتريات حسب النوع (لحمة، خبز، خضرة…) من بنود الفواتير. قراءة بس. · benutzt von: accounting-agent.js, server.js
 - `push.js` — Web Push (RFC 8030 + RFC 8291 aes128gcm + VAPID RFC 8292) ohne Fremdbibliothek, nur node:crypto. · benutzt von: server.js
 - `qonto-sync.js` — liest eingehende Zahlungen von Qonto (Business API, nur Lesen) und legt sie als bankTransactions ab. · benutzt von: server.js
 - `reminders.js` — تذكيرات يومية (خبز + Loco) على تلغرام وبوب-أب بالكاشير. · benutzt von: server.js
@@ -188,6 +190,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `sales-invoice-routes.js` — /api/sales-invoices/* (A4-Rechnungen). Speicher: data.salesInvoices. Rechte: auth.js (Erstellen/Ansehen = Kasse, Stornieren/Absender = Inhaber/Manager). · benutzt von: server.js
 - `sales-invoice.js` — A4-Rechnung (Ausgangsrechnung) aus einer Kassen-Bestellung. Rein (kein I/O): Berechnung + HTML. · benutzt von: order-correction.js, sales-invoice-routes.js, server.js
 - `sales-ledger.js` — سجل المبيعات للمحاسب، قسمين منفصلين: · benutzt von: accounting-agent.js, accounting-anomalies.js, accounting-health.js, accounting-weekly.js, day-closing.js
+- `sales-posting.js` — ترحيل المبيعات للدفتر بالشكل الصح (بيستعملو POST /api/accounting/auto-post). · benutzt von: server.js
 - `server-auth.js` — ربط auth.js بالسيرفر: بوابة الصلاحيات، تسجيل الدخول بالـPIN، الجلسات، إدارة الفريق. · API: /api/auth/ · benutzt von: server.js
 - `server.js` — Hauptserver: alle /api-Routen, Daten (data/nara-admin.json), Zeitpläne (Berichte, Telegram, Backups) · API: /api/accounting/accounts, /api/accounting/auto-post-platform-commissions, /api/accounting/agent, /api/accounting/assistant, /api/accounting/agent/status, /api/accounting/anomalies, /api/accounting/bank-suggestions, /api/accounting/bank-statement/read …
 - `settlement-ledger.js` — rows(byDay, day, fees) -> { rows:{KEY:{amount,count,commission,rate}}, gross, fee } · benutzt von: day-closing.js
@@ -310,9 +313,10 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `README.md` — NARA – Restaurant Operations Platform
 - `web-prototype/README.md` — Website-Prototyp (Kunden-Seite)
 
-## Tests (107)
+## Tests (108)
 
 - `tests/accounting-agent.test.js`
+- `tests/accounting-books.test.js`
 - `tests/accounting-export.test.js`
 - `tests/accounting-health-server.test.js`
 - `tests/accounting-health.test.js`

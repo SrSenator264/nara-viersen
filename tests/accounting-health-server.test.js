@@ -85,3 +85,12 @@ test('Manager-Endpunkte: Status, Chat ohne Schlüssel 503, Aufgaben leer, Buchha
   assert.equal((await call('POST', '/api/manager/chat', { message: 'hi' }, S.acct)).status, 403);
   assert.equal((await call('GET', '/manager.html', null, S.owner)).status, 200);
 });
+test('Einkauf/Kassenbuch/Auto-Buchung Endpunkte', async () => {
+  const p = await call('GET', '/api/accounting/purchases?year=2026&month=11', null, S.acct); assert.equal(p.status, 200); assert.equal(p.json.current.invoices, 0);
+  assert.equal((await call('POST', '/api/accounting/purchases/category', { description: 'Mystery', category: 'NOPE' }, S.owner)).status, 422);
+  assert.equal((await call('POST', '/api/accounting/purchases/category', { description: 'Mystery', category: 'PACKAGING' }, S.owner)).status, 200);
+  const k = await call('GET', '/api/accounting/kassenbuch?year=2026&month=11', null, S.acct); assert.equal(k.status, 200); assert.match(k.json.csv, /Datum;Z-Nr/);
+  await call('GET', '/api/accounting/accounts', null, S.owner);
+  const a = await call('POST', '/api/accounting/auto-post', {}, S.owner); assert.equal(a.status, 200); assert.equal(a.json.createdCount, 0);
+  const acc = await call('GET', '/api/accounting/accounts', null, S.owner); assert.ok(acc.json.accounts.some(x => x.number === '4100'));
+});

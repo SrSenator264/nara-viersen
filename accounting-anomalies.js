@@ -7,6 +7,7 @@
 //   OLD_UNMATCHED    حركة بنك بدون مطابقة أقدم من 30 يوم
 //   NO_DOCUMENT      فاتورة منرحّلة بدون Beleg مرفق
 //   VAT_ON_KLEIN     Kleinunternehmer وفاتورة البيع/الإيصال فيها ضريبة (من الإعدادات)
+//   FIXED_COST_MISSING  مصروف ثابت (إيجار، كهربا…) ما إلو فاتورة ولا حركة بنك هالشهر بعد موعدو بـ 5 أيام
 
 const SL = require('./sales-ledger.js');
 const bizDay = require('./business-day.js');
@@ -75,6 +76,19 @@ function detect(data, { today = bizDay.today(), lookbackDays = 60, priceJump = 0
   // 7) Kleinunternehmer + ضريبة
   const acc = (data.settings && data.settings.accounting) || {};
   if (str(acc.vatRegime).toUpperCase() === 'KLEIN' && Number(acc.defaultSalesVatRate || 0) > 0) out.push({ type: 'VAT_ON_KLEIN', level: 'crit', date: today, rate: Number(acc.defaultSalesVatRate) });
+
+  // 8) مصاريف ثابتة ناقصة (settings.accounting.fixedCosts: [{ name, match, amountCents, day }])
+  for (const f of acc.fixedCosts || []) {
+    const match = low(f.match || f.name); if (!match) continue;
+    for (const back of [0, 1]) {
+      const t = new Date(Date.parse(today + 'T12:00:00Z')); t.setUTCDate(1); t.setUTCMonth(t.getUTCMonth() - back);
+      const ym = t.toISOString().slice(0, 7), day = Math.min(28, Math.max(1, Number(f.day) || 1)), due = ym + '-' + String(day).padStart(2, '0');
+      if (addDays(due, 5) > today) continue;
+      const inv = invoices.some(i => str(i.invoiceDate || i.createdAt).slice(0, 7) === ym && (low(supName(i)).includes(match) || low(i.invoiceNumber).includes(match)));
+      const bank = (data.bankTransactions || []).some(x => str(x.date).slice(0, 7) === ym && Number(x.amountCents) < 0 && (low(x.description).includes(match) || low(x.reference).includes(match)));
+      if (!inv && !bank) out.push({ type: 'FIXED_COST_MISSING', level: 'warn', date: due, name: str(f.name || f.match), month: ym, amountCents: Number(f.amountCents) || null });
+    }
+  }
 
   const rank = { crit: 0, warn: 1, info: 2 };
   return out.sort((a, b) => rank[a.level] - rank[b.level] || str(b.date).localeCompare(str(a.date)));

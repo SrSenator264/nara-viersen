@@ -12,7 +12,7 @@ const fmt = d => d.split('-').reverse().join('.');
 const addDays = (d, n) => new Date(Date.parse(d + 'T12:00:00Z') + n * 86400000).toISOString().slice(0, 10);
 const invCents = i => { for (const k of ['totalAmountCents', 'totalCents', 'grossAmountCents']) if (i[k] != null && Number.isFinite(Number(i[k]))) return Math.round(Number(i[k])); for (const k of ['totalAmount', 'grossAmount']) if (i[k] != null && Number.isFinite(Number(i[k]))) return Math.round(Number(i[k]) * 100); return 0; };
 const PL = { LIEFERANDO: 'Lieferando', UBER_EATS: 'Uber Eats', WOLT: 'Wolt', LANCH: 'Lanch' };
-const AN_AR = { DUP_INVOICE: 'فاتورة مكررة', PRICE_JUMP: 'سعر طلع', CASH_DIFF: 'فرق بالصندوق', LOW_SALES_DAY: 'يوم مبيعات واطي', OLD_UNMATCHED: 'بنك بدون مطابقة', NO_DOCUMENT: 'فاتورة بدون مستند', VAT_ON_KLEIN: 'ضريبة على الإيصال وإنت Kleinunternehmer' };
+const AN_AR = { DUP_INVOICE: 'فاتورة مكررة', PRICE_JUMP: 'سعر طلع', CASH_DIFF: 'فرق بالصندوق', LOW_SALES_DAY: 'يوم مبيعات واطي', OLD_UNMATCHED: 'بنك بدون مطابقة', NO_DOCUMENT: 'فاتورة بدون مستند', VAT_ON_KLEIN: 'ضريبة على الإيصال وإنت Kleinunternehmer', FIXED_COST_MISSING: 'مصروف ثابت ناقص' };
 const DL_AR = { minijobReport: 'Minijob: Beitragsnachweis', minijobPay: 'Minijob: الدفع', monthClose: 'إقفال الشهر', gewstPre: 'دفعة Gewerbesteuer', estPre: 'دفعة ضريبة الدخل', ustVa: 'USt-Voranmeldung', annual: 'الإقرارات السنوية', kassenmeldung: 'تسجيل الكاشير بـ ELSTER' };
 
 function berlin(ms) {
@@ -49,7 +49,7 @@ function compose(data, weekEnd) {
   lines.push(`🗓️ إقفال الشهر: ${m.done}/${m.total} خالصين`);
   const todo = m.items.filter(i => i.status === 'warn' || i.status === 'todo');
   if (todo.length) lines.push('   ناقص: ' + todo.map(i => ({ closings: 'تقفيلات', tse: 'TSE', bank: 'البنك', belege: 'فواتير للمراجعة', journal: 'قيود', period: 'قفل الشهر' }[i.key]) + (i.count ? ' (' + i.count + ')' : '')).join('، '));
-  if (an.length) { lines.push('', '⚠️ غير طبيعي:'); for (const a of an.slice(0, 6)) lines.push(`   • ${AN_AR[a.type] || a.type}` + (a.date ? ' ' + fmt(a.date) : '') + (a.item ? ' · ' + a.item + ' +' + a.changePct + '%' : '') + (a.differenceCents ? ' · ' + eur(a.differenceCents) : '')); }
+  if (an.length) { lines.push('', '⚠️ غير طبيعي:'); for (const a of an.slice(0, 6)) lines.push(`   • ${AN_AR[a.type] || a.type}` + (a.date ? ' ' + fmt(a.date) : '') + (a.item ? ' · ' + a.item + ' +' + a.changePct + '%' : '') + (a.differenceCents ? ' · ' + eur(a.differenceCents) : '') + (a.type === 'FIXED_COST_MISSING' ? ' · ' + a.name : '')); }
   const dl = h.deadlines.filter(d => d.date <= addDays(today, 14));
   if (dl.length) { lines.push('', '⏰ مواعيد الأسبوعين الجايين:'); for (const d of dl) lines.push(`   • ${fmt(d.date)}: ${DL_AR[d.key] || d.key}`); }
   lines.push('', '🤖 لأي تفصيل: صفحة المحاسب الذكي بـ Flamo.');

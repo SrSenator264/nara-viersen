@@ -66,6 +66,10 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
 .up{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border:2px dashed var(--line);border-radius:14px;cursor:pointer;font-weight:800;margin-top:6px}
 .up input{display:none}
 .okc{color:var(--ok);font-weight:800}.badc{color:var(--bad);font-weight:800}
+.cat{display:flex;align-items:center;gap:10px;padding:7px 0}.cat .e{font-size:1.3rem;width:30px;text-align:center}.cat .n{flex:1}.cat .b{height:8px;border-radius:5px;background:var(--brand);margin-top:3px}.cat .v{font-weight:800;white-space:nowrap;text-align:end}.cat small{display:block;font-weight:600}
+.up2{color:var(--bad)}.down2{color:var(--ok)}
+.fx{display:flex;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}.fx span{flex:1}.fx button{border:0;background:#eef0ea;border-radius:10px;min-height:36px;padding:0 10px;cursor:pointer}
+.unk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0;border-top:1px solid var(--line)}.unk span{flex:1;min-width:140px}.unk select{min-height:40px;border-radius:10px;border:2px solid var(--line);background:#fff}
 .note{font-size:.82rem;color:var(--mute);text-align:center;padding:4px 10px 20px}
 </style>
 <link rel="stylesheet" href="flamo-font.css?v=20261109a"></head>
@@ -76,6 +80,8 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
   <section class="card alert" id="c-alert" hidden></section>
   <section class="card" id="c-klein"></section>
   <section class="card" id="c-month"></section>
+  <section class="card" id="c-pur"></section>
+  <section class="card" id="c-kb"></section>
   <section class="card" id="c-plat"></section>
   <section class="card" id="c-an"></section>
   <section class="card" id="c-euer" hidden></section>
@@ -104,6 +110,16 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
       <label class="cb"><input id="s-kmdone" type="checkbox"><span data-t="sKmDone"></span></label>
       <label class="cb"><input id="s-minijob" type="checkbox"><span data-t="sMinijob"></span></label>
     </div>
+    <h2 style="margin-top:16px">🏠 <span data-t="fxTitle"></span></h2>
+    <p class="mute" data-t="fxHint"></p>
+    <div id="fxList"></div>
+    <div class="set">
+      <label><span data-t="fxName"></span><input id="fx-name" data-t-ph="fxNamePh"></label>
+      <label><span data-t="fxMatch"></span><input id="fx-match" data-t-ph="fxMatchPh"></label>
+      <label><span data-t="fxAmount"></span><input id="fx-amount" type="number" min="0" step="0.01" inputmode="decimal"></label>
+      <label><span data-t="fxDay"></span><input id="fx-day" type="number" min="1" max="28" value="1"></label>
+    </div>
+    <button class="btn ghost" id="fxAdd" type="button" style="width:100%;margin-top:10px">➕ <span data-t="fxAdd"></span></button>
     <button class="btn" id="save" type="button" style="width:100%;margin-top:12px">💾 <span data-t="save"></span></button>
     <button class="btn ghost" id="weekly" type="button" style="width:100%;margin-top:10px">📨 <span data-t="weeklyTest"></span></button>
     <div id="msg" class="mute" role="status"></div>
@@ -205,6 +221,30 @@ FT.init({
   w_NO_PAYROLL:{de:'Keine Lohnzahlungen erfasst',ar:'ما في رواتب مسجلة',en:'No wage payments recorded'},
   w_CATEGORIES_GUESSED:{de:'Kategorien teils geschätzt',ar:'بعض التصنيفات تقديرية',en:'Some categories estimated'},
   w_NO_RENT:{de:'Keine Miete erfasst',ar:'ما في إيجار مسجل',en:'No rent recorded'},
+  puTitle:{de:'Einkauf nach Warengruppe',ar:'المشتريات حسب النوع',en:'Purchases by category'},
+  puTotal:{de:'{a} in {n} Rechnungen',ar:'{a} بـ {n} فاتورة',en:'{a} in {n} invoices'},
+  puNone:{de:'Keine Einkaufsrechnungen in diesem Monat',ar:'ما في فواتير مشتريات بهالشهر',en:'No purchase invoices this month'},
+  puTop:{de:'Teuerste Artikel',ar:'أغلى المواد',en:'Most expensive items'},
+  puUnk:{de:'Ohne Gruppe — bitte zuordnen',ar:'بدون نوع — صنّفهم',en:'Uncategorized — please assign'},
+  puVsPrev:{de:'zum Vormonat',ar:'عن الشهر اللي قبل',en:'vs last month'},
+  puSaved:{de:'Gespeichert ✅',ar:'انحفظ ✅',en:'Saved ✅'},
+  c_MEAT:{de:'Fleisch',ar:'لحمة',en:'Meat'},c_BREAD:{de:'Brot',ar:'خبز',en:'Bread'},c_VEG:{de:'Gemüse',ar:'خضرة',en:'Vegetables'},c_CHEESE:{de:'Käse',ar:'أجبان',en:'Cheese'},c_SAUCE:{de:'Saucen & Gewürze',ar:'صوصات وبهارات',en:'Sauces & spices'},c_FROZEN:{de:'TK & Pommes',ar:'مجمّدات وبطاطا',en:'Frozen & fries'},c_DRINKS:{de:'Getränke',ar:'مشروبات',en:'Drinks'},c_OIL:{de:'Öl & Fett',ar:'زيت',en:'Oil'},c_PACKAGING:{de:'Verpackung',ar:'تغليف',en:'Packaging'},c_CLEANING:{de:'Reinigung',ar:'تنظيف',en:'Cleaning'},c_OTHER:{de:'Sonstiges',ar:'غيره',en:'Other'},
+  kbTitle:{de:'Kassenbuch',ar:'دفتر الصندوق',en:'Cash book'},
+  kbSales:{de:'Bareinnahmen',ar:'المبيعات النقدية',en:'Cash sales'},
+  kbOut:{de:'Abgeschöpft',ar:'المسحوب من الدرج',en:'Taken out'},
+  kbDiff:{de:'Differenzen',ar:'الفروقات',en:'Differences'},
+  kbDays:{de:'{n} Tage abgeschlossen',ar:'{n} أيام مقفّلة',en:'{n} days closed'},
+  kbMissing:{de:'⚠️ Ohne Abschluss: {d}',ar:'⚠️ بدون تقفيلة: {d}',en:'⚠️ Not closed: {d}'},
+  kbCsv:{de:'Kassenbuch als CSV laden',ar:'نزّل دفتر الصندوق CSV',en:'Download cash book CSV'},
+  fxTitle:{de:'Feste Kosten',ar:'المصاريف الثابتة',en:'Fixed costs'},
+  fxHint:{de:'Fehlt bis 5 Tage nach dem Fälligkeitstag eine Rechnung oder Abbuchung, erscheint eine Warnung.',ar:'إذا لبعد موعدها بـ 5 أيام ما وصلت فاتورة ولا انسحب المبلغ من البنك، بيطلعلك تنبيه.',en:'If no invoice or debit appears within 5 days after the due day, you get a warning.'},
+  fxName:{de:'Name',ar:'الاسم',en:'Name'},fxNamePh:{de:'z. B. Miete',ar:'مثلاً الإيجار',en:'e.g. Rent'},
+  fxMatch:{de:'Suchwort (Lieferant/Bank)',ar:'كلمة البحث (المورّد/البنك)',en:'Search word (supplier/bank)'},fxMatchPh:{de:'z. B. Telekom',ar:'مثلاً Telekom',en:'e.g. Telekom'},
+  fxAmount:{de:'Betrag ca. (€)',ar:'المبلغ تقريباً (€)',en:'Amount approx. (€)'},
+  fxDay:{de:'Fällig am (Tag)',ar:'موعدو (يوم بالشهر)',en:'Due on (day)'},
+  fxAdd:{de:'Hinzufügen',ar:'زيد',en:'Add'},
+  fxDel:{de:'Entfernen',ar:'شيل',en:'Remove'},
+  a_FIXED_COST_MISSING:{de:'Feste Kosten fehlen: {s} ({n})',ar:'مصروف ثابت ناقص: {s} ({n})',en:'Fixed cost missing: {s} ({n})'},
   anTitle:{de:'Auffälligkeiten',ar:'شي مو طبيعي',en:'Anomalies'},
   anNone:{de:'Nichts Auffälliges in den letzten Wochen ✅',ar:'ما في شي غريب بالأسابيع الأخيرة ✅',en:'Nothing unusual in recent weeks ✅'},
   a_DUP_INVOICE:{de:'Doppelte Rechnung? {s} {n}',ar:'فاتورة مكررة؟ {s} {n}',en:'Duplicate invoice? {s} {n}'},
@@ -256,8 +296,8 @@ const monthShort=m=>{try{return new Intl.DateTimeFormat(FT.locale(),{month:'narr
 let H=null,S=null,Y=null,M=null;
 
 const LINK={closings:'kasse-settlement.html',tse:'sales.html',bank:'banking.html',belege:'inventory-foundation.html',journal:'accounting.html',period:'accounting.html'};
-const AN_ICON={DUP_INVOICE:'👯',PRICE_JUMP:'📈',CASH_DIFF:'💵',LOW_SALES_DAY:'📉',OLD_UNMATCHED:'🏦',NO_DOCUMENT:'📎',VAT_ON_KLEIN:'🚨'};
-const AN_LINK={DUP_INVOICE:'inventory-foundation.html',PRICE_JUMP:'inventory-foundation.html',CASH_DIFF:'kasse-settlement.html',LOW_SALES_DAY:'sales.html',OLD_UNMATCHED:'banking.html',NO_DOCUMENT:'inventory-foundation.html',VAT_ON_KLEIN:'accounting-home.html'};
+const AN_ICON={FIXED_COST_MISSING:'🏠',DUP_INVOICE:'👯',PRICE_JUMP:'📈',CASH_DIFF:'💵',LOW_SALES_DAY:'📉',OLD_UNMATCHED:'🏦',NO_DOCUMENT:'📎',VAT_ON_KLEIN:'🚨'};
+const AN_LINK={FIXED_COST_MISSING:'banking.html',DUP_INVOICE:'inventory-foundation.html',PRICE_JUMP:'inventory-foundation.html',CASH_DIFF:'kasse-settlement.html',LOW_SALES_DAY:'sales.html',OLD_UNMATCHED:'banking.html',NO_DOCUMENT:'inventory-foundation.html',VAT_ON_KLEIN:'accounting-home.html'};
 let AN=null,PL=[],PP=null,PMSG='';
 const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',SIDES:'Sides / Loco',OTHER:'?'};
 function plLine(s,c){
@@ -276,6 +316,30 @@ function drawPlat(){
       if(r.ok&&j.statement){PP=j;PMSG=''}else PMSG=t(j.code==='NO_AI_KEY'?'plNoKey':'plFail');}catch(e){PMSG=t('plFail')}drawPlat()};
   const sv=$('plSave');if(sv)sv.onclick=async()=>{try{const r=await fetch('/api/accounting/platform-statement/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({documentId:PP.documentId,statement:PP.statement})});PMSG=t(r.ok?'plSaved':r.status===409?'plDup':'plFail');if(r.ok)PP=null;await loadPlat()}catch(e){PMSG=t('plFail');drawPlat()}};
 }
+let PU=null,KB=null;
+const CAT_ICON={MEAT:'🥩',BREAD:'🍞',VEG:'🥬',CHEESE:'🧀',SAUCE:'🥫',FROZEN:'🍟',DRINKS:'🥤',OIL:'🫒',PACKAGING:'📦',CLEANING:'🧽',OTHER:'📎'};
+function drawPur(){
+  const el=$('c-pur');if(!PU){el.innerHTML='';return}
+  const c=PU.current,max=Math.max(1,...PU.categories.map(k=>c.totals[k]));
+  const rows=PU.categories.filter(k=>c.totals[k]).sort((a,b)=>c.totals[b]-c.totals[a]).map(k=>{const ch=PU.changePct[k];return `<div class="cat"><span class="e">${CAT_ICON[k]}</span><span class="n"><b>${esc(tk('c_'+k))}</b><div class="b" style="width:${Math.round(c.totals[k]/max*100)}%"></div></span><span class="v">${esc(eur(c.totals[k]))}${ch==null?'':`<small class="${ch>0?'up2':'down2'}">${ch>0?'+':''}${ch}% ${esc(t('puVsPrev'))}</small>`}</span></div>`}).join('');
+  const top=c.top.length?`<p class="mute" style="margin:10px 0 4px">${esc(t('puTop'))}</p>`+c.top.map(x=>`<div class="fx"><span>${esc(x.name)}</span><b>${esc(eur(x.cents))}</b></div>`).join(''):'';
+  const unk=c.uncategorized.length?`<p class="mute" style="margin:10px 0 4px">${esc(t('puUnk'))}</p>`+c.uncategorized.slice(0,6).map((x,i)=>`<div class="unk"><span>${esc(x.description)} · ${esc(eur(x.cents))}</span><select data-u="${i}"><option value="">—</option>${PU.categories.filter(k=>k!=='OTHER').map(k=>`<option value="${k}">${CAT_ICON[k]} ${esc(tk('c_'+k))}</option>`).join('')}</select></div>`).join(''):'';
+  el.innerHTML=`<h2>🧾 ${esc(t('puTitle'))}</h2><p class="mute">${esc(monthName(c.month))} ${c.year} · ${esc(t('puTotal',{a:eur(c.totalCents),n:c.invoices}))}</p>${rows||`<p class="mute">${esc(t('puNone'))}</p>`}${top}${unk}`;
+  el.querySelectorAll('[data-u]').forEach(s=>s.onchange=async()=>{const x=c.uncategorized[Number(s.dataset.u)];if(!s.value)return;try{await fetch('/api/accounting/purchases/category',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({category:s.value,inventoryItemId:x.inventoryItemId||undefined,description:x.description})});$('msg').textContent=t('puSaved')}catch(e){}loadPur()});
+}
+function drawKb(){
+  const el=$('c-kb');if(!KB){el.innerHTML='';return}
+  const k=KB.kassenbuch;
+  el.innerHTML=`<h2>📗 ${esc(t('kbTitle'))}</h2><p class="mute">${esc(monthName(k.month))} ${k.year} · ${esc(t('kbDays',{n:k.rows.length}))}</p><div class="row"><div class="stat"><span class="mute">${esc(t('kbSales'))}</span><b>${esc(eur(k.totals.salesCents))}</b></div><div class="stat"><span class="mute">${esc(t('kbOut'))}</span><b>${esc(eur(k.totals.takeOutCents))}</b></div><div class="stat"><span class="mute">${esc(t('kbDiff'))}</span><b>${esc(eur(k.totals.differenceCents))}</b></div></div>${k.missingDays.length?`<p class="badc">${esc(t('kbMissing',{d:k.missingDays.map(d=>d.slice(8)+'.').join(' ')}))}</p>`:''}<button class="btn ghost" id="kbCsv" type="button" style="width:100%;margin-top:10px">⬇️ ${esc(t('kbCsv'))}</button>`;
+  $('kbCsv').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([KB.csv],{type:'text/csv;charset=utf-8'}));a.download=KB.filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+}
+async function loadPur(){try{const r=await fetch(`/api/accounting/purchases?year=${Y}&month=${M}`,{cache:'no-store'});PU=r.ok?await r.json():null}catch(e){PU=null}drawPur()}
+async function loadKb(){try{const r=await fetch(`/api/accounting/kassenbuch?year=${Y}&month=${M}`,{cache:'no-store'});KB=r.ok?await r.json():null}catch(e){KB=null}drawKb()}
+function drawFx(){
+  const list=(S&&S.fixedCosts)||[];
+  $('fxList').innerHTML=list.map((f,i)=>`<div class="fx"><span>🏠 <b>${esc(f.name)}</b> · "${esc(f.match)}" · ${f.amountCents?esc(eur(f.amountCents))+' · ':''}${esc(f.day)}.</span><button type="button" data-fx="${i}">✖ ${esc(t('fxDel'))}</button></div>`).join('');
+  $('fxList').querySelectorAll('[data-fx]').forEach(b=>b.onclick=()=>{const l=list.slice();l.splice(Number(b.dataset.fx),1);saveSettings({fixedCosts:l})});
+}
 let EU=null;
 function drawEuer(){
   const el=$('c-euer');if(!EU){el.hidden=true;return}el.hidden=false;
@@ -286,7 +350,7 @@ async function loadEuer(){try{const r=await fetch('/api/accounting/euer',{cache:
 async function loadPlat(){try{const r=await fetch('/api/accounting/platform-statements',{cache:'no-store'});PL=r.ok?(await r.json()).statements||[]:[]}catch(e){PL=[]}drawPlat()}
 function drawAn(){
   const el=$('c-an');if(!AN){el.hidden=true;return}el.hidden=false;
-  const rows=AN.slice(0,8).map(a=>{const txt=tk('a_'+a.type,{s:a.supplier||'',n:a.invoiceNumber||a.number||'',i:a.item||'',p:a.changePct||'',a:eur(a.differenceCents!=null?a.differenceCents:a.salesCents),u:eur(a.usualCents),c:a.count||'',r:a.rate||''});
+  const rows=AN.slice(0,8).map(a=>{const txt=tk('a_'+a.type,{s:a.supplier||a.name||'',n:a.invoiceNumber||a.number||a.month||'',i:a.item||'',p:a.changePct||'',a:eur(a.differenceCents!=null?a.differenceCents:a.salesCents),u:eur(a.usualCents),c:a.count||'',r:a.rate||''});
     return `<a class="check" href="${AN_LINK[a.type]||'#'}"><span class="e">${AN_ICON[a.type]||'⚠️'}</span><span class="t"><b>${esc(txt)}</b><small>${a.date?esc(fmtD(a.date)):''}</small></span><span class="go">›</span></a>`}).join('');
   el.innerHTML=`<h2>🕵️ ${esc(t('anTitle'))}</h2>${rows||`<p class="mute">${esc(t('anNone'))}</p>`}`;
 }
@@ -359,7 +423,7 @@ function drawSettings(){
   $('s-kmdone').checked=!!S.kassenmeldungDone;
   $('s-minijob').checked=S.minijob!==false;
 }
-function draw(){if(!H)return;drawAsk();drawKlein();drawMonth();drawPlat();drawAn();drawEuer();drawDl();drawSettings()}
+function draw(){if(!H)return;drawAsk();drawKlein();drawMonth();drawPur();drawKb();drawPlat();drawAn();drawEuer();drawDl();drawSettings();drawFx()}
 
 async function load(){
   try{
@@ -368,6 +432,7 @@ async function load(){
     if(!a.ok||!b.ok)throw 0;
     H=await a.json();S=(await b.json()).settings||{};
     if(!Y){Y=H.month.year;M=H.month.month}
+    loadPur();loadKb();
     try{const c=await fetch('/api/accounting/anomalies',{cache:'no-store'});AN=c.ok?(await c.json()).anomalies||[]:null}catch(e){AN=null}
     draw();
   }catch(e){$('msg').textContent=t('err')}
@@ -385,6 +450,7 @@ $('save').onclick=()=>{
   saveSettings({vatRegime:$('s-regime').value,manualRevenueCents:mr,kasseInUseSince:$('s-since').value||'',kassenmeldungDone:$('s-kmdone').checked,minijob:$('s-minijob').checked});
 };
 loadPlat();loadEuer();
+$('fxAdd').onclick=()=>{const name=$('fx-name').value.trim(),match=($('fx-match').value.trim()||name);if(!name)return;const n=Number(String($('fx-amount').value).replace(',','.'));const l=((S&&S.fixedCosts)||[]).concat([{name:name.slice(0,60),match:match.slice(0,60),amountCents:Number.isFinite(n)&&n>0?Math.round(n*100):0,day:Math.min(28,Math.max(1,Number($('fx-day').value)||1))}]);$('fx-name').value='';$('fx-match').value='';$('fx-amount').value='';saveSettings({fixedCosts:l})};
 $('weekly').onclick=async()=>{try{const r=await fetch('/api/accounting/weekly/test',{method:'POST'});const j=await r.json();$('msg').textContent=t(j.sent?'weeklyOk':'weeklyNo')}catch(e){$('msg').textContent=t('err')}};
 load();
 </script>

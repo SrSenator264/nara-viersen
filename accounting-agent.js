@@ -14,6 +14,8 @@ const BM = require('./bank-match.js');
 const PS = require('./platform-statement.js');
 const EU = require('./euer-draft.js');
 const DC = require('./dish-cost.js');
+const PC = require('./purchase-categories.js');
+const KB = require('./kassenbuch.js');
 
 const str = v => (v == null ? '' : String(v));
 const low = v => str(v).toLowerCase();
@@ -67,6 +69,10 @@ const TOOLS = [
     parameters: { type: 'object', properties: { year: { type: 'integer' } } } },
   { name: 'dish_costs', description: 'Wareneinsatz pro Gericht aus Rezept × letztem Einkaufspreis, Verkaufspreis, Marge und Kostenanteil in %. Optional Suche nach Gericht.',
     parameters: { type: 'object', properties: { query: { type: 'string' } } } },
+  { name: 'purchases', description: 'Einkäufe nach Warengruppe (Fleisch, Brot, Gemüse, Käse, Saucen, TK/Pommes, Getränke, Öl, Verpackung, Reinigung) für einen Monat, Vergleich mit Vormonat, Top-5-Artikel, unkategorisierte Positionen.',
+    parameters: { type: 'object', properties: { year: { type: 'integer' }, month: { type: 'integer' } } } },
+  { name: 'kassenbuch', description: 'Kassenbuch eines Monats aus den Tagesabschlüssen: Anfangsbestand, Bareinnahmen, Entnahmen, Differenzen, fehlende Abschlüsse.',
+    parameters: { type: 'object', properties: { year: { type: 'integer' }, month: { type: 'integer' } } } },
   { name: 'cashbook', description: 'Kassenbuch-Einträge (Anfangsbestand, Einlagen, Entnahmen, Abschluss) im Zeitraum.',
     parameters: { type: 'object', properties: { from: { type: 'string' }, to: { type: 'string' } } } },
 ];
@@ -154,6 +160,8 @@ function makeTools(data, { today } = {}) {
     platform_statements: a => { const pf = str(a.platform).toUpperCase(); const rows = (data.platformStatements || []).filter(s => !pf || s.platform === pf).sort((x, y) => str(y.periodTo).localeCompare(str(x.periodTo))).slice(0, 24); return { count: rows.length, statements: rows.map(s => ({ ...s, comparison: PS.compare(data, s) })), note: rows.length ? undefined : 'Noch keine Plattform-Abrechnung hochgeladen (Buchhaltung → Plattform-Abrechnungen).' }; },
     euer_draft: a => EU.build(data, Number(a.year) || Number(str(today || bizDay.today()).slice(0, 4))),
     dish_costs: a => DC.build(data, { query: a.query }),
+    purchases: a => { const t = str(today || bizDay.today()); return PC.build(data, { year: Number(a.year) || Number(t.slice(0, 4)), month: Number(a.month) || Number(t.slice(5, 7)) }); },
+    kassenbuch: a => { const t = str(today || bizDay.today()); return KB.build(data, { year: Number(a.year) || Number(t.slice(0, 4)), month: Number(a.month) || Number(t.slice(5, 7)) }); },
     cashbook: a => {
       const rows = (data.cashbooks || []).filter(x => inRange(str(x.date), a.from, a.to)).sort((x, y) => str(x.date).localeCompare(str(y.date)));
       return { count: rows.length, balanceCents: rows.reduce((s, x) => s + num(x.inCents) - num(x.outCents), 0), rows: rows.slice(-80) };

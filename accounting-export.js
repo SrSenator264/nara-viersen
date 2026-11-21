@@ -9,10 +9,31 @@ const bizDay = require('./business-day.js');
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 const FORMATS = ['datev', 'lexware'];
 
+// Vorschlag Flamo-Konto → SKR03 (Einzelunternehmen, Gastronomie). Nur Vorschlag: Steuerberater prüft/ändert im Profil.
+const SKR03_SUGGESTED = {
+  1000: '1000', // Kasse
+  1200: '1200', // Bank
+  1300: '3980', // Bestand Waren
+  1360: '1400', // Plattform-Verrechnung → Forderungen aus L+L
+  1365: '1360', // Geldtransit (Kartenzahlungen)
+  1400: '1571', // Abziehbare Vorsteuer 7 %
+  1570: '1771', // Umsatzsteuer 7 %
+  4000: '8300', // Erlöse 7 %
+  4010: '8400', // Erlöse 19 %
+  4100: '8195', // Erlöse als Kleinunternehmer § 19 UStG
+  5000: '3200', // Wareneingang
+  5100: '4190', // Aushilfslöhne (Minijob)
+  5200: '4210', // Miete
+  5210: '4240', // Gas, Strom, Wasser
+  5220: '4760', // Verkaufsprovisionen (Plattformen)
+  5230: '4830', // Abschreibungen
+  9000: '0880', // Variables Kapital (Einzelunternehmen)
+};
+
 const DEFAULT_PROFILE = {
   id: 'default', name: 'Steuerberater', email: '', format: 'datev', skr: 'SKR03',
   beraterNr: '', mandantNr: '', wjBeginn: '01-01', kontenlaenge: 4,
-  accountMap: {}, buKeys: {},
+  accountMap: { ...SKR03_SUGGESTED }, buKeys: {},
 };
 
 function normalizeProfile(p) {
@@ -138,4 +159,4 @@ function build(data, opt, now) {
   };
 }
 
-module.exports = { build, collect, toRows, datevText, lexwareText, normalizeProfile, pickProfile, wjStart, clean, DEFAULT_PROFILE, FORMATS };
+module.exports = { SKR03_SUGGESTED, build, collect, toRows, datevText, lexwareText, normalizeProfile, pickProfile, wjStart, clean, DEFAULT_PROFILE, FORMATS };
