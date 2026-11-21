@@ -23,7 +23,7 @@
     { k: 'dispatch', f: 'dispatch.html', i: '🛵', g: 'delivery', n: L('Fahrer-Plan', 'توزيع السواقين', 'Dispatch') },
     { k: 'sales', f: 'sales.html', i: '💶', g: 'money', n: L('Umsätze', 'المبيعات', 'Sales') },
     { k: 'close', f: 'kasse-settlement.html', i: '📊', g: 'money', n: L('Tagesabschluss', 'تقفيلة اليوم', 'Daily closing') },
-    { k: 'accounting', f: 'accounting.html', i: '📚', g: 'money', n: L('Buchhaltung', 'المحاسبة', 'Accounting') },
+    { k: 'accounting', f: 'accounting-home.html', i: '📚', g: 'money', n: L('Buchhaltung', 'المحاسبة', 'Accounting') }, // مركز المحاسبة: كروت؛ الدفتر التفصيلي accounting.html من جوّا
     { k: 'banking', f: 'banking.html', i: '🏦', g: 'money', n: L('Bank', 'البنك', 'Bank') },
     { k: 'reports', f: 'reports.html', i: '📈', g: 'money', n: L('Gewinn & Verlust', 'الربح والخسارة', 'Profit & loss') },
     { k: 'stock', f: 'inventory-foundation.html', i: '📦', g: 'money', n: L('Lager & Einkauf', 'المخزن والمشتريات', 'Stock & purchasing') }, // مدخل واحد: الأقسام (مخزن، موردين، فواتير، وثائق) تابات جوّا الصفحة

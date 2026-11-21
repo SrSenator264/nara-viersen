@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="de" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flamo · Buchhaltung</title>
+<script src="nara-lang.js?v=20261009b" data-section="accounting"></script>
+<script src="flamo-t.js"></script>
+<link rel="stylesheet" href="flamo-night.css?v=20261031b"><script src="flamo-night.js?v=20261031b"></script>
+<style>
+:root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--bad:#d1342f;--soft:#fff4ea}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 FlamoAr,"Segoe UI",system-ui,Arial,sans-serif}
+button,input,select{font:inherit;color:inherit}
+header{padding:14px 16px;background:#fff;box-shadow:0 1px 0 var(--line)}
+header h1{margin:0;font-size:1.3rem;color:var(--brand)}
+header p{margin:2px 0 0;color:var(--mute);font-size:.92rem}
+main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 1px 0 var(--line)}
+.card h2{margin:0 0 8px;font-size:1.15rem}
+.card.alert{box-shadow:inset 0 0 0 3px var(--bad);background:#fff6f5}
+.card.ask{box-shadow:inset 0 0 0 3px var(--brand);background:var(--soft)}
+.mute{color:var(--mute);font-size:.9rem}
+.big{font-size:1.6rem;font-weight:800}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1;min-width:140px}
+.stat{background:#f7f5f2;border-radius:14px;padding:10px 12px}
+.stat b{display:block;font-size:1.15rem}
+.bar{height:16px;border-radius:9px;background:#eee9e3;overflow:hidden;margin:10px 0 4px}
+.bar i{display:block;height:100%;background:var(--ok);transition:width .4s}
+.bar.warn i{background:var(--brand)}.bar.over i{background:var(--bad)}
+.months{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;align-items:end;height:90px;margin-top:10px}
+.months div{display:flex;flex-direction:column-reverse;height:100%}
+.months span{display:block;border-radius:4px 4px 0 0}
+.months .o{background:var(--brand)}.months .p{background:#f6b27a}
+.mlab{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;font-size:.7rem;color:var(--mute);text-align:center}
+.legend{display:flex;gap:14px;font-size:.82rem;color:var(--mute);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:4px;vertical-align:middle}
+.check{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);text-decoration:none;color:inherit}
+.check:first-of-type{border-top:0}
+.check .e{font-size:1.5rem;width:34px;text-align:center}
+.check .t{flex:1}
+.check .t small{display:block;color:var(--mute)}
+.check .go{color:var(--brand);font-weight:800}
+.mnav{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.mnav b{flex:1;text-align:center;font-size:1.05rem}
+.mnav button{min-height:44px;min-width:52px;border:0;border-radius:12px;background:#eef0ea;font-size:1.1rem;cursor:pointer}
+.dl{display:flex;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.dl:first-of-type{border-top:0}
+.dl .e{font-size:1.4rem;width:34px;text-align:center}
+.dl .t{flex:1}
+.dl .d{font-weight:800;white-space:nowrap}
+.dl.soon .d{color:var(--brand)}.dl.late .d{color:var(--bad)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:16px;background:#f7f5f2;text-decoration:none;color:inherit;font-weight:800}
+.tile span{font-size:1.6rem}
+.tile small{font-weight:400;color:var(--mute)}
+.btn{min-height:52px;border:0;border-radius:14px;background:var(--brand);color:#fff;font-weight:800;font-size:1.02rem;cursor:pointer;padding:0 14px}
+.btn.ghost{background:#eef0ea;color:var(--ink)}
+.set{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.set label{flex:1;min-width:160px;display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:.9rem}
+.set input,.set select{min-height:46px;padding:0 12px;border:2px solid var(--line);border-radius:12px;background:#fff}
+.set label.cb{flex-direction:row;align-items:center;gap:8px}
+.set label.cb input{min-height:auto;width:22px;height:22px}
+#msg{min-height:1.4em;margin-top:6px}
+.note{font-size:.82rem;color:var(--mute);text-align:center;padding:4px 10px 20px}
+</style>
+<link rel="stylesheet" href="flamo-font.css?v=20261109a"></head>
+<body>
+<header><h1>📚 <span data-t="title"></span></h1><p data-t="sub"></p></header>
+<main>
+  <section class="card ask" id="c-ask" hidden></section>
+  <section class="card alert" id="c-alert" hidden></section>
+  <section class="card" id="c-klein"></section>
+  <section class="card" id="c-month"></section>
+  <section class="card" id="c-dl"></section>
+  <section class="card">
+    <h2>🧰 <span data-t="tools"></span></h2>
+    <div class="tiles">
+      <a class="tile" href="accounting.html"><span>📒</span><b data-t="tJournal"></b><small data-t="tJournalHint"></small></a>
+      <a class="tile" href="kasse-settlement.html"><span>📊</span><b data-t="tClose"></b><small data-t="tCloseHint"></small></a>
+      <a class="tile" href="sales.html"><span>💶</span><b data-t="tSales"></b><small data-t="tSalesHint"></small></a>
+      <a class="tile" href="banking.html"><span>🏦</span><b data-t="tBank"></b><small data-t="tBankHint"></small></a>
+      <a class="tile" href="inventory-foundation.html"><span>🧾</span><b data-t="tBelege"></b><small data-t="tBelegeHint"></small></a>
+      <a class="tile" href="reports.html"><span>📈</span><b data-t="tPl"></b><small data-t="tPlHint"></small></a>
+    </div>
+  </section>
+  <section class="card">
+    <h2>⚙️ <span data-t="settings"></span></h2>
+    <div class="set">
+      <label><span data-t="sRegime"></span><select id="s-regime"><option value="" data-t="rUnknown"></option><option value="KLEIN" data-t="rKlein"></option><option value="REGEL" data-t="rRegel"></option></select></label>
+      <label><span data-t="sManualCur"></span><input id="s-mcur" type="number" min="0" step="0.01" inputmode="decimal"></label>
+      <label><span data-t="sManualPrev"></span><input id="s-mprev" type="number" min="0" step="0.01" inputmode="decimal"></label>
+    </div>
+    <div class="set">
+      <label><span data-t="sKasseSince"></span><input id="s-since" type="date"></label>
+      <label class="cb"><input id="s-kmdone" type="checkbox"><span data-t="sKmDone"></span></label>
+      <label class="cb"><input id="s-minijob" type="checkbox"><span data-t="sMinijob"></span></label>
+    </div>
+    <button class="btn" id="save" type="button" style="width:100%;margin-top:12px">💾 <span data-t="save"></span></button>
+    <div id="msg" class="mute" role="status"></div>
+  </section>
+  <p class="note" data-t="disclaimer"></p>
+</main>
+<script>
+FT.init({
+  title:{de:'Buchhaltung',ar:'المحاسبة',en:'Accounting'},
+  sub:{de:'Alles auf einen Blick: Grenzen, Monatsabschluss, Fristen.',ar:'كل شي بنظرة وحدة: الحدود، إقفال الشهر، المواعيد.',en:'Everything at a glance: limits, month close, deadlines.'},
+  askTitle:{de:'Wie wirst du besteuert?',ar:'شو وضعك مع ضريبة المبيعات؟',en:'How are you taxed?'},
+  askText:{de:'Ohne diese Angabe kann Flamo Umsatzsteuer nicht richtig behandeln. Im Steuerbescheid oder bei ELSTER nachsehen.',ar:'بدون هالمعلومة Flamo ما بيعرف يتعامل مع الضريبة صح. شوفها بقرار الضريبة أو بـ ELSTER.',en:'Without this, Flamo cannot handle VAT correctly. Check your tax assessment or ELSTER.'},
+  rUnknown:{de:'Noch nicht festgelegt',ar:'لسا مو محدد',en:'Not set yet'},
+  rKlein:{de:'Kleinunternehmer (§ 19 UStG, keine USt)',ar:'Kleinunternehmer (§ 19، بدون ضريبة)',en:'Small business (§ 19 UStG, no VAT)'},
+  rRegel:{de:'Regelbesteuerung (mit USt)',ar:'ضريبة عادية (مع ضريبة مبيعات)',en:'Standard VAT'},
+  alertTitle:{de:'Achtung: das passt nicht zusammen',ar:'انتبه: في شي مو راكب',en:'Warning: this does not fit together'},
+  alertVat:{de:'Als Kleinunternehmer darf auf Bons keine Umsatzsteuer stehen (§ 14c UStG: ausgewiesene Steuer wird geschuldet). Die Kasse rechnet aber mit {r} %.',ar:'كـ Kleinunternehmer ممنوع تنكتب ضريبة على الإيصالات (§ 14c: أي ضريبة مكتوبة بتصير مطلوبة منك). بس الكاشير عم يحسب {r} %.',en:'As a small business, receipts must not show VAT (§ 14c UStG: stated VAT is owed). But the till uses {r} %.'},
+  alertOver:{de:'Der Umsatz liegt über der Grenze. Dann gilt die Kleinunternehmerregelung nicht mehr.',ar:'المبيعات فوق الحد. بهالحالة نظام الـ Kleinunternehmer ما عاد بينطبق.',en:'Sales are above the limit, so the small-business rule no longer applies.'},
+  alertAct:{de:'Bitte vor dem nächsten Monatsabschluss mit einem Steuerberater klären.',ar:'لازم تتأكد مع Steuerberater قبل إقفال الشهر الجاي.',en:'Please clarify with a tax adviser before the next month close.'},
+  kleinTitle:{de:'Umsatzgrenze § 19 UStG',ar:'حد المبيعات (§ 19)',en:'Sales limit § 19 UStG'},
+  ytd:{de:'Umsatz {y} bisher',ar:'مبيعات {y} لهلق',en:'Sales {y} so far'},
+  ofLimit:{de:'von 100.000 € ({p} %)',ar:'من 100.000 € ({p} %)',en:'of €100,000 ({p} %)'},
+  own:{de:'Kasse & Website',ar:'الكاشير والموقع',en:'Till & website'},
+  plat:{de:'Plattformen',ar:'المنصات',en:'Platforms'},
+  manual:{de:'Vor Flamo (manuell)',ar:'قبل Flamo (يدوي)',en:'Before Flamo (manual)'},
+  prevYear:{de:'Vorjahr {y} (Grenze 25.000 €)',ar:'السنة الماضية {y} (الحد 25.000 €)',en:'Last year {y} (limit €25,000)'},
+  proj:{de:'Hochrechnung Jahresende',ar:'توقّع آخر السنة',en:'Year-end projection'},
+  cross:{de:'Grenze erreicht etwa am {d}',ar:'بتوصل للحد تقريباً بـ {d}',en:'Limit reached around {d}'},
+  crossPassed:{de:'Grenze schon überschritten',ar:'الحد انتجاوز',en:'Limit already exceeded'},
+  crossNo:{de:'Grenze wird dieses Jahr nicht erreicht',ar:'ما بتوصل للحد هالسنة',en:'Limit not reached this year'},
+  stOK:{de:'✅ Im grünen Bereich',ar:'✅ تمام',en:'✅ All good'},
+  stWARN:{de:'⚠️ Nahe an der Grenze',ar:'⚠️ قرّبت عالحد',en:'⚠️ Close to the limit'},
+  stOVER:{de:'⛔ Über der Grenze',ar:'⛔ فوق الحد',en:'⛔ Over the limit'},
+  prevLow:{de:'Vorjahr in Flamo unvollständig? Unten unter Einstellungen ergänzen.',ar:'السنة الماضية ناقصة بـ Flamo؟ زيدها تحت بالإعدادات.',en:'Last year incomplete in Flamo? Add it below in settings.'},
+  monthTitle:{de:'Monatsabschluss',ar:'إقفال الشهر',en:'Month close'},
+  monthDone:{de:'{n} von {t} erledigt',ar:'{n} من {t} خالصين',en:'{n} of {t} done'},
+  mSales:{de:'Umsatz Kasse {a} · Plattformen {b}',ar:'مبيعات الكاشير {a} · المنصات {b}',en:'Till {a} · Platforms {b}'},
+  c_closings:{de:'Tagesabschlüsse',ar:'تقفيلات الأيام',en:'Daily closings'},
+  c_closings_ok:{de:'Jeder Verkaufstag hat einen Abschluss',ar:'كل يوم فيه بيع إلو تقفيلة',en:'Every sales day is closed'},
+  c_closings_warn:{de:'{n} Tage ohne Abschluss: {d}',ar:'{n} أيام بدون تقفيلة: {d}',en:'{n} days without closing: {d}'},
+  c_tse:{de:'TSE-Signaturen',ar:'توقيعات الـ TSE',en:'TSE signatures'},
+  c_tse_ok:{de:'Alle Kassenverkäufe signiert',ar:'كل مبيعات الكاشير موقّعة',en:'All till sales signed'},
+  c_tse_warn:{de:'{n} Verkäufe ohne TSE-Nummer',ar:'{n} عمليات بدون رقم TSE',en:'{n} sales without TSE number'},
+  c_bank:{de:'Bank abgleichen',ar:'مطابقة البنك',en:'Bank matching'},
+  c_bank_ok:{de:'Keine offenen Bankbuchungen',ar:'ما في حركات بنك مفتوحة',en:'No open bank lines'},
+  c_bank_warn:{de:'{n} Bankbuchungen ohne Zuordnung',ar:'{n} حركات بنك بدون مطابقة',en:'{n} bank lines unmatched'},
+  c_belege:{de:'Belege prüfen',ar:'مراجعة الفواتير',en:'Review receipts'},
+  c_belege_ok:{de:'Keine Belege warten',ar:'ما في فواتير ناطرة',en:'No receipts waiting'},
+  c_belege_warn:{de:'{n} Belege warten auf Prüfung',ar:'{n} فواتير ناطرة مراجعة',en:'{n} receipts waiting for review'},
+  c_journal:{de:'Buchungen',ar:'القيود',en:'Journal entries'},
+  c_journal_ok:{de:'Alle Buchungen gebucht',ar:'كل القيود منشورة',en:'All entries posted'},
+  c_journal_warn:{de:'{n} Buchungen nicht gebucht',ar:'{n} قيود مو منشورة',en:'{n} entries not posted'},
+  c_period:{de:'Monat abschließen',ar:'قفّل الشهر',en:'Close the month'},
+  c_period_ok:{de:'Monat ist abgeschlossen 🔒',ar:'الشهر مقفّل 🔒',en:'Month is closed 🔒'},
+  c_period_todo:{de:'Monat vorbei — jetzt abschließen',ar:'الشهر خلص — قفّلو هلق',en:'Month is over — close it now'},
+  c_period_wait:{de:'Erst nach Monatsende',ar:'بس بعد آخر الشهر',en:'Only after month end'},
+  open:{de:'Öffnen',ar:'افتح',en:'Open'},
+  dlTitle:{de:'Nächste Fristen',ar:'المواعيد الجاية',en:'Upcoming deadlines'},
+  dlNone:{de:'Keine Fristen in den nächsten Wochen',ar:'ما في مواعيد بالأسابيع الجاية',en:'No deadlines in the coming weeks'},
+  inDays:{de:'in {n} Tagen',ar:'بعد {n} يوم',en:'in {n} days'},
+  todayD:{de:'heute',ar:'اليوم',en:'today'},
+  lateD:{de:'überfällig',ar:'متأخر',en:'overdue'},
+  d_minijobReport:{de:'Minijob: Beitragsnachweis {m} senden',ar:'Minijob: ابعت Beitragsnachweis لشهر {m}',en:'Minijob: send contribution report {m}'},
+  d_minijobPay:{de:'Minijob: Beiträge {m} fällig',ar:'Minijob: اشتراكات شهر {m} مستحقة',en:'Minijob: contributions {m} due'},
+  d_monthClose:{de:'Monatsabschluss {m} fertig machen',ar:'خلّص إقفال شهر {m}',en:'Finish month close {m}'},
+  d_gewstPre:{de:'Gewerbesteuer-Vorauszahlung (falls festgesetzt)',ar:'دفعة مقدمة Gewerbesteuer (إذا مفروضة)',en:'Trade tax prepayment (if assessed)'},
+  d_estPre:{de:'Einkommensteuer-Vorauszahlung (falls festgesetzt)',ar:'دفعة مقدمة ضريبة الدخل (إذا مفروضة)',en:'Income tax prepayment (if assessed)'},
+  d_ustVa:{de:'USt-Voranmeldung Q{q}',ar:'USt-Voranmeldung للربع {q}',en:'VAT return Q{q}'},
+  d_annual:{de:'Steuererklärungen {y} (ohne Steuerberater)',ar:'الإقرارات الضريبية لسنة {y} (بدون Steuerberater)',en:'Tax returns {y} (without adviser)'},
+  d_kassenmeldung:{de:'Kassenmeldung bei ELSTER (§ 146a Abs. 4 AO)',ar:'تسجيل الكاشير بـ ELSTER (§ 146a Abs. 4 AO)',en:'Till registration in ELSTER (§ 146a(4) AO)'},
+  dlNote:{de:'Fristen ungefähr: Wochenende → Montag, Feiertage nicht berücksichtigt.',ar:'المواعيد تقريبية: السبت والأحد بينزاحوا للاثنين، العطل مو محسوبة.',en:'Approximate: weekends move to Monday, holidays not included.'},
+  tools:{de:'Werkzeuge',ar:'الأدوات',en:'Tools'},
+  tJournal:{de:'Buchungsjournal',ar:'دفتر القيود',en:'Journal'},
+  tJournalHint:{de:'Konten, Buchungen, Export',ar:'الحسابات والقيود والتصدير',en:'Accounts, entries, export'},
+  tClose:{de:'Tagesabschluss',ar:'تقفيلة اليوم',en:'Daily closing'},
+  tCloseHint:{de:'Z-Bon jeden Abend',ar:'Z-Bon كل ليلة',en:'Z report every night'},
+  tSales:{de:'Umsätze',ar:'المبيعات',en:'Sales'},
+  tSalesHint:{de:'Kasse und Plattformen getrennt',ar:'الكاشير والمنصات منفصلين',en:'Till and platforms separate'},
+  tBank:{de:'Bank',ar:'البنك',en:'Bank'},
+  tBankHint:{de:'Wise & Qonto abgleichen',ar:'مطابقة Wise وQonto',en:'Match Wise & Qonto'},
+  tBelege:{de:'Einkauf & Belege',ar:'المشتريات والفواتير',en:'Purchases & receipts'},
+  tBelegeHint:{de:'Rechnungen hochladen',ar:'ارفع الفواتير',en:'Upload invoices'},
+  tPl:{de:'Gewinn & Verlust',ar:'الربح والخسارة',en:'Profit & loss'},
+  tPlHint:{de:'Monat für Monat',ar:'شهر بشهر',en:'Month by month'},
+  settings:{de:'Einstellungen',ar:'الإعدادات',en:'Settings'},
+  sRegime:{de:'Umsatzsteuer',ar:'ضريبة المبيعات',en:'VAT status'},
+  sManualCur:{de:'Umsatz dieses Jahr vor Flamo (€)',ar:'مبيعات هالسنة قبل Flamo (€)',en:'Sales this year before Flamo (€)'},
+  sManualPrev:{de:'Umsatz Vorjahr vor Flamo (€)',ar:'مبيعات السنة الماضية قبل Flamo (€)',en:'Sales last year before Flamo (€)'},
+  sKasseSince:{de:'Kasse mit TSE in Betrieb seit',ar:'الكاشير مع TSE شغّال من',en:'Till with TSE in use since'},
+  sKmDone:{de:'Kassenmeldung erledigt',ar:'تسجيل الكاشير بـ ELSTER خلص',en:'Till registration done'},
+  sMinijob:{de:'Minijobber angestellt',ar:'في موظفين Minijob',en:'Minijob staff employed'},
+  save:{de:'Speichern',ar:'احفظ',en:'Save'},
+  saved:{de:'Gespeichert ✅',ar:'انحفظ ✅',en:'Saved ✅'},
+  err:{de:'Fehler — bitte neu laden',ar:'في مشكلة — اعمل تحديث',en:'Error — please reload'},
+  disclaimer:{de:'Vorbereitung, keine Steuerberatung. Zahlen vor Abgabe prüfen.',ar:'تحضير بس، مو استشارة ضريبية. راجع الأرقام قبل ما تبعت شي.',en:'Preparation only, not tax advice. Check figures before filing.'},
+  prevM:{de:'Vorheriger Monat',ar:'الشهر اللي قبل',en:'Previous month'},
+  nextM:{de:'Nächster Monat',ar:'الشهر اللي بعد',en:'Next month'},
+},{onChange(){draw()}});
+
+const $=id=>document.getElementById(id);
+const t=(k,v)=>FT.t(k,v);
+const tk=(k,v)=>FT.t(k,v); // dynamic keys (c_*, d_*, st*)
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=c=>new Intl.NumberFormat(FT.locale(),{style:'currency',currency:'EUR',maximumFractionDigits:0}).format((Number(c)||0)/100);
+const fmtD=s=>{try{return new Intl.DateTimeFormat(FT.locale(),{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(s+'T00:00:00Z'))}catch(e){return s}};
+const monthName=m=>{try{return new Intl.DateTimeFormat(FT.locale(),{month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(2026,m-1,1)))}catch(e){return String(m)}};
+const monthShort=m=>{try{return new Intl.DateTimeFormat(FT.locale(),{month:'narrow',timeZone:'UTC'}).format(new Date(Date.UTC(2026,m-1,1)))}catch(e){return String(m)}};
+let H=null,S=null,Y=null,M=null;
+
+const LINK={closings:'kasse-settlement.html',tse:'sales.html',bank:'banking.html',belege:'inventory-foundation.html',journal:'accounting.html',period:'accounting.html'};
+const DL_ICON={minijobReport:'👥',minijobPay:'💸',monthClose:'📅',gewstPre:'🏛️',estPre:'🏛️',ustVa:'🧾',annual:'📑',kassenmeldung:'🧮'};
+
+function drawAsk(){
+  const k=H.klein,ask=$('c-ask'),al=$('c-alert');
+  ask.hidden=!!k.regime;
+  if(!k.regime)ask.innerHTML=`<h2>❓ ${esc(t('askTitle'))}</h2><p class="mute">${esc(t('askText'))}</p><div class="row"><button class="btn" data-r="KLEIN" type="button">${esc(t('rKlein'))}</button><button class="btn ghost" data-r="REGEL" type="button">${esc(t('rRegel'))}</button></div>`;
+  ask.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>saveSettings({vatRegime:b.dataset.r}));
+  const msgs=[];
+  if(k.regime==='KLEIN'&&k.vatOnReceipts)msgs.push(t('alertVat',{r:S&&S.defaultSalesVatRate}));
+  if(k.regime==='KLEIN'&&k.status==='OVER')msgs.push(t('alertOver'));
+  al.hidden=!msgs.length;
+  if(msgs.length)al.innerHTML=`<h2>🚨 ${esc(t('alertTitle'))}</h2>${msgs.map(m=>`<p>${esc(m)}</p>`).join('')}<p><b>${esc(t('alertAct'))}</b></p>`;
+}
+function drawKlein(){
+  const k=H.klein,p=Math.min(100,Math.round(k.ytdCents/k.limitCurCents*100)),cls=k.status==='OVER'?'over':k.status==='WARN'?'warn':'';
+  const max=Math.max(1,...k.months.map(x=>x.totalCents));
+  const cross=k.crossDate==='PASSED'?t('crossPassed'):k.crossDate?t('cross',{d:fmtD(k.crossDate)}):t('crossNo');
+  $('c-klein').innerHTML=`<h2>📏 ${esc(t('kleinTitle'))}</h2>
+    <div class="mute">${esc(t('ytd',{y:k.year}))}</div><div class="big">${esc(eur(k.ytdCents))}</div>
+    <div class="bar ${cls}"><i style="width:${p}%"></i></div>
+    <div class="row" style="justify-content:space-between"><span class="mute">${esc(t('ofLimit',{p}))}</span><b>${esc(tk('st'+k.status))}</b></div>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><span class="mute">${esc(t('own'))}</span><b>${esc(eur(k.ownCents))}</b></div>
+      <div class="stat"><span class="mute">${esc(t('plat'))}</span><b>${esc(eur(k.platformCents))}</b></div>
+      ${k.manualCents?`<div class="stat"><span class="mute">${esc(t('manual'))}</span><b>${esc(eur(k.manualCents))}</b></div>`:''}
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div class="stat"><span class="mute">${esc(t('prevYear',{y:k.year-1}))}</span><b>${esc(eur(k.prevYearCents))}</b></div>
+      <div class="stat"><span class="mute">${esc(t('proj'))}</span><b>${esc(eur(k.projectedCents))}</b><span class="mute">${esc(cross)}</span></div>
+    </div>
+    ${!k.prevManualCents&&k.prevYearInSystemCents<k.limitPrevCents?`<p class="mute">💡 ${esc(t('prevLow'))}</p>`:''}
+    <div class="months">${k.months.map(x=>`<div title="${esc(monthName(x.month))}: ${esc(eur(x.totalCents))}"><span class="o" style="height:${x.ownCents/max*100}%"></span><span class="p" style="height:${x.platformCents/max*100}%"></span></div>`).join('')}</div>
+    <div class="mlab">${k.months.map(x=>`<span>${esc(monthShort(x.month))}</span>`).join('')}</div>
+    <div class="legend"><span><i style="background:var(--brand)"></i>${esc(t('own'))}</span><span><i style="background:#f6b27a"></i>${esc(t('plat'))}</span></div>`;
+}
+function drawMonth(){
+  const m=H.month,dayList=d=>d.map(x=>x.slice(8)+'.').join(' ');
+  const rows=m.items.map(i=>{
+    const e=i.status==='ok'?'✅':i.status==='wait'?'⏳':'⚠️';
+    const txt=tk('c_'+i.key+'_'+i.status,{n:i.count,d:i.days?dayList(i.days):''});
+    return `<a class="check" href="${LINK[i.key]}"><span class="e">${e}</span><span class="t"><b>${esc(tk('c_'+i.key))}</b><small>${esc(txt)}</small></span>${i.status==='ok'||i.status==='wait'?'':`<span class="go">${esc(t('open'))} ›</span>`}</a>`;
+  }).join('');
+  $('c-month').innerHTML=`<h2>🗓️ ${esc(t('monthTitle'))}</h2>
+    <div class="mnav"><button type="button" id="mPrev" aria-label="${esc(t('prevM'))}">‹</button><b>${esc(monthName(m.month))} ${m.year}</b><button type="button" id="mNext" aria-label="${esc(t('nextM'))}">›</button></div>
+    <div class="mute" style="text-align:center">${esc(t('monthDone',{n:m.done,t:m.total}))} · ${esc(t('mSales',{a:eur(m.ownCents),b:eur(m.platformCents)}))}</div>
+    <div class="bar ${m.done<m.total?'warn':''}"><i style="width:${Math.round(m.done/m.total*100)}%"></i></div>${rows}`;
+  $('mPrev').onclick=()=>{M--;if(M<1){M=12;Y--}load()};
+  $('mNext').onclick=()=>{M++;if(M>12){M=1;Y++}load()};
+}
+function drawDl(){
+  const now=Date.parse(H.today+'T00:00:00Z');
+  const rows=H.deadlines.slice(0,10).map(d=>{
+    const n=Math.round((Date.parse(d.date+'T00:00:00Z')-now)/86400000),cls=n<0?'late':n<=7?'soon':'';
+    const when=n<0?t('lateD'):n===0?t('todayD'):t('inDays',{n});
+    const label=tk('d_'+d.key,{m:d.month?monthName(d.month):'',q:d.quarter||'',y:d.forYear||''});
+    return `<div class="dl ${cls}"><span class="e">${DL_ICON[d.key]||'📌'}</span><span class="t">${esc(label)}<br><span class="mute">${esc(fmtD(d.date))}</span></span><span class="d">${esc(when)}</span></div>`;
+  }).join('');
+  $('c-dl').innerHTML=`<h2>⏰ ${esc(t('dlTitle'))}</h2>${rows||`<p class="mute">${esc(t('dlNone'))}</p>`}<p class="mute">${esc(t('dlNote'))}</p>`;
+}
+function drawSettings(){
+  if(!S)return;
+  const y=H?H.klein.year:new Date().getFullYear(),mr=S.manualRevenueCents||{};
+  $('s-regime').value=S.vatRegime||'';
+  $('s-mcur').value=mr[y]?(mr[y]/100):'';
+  $('s-mprev').value=mr[y-1]?(mr[y-1]/100):'';
+  $('s-since').value=S.kasseInUseSince||'';
+  $('s-kmdone').checked=!!S.kassenmeldungDone;
+  $('s-minijob').checked=S.minijob!==false;
+}
+function draw(){if(!H)return;drawAsk();drawKlein();drawMonth();drawDl();drawSettings()}
+
+async function load(){
+  try{
+    const q=Y?`?year=${Y}&month=${M}`:'';
+    const [a,b]=await Promise.all([fetch('/api/accounting/health'+q,{cache:'no-store'}),fetch('/api/accounting/settings',{cache:'no-store'})]);
+    if(!a.ok||!b.ok)throw 0;
+    H=await a.json();S=(await b.json()).settings||{};
+    if(!Y){Y=H.month.year;M=H.month.month}
+    draw();
+  }catch(e){$('msg').textContent=t('err')}
+}
+async function saveSettings(patch){
+  try{
+    const r=await fetch('/api/accounting/settings',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(patch)});
+    if(!r.ok)throw 0;S=(await r.json()).settings||S;$('msg').textContent=t('saved');await load();
+  }catch(e){$('msg').textContent=t('err')}
+}
+$('save').onclick=()=>{
+  const y=H?H.klein.year:new Date().getFullYear(),mr=Object.assign({},(S&&S.manualRevenueCents)||{});
+  const cents=v=>{const n=Number(String(v).replace(',','.'));return Number.isFinite(n)&&n>0?Math.round(n*100):0};
+  mr[y]=cents($('s-mcur').value);mr[y-1]=cents($('s-mprev').value);
+  saveSettings({vatRegime:$('s-regime').value,manualRevenueCents:mr,kasseInUseSince:$('s-since').value||'',kassenmeldungDone:$('s-kmdone').checked,minijob:$('s-minijob').checked});
+};
+load();
+</script>
+<script src="flamo-home.js?v=20261031a" defer></script></body>
+</html>
