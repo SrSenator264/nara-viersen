@@ -360,7 +360,7 @@ function oName(n){var x=ON[n],e=window.NARA_EMOJI?NARA_EMOJI.ing(n):'';return (e
 /* Entwurf von Flamo (vom Server geprüft) in den Warenkorb legen: Optionsnamen/-preise aus dem Menü ergänzen */
 function mkLine(l){var p=byId[l&&l.id];if(!p||!(l.q>=1))return null;var o=[];(l.o||[]).forEach(function(x){((p.o||[]).forEach(function(g){if(g.g!==x.g)return;(g.x||[]).forEach(function(it){if(it.i===x.i)o.push({g:g.g,i:it.i,n:it.n,c:it.c||0})})}))});return{id:p.id,q:Math.min(20,l.q|0),m:l.m&&p.mc?1:0,o:o,nt:'',u:l.u>0?l.u:(l.m&&p.mc?p.mc:p.p)}}
 function removeLines(ls){(ls||[]).forEach(function(l){var line=mkLine(l);if(!line)return;var k=lineKey(line);if(cart[k]){cart[k].q-=line.q;if(cart[k].q<=0)delete cart[k]}});save();render()}
-function addLines(ls){var n=0;(ls||[]).forEach(function(l){var p=byId[l&&l.id];if(!p||!(l.q>=1))return;var o=[];(l.o||[]).forEach(function(x){((p.o||[]).forEach(function(g){if(g.g!==x.g)return;(g.x||[]).forEach(function(it){if(it.i===x.i)o.push({g:g.g,i:it.i,n:it.n,c:it.c||0})})}))});var line={id:p.id,q:Math.min(20,l.q|0),m:l.m&&p.mc?1:0,o:o,nt:'',u:l.u>0?l.u:(l.m&&p.mc?p.mc:p.p)};var k=lineKey(line);if(cart[k])cart[k].q+=line.q;else cart[k]=line;n+=line.q});if(n){save();render();try{window.dispatchEvent(new CustomEvent('nara-added',{detail:{id:0}}))}catch(e){}}return n}
+function addLines(ls){var n=0;(ls||[]).forEach(function(l){var p=byId[l&&l.id];if(!p||!(l.q>=1))return;var o=[];(l.o||[]).forEach(function(x){((p.o||[]).forEach(function(g){if(g.g!==x.g)return;(g.x||[]).forEach(function(it){if(it.i===x.i)o.push({g:g.g,i:it.i,n:it.n,c:it.c||0})})}))});var line={id:p.id,q:Math.min(20,l.q|0),m:l.m&&p.mc?1:0,o:o,nt:typeof l.nt==='string'?l.nt.slice(0,160):'',u:l.u>0?l.u:(l.m&&p.mc?p.mc:p.p)};var k=lineKey(line);if(cart[k])cart[k].q+=line.q;else cart[k]=line;n+=line.q});if(n){save();render();try{window.dispatchEvent(new CustomEvent('nara-added',{detail:{id:0}}))}catch(e){}}return n}
 window.NARA_WEB={addLines:addLines,removeLines:removeLines,cart:function(){return cart},setCart:function(o){cart=normCart(o||{});save();render()},openCart:function(){drawerOpen=true;render()},add:addSimple,menu:MENU,byId:byId,eur:function(c){return eur(c)}};
 var MS={burger:1,crispy:1,street:1,orient:1,drinks:1,sweet:1,sides:1};
 function mascot(size,k){return '<img class="mascot" src="c/'+(k&&MS[k]?'m-'+k:'mascot')+'.webp" alt="" width="'+size+'" height="'+Math.round(size*1.18)+'">'}
@@ -383,7 +383,7 @@ function section(k){
  var cards=groups.map(function(g){
   return '<h3 class="grp">'+esc(g)+'</h3><div class="grid">'+items.filter(function(p){return p.g===g}).map(function(p){
    var q=qtyOf(p.id);
-   return '<article class="card"><button type="button" class="ph" data-open="'+p.id+'" aria-label="'+esc(p.n)+'">'+(p.img?'<img src="'+p.img+'" alt="" loading="lazy">':'<span class="ph-name">'+esc(p.n)+'</span>')+'</button><div class="info"><h4 dir="auto">'+esc(p.n)+'</h4>'+(p.d?'<p dir="auto">'+esc(p.d)+'</p>':'')+'<div class="row"><b class="price">'+(p.mc?'<small>'+esc(t('single'))+'</small> ':'')+eur(p.p)+'</b><button type="button" class="add'+(q?' has':'')+'" data-add="'+p.id+'" aria-label="'+esc(t('add')+': '+p.n)+'">'+(q?'<span>'+q+'</span>':'+')+'</button></div></div></article>';
+   return '<article class="card"><button type="button" class="ph" data-open="'+p.id+'" aria-label="'+esc(p.n)+'">'+(p.img?'<img src="'+p.img+'" alt="" loading="lazy">':'<span class="ph-name">'+esc(p.n)+'</span>')+'</button><div class="info"><h4 dir="auto">'+esc(p.n)+'</h4>'+(p.d?'<p dir="auto">'+esc(p.d)+'</p>':'')+(p.s==='burger'&&(p.o||[]).some(function(g){return g.g==='Ihre Extras'})&&!/angebot|\(4 st/i.test(p.n0||p.n)?'<button type="button" class="fb-edit" data-build="'+p.id+'">✏️ '+esc(({de:'Anpassen',ar:'عدّل برغرك',en:'Customize'})[lang]||'Anpassen')+'</button>':'')+'<div class="row"><b class="price">'+(p.mc?'<small>'+esc(t('single'))+'</small> ':'')+eur(p.p)+'</b><button type="button" class="add'+(q?' has':'')+'" data-add="'+p.id+'" aria-label="'+esc(t('add')+': '+p.n)+'">'+(q?'<span>'+q+'</span>':'+')+'</button></div></div></article>';
   }).join('')+'</div>';
  }).join('');
  return '<section class="shero" style="--c:'+s.c+';--ink:'+s.ink+'"><div class="shero-in"><a href="#home" class="back">← '+esc(t('back'))+'</a><h1>'+esc(tt(s.name))+'</h1><p>'+esc(tt(s.sub))+'</p></div>'+(THEME.guide&&k==='burger'?'<div class="shero-bar"><img src="c/flamo-bar.webp" alt="Flamo sitzt auf der Burger-Bar"></div>':(s.img?'<img class="shero-img" src="'+s.img+'" alt="">':''))+(THEME.heroMascot?'<div class="shero-m">'+mascot(240,k)+'</div>':'')+'</section><section class="menu">'+cards+'</section>'+footer();
@@ -959,4 +959,6 @@ setTimeout(perch,300);
 })();
 </script>
 
+<link rel="stylesheet" href="builder/builder.css?v=20261121a">
+<script src="builder/builder.js?v=20261121a"></script>
 <script src="../flamo-home.js?v=20261031a" defer></script>

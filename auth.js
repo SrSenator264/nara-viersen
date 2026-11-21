@@ -175,7 +175,7 @@ const FRONTEND_JS = new Set([
   'kasse-settlement.js', 'kasse-sync.js', 'kasse-touch.js', 'kasse-training.js', 'kasse.js',
   'live-orders-trend.js', 'manager-pending-actions.js', 'menu-source.js', 'menu-surcharge.js', 'nara-3d-scene.js', 'nara-auth.js', 'nara-emoji.js', 'nara-i18n.js',
   'nara-lang.js', 'nara-receipt-core.mjs', 'nara-sidebar-chef.js', 'operations/core.js', 'reports.js', 'staff.js', 'sw.js',
-  'vendor/qrcode.bundle.js',
+  'vendor/qrcode.bundle.js', 'web-prototype/builder/builder.js',
 ]);
 const STATIC_EXT = new Set(['.html', '.js', '.mjs', '.css', '.png', '.jpg', '.jpeg', '.webp', '.webm', '.avif', '.gif', '.svg', '.ico', '.woff', '.woff2', '.webmanifest', '.mp3', '.wav', '.ogg']);
 function staticAllowed(rel) {

@@ -2,7 +2,7 @@
 
 Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand bearbeiten.
 
-## Seiten (HTML) (34)
+## Seiten (HTML) (35)
 
 - `accounting-agent.html` — Flamo · KI-Buchhalter
 - `accounting-home.html` — Flamo · Buchhaltung
@@ -37,6 +37,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `status.html` — Flamo · Status
 - `team.html` — Flamo · Team
 - `update.html` — Flamo · Update
+- `web-prototype/c-classic.html` — Halle in Farbe
 - `web-prototype/c.html` — Halle in Farbe
 
 ## Code (Server & Frontend) (167)
@@ -209,6 +210,11 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `uber-normalize.mjs` — طلب Uber Eats Orders (merchants.ubereats.com/orders، GraphQL getActiveOrders) → شكل طلب NARA.
 - `web-order.js` — طلبات الموقع (بلا عمولة): بيتحقق من السلة بالسيرفر وبيحسب الأسعار من بيانات NARA، ما منثق بأسعار المتصفح. · benutzt von: server.js
 
+## Kundenseite (2)
+
+- `web-prototype/builder/builder.js` — ───────────────────────── KERN (rein, testbar) ─────────────────────────
+- `web-prototype/builder/layers.json`
+
 ## Skripte & Startdateien (57)
 
 - `Create-Desktop-Shortcut.cmd`
@@ -269,7 +275,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `start-nara.cmd`
 - `Tunnel-Config-Aktualisieren.ps1` — Tunnel-Config-Aktualisieren.ps1
 
-## Dokumente & Pläne (41)
+## Dokumente & Pläne (42)
 
 - `ACCOUNTING_AGENT_SYSTEM.md` — NARA Accounting Agent System
 - `AI_AGENT_SYSTEM.md` — NARA · AI Orchestrator Behavior
@@ -287,6 +293,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `plans/ACCOUNTING_AUDIT.md` — جرد قسم المحاسبة (المرحلة 0)
 - `plans/ACCOUNTING_STRATEGY.md` — استراتيجية المحاسبة الكاملة — Flamo
 - `plans/BURGER_BUILDER_SPEC.md` — Burger-Builder ("✏️ عدّل / اصنع برغرك") — Spezifikation
+- `plans/NIGHT_REPORT.md` — تقرير الشغل — 2026-11-21
 - `plans/PLAN_ACCOUNTING.md` — خطة: قسم المحاسبة الشاملة في Flamo
 - `plans/PLAN_AGENTS_HUB.md` — خطة: مركز الوكلاء (Agents Hub) — وكلاء بيشتغلوا لحالهم (Flamo)
 - `plans/PLAN_CASHIER_BOOKLET.md` — خطة: دفتر الكاشير التفاعلي (Anleitung) — دليل الموظفين + Bedienungsanleitung للـ Finanzamt
@@ -313,7 +320,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `README.md` — NARA – Restaurant Operations Platform
 - `web-prototype/README.md` — Website-Prototyp (Kunden-Seite)
 
-## Tests (108)
+## Tests (109)
 
 - `tests/accounting-agent.test.js`
 - `tests/accounting-books.test.js`
@@ -331,6 +338,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/bank-pay.test.js`
 - `tests/body-reader.test.js`
 - `tests/boot-and-shared.test.js`
+- `tests/burger-builder.test.js`
 - `tests/business-day.test.js`
 - `tests/customer-book.test.js`
 - `tests/customer-db.test.js`

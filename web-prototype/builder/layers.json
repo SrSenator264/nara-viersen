@@ -1,0 +1,21 @@
+{
+  "_doc": "Ebenen des Burger-Builders. src leer = eingebaute SVG-Zeichnung. Für echte Fotos: transparentes PNG/WebP (Seitenansicht, 1040 px breit) nach layers/<name>.webp legen und src eintragen. baseY = Unterkante (Auflage) in px von oben, restY = wo die nächste Ebene aufliegt; beide bezogen auf vbW x vbH.",
+  "bunBottom": { "src": "", "vbW": 260, "vbH": 64,  "baseY": 64,  "restY": 16 },
+  "patty":     { "src": "", "vbW": 260, "vbH": 46,  "baseY": 40,  "restY": 14 },
+  "chicken":   { "src": "", "vbW": 264, "vbH": 50,  "baseY": 44,  "restY": 12 },
+  "veggie":    { "src": "", "vbW": 256, "vbH": 44,  "baseY": 38,  "restY": 13 },
+  "cheese":    { "src": "", "vbW": 268, "vbH": 40,  "baseY": 14,  "restY": 6 },
+  "lettuce":   { "src": "", "vbW": 280, "vbH": 42,  "baseY": 30,  "restY": 12 },
+  "tomato":    { "src": "", "vbW": 250, "vbH": 30,  "baseY": 25,  "restY": 8 },
+  "pickles":   { "src": "", "vbW": 250, "vbH": 26,  "baseY": 22,  "restY": 8 },
+  "onion":     { "src": "", "vbW": 250, "vbH": 22,  "baseY": 18,  "restY": 7 },
+  "bacon":     { "src": "", "vbW": 260, "vbH": 26,  "baseY": 21,  "restY": 9 },
+  "jalapeno":  { "src": "", "vbW": 250, "vbH": 22,  "baseY": 18,  "restY": 8 },
+  "egg":       { "src": "", "vbW": 250, "vbH": 34,  "baseY": 26,  "restY": 10 },
+  "friedOnion":{ "src": "", "vbW": 250, "vbH": 24,  "baseY": 19,  "restY": 9 },
+  "pineapple": { "src": "", "vbW": 250, "vbH": 26,  "baseY": 21,  "restY": 8 },
+  "camembert": { "src": "", "vbW": 250, "vbH": 34,  "baseY": 28,  "restY": 9 },
+  "shrimp":    { "src": "", "vbW": 250, "vbH": 30,  "baseY": 24,  "restY": 10 },
+  "sauce":     { "src": "", "vbW": 240, "vbH": 26,  "baseY": 14,  "restY": 10 },
+  "bunTop":    { "src": "", "vbW": 260, "vbH": 104, "baseY": 100, "restY": 0 }
+}
