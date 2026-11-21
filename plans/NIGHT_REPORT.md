@@ -57,7 +57,7 @@
 1. **الإيميل:** Impressum وDatenschutz فيهن علامة ⚠️ "E-Mail fehlt". بعتلي الإيميل اللي بدك ياه ينكتب وبحطو. (الإيميل إلزامي بالـ Impressum.)
 2. **Google Fonts:** الموقع لسا بيحمّل خط Bricolage من Google (ومذكور بالـ Datenschutz). الأحسن تحميلو محلياً (محاكم ألمانية اعتبرتو مخالفة). ما قدرت أنزّلو هون (ما في إنترنت)، بدك ملف الخط أو تشغيل لحالو من جهازك.
 3. **راجع النصوص القانونية** عند محامي أو Steuerberater قبل النشر: كتبتها من معلوماتك المعروفة وكيف الموقع بيشتغل فعلياً (Cloudflare، شات الذكاء الاصطناعي Anthropic/Google، تحليل التخزين المحلي)، بس مو استشارة قانونية.
-4. **اسم المحل:** الموقع لسا بيعرض "iu gene" بالهيدر وبالـ footer. ما لمسته لأنو مو من المهمة. بالـ Impressum كتبت "Flamo (Einzelunternehmen)": لازم يتطابق مع اسم الـ Gewerbe بالـ Stadt Viersen، تأكد منو أو عدّلو.
+4. **اسم المحل:** الموقع لسا بيعرض "iu gene" بالهيدر وبالـ footer. ما لمسته لأنو مو من المهمة. سطر "Flamo (Einzelunternehmen)" انشال من الـ Impressum والـ Datenschutz بطلب عمر (21.11).
 5. GitHub Desktop: Fetch ثم Pull، وجرّب `NARA-Simulate.cmd 30` ثم `NARA-Simulate.cmd clear`.
 
 ## آخر اختبار
