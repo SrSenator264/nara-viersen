@@ -63,3 +63,12 @@ test('Smart-Endpunkte: Auffälligkeiten, Bank-Vorschläge, Auszug ohne Schlüsse
   assert.equal((await call('GET', '/api/accounting/anomalies', null, S.cashier)).status, 403);
   assert.equal((await call('GET', '/banking.html', null, S.acct)).status, 200);
 });
+test('Plattform-Abrechnungen: speichern, doppelt 409, Liste mit Vergleich, Lesen ohne Schlüssel 503', async () => {
+  const st = { platform: 'LIEFERANDO', documentKind: 'SETTLEMENT', invoiceNumber: 'LF-1', periodFrom: '2026-11-01', periodTo: '2026-11-07', ordersCount: 0, grossCents: 0, payoutCents: 0 };
+  assert.equal((await call('POST', '/api/accounting/platform-statement/save', { statement: { ...st, periodFrom: null } }, S.owner)).status, 422);
+  const s = await call('POST', '/api/accounting/platform-statement/save', { statement: st }, S.owner); assert.equal(s.status, 201);
+  assert.equal((await call('POST', '/api/accounting/platform-statement/save', { statement: st }, S.owner)).status, 409);
+  const l = await call('GET', '/api/accounting/platform-statements', null, S.acct); assert.equal(l.json.statements.length, 1); assert.equal(l.json.statements[0].comparison.ok, true);
+  assert.equal((await call('POST', '/api/accounting/platform-statement/read', { filename: 'a.pdf', mime: 'application/pdf', data: 'JVBE' }, S.owner)).status, 503);
+  assert.equal((await call('POST', '/api/accounting/platform-statement/save', { statement: st }, S.cashier)).status, 403);
+});

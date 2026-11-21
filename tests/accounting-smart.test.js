@@ -86,3 +86,21 @@ test('Wochenbericht: Fälligkeit Montag 9 Uhr, Text mit Umsatz, Plattformen, Fri
   assert.equal((await AW.tick({ readData: () => d, alerts, file, now: now + 7 * 86400000 + 60000 })).reason, 'done');
   assert.equal(sent.length, 1);
 });
+
+test('Plattform-Abrechnung: Normalisieren, Vergleich mit Flamo (Loco getrennt), Claude-Anfrage', async () => {
+  const PS = require('../platform-statement.js');
+  const st = PS.normalize({ platform: 'LIEFERANDO', documentKind: 'SETTLEMENT', periodFrom: '2026-11-01', periodTo: '2026-11-07', ordersCount: 2, grossSales: 55, commissionNet: 10, commissionVat: 1.9, otherFees: 1, payout: 42.1 });
+  assert.equal(st.commissionGrossCents, 1190); assert.equal(st.grossCents, 5500);
+  const d = { orders: [
+    { id: 'a', platform: 'LIEFERANDO', placedAt: '2026-11-02T15:00:00Z', totalCents: 2500, status: 'DELIVERED' },
+    { id: 'b', platform: 'LIEFERANDO', placedAt: '2026-11-03T15:00:00Z', totalCents: 3000, status: 'DELIVERED' },
+    { id: 'c', platform: 'LIEFERANDO', placedAt: '2026-11-03T16:00:00Z', totalCents: 4000, status: 'DELIVERED', brand: 'Loco Chicken' },
+    { id: 'x', platform: 'LIEFERANDO', placedAt: '2026-11-04T16:00:00Z', totalCents: 9000, status: 'CANCELLED' },
+  ], payments: [] };
+  const c = PS.compare(d, st); assert.equal(c.ok, true); assert.equal(c.flamoCount, 2); assert.equal(c.feeSharePct, 23.5);
+  const loco = PS.compare(d, { ...st, platform: 'SIDES', ordersCount: 1, grossCents: 4000 }); assert.equal(loco.ok, true); assert.equal(loco.flamoCount, 1);
+  const bad = PS.compare(d, { ...st, ordersCount: 3, grossCents: 8000 }); assert.equal(bad.ok, false); assert.equal(bad.diffCount, 1); assert.equal(bad.diffCents, 2500);
+  assert.equal(PS.compare(d, { ...st, periodFrom: null }).possible, false);
+  let body; const r = await PS.read({ files: ['QQ=='], mimeTypes: ['application/pdf'] }, { env: { ANTHROPIC_API_KEY: 'k' }, fetchImpl: async (u, o) => { body = JSON.parse(o.body); return { ok: true, json: async () => ({ content: [{ type: 'tool_use', name: 'save_platform_statement', input: { platform: 'UBER_EATS', documentKind: 'SETTLEMENT', payout: 12 } }] }) }; } });
+  assert.equal(body.tool_choice.name, 'save_platform_statement'); assert.equal(r.platform, 'UBER_EATS'); assert.equal(r.payoutCents, 1200);
+});

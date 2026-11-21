@@ -63,6 +63,9 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
 .set label.cb{flex-direction:row;align-items:center;gap:8px}
 .set label.cb input{min-height:auto;width:22px;height:22px}
 #msg{min-height:1.4em;margin-top:6px}
+.up{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border:2px dashed var(--line);border-radius:14px;cursor:pointer;font-weight:800;margin-top:6px}
+.up input{display:none}
+.okc{color:var(--ok);font-weight:800}.badc{color:var(--bad);font-weight:800}
 .note{font-size:.82rem;color:var(--mute);text-align:center;padding:4px 10px 20px}
 </style>
 <link rel="stylesheet" href="flamo-font.css?v=20261109a"></head>
@@ -73,6 +76,7 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
   <section class="card alert" id="c-alert" hidden></section>
   <section class="card" id="c-klein"></section>
   <section class="card" id="c-month"></section>
+  <section class="card" id="c-plat"></section>
   <section class="card" id="c-an"></section>
   <section class="card" id="c-dl"></section>
   <section class="card">
@@ -172,6 +176,22 @@ FT.init({
   dlNote:{de:'Fristen ungefähr: Wochenende → Montag, Feiertage nicht berücksichtigt.',ar:'المواعيد تقريبية: السبت والأحد بينزاحوا للاثنين، العطل مو محسوبة.',en:'Approximate: weekends move to Monday, holidays not included.'},
   tAgent:{de:'KI-Buchhalter',ar:'المحاسب الذكي',en:'AI accountant'},
   tAgentHint:{de:'Frag alles zu deinen Zahlen',ar:'اسأل أي شي عن أرقامك',en:'Ask anything about your figures'},
+  plTitle:{de:'Plattform-Abrechnungen',ar:'كشوف المنصات',en:'Platform statements'},
+  plHint:{de:'Abrechnung oder Provisionsrechnung von Lieferando, Uber Eats oder Sides hochladen — die KI liest sie und vergleicht mit Flamo.',ar:'ارفع كشف أو فاتورة عمولة Lieferando أو Uber Eats أو Sides — الذكاء الاصطناعي بيقراها وبيقارنها مع Flamo.',en:'Upload a Lieferando, Uber Eats or Sides statement or commission invoice — AI reads it and compares with Flamo.'},
+  plUp:{de:'PDF oder Foto hochladen',ar:'ارفع PDF أو صورة',en:'Upload PDF or photo'},
+  plReading:{de:'KI liest die Abrechnung…',ar:'عم يقرا الكشف…',en:'Reading the statement…'},
+  plNoKey:{de:'Braucht ANTHROPIC_API_KEY in der .env auf dem Kassen-PC.',ar:'بدها ANTHROPIC_API_KEY بملف .env على كمبيوتر المحل.',en:'Needs ANTHROPIC_API_KEY in .env on the shop PC.'},
+  plFail:{de:'Konnte nicht gelesen werden.',ar:'ما قدرت إقراه.',en:'Could not be read.'},
+  plRow:{de:'{p} · {f} – {t}',ar:'{p} · {f} – {t}',en:'{p} · {f} – {t}'},
+  plNums:{de:'Umsatz {g} · Provision+Gebühren {c} · Auszahlung {o}',ar:'المبيعات {g} · العمولة والرسوم {c} · الدفعة {o}',en:'Sales {g} · commission+fees {c} · payout {o}'},
+  plCmpOk:{de:'✅ Passt zu Flamo ({n} Bestellungen)',ar:'✅ مطابق لـ Flamo ({n} طلب)',en:'✅ Matches Flamo ({n} orders)'},
+  plCmpBad:{de:'⚠️ Abweichung zu Flamo: {n} Bestellungen, {a}',ar:'⚠️ في فرق مع Flamo: {n} طلب، {a}',en:'⚠️ Differs from Flamo: {n} orders, {a}'},
+  plCmpNo:{de:'Kein Zeitraum erkannt — kein Vergleich',ar:'ما في فترة واضحة — ما في مقارنة',en:'No period found — no comparison'},
+  plFee:{de:'Gebührenanteil {p} %',ar:'نسبة الرسوم {p} %',en:'Fee share {p} %'},
+  plSave:{de:'Speichern',ar:'احفظ',en:'Save'},
+  plSaved:{de:'Gespeichert ✅',ar:'انحفظ ✅',en:'Saved ✅'},
+  plDup:{de:'Schon gespeichert',ar:'محفوظ من قبل',en:'Already saved'},
+  plNone:{de:'Noch keine Abrechnung gespeichert',ar:'لسا ما في كشوف محفوظة',en:'No statements saved yet'},
   anTitle:{de:'Auffälligkeiten',ar:'شي مو طبيعي',en:'Anomalies'},
   anNone:{de:'Nichts Auffälliges in den letzten Wochen ✅',ar:'ما في شي غريب بالأسابيع الأخيرة ✅',en:'Nothing unusual in recent weeks ✅'},
   a_DUP_INVOICE:{de:'Doppelte Rechnung? {s} {n}',ar:'فاتورة مكررة؟ {s} {n}',en:'Duplicate invoice? {s} {n}'},
@@ -225,7 +245,25 @@ let H=null,S=null,Y=null,M=null;
 const LINK={closings:'kasse-settlement.html',tse:'sales.html',bank:'banking.html',belege:'inventory-foundation.html',journal:'accounting.html',period:'accounting.html'};
 const AN_ICON={DUP_INVOICE:'👯',PRICE_JUMP:'📈',CASH_DIFF:'💵',LOW_SALES_DAY:'📉',OLD_UNMATCHED:'🏦',NO_DOCUMENT:'📎',VAT_ON_KLEIN:'🚨'};
 const AN_LINK={DUP_INVOICE:'inventory-foundation.html',PRICE_JUMP:'inventory-foundation.html',CASH_DIFF:'kasse-settlement.html',LOW_SALES_DAY:'sales.html',OLD_UNMATCHED:'banking.html',NO_DOCUMENT:'inventory-foundation.html',VAT_ON_KLEIN:'accounting-home.html'};
-let AN=null;
+let AN=null,PL=[],PP=null,PMSG='';
+const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',SIDES:'Sides / Loco',OTHER:'?'};
+function plLine(s,c){
+  const fee=(s.commissionGrossCents||0)+(s.otherFeesCents||0);
+  const cmp=!c||!c.possible?`<small>${esc(t('plCmpNo'))}</small>`:c.ok?`<small class="okc">${esc(t('plCmpOk',{n:c.flamoCount}))}</small>`:`<small class="badc">${esc(t('plCmpBad',{n:(c.diffCount>0?'+':'')+(c.diffCount==null?'?':c.diffCount),a:c.diffCents==null?'?':eur(c.diffCents)}))}</small>`;
+  return `<span class="t"><b>${esc(t('plRow',{p:PLN[s.platform]||s.platform,f:s.periodFrom?fmtD(s.periodFrom):'?',t:s.periodTo?fmtD(s.periodTo):'?'}))}</b><small>${esc(t('plNums',{g:s.grossCents==null?'?':eur(s.grossCents),c:eur(fee),o:s.payoutCents==null?'?':eur(s.payoutCents)}))}${c&&c.feeSharePct!=null?' · '+esc(t('plFee',{p:c.feeSharePct})):''}</small>${cmp}</span>`;
+}
+function drawPlat(){
+  const el=$('c-plat');
+  const prev=PP?`<div class="check" style="background:var(--soft);border-radius:12px;padding:10px"><span class="e">🤖</span>${plLine(PP.statement,PP.comparison)}<button class="btn" type="button" id="plSave">💾 ${esc(t('plSave'))}</button></div>`:'';
+  const list=PL.slice(0,6).map(s=>`<div class="check"><span class="e">${s.comparison&&s.comparison.ok?'✅':'🛵'}</span>${plLine(s,s.comparison)}</div>`).join('');
+  el.innerHTML=`<h2>🛵 ${esc(t('plTitle'))}</h2><p class="mute">${esc(t('plHint'))}</p><label class="up">📄 ${esc(t('plUp'))}<input type="file" id="plFile" accept=".pdf,application/pdf,image/png,image/jpeg"></label><p class="mute" role="status">${esc(PMSG)}</p>${prev}${list||(!PP?`<p class="mute">${esc(t('plNone'))}</p>`:'')}`;
+  $('plFile').onchange=async()=>{const f=$('plFile').files[0];if(!f)return;PMSG=t('plReading');PP=null;drawPlat();
+    try{const data=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result));r.onerror=no;r.readAsDataURL(f)});
+      const r=await fetch('/api/accounting/platform-statement/read',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({filename:f.name,mime:f.type,data})});const j=await r.json().catch(()=>({}));
+      if(r.ok&&j.statement){PP=j;PMSG=''}else PMSG=t(j.code==='NO_AI_KEY'?'plNoKey':'plFail');}catch(e){PMSG=t('plFail')}drawPlat()};
+  const sv=$('plSave');if(sv)sv.onclick=async()=>{try{const r=await fetch('/api/accounting/platform-statement/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({documentId:PP.documentId,statement:PP.statement})});PMSG=t(r.ok?'plSaved':r.status===409?'plDup':'plFail');if(r.ok)PP=null;await loadPlat()}catch(e){PMSG=t('plFail');drawPlat()}};
+}
+async function loadPlat(){try{const r=await fetch('/api/accounting/platform-statements',{cache:'no-store'});PL=r.ok?(await r.json()).statements||[]:[]}catch(e){PL=[]}drawPlat()}
 function drawAn(){
   const el=$('c-an');if(!AN){el.hidden=true;return}el.hidden=false;
   const rows=AN.slice(0,8).map(a=>{const txt=tk('a_'+a.type,{s:a.supplier||'',n:a.invoiceNumber||a.number||'',i:a.item||'',p:a.changePct||'',a:eur(a.differenceCents!=null?a.differenceCents:a.salesCents),u:eur(a.usualCents),c:a.count||'',r:a.rate||''});
@@ -301,7 +339,7 @@ function drawSettings(){
   $('s-kmdone').checked=!!S.kassenmeldungDone;
   $('s-minijob').checked=S.minijob!==false;
 }
-function draw(){if(!H)return;drawAsk();drawKlein();drawMonth();drawAn();drawDl();drawSettings()}
+function draw(){if(!H)return;drawAsk();drawKlein();drawMonth();drawPlat();drawAn();drawDl();drawSettings()}
 
 async function load(){
   try{
@@ -326,6 +364,7 @@ $('save').onclick=()=>{
   mr[y]=cents($('s-mcur').value);mr[y-1]=cents($('s-mprev').value);
   saveSettings({vatRegime:$('s-regime').value,manualRevenueCents:mr,kasseInUseSince:$('s-since').value||'',kassenmeldungDone:$('s-kmdone').checked,minijob:$('s-minijob').checked});
 };
+loadPlat();
 $('weekly').onclick=async()=>{try{const r=await fetch('/api/accounting/weekly/test',{method:'POST'});const j=await r.json();$('msg').textContent=t(j.sent?'weeklyOk':'weeklyNo')}catch(e){$('msg').textContent=t('err')}};
 load();
 </script>
