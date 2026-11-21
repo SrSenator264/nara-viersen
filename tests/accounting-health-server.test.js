@@ -72,3 +72,7 @@ test('Plattform-Abrechnungen: speichern, doppelt 409, Liste mit Vergleich, Lesen
   assert.equal((await call('POST', '/api/accounting/platform-statement/read', { filename: 'a.pdf', mime: 'application/pdf', data: 'JVBE' }, S.owner)).status, 503);
   assert.equal((await call('POST', '/api/accounting/platform-statement/save', { statement: st }, S.cashier)).status, 403);
 });
+test('EÜR-Endpunkt', async () => {
+  const r = await call('GET', '/api/accounting/euer?year=2026', null, S.acct); assert.equal(r.status, 200); assert.equal(r.json.euer.year, 2026); assert.ok(Array.isArray(r.json.euer.warnings));
+  assert.equal((await call('GET', '/api/accounting/euer?year=1900', null, S.acct)).status, 422);
+});

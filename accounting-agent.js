@@ -12,6 +12,7 @@ const bizDay = require('./business-day.js');
 const AN = require('./accounting-anomalies.js');
 const BM = require('./bank-match.js');
 const PS = require('./platform-statement.js');
+const EU = require('./euer-draft.js');
 
 const str = v => (v == null ? '' : String(v));
 const low = v => str(v).toLowerCase();
@@ -61,6 +62,8 @@ const TOOLS = [
     parameters: { type: 'object', properties: {} } },
   { name: 'platform_statements', description: 'Gespeicherte Plattform-Abrechnungen (Lieferando, Uber Eats, Sides/Loco): Bruttoumsatz, Provision, Gebühren, Auszahlung und Abgleich mit den Bestellungen in Flamo (Differenz Anzahl/Betrag).',
     parameters: { type: 'object', properties: { platform: { type: 'string' } } } },
+  { name: 'euer_draft', description: 'Entwurf der EÜR (Einnahmenüberschussrechnung) für ein Jahr: Einnahmen (Kasse, Plattformen), Ausgaben nach Kategorie (Wareneinkauf, Miete, Energie, Telefon, Versicherung/BGN, Plattformgebühren, Löhne, AfA…), Gewinn, Warnungen was fehlt.',
+    parameters: { type: 'object', properties: { year: { type: 'integer' } } } },
   { name: 'cashbook', description: 'Kassenbuch-Einträge (Anfangsbestand, Einlagen, Entnahmen, Abschluss) im Zeitraum.',
     parameters: { type: 'object', properties: { from: { type: 'string' }, to: { type: 'string' } } } },
 ];
@@ -146,6 +149,7 @@ function makeTools(data, { today } = {}) {
     anomalies: a => ({ items: AN.detect(data, { today, lookbackDays: Math.max(7, Math.min(365, num(a.days) || 60)) }).slice(0, 40) }),
     bank_suggestions: () => { const s = BM.suggest(data); return { count: s.length, suggestions: s.slice(0, 30) }; },
     platform_statements: a => { const pf = str(a.platform).toUpperCase(); const rows = (data.platformStatements || []).filter(s => !pf || s.platform === pf).sort((x, y) => str(y.periodTo).localeCompare(str(x.periodTo))).slice(0, 24); return { count: rows.length, statements: rows.map(s => ({ ...s, comparison: PS.compare(data, s) })), note: rows.length ? undefined : 'Noch keine Plattform-Abrechnung hochgeladen (Buchhaltung → Plattform-Abrechnungen).' }; },
+    euer_draft: a => EU.build(data, Number(a.year) || Number(str(today || bizDay.today()).slice(0, 4))),
     cashbook: a => {
       const rows = (data.cashbooks || []).filter(x => inRange(str(x.date), a.from, a.to)).sort((x, y) => str(x.date).localeCompare(str(y.date)));
       return { count: rows.length, balanceCents: rows.reduce((s, x) => s + num(x.inCents) - num(x.outCents), 0), rows: rows.slice(-80) };

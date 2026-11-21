@@ -78,6 +78,7 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
   <section class="card" id="c-month"></section>
   <section class="card" id="c-plat"></section>
   <section class="card" id="c-an"></section>
+  <section class="card" id="c-euer" hidden></section>
   <section class="card" id="c-dl"></section>
   <section class="card">
     <h2>🧰 <span data-t="tools"></span></h2>
@@ -192,6 +193,18 @@ FT.init({
   plSaved:{de:'Gespeichert ✅',ar:'انحفظ ✅',en:'Saved ✅'},
   plDup:{de:'Schon gespeichert',ar:'محفوظ من قبل',en:'Already saved'},
   plNone:{de:'Noch keine Abrechnung gespeichert',ar:'لسا ما في كشوف محفوظة',en:'No statements saved yet'},
+  euTitle:{de:'EÜR {y} (Entwurf)',ar:'EÜR {y} (مسودة)',en:'Profit statement {y} (draft)'},
+  euIn:{de:'Einnahmen',ar:'الإيرادات',en:'Income'},
+  euOut:{de:'Ausgaben',ar:'المصاريف',en:'Expenses'},
+  euProfit:{de:'Gewinn',ar:'الربح',en:'Profit'},
+  euAsk:{de:'Details fragen 🤖',ar:'اسأل المحاسب عن التفاصيل 🤖',en:'Ask for details 🤖'},
+  w_VAT_REGIME_NOT_SET:{de:'Umsatzsteuer-Status fehlt',ar:'وضع الضريبة مو محدد',en:'VAT status missing'},
+  w_REGEL_NET_SPLIT_NEEDED:{de:'Netto/USt-Trennung noch nicht umgesetzt',ar:'لسا ما في فصل صافي/ضريبة',en:'Net/VAT split not implemented yet'},
+  w_NO_PURCHASE_INVOICES:{de:'Keine Einkaufsrechnungen erfasst',ar:'ما في فواتير مشتريات مسجلة',en:'No purchase invoices recorded'},
+  w_NO_PLATFORM_FEES:{de:'Plattformgebühren fehlen (Abrechnungen hochladen)',ar:'عمولات المنصات ناقصة (ارفع الكشوف)',en:'Platform fees missing (upload statements)'},
+  w_NO_PAYROLL:{de:'Keine Lohnzahlungen erfasst',ar:'ما في رواتب مسجلة',en:'No wage payments recorded'},
+  w_CATEGORIES_GUESSED:{de:'Kategorien teils geschätzt',ar:'بعض التصنيفات تقديرية',en:'Some categories estimated'},
+  w_NO_RENT:{de:'Keine Miete erfasst',ar:'ما في إيجار مسجل',en:'No rent recorded'},
   anTitle:{de:'Auffälligkeiten',ar:'شي مو طبيعي',en:'Anomalies'},
   anNone:{de:'Nichts Auffälliges in den letzten Wochen ✅',ar:'ما في شي غريب بالأسابيع الأخيرة ✅',en:'Nothing unusual in recent weeks ✅'},
   a_DUP_INVOICE:{de:'Doppelte Rechnung? {s} {n}',ar:'فاتورة مكررة؟ {s} {n}',en:'Duplicate invoice? {s} {n}'},
@@ -263,6 +276,13 @@ function drawPlat(){
       if(r.ok&&j.statement){PP=j;PMSG=''}else PMSG=t(j.code==='NO_AI_KEY'?'plNoKey':'plFail');}catch(e){PMSG=t('plFail')}drawPlat()};
   const sv=$('plSave');if(sv)sv.onclick=async()=>{try{const r=await fetch('/api/accounting/platform-statement/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({documentId:PP.documentId,statement:PP.statement})});PMSG=t(r.ok?'plSaved':r.status===409?'plDup':'plFail');if(r.ok)PP=null;await loadPlat()}catch(e){PMSG=t('plFail');drawPlat()}};
 }
+let EU=null;
+function drawEuer(){
+  const el=$('c-euer');if(!EU){el.hidden=true;return}el.hidden=false;
+  el.innerHTML=`<h2>📑 ${esc(t('euTitle',{y:EU.year}))}</h2><div class="row"><div class="stat"><span class="mute">${esc(t('euIn'))}</span><b>${esc(eur(EU.income.totalCents))}</b></div><div class="stat"><span class="mute">${esc(t('euOut'))}</span><b>${esc(eur(EU.expenses.totalCents))}</b></div><div class="stat"><span class="mute">${esc(t('euProfit'))}</span><b>${esc(eur(EU.profitCents))}</b></div></div>
+    ${EU.warnings.length?`<p class="mute">${EU.warnings.map(w=>'⚠️ '+esc(tk('w_'+w))).join('<br>')}</p>`:''}<a class="tile" href="accounting-agent.html" style="margin-top:8px"><b>${esc(t('euAsk'))}</b></a>`;
+}
+async function loadEuer(){try{const r=await fetch('/api/accounting/euer',{cache:'no-store'});EU=r.ok?(await r.json()).euer:null}catch(e){EU=null}drawEuer()}
 async function loadPlat(){try{const r=await fetch('/api/accounting/platform-statements',{cache:'no-store'});PL=r.ok?(await r.json()).statements||[]:[]}catch(e){PL=[]}drawPlat()}
 function drawAn(){
   const el=$('c-an');if(!AN){el.hidden=true;return}el.hidden=false;
@@ -339,7 +359,7 @@ function drawSettings(){
   $('s-kmdone').checked=!!S.kassenmeldungDone;
   $('s-minijob').checked=S.minijob!==false;
 }
-function draw(){if(!H)return;drawAsk();drawKlein();drawMonth();drawPlat();drawAn();drawDl();drawSettings()}
+function draw(){if(!H)return;drawAsk();drawKlein();drawMonth();drawPlat();drawAn();drawEuer();drawDl();drawSettings()}
 
 async function load(){
   try{
@@ -364,7 +384,7 @@ $('save').onclick=()=>{
   mr[y]=cents($('s-mcur').value);mr[y-1]=cents($('s-mprev').value);
   saveSettings({vatRegime:$('s-regime').value,manualRevenueCents:mr,kasseInUseSince:$('s-since').value||'',kassenmeldungDone:$('s-kmdone').checked,minijob:$('s-minijob').checked});
 };
-loadPlat();
+loadPlat();loadEuer();
 $('weekly').onclick=async()=>{try{const r=await fetch('/api/accounting/weekly/test',{method:'POST'});const j=await r.json();$('msg').textContent=t(j.sent?'weeklyOk':'weeklyNo')}catch(e){$('msg').textContent=t('err')}};
 load();
 </script>

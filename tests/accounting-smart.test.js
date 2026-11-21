@@ -104,3 +104,29 @@ test('Plattform-Abrechnung: Normalisieren, Vergleich mit Flamo (Loco getrennt), 
   let body; const r = await PS.read({ files: ['QQ=='], mimeTypes: ['application/pdf'] }, { env: { ANTHROPIC_API_KEY: 'k' }, fetchImpl: async (u, o) => { body = JSON.parse(o.body); return { ok: true, json: async () => ({ content: [{ type: 'tool_use', name: 'save_platform_statement', input: { platform: 'UBER_EATS', documentKind: 'SETTLEMENT', payout: 12 } }] }) }; } });
   assert.equal(body.tool_choice.name, 'save_platform_statement'); assert.equal(r.platform, 'UBER_EATS'); assert.equal(r.payoutCents, 1200);
 });
+
+test('EÜR-Entwurf: Einnahmen Kasse+Plattform+manuell, Ausgaben kategorisiert, Plattformgebühren aus Abrechnung, AfA, Warnungen', () => {
+  const EU = require('../euer-draft.js');
+  const d = {
+    settings: { accounting: { vatRegime: 'KLEIN', manualRevenueCents: { 2026: 100000 }, supplierCategories: { s3: 'EQUIPMENT_SMALL' } } },
+    orders: [{ id: 'o1' }, { id: 'l1', platform: 'UBER', placedAt: '2026-05-01T15:00:00Z', totalCents: 3000, status: 'DELIVERED' }],
+    payments: [{ id: 'p1', orderId: 'o1', createdAt: '2026-05-01T14:00:00Z', status: 'COMPLETED', amountCents: 2000 }],
+    suppliers: [{ id: 's1', name: 'Fleisch Müller' }, { id: 's2', name: 'EWE Energie' }, { id: 's3', name: 'Metro' }],
+    invoices: [
+      { supplierId: 's1', invoiceDate: '2026-03-01', totalAmount: 100, status: 'POSTED', lineItems: [{}] },
+      { supplierId: 's2', invoiceDate: '2026-03-01', totalCents: 5000, status: 'POSTED' },
+      { supplierId: 's3', invoiceDate: '2026-04-01', totalCents: 7000, status: 'POSTED' },
+      { supplierId: 's1', invoiceDate: '2026-04-01', totalCents: 99999, status: 'DRAFT' },
+      { supplierId: 's1', invoiceDate: '2025-12-31', totalCents: 99999, status: 'POSTED' },
+    ],
+    platformStatements: [{ platform: 'UBER_EATS', periodTo: '2026-05-31', commissionGrossCents: 900, otherFeesCents: 100 }],
+    payrollPayments: [{ date: '2026-05-02', amountCents: 50000 }],
+    fixedAssets: [{ status: 'ACTIVE', purchaseDate: '2026-11-01', usefulLifeMonths: 36, monthlyDepreciationCents: 1000 }],
+  };
+  const r = EU.build(d, 2026);
+  assert.equal(r.income.totalCents, 105000); assert.equal(r.income.platformCents, 3000);
+  assert.equal(r.expenses.GOODS, 10000); assert.equal(r.expenses.ENERGY, 5000); assert.equal(r.expenses.EQUIPMENT_SMALL, 7000);
+  assert.equal(r.expenses.PLATFORM_FEES, 1000); assert.equal(r.expenses.WAGES, 50000); assert.equal(r.expenses.AFA, 2000);
+  assert.equal(r.expenses.totalCents, 75000); assert.equal(r.profitCents, 30000);
+  assert.ok(r.warnings.includes('CATEGORIES_GUESSED')); assert.ok(r.warnings.includes('NO_RENT')); assert.ok(!r.warnings.includes('NO_PLATFORM_FEES'));
+});
