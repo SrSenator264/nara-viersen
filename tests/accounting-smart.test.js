@@ -130,3 +130,14 @@ test('EÜR-Entwurf: Einnahmen Kasse+Plattform+manuell, Ausgaben kategorisiert, P
   assert.equal(r.expenses.totalCents, 75000); assert.equal(r.profitCents, 30000);
   assert.ok(r.warnings.includes('CATEGORIES_GUESSED')); assert.ok(r.warnings.includes('NO_RENT')); assert.ok(!r.warnings.includes('NO_PLATFORM_FEES'));
 });
+
+test('Wareneinsatz pro Gericht: Rezept × letzter Preis, Marge, fehlende Preise markiert', () => {
+  const DC = require('../dish-cost.js');
+  const d = { inventoryItems: [{ id: 'v1', name: 'Hack', baseUnit: 'g' }, { id: 'v2', name: 'Brot', baseUnit: 'Stk' }, { id: 'v3', name: 'Käse', baseUnit: 'g' }],
+    purchasePriceHistory: [{ inventoryItemId: 'v1', unitPrice: 0.01, createdAt: '2026-10-01' }, { inventoryItemId: 'v1', unitPrice: 0.012, createdAt: '2026-11-01' }, { inventoryItemId: 'v2', unitPrice: 0.5, createdAt: '2026-11-01' }],
+    products: [{ id: 'm1', name: 'Burger', priceCents: 990 }],
+    recipes: [{ productId: 'm1', status: 'ACTIVE', ingredientLines: [{ inventoryItemId: 'v1', quantity: 150 }, { inventoryItemId: 'v2', quantity: 1 }, { inventoryItemId: 'v3', quantity: 20 }] }] };
+  const r = DC.build(d); const b = r.dishes[0];
+  assert.equal(b.costCents, 230); assert.equal(b.marginCents, 760); assert.equal(b.costSharePct, 23.2); assert.equal(b.complete, false); assert.deepEqual(b.missing, ['Käse']);
+  assert.equal(DC.build(d, { query: 'pizza' }).count, 0);
+});
