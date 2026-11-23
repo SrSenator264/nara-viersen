@@ -416,7 +416,7 @@ function drawDl(){
 function drawSettings(){
   if(!S)return;
   const y=H?H.klein.year:new Date().getFullYear(),mr=S.manualRevenueCents||{};
-  $('s-regime').value=S.vatRegime||'';
+  $('s-regime').value=S.vatRegime||'KLEIN';
   $('s-mcur').value=mr[y]?(mr[y]/100):'';
   $('s-mprev').value=mr[y-1]?(mr[y-1]/100):'';
   $('s-since').value=S.kasseInUseSince||'';

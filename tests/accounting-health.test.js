@@ -95,3 +95,10 @@ test('Rechte und Auslieferung: Seite für Buchhaltung, Modul nicht öffentlich, 
   const src = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
   assert.match(src, /'\/api\/accounting\/health'/);
 });
+
+test('وضع الضريبة غير محدد = Kleinunternehmer افتراضياً (والتعارض مع ضريبة الإيصال بيظهر)', () => {
+  const d = base({ settings: { accounting: { defaultSalesVatRate: 7 } } });
+  const k = AH.kleinunternehmer(d, 2026, '2026-11-23');
+  assert.equal(k.regime, 'KLEIN'); assert.equal(k.conflict, true);
+  assert.equal(AH.deadlines(d, '2026-11-23').some(x => x.key === 'ustVa'), false);
+});

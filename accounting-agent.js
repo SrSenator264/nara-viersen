@@ -263,19 +263,21 @@ async function chat(input, { data, adapter, today, maxRounds = 8 }) {
   const merged = cleanHistory(input.history);
   const message = str(input.message).trim().slice(0, 3000);
   if (!message) return { ok: false, code: 'EMPTY_MESSAGE' };
-  const regime = (data.settings && data.settings.accounting && data.settings.accounting.vatRegime) || '';
+  const regime = (data.settings && data.settings.accounting && data.settings.accounting.vatRegime) || 'KLEIN';
   const tools = makeTools(data, { today });
   const st = adapter.init(systemPrompt({ lang, today, regime }), merged, message);
   const usage = { in: 0, out: 0 }, used = []; let text = '', rounds = 0, done = false;
-  while (rounds < maxRounds) {
-    rounds++;
-    const r = await adapter.call(st);
-    usage.in += r.usage.in; usage.out += r.usage.out;
-    if (!r.calls.length) { text = r.text; done = true; break; }
-    const results = r.calls.map(c => { used.push(c.name); return tools.run(c.name, c.args); });
-    adapter.addResults(st, r.calls, results);
-  }
-  if (!done) { const r = await adapter.finalNoTools(st, 'Answer now with what you have. Do not call tools.'); usage.in += r.usage.in; usage.out += r.usage.out; text = r.text; }
+  try {
+    while (rounds < maxRounds) {
+      rounds++;
+      const r = await adapter.call(st);
+      usage.in += r.usage.in; usage.out += r.usage.out;
+      if (!r.calls.length) { text = r.text; done = true; break; }
+      const results = r.calls.map(c => { used.push(c.name); return tools.run(c.name, c.args); });
+      adapter.addResults(st, r.calls, results);
+    }
+    if (!done) { const r = await adapter.finalNoTools(st, 'Answer now with what you have. Do not call tools.'); usage.in += r.usage.in; usage.out += r.usage.out; text = r.text; }
+  } catch (e) { if (e && typeof e === 'object') e.usage = usage; throw e; } // الجولات اللي انصرفت قبل الخطأ لازم تنحسب بالسقف
   if (!text) return { ok: false, code: 'EMPTY', usage, rounds };
   return { ok: true, reply: text.slice(0, 8000), toolsUsed: [...new Set(used)], usage, rounds, provider: adapter.name };
 }

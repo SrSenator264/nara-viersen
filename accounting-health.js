@@ -57,7 +57,7 @@ function kleinunternehmer(data, year, today) {
   let crossDate = null;
   if (ytdCents > LIMIT_CUR) crossDate = 'PASSED';
   else if (perDay > 0) { const d = Math.ceil((LIMIT_CUR - ytdCents) / perDay); const x = addDays(new Date(now), d); if (x.getUTCFullYear() === year) crossDate = ymd(x); }
-  const regime = up(acc.vatRegime); // '' (مو محدد) | KLEIN | REGEL
+  const regime = up(acc.vatRegime) || 'KLEIN'; // الافتراضي Kleinunternehmer (عمر أكّد 21.11) | REGEL
   const prevOver = prevYearCents > LIMIT_PREV, curOver = ytdCents > LIMIT_CUR;
   let status = 'OK';
   if (prevOver || curOver) status = 'OVER';
@@ -110,7 +110,7 @@ function kasseInUseSince(data) {
 
 function deadlines(data, today, horizonDays = 100) {
   const acc = (data.settings && data.settings.accounting) || {};
-  const regime = up(acc.vatRegime), hasStaff = acc.minijob !== false;
+  const regime = up(acc.vatRegime) || 'KLEIN', hasStaff = acc.minijob !== false;
   const t = Date.parse(today + 'T00:00:00Z'), end = t + horizonDays * 86400000;
   const y0 = Number(today.slice(0, 4)), out = [];
   const push = (d, key, extra) => { const ms = d.getTime(); if (ms >= t && ms <= end) out.push({ date: ymd(d), key, ...(extra || {}) }); };

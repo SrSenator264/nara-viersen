@@ -117,3 +117,9 @@ test('Rechnungsleser Claude: PDF als document, erzwungenes Tool, Ergebnis validi
 test('Rechte: Seite nur Buchhaltung, Modul nicht öffentlich', () => {
   assert.ok(A.PAGE_ROLES['accounting-agent.html']); assert.equal(A.staticAllowed('accounting-agent.js'), false);
 });
+
+test('chat: لو صار خطأ بعد جولات، الخطأ بيحمل الاستهلاك عشان ينحسب بالسقف', async () => {
+  let n = 0;
+  const adapter = { name: 'f', init: () => ({}), call: async () => { n++; if (n === 3) throw new Error('boom'); return { text: '', calls: [{ id: 'x', name: 'overview', args: {} }], usage: { in: 100, out: 10 } }; }, addResults() {}, finalNoTools: async () => ({ text: 'x', usage: { in: 0, out: 0 } }) };
+  await assert.rejects(() => AA.chat({ message: 'hi' }, { data: data(), adapter, today: '2026-11-21' }), e => e.usage && e.usage.in === 200 && e.usage.out === 20);
+});
