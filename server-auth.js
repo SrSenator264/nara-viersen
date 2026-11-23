@@ -10,7 +10,8 @@ const COOKIE = 'nara_session';
 const SESSION_MS = 14 * 3600 * 1000;
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 
-function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
+function create({ readAdminData, writeAdminData, reply, adminId, dir, plog }) {
+  const plogRec = (req, entries) => { try { if (plog) plog.record(entries.map(e => ({ user: (req.naraUser && (req.naraUser.name || req.naraUser.id)) || 'SYSTEM', area: 'USERS', ...e }))); } catch (e) { console.error('[NARA][PLOG]', e.message); } };
   const file = path.join(dir, 'nara-auth.json');
   let store = { accounts: {}, sessions: {}, invites: {} };
   try { const j = JSON.parse(fs.readFileSync(file, 'utf8')); if (j && typeof j === 'object') store = { accounts: j.accounts || {}, sessions: j.sessions || {}, invites: j.invites || {} }; } catch { /* first run */ }
@@ -133,6 +134,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
         writeAdminData(data);
         store.accounts[id] = { role: 'OWNER', active: true, pin: A.hashPin(b.pin) };
         save();
+        plogRec(req, [{ user: name || 'bootstrap', entity: 'account:' + id + ' ' + (name || ''), field: '(angelegt)', before: null, after: { role: 'OWNER', active: true }, note: 'bootstrap' }]);
         startSession(req, res, id, name, 'OWNER');
       });
       return true;
@@ -160,6 +162,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
         inv.used = true; inv.usedBy = id; inv.usedAt = now;
         store.accounts[id] = { role: 'DRIVER', active: true, pin: A.hashPin(b.pin) };
         save();
+        plogRec(req, [{ user: name || 'join', entity: 'account:' + id + ' ' + (name || ''), field: '(angelegt)', before: null, after: { role: 'DRIVER', active: true }, note: 'invite-join' }]);
         startSession(req, res, id, name, 'DRIVER');
       });
       return true;
@@ -201,6 +204,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
         if (emp) { emp.active = false; emp.archivedAt = now; emp.updatedAt = now; }
         data.auditEvents ??= []; data.auditEvents.push({ id: adminId('audit'), type: 'STAFF_DELETED', createdAt: now, details: { by: req.naraUser.name || req.naraUser.id, employeeId: id, name: nameOf(data, id), role: acc?.role || null } });
         writeAdminData(data);
+        plogRec(req, [{ entity: 'account:' + id + ' ' + nameOf(data, id), field: '(gelöscht)', before: { role: acc?.role || null }, after: null }]);
         replyC(res, 200, { ok: true, id });
       });
       return true;
@@ -212,6 +216,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
         if (A.MANAGERS.includes(acc.role) && req.naraUser.role !== 'OWNER' && req.naraUser.id !== id) return reply(res, 403, { error: 'Nur der Inhaber ändert Manager-PINs.', code: 'FORBIDDEN' });
         const err = A.validatePin(acc.role, b.pin); if (err) return reply(res, 422, { error: err });
         acc.pin = A.hashPin(b.pin); save(); revoke(id);
+        plogRec(req, [{ entity: 'account:' + id + ' ' + nameOf(readAdminData(), id), field: 'pin', before: '***', after: '***' }]);
         replyC(res, 200, { ok: true });
       });
       return true;
@@ -234,6 +239,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
       if (!acc || acc.role !== 'MANAGER' || acc.active === false || !acc.pin) return deny('Nur ein angemeldeter Manager kann die Inhaber-Rolle zurückholen.', 'NOT_MANAGER');
       try {
         acc.role = 'OWNER'; save(); // الصلاحية الفعلية بتنحفظ أول
+        plogRec(req, [{ entity: 'account:' + me.id + ' ' + (me.name || ''), field: 'role', before: 'MANAGER', after: 'OWNER', note: 'restore-owner' }]);
         try { // تحديث سجل الموظف + سجل التدقيق: محاولة ثانوية، فشلها ما بيمنع الصلاحية
           const data = readAdminData(), emp = (data.employees || []).find(e => e.id === me.id), now = new Date().toISOString();
           if (emp) { emp.role = 'OWNER'; emp.updatedAt = now; }
@@ -262,6 +268,7 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
         if (!prev && !b.pin) return reply(res, 422, { error: 'Neues Konto braucht eine PIN.' });
         if (b.pin) { const err = A.validatePin(role, b.pin); if (err) return reply(res, 422, { error: err }); }
         else if (prev?.pin && String(prev.pin.salt)) { const need = ({ OWNER: 6, MANAGER: 6, ACCOUNTANT: 6 })[role]; if (need && !(A.MANAGERS.includes(prev.role) || prev.role === 'ACCOUNTANT')) return reply(res, 422, { error: `Für ${role} bitte neue PIN (mind. ${need} Ziffern) setzen.` }); }
+        const plPrevEmp = emp ? { name: emp.name, role: emp.role, active: emp.active !== false } : null;
         if (!emp) { id = adminId('employee'); emp = { id, name, role, active, permissions: [], qrToken: adminId('qr'), hourlyRateCents: null, monthlySalaryCents: null, contractType: 'HOURLY', internalProfileEnabled: true, officialProfileEnabled: false, workforceType: 'INTERNAL', breakMinutes: 0, overtimeMultiplier: 1.25, dailyDeductionCents: 0, currency: 'EUR', createdAt: now, updatedAt: now }; data.employees.push(emp); }
         else { emp.name = name; emp.role = role; emp.active = active; emp.updatedAt = now; }
         writeAdminData(data);
@@ -270,6 +277,19 @@ function create({ readAdminData, writeAdminData, reply, adminId, dir }) {
         store.accounts[id] = { role, active, pin: b.pin ? A.hashPin(b.pin) : prev?.pin, ...(custGrant ? { customers: true } : {}), ...(delGrant && role !== 'OWNER' ? { canDelete: true } : {}) };
         if (b.pin || !active || (prev && prev.role !== role)) revoke(id);
         save();
+        {
+          const ent = 'account:' + id + ' ' + name, now2 = store.accounts[id], pl = [];
+          if (!plPrevEmp && !prev) pl.push({ entity: ent, field: '(angelegt)', before: null, after: { name, role, active } });
+          else {
+            if (plPrevEmp && plPrevEmp.name !== name) pl.push({ entity: ent, field: 'name', before: plPrevEmp.name, after: name });
+            if ((prev ? prev.role : plPrevEmp && plPrevEmp.role) !== role) pl.push({ entity: ent, field: 'role', before: prev ? prev.role : plPrevEmp && plPrevEmp.role, after: role });
+            if ((prev ? prev.active !== false : plPrevEmp && plPrevEmp.active) !== active) pl.push({ entity: ent, field: 'active', before: prev ? prev.active !== false : plPrevEmp && plPrevEmp.active, after: active });
+            if ((prev && prev.customers === true) !== (now2.customers === true)) pl.push({ entity: ent, field: 'customers', before: prev && prev.customers === true, after: now2.customers === true });
+            if ((prev && prev.canDelete === true) !== (now2.canDelete === true)) pl.push({ entity: ent, field: 'canDelete', before: prev && prev.canDelete === true, after: now2.canDelete === true });
+          }
+          if (b.pin) pl.push({ entity: ent, field: 'pin', before: prev && prev.pin ? '***' : null, after: '***' });
+          plogRec(req, pl);
+        }
         replyC(res, 200, { ok: true, id });
       });
       return true;
