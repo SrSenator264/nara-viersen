@@ -48,9 +48,12 @@ function compare(data, st) {
   const rows = SL.build(data, st.periodFrom, st.periodTo).platform.rows.filter(r => r.status === 'OK' && (st.platform === 'SIDES' ? r.brand === 'Loco Chicken' : r.platform === st.platform && r.brand !== 'Loco Chicken'));
   const flamoCount = rows.length, flamoGross = rows.reduce((s, r) => s + r.grossCents, 0);
   const diffCount = st.ordersCount != null ? st.ordersCount - flamoCount : null, diffCents = st.grossCents != null ? st.grossCents - flamoGross : null;
-  const ok = (diffCount == null || diffCount === 0) && (diffCents == null || Math.abs(diffCents) <= Math.max(100, Math.round(flamoGross * 0.01)));
+  const nothing = diffCount == null && diffCents == null; // الكشف ما فيه عدد ولا مبلغ → ما في شي نقارنو (مو "تمام")
+  const ok = nothing ? null : (diffCount == null || diffCount === 0) && (diffCents == null || Math.abs(diffCents) <= Math.max(100, Math.round(flamoGross * 0.01)));
+  const missingPct = diffCents != null && st.grossCents ? Math.round(diffCents / st.grossCents * 1000) / 10 : null; // نسبة الناقص بـ Flamo من مبلغ الكشف
+  const missingCountPct = diffCount != null && st.ordersCount ? Math.round(diffCount / st.ordersCount * 1000) / 10 : null;
   const feeShare = st.grossCents && st.commissionGrossCents != null ? Math.round(((st.commissionGrossCents || 0) + (st.otherFeesCents || 0)) / st.grossCents * 1000) / 10 : null;
-  return { possible: true, flamoCount, flamoGrossCents: flamoGross, diffCount, diffCents, ok, feeSharePct: feeShare };
+  return { possible: true, flamoCount, flamoGrossCents: flamoGross, diffCount, diffCents, ok, missingPct, missingCountPct, feeSharePct: feeShare };
 }
 
 async function read({ files = [], mimeTypes = [] }, { env = process.env, fetchImpl = fetch } = {}) {

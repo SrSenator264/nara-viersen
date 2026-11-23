@@ -101,6 +101,8 @@ test('Plattform-Abrechnung: Normalisieren, Vergleich mit Flamo (Loco getrennt), 
   const loco = PS.compare(d, { ...st, platform: 'SIDES', ordersCount: 1, grossCents: 4000 }); assert.equal(loco.ok, true); assert.equal(loco.flamoCount, 1);
   const bad = PS.compare(d, { ...st, ordersCount: 3, grossCents: 8000 }); assert.equal(bad.ok, false); assert.equal(bad.diffCount, 1); assert.equal(bad.diffCents, 2500);
   assert.equal(PS.compare(d, { ...st, periodFrom: null }).possible, false);
+  const none = PS.compare(d, { ...st, ordersCount: null, grossCents: null }); assert.equal(none.possible, true); assert.equal(none.ok, null);
+  const short = PS.compare(d, { ...st, ordersCount: 4, grossCents: 20000 }); assert.equal(short.ok, false); assert.equal(typeof short.missingPct, 'number'); assert.ok(short.missingPct > 0);
   let body; const r = await PS.read({ files: ['QQ=='], mimeTypes: ['application/pdf'] }, { env: { ANTHROPIC_API_KEY: 'k' }, fetchImpl: async (u, o) => { body = JSON.parse(o.body); return { ok: true, json: async () => ({ content: [{ type: 'tool_use', name: 'save_platform_statement', input: { platform: 'UBER_EATS', documentKind: 'SETTLEMENT', payout: 12 } }] }) }; } });
   assert.equal(body.tool_choice.name, 'save_platform_statement'); assert.equal(r.platform, 'UBER_EATS'); assert.equal(r.payoutCents, 1200);
 });
