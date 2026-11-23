@@ -368,6 +368,8 @@ function drawAsk(){
   if(msgs.length)al.innerHTML=`<h2>🚨 ${esc(t('alertTitle'))}</h2>${msgs.map(m=>`<p>${esc(m)}</p>`).join('')}<p><b>${esc(t('alertAct'))}</b></p>`;
 }
 function drawKlein(){
+  if(H.klein.regime!=='KLEIN'){$('c-klein').hidden=true;$('c-klein').innerHTML='';return}
+  $('c-klein').hidden=false;
   const k=H.klein,p=Math.min(100,Math.round(k.ytdCents/k.limitCurCents*100)),cls=k.status==='OVER'?'over':k.status==='WARN'?'warn':'';
   const max=Math.max(1,...k.months.map(x=>x.totalCents));
   const cross=k.crossDate==='PASSED'?t('crossPassed'):k.crossDate?t('cross',{d:fmtD(k.crossDate)}):t('crossNo');
@@ -416,7 +418,7 @@ function drawDl(){
 function drawSettings(){
   if(!S)return;
   const y=H?H.klein.year:new Date().getFullYear(),mr=S.manualRevenueCents||{};
-  $('s-regime').value=S.vatRegime||'KLEIN';
+  $('s-regime').value=S.vatRegime||'REGEL';
   $('s-mcur').value=mr[y]?(mr[y]/100):'';
   $('s-mprev').value=mr[y-1]?(mr[y-1]/100):'';
   $('s-since').value=S.kasseInUseSince||'';

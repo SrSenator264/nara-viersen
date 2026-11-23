@@ -65,7 +65,7 @@ test('Fristen: Wochenende → Montag, drittletzter Bankarbeitstag, USt-VA nur be
   assert.equal(AH.shiftWeekend(new Date(Date.UTC(2027, 1, 15))).toISOString().slice(0, 10), '2027-02-15');
   assert.equal(AH.shiftWeekend(new Date(Date.UTC(2026, 10, 15))).toISOString().slice(0, 10), '2026-11-16'); // So → Mo
   assert.equal(AH.addMonth('2026-11-13'), '2026-12-13'); assert.equal(AH.addMonth('2027-01-31'), '2027-02-28');
-  const klein = AH.deadlines(base(), '2026-11-21');
+  const klein = AH.deadlines(base({ settings: { accounting: { vatRegime: 'KLEIN' } } }), '2026-11-21');
   assert.ok(!klein.some(x => x.key === 'ustVa'));
   assert.ok(klein.some(x => x.key === 'minijobPay' && x.date === '2026-11-26'));
   const regel = AH.deadlines(base({ settings: { accounting: { vatRegime: 'REGEL', minijob: false } } }), '2026-11-21');
@@ -96,9 +96,11 @@ test('Rechte und Auslieferung: Seite für Buchhaltung, Modul nicht öffentlich, 
   assert.match(src, /'\/api\/accounting\/health'/);
 });
 
-test('وضع الضريبة غير محدد = Kleinunternehmer افتراضياً (والتعارض مع ضريبة الإيصال بيظهر)', () => {
+test('وضع الضريبة غير محدد = Regelbesteuerung افتراضياً: ما في تعارض Klein، وUSt-VA بالمواعيد', () => {
   const d = base({ settings: { accounting: { defaultSalesVatRate: 7 } } });
   const k = AH.kleinunternehmer(d, 2026, '2026-11-23');
-  assert.equal(k.regime, 'KLEIN'); assert.equal(k.conflict, true);
-  assert.equal(AH.deadlines(d, '2026-11-23').some(x => x.key === 'ustVa'), false);
+  assert.equal(k.regime, 'REGEL'); assert.equal(k.conflict, false);
+  assert.equal(AH.deadlines(d, '2026-11-23').some(x => x.key === 'ustVa'), true);
+  const kl = AH.kleinunternehmer(base({ settings: { accounting: { vatRegime: 'KLEIN', defaultSalesVatRate: 7 } } }), 2026, '2026-11-23');
+  assert.equal(kl.conflict, true);
 });

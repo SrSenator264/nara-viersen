@@ -43,7 +43,7 @@ test('Umsatz-Buchung: bar/Karte/online getrennt, Plattform als Tagessumme, Klein
   const pl = e.find(x => x.sourceRef.startsWith('PLATFORM_DAY:2026-11-20:LIEFERANDO')); assert.equal(pl.lines[0].debitCents, 4000); assert.equal(pl.lines[0].accountId, 'acc1360');
   assert.equal(SP.build(d, { regime: 'KLEIN', accountId: ids, existingRefs: new Set(e.map(x => x.sourceRef)) }).length, 0);
   const r = SP.build({ ...d, payments: [{ id: 'p9', orderId: 'o1', createdAt: '2026-11-20T14:00:00Z', status: 'COMPLETED', amountCents: 1070, method: 'CARD', vatAmountCents: 70 }], orders: [{ id: 'o1' }] }, { regime: 'REGEL', accountId: ids });
-  assert.deepEqual(r[0].lines.map(l => [l.accountId, l.debitCents, l.creditCents]), [['acc1365', 1070, 0], ['acc4000', 0, 1000], ['acc1570', 0, 70]]);
+  assert.deepEqual(r[0].lines.map(l => [l.accountId, l.debitCents, l.creditCents]), [['acc1365', 1070, 0], ['acc4000', 0, 1000], ['acc1571', 0, 70]]);
 });
 
 test('Kassenbuch: aus Tagesabschlüssen, fehlende Tage, CSV', () => {
@@ -66,4 +66,23 @@ test('DATEV-Standardprofil: SKR03-Vorschlag, eigene Profile unverändert', () =>
   assert.equal(AX.normalizeProfile(null).accountMap['4100'], '8195');
   assert.equal(AX.normalizeProfile(null).accountMap['1000'], '1000');
   assert.deepEqual(AX.normalizeProfile({ accountMap: {} }).accountMap, {});
+});
+
+test('Umsatz-Buchung Regel: Essen 7 % und Getränk 19 % getrennt, Trinkgeld nicht im Umsatz, Storno negativ, Plattform mit Steuer', () => {
+  const ids = n => 'acc' + n;
+  const cart = [{ name: 'Burger', unitCents: 1070, quantity: 1, vatRate: 7 }, { name: 'Cola', unitCents: 1190, quantity: 1, vatRate: 19 }];
+  const d = {
+    orders: [{ id: 'o1', source: 'KASSE', cart }, { id: 'l1', displayCode: 'L-1', platform: 'LIEFERANDO', placedAt: '2026-11-20T15:00:00Z', totalCents: 2260, status: 'DELIVERED', cart }],
+    payments: [{ id: 'p1', orderId: 'o1', createdAt: '2026-11-20T14:00:00Z', status: 'COMPLETED', amountCents: 2260, tipCents: 200, method: 'CARD' }, { id: 'p2', orderId: 'o1', createdAt: '2026-11-20T16:00:00Z', status: 'COMPLETED', amountCents: -1190, method: 'CARD' }],
+  };
+  const e = SP.build(d, { regime: 'REGEL', accountId: ids }), line = (x, a) => x.lines.filter(l => l.accountId === a).reduce((s, l) => s + l.creditCents - l.debitCents, 0);
+  const p1 = e.find(x => x.sourceRef === 'PAYMENT:p1');
+  assert.equal(line(p1, 'acc4000'), 1000); assert.equal(line(p1, 'acc1571'), 70); assert.equal(line(p1, 'acc4010'), 1000); assert.equal(line(p1, 'acc1572'), 190);
+  assert.equal(p1.lines.reduce((s, l) => s + l.debitCents, 0), 2260); // Trinkgeld (200) ist nicht Teil des Umsatzes
+  const st = e.find(x => x.sourceRef === 'PAYMENT:p2'); assert.equal(line(st, 'acc4010') + line(st, 'acc4000') < 0, true);
+  const pl = e.find(x => x.sourceRef.startsWith('PLATFORM_DAY')); assert.equal(line(pl, 'acc1571'), 70); assert.equal(line(pl, 'acc1572'), 190);
+  const v = SP.vatSummary(d, '2026-11-20', '2026-11-20');
+  assert.deepEqual(v.platform.map(r => [r.rate, r.grossCents, r.vatCents]), [[7, 1070, 70], [19, 1190, 190]]);
+  assert.equal(v.own.reduce((t, r) => t + r.grossCents, 0), 1070); // 2260 - 1190 Storno
+  assert.equal(v.totals.grossCents, 1070 + 2260);
 });

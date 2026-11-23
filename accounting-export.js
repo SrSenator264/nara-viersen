@@ -17,7 +17,9 @@ const SKR03_SUGGESTED = {
   1360: '1400', // Plattform-Verrechnung → Forderungen aus L+L
   1365: '1360', // Geldtransit (Kartenzahlungen)
   1400: '1571', // Abziehbare Vorsteuer 7 %
-  1570: '1771', // Umsatzsteuer 7 %
+  1570: '1771', // Umsatzsteuer (sonstige Sätze → Vorschlag 7 %)
+  1571: '1771', // Umsatzsteuer 7 %
+  1572: '1776', // Umsatzsteuer 19 %
   4000: '8300', // Erlöse 7 %
   4010: '8400', // Erlöse 19 %
   4100: '8195', // Erlöse als Kleinunternehmer § 19 UStG

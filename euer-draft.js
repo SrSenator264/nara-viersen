@@ -30,7 +30,7 @@ function categorize(name, i, overrides) {
 
 function build(data, year) {
   const from = year + '-01-01', to = year + '-12-31', inY = d => d >= from && d <= to;
-  const acc = (data.settings && data.settings.accounting) || {}, regime = str(acc.vatRegime).toUpperCase() || 'KLEIN';
+  const acc = (data.settings && data.settings.accounting) || {}, regime = str(acc.vatRegime).toUpperCase() || 'REGEL';
   const l = SL.build(data, from, to);
   const ownCents = l.own.totals.grossCents, platformCents = l.platform.totals.grossCents;
   const manual = Math.max(0, Math.round(Number((acc.manualRevenueCents || {})[year] || 0)));

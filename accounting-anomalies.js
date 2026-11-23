@@ -75,7 +75,7 @@ function detect(data, { today = bizDay.today(), lookbackDays = 60, priceJump = 0
 
   // 7) Kleinunternehmer + ضريبة
   const acc = (data.settings && data.settings.accounting) || {};
-  if ((str(acc.vatRegime).toUpperCase() || 'KLEIN') === 'KLEIN' && Number(acc.defaultSalesVatRate || 0) > 0) out.push({ type: 'VAT_ON_KLEIN', level: 'crit', date: today, rate: Number(acc.defaultSalesVatRate) });
+  if (str(acc.vatRegime).toUpperCase() === 'KLEIN' && Number(acc.defaultSalesVatRate || 0) > 0) out.push({ type: 'VAT_ON_KLEIN', level: 'crit', date: today, rate: Number(acc.defaultSalesVatRate) });
 
   // 8) مصاريف ثابتة ناقصة (settings.accounting.fixedCosts: [{ name, match, amountCents, day }])
   for (const f of acc.fixedCosts || []) {

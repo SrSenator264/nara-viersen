@@ -263,7 +263,7 @@ async function chat(input, { data, adapter, today, maxRounds = 8 }) {
   const merged = cleanHistory(input.history);
   const message = str(input.message).trim().slice(0, 3000);
   if (!message) return { ok: false, code: 'EMPTY_MESSAGE' };
-  const regime = (data.settings && data.settings.accounting && data.settings.accounting.vatRegime) || 'KLEIN';
+  const regime = (data.settings && data.settings.accounting && data.settings.accounting.vatRegime) || 'REGEL';
   const tools = makeTools(data, { today });
   const st = adapter.init(systemPrompt({ lang, today, regime }), merged, message);
   const usage = { in: 0, out: 0 }, used = []; let text = '', rounds = 0, done = false;
