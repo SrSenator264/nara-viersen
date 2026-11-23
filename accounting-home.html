@@ -76,7 +76,6 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
 <body>
 <header><h1>📚 <span data-t="title"></span></h1><p data-t="sub"></p></header>
 <main>
-  <section class="card ask" id="c-ask" hidden></section>
   <section class="card alert" id="c-alert" hidden></section>
   <section class="card" id="c-klein"></section>
   <section class="card" id="c-month"></section>
@@ -101,7 +100,6 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
   <section class="card">
     <h2>⚙️ <span data-t="settings"></span></h2>
     <div class="set">
-      <label><span data-t="sRegime"></span><select id="s-regime"><option value="" data-t="rUnknown"></option><option value="KLEIN" data-t="rKlein"></option><option value="REGEL" data-t="rRegel"></option></select></label>
       <label><span data-t="sManualCur"></span><input id="s-mcur" type="number" min="0" step="0.01" inputmode="decimal"></label>
       <label><span data-t="sManualPrev"></span><input id="s-mprev" type="number" min="0" step="0.01" inputmode="decimal"></label>
     </div>
@@ -356,17 +354,6 @@ function drawAn(){
 }
 const DL_ICON={minijobReport:'👥',minijobPay:'💸',monthClose:'📅',gewstPre:'🏛️',estPre:'🏛️',ustVa:'🧾',annual:'📑',kassenmeldung:'🧮'};
 
-function drawAsk(){
-  const k=H.klein,ask=$('c-ask'),al=$('c-alert');
-  ask.hidden=!!k.regime;
-  if(!k.regime)ask.innerHTML=`<h2>❓ ${esc(t('askTitle'))}</h2><p class="mute">${esc(t('askText'))}</p><div class="row"><button class="btn" data-r="KLEIN" type="button">${esc(t('rKlein'))}</button><button class="btn ghost" data-r="REGEL" type="button">${esc(t('rRegel'))}</button></div>`;
-  ask.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>saveSettings({vatRegime:b.dataset.r}));
-  const msgs=[];
-  if(k.regime==='KLEIN'&&k.vatOnReceipts)msgs.push(t('alertVat',{r:S&&S.defaultSalesVatRate}));
-  if(k.regime==='KLEIN'&&k.status==='OVER')msgs.push(t('alertOver'));
-  al.hidden=!msgs.length;
-  if(msgs.length)al.innerHTML=`<h2>🚨 ${esc(t('alertTitle'))}</h2>${msgs.map(m=>`<p>${esc(m)}</p>`).join('')}<p><b>${esc(t('alertAct'))}</b></p>`;
-}
 function drawKlein(){
   if(H.klein.regime!=='KLEIN'){$('c-klein').hidden=true;$('c-klein').innerHTML='';return}
   $('c-klein').hidden=false;
@@ -418,14 +405,13 @@ function drawDl(){
 function drawSettings(){
   if(!S)return;
   const y=H?H.klein.year:new Date().getFullYear(),mr=S.manualRevenueCents||{};
-  $('s-regime').value=S.vatRegime||'REGEL';
   $('s-mcur').value=mr[y]?(mr[y]/100):'';
   $('s-mprev').value=mr[y-1]?(mr[y-1]/100):'';
   $('s-since').value=S.kasseInUseSince||'';
   $('s-kmdone').checked=!!S.kassenmeldungDone;
   $('s-minijob').checked=S.minijob!==false;
 }
-function draw(){if(!H)return;drawAsk();drawKlein();drawMonth();drawPur();drawKb();drawPlat();drawAn();drawEuer();drawDl();drawSettings();drawFx()}
+function draw(){if(!H)return;drawKlein();drawMonth();drawPur();drawKb();drawPlat();drawAn();drawEuer();drawDl();drawSettings();drawFx()}
 
 async function load(){
   try{
@@ -449,7 +435,7 @@ $('save').onclick=()=>{
   const y=H?H.klein.year:new Date().getFullYear(),mr=Object.assign({},(S&&S.manualRevenueCents)||{});
   const cents=v=>{const n=Number(String(v).replace(',','.'));return Number.isFinite(n)&&n>0?Math.round(n*100):0};
   mr[y]=cents($('s-mcur').value);mr[y-1]=cents($('s-mprev').value);
-  saveSettings({vatRegime:$('s-regime').value,manualRevenueCents:mr,kasseInUseSince:$('s-since').value||'',kassenmeldungDone:$('s-kmdone').checked,minijob:$('s-minijob').checked});
+  saveSettings({vatRegime:'REGEL',manualRevenueCents:mr,kasseInUseSince:$('s-since').value||'',kassenmeldungDone:$('s-kmdone').checked,minijob:$('s-minijob').checked});
 };
 loadPlat();loadEuer();
 $('fxAdd').onclick=()=>{const name=$('fx-name').value.trim(),match=($('fx-match').value.trim()||name);if(!name)return;const n=Number(String($('fx-amount').value).replace(',','.'));const l=((S&&S.fixedCosts)||[]).concat([{name:name.slice(0,60),match:match.slice(0,60),amountCents:Number.isFinite(n)&&n>0?Math.round(n*100):0,day:Math.min(28,Math.max(1,Number($('fx-day').value)||1))}]);$('fx-name').value='';$('fx-match').value='';$('fx-amount').value='';saveSettings({fixedCosts:l})};
