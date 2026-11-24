@@ -42,8 +42,10 @@ async function extractStatement({ files = [], mimeTypes = [] }, { env = process.
   const body = { model, max_tokens: 16000, tools: [{ name: 'save_statement', description: 'Speichert die Buchungen des Kontoauszugs.', input_schema: SCHEMA }], tool_choice: { type: 'tool', name: 'save_statement' }, messages: [{ role: 'user', content }] };
   const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 180000);
   try {
-    const r = await fetchImpl('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' }, body: JSON.stringify(body), signal: ctl.signal });
+    const call = b => fetchImpl('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' }, body: JSON.stringify(b), signal: ctl.signal });
+    let r = await call(body);
     let j = null; try { j = await r.json(); } catch { /* no body */ }
+    if (r.status === 400 && /tool_choice/.test(str(j && j.error && j.error.message))) { r = await call({ ...body, tool_choice: { type: 'auto' } }); j = null; try { j = await r.json(); } catch { /* no body */ } }
     if (!r.ok) throw Object.assign(new Error('Claude ' + r.status + (j && j.error ? ': ' + str(j.error.message).slice(0, 200) : '')), { code: 'AI_ERROR', status: r.status });
     const block = ((j && j.content) || []).find(b => b.type === 'tool_use' && b.name === 'save_statement');
     if (!block) throw Object.assign(new Error('EMPTY'), { code: 'AI_EMPTY' });

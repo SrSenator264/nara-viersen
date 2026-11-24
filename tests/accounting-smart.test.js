@@ -103,6 +103,8 @@ test('Plattform-Abrechnung: Normalisieren, Vergleich mit Flamo (Loco getrennt), 
   assert.equal(PS.compare(d, { ...st, periodFrom: null }).possible, false);
   const none = PS.compare(d, { ...st, ordersCount: null, grossCents: null }); assert.equal(none.possible, true); assert.equal(none.ok, null);
   const short = PS.compare(d, { ...st, ordersCount: 4, grossCents: 20000 }); assert.equal(short.ok, false); assert.equal(typeof short.missingPct, 'number'); assert.ok(short.missingPct > 0);
+  const bodies = []; const rr = await PS.read({ files: ['QQ=='], mimeTypes: ['application/pdf'] }, { env: { ANTHROPIC_API_KEY: 'k' }, fetchImpl: async (u2, o) => { const b = JSON.parse(o.body); bodies.push(b); return bodies.length === 1 ? { ok: false, status: 400, json: async () => ({ error: { message: 'tool_choice: type "tool" and "any" are not supported for this model.' } }) } : { ok: true, json: async () => ({ content: [{ type: 'tool_use', name: 'save_platform_statement', input: { platform: 'LIEFERANDO', ordersCount: 2, grossCents: 5500 } }] }) }; } });
+  assert.equal(bodies.length, 2); assert.equal(bodies[1].tool_choice.type, 'auto'); assert.equal(rr.platform, 'LIEFERANDO');
   let body; const r = await PS.read({ files: ['QQ=='], mimeTypes: ['application/pdf'] }, { env: { ANTHROPIC_API_KEY: 'k' }, fetchImpl: async (u, o) => { body = JSON.parse(o.body); return { ok: true, json: async () => ({ content: [{ type: 'tool_use', name: 'save_platform_statement', input: { platform: 'UBER_EATS', documentKind: 'SETTLEMENT', payout: 12 } }] }) }; } });
   assert.equal(body.tool_choice.name, 'save_platform_statement'); assert.equal(r.platform, 'UBER_EATS'); assert.equal(r.payoutCents, 1200);
 });

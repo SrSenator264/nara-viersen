@@ -81,8 +81,10 @@ async function extractClaude({files=[],mimeTypes=[]},fetchImpl=fetch){
   const body={model,max_tokens:8000,tools:[{name:'save_invoice',description:'Speichert die gelesenen Rechnungsdaten.',input_schema:toClaudeSchema(schema)}],tool_choice:{type:'tool',name:'save_invoice'},messages:[{role:'user',content}]};
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),90000);
   try{
-    const r=await fetchImpl('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify(body),signal:controller.signal});
+    const call=b=>fetchImpl('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify(b),signal:controller.signal});
+    let r=await call(body);
     let payload=null;try{payload=await r.json()}catch{}
+    if(r.status===400&&/tool_choice/.test(String(payload?.error?.message||''))){r=await call({...body,tool_choice:{type:'auto'}});payload=null;try{payload=await r.json()}catch{}}
     console.log('[NARA][CLAUDE_INVOICE] status='+r.status+' model='+model+' pages='+files.length+' ms='+(Date.now()-started));
     if(!r.ok)throw Object.assign(new Error('Claude HTTP '+r.status+(payload?.error?.message?': '+String(payload.error.message).slice(0,200):'')),{status:r.status,code:'CLAUDE_PROVIDER_ERROR'});
     const block=(payload?.content||[]).find(b=>b.type==='tool_use'&&b.name==='save_invoice');
