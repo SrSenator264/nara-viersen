@@ -312,7 +312,7 @@ function drawPlat(){
   $('plFile').onchange=async()=>{const f=$('plFile').files[0];if(!f)return;PMSG=t('plReading');PP=null;drawPlat();
     try{const data=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result));r.onerror=no;r.readAsDataURL(f)});
       const r=await fetch('/api/accounting/platform-statement/read',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({filename:f.name,mime:f.type,data})});const j=await r.json().catch(()=>({}));
-      if(r.ok&&j.statement){PP=j;PMSG=''}else PMSG=t(j.code==='NO_AI_KEY'?'plNoKey':'plFail')+(j.code&&j.code!=='NO_AI_KEY'?' ['+j.code+(j.status?' '+j.status:'')+']':'');}catch(e){PMSG=t('plFail')}drawPlat()};
+      if(r.ok&&j.statement){PP=j;PMSG=''}else PMSG=t(j.code==='NO_AI_KEY'?'plNoKey':'plFail')+(j.code&&j.code!=='NO_AI_KEY'?' ['+j.code+(j.status?' '+j.status:'')+(j.detail?': '+j.detail:'')+']':'');}catch(e){PMSG=t('plFail')}drawPlat()};
   const sv=$('plSave');if(sv)sv.onclick=async()=>{try{const r=await fetch('/api/accounting/platform-statement/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({documentId:PP.documentId,statement:PP.statement})});PMSG=t(r.ok?'plSaved':r.status===409?'plDup':'plFail');if(r.ok)PP=null;await loadPlat()}catch(e){PMSG=t('plFail');drawPlat()}};
 }
 let PU=null,KB=null;

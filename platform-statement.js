@@ -66,7 +66,7 @@ async function read({ files = [], mimeTypes = [] }, { env = process.env, fetchIm
   try {
     const r = await fetchImpl('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' }, body: JSON.stringify(body), signal: ctl.signal });
     let j = null; try { j = await r.json(); } catch { /* no body */ }
-    if (!r.ok) throw Object.assign(new Error('Claude ' + r.status), { code: 'AI_ERROR', status: r.status });
+    if (!r.ok) throw Object.assign(new Error('Claude ' + r.status), { code: 'AI_ERROR', status: r.status, detail: str(j && j.error && j.error.message).slice(0, 200) });
     const b = ((j && j.content) || []).find(x => x.type === 'tool_use' && x.name === 'save_platform_statement');
     if (!b) throw Object.assign(new Error('EMPTY'), { code: 'AI_EMPTY' });
     return normalize(b.input);
