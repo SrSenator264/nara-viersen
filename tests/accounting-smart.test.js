@@ -155,3 +155,12 @@ test('parseUberCsv reads Uber Eats CSV locally, rejects others', () => {
   assert.throws(() => PS.parseUberCsv('a,b\n1,2\n'), { code: 'NOT_UBER_CSV' });
   assert.throws(() => PS.parseUberCsv(''), { code: 'NOT_UBER_CSV' });
 });
+
+test('parseUberCsv reads Uber payments-summary CSV (one statement per payout)', () => {
+  const fs = require('fs'), path = require('path'), PS = require('../platform-statement.js');
+  const out = PS.parseUberCsv(fs.readFileSync(path.join(__dirname, 'fixtures', 'uber-payments-sample.csv'), 'utf8'));
+  assert.equal(out.length, 4); const a = out[0];
+  assert.equal(a.invoiceNumber, '3TFHOGVBB9B2'); assert.equal(a.periodFrom, '2026-09-28'); assert.equal(a.periodTo, '2026-10-04');
+  assert.equal(a.ordersCount, 39); assert.equal(a.grossCents, 132099); assert.equal(a.commissionGrossCents, 17147); assert.equal(a.otherFeesCents, 14704); assert.equal(a.payoutCents, 61627);
+  assert.equal(out[1].refundsCents, 1098); assert.equal(out[3].periodTo, '2026-10-25');
+});

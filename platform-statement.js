@@ -92,8 +92,21 @@ function csvRows(text) {
   return out;
 }
 const I = { date: 6, vat: 18, refund: 23, ads: 64, fee: 58, payout: 66, transfer: 67, status: 68, fulfil: 9 };
+// ملخص المدفوعات (Payments summary): سطر لكل تحويل أسبوعي (الاثنين) وبيغطي الأسبوع اللي قبلو (اثنين–أحد)
+function parseUberPaymentsCsv(rows) {
+  const n = v => { const x = Number(str(v).replace(',', '.')); return Number.isFinite(x) ? x : 0; };
+  const shift = (d, k) => { const t = new Date(d + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + k); return t.toISOString().slice(0, 10); };
+  const data = rows.slice(1).filter(r => isDay(r[52]));
+  if (!data.length) throw Object.assign(new Error('NO_ROWS'), { code: 'NO_ROWS' });
+  return data.map(r => normalize({
+    platform: 'UBER_EATS', documentKind: 'SETTLEMENT', invoiceNumber: str(r[53]).trim() || null, documentDate: r[52], periodFrom: shift(r[52], -7), periodTo: shift(r[52], -1),
+    ordersCount: n(r[3]), grossSales: n(r[10]), commissionGross: Math.abs(n(r[45])), otherFees: Math.abs(n(r[49])) + Math.abs(n(r[19]) + n(r[20])),
+    refunds: Math.abs(n(r[13])), payout: n(r[51]), notes: 'CSV Zahlungsübersicht, Auszahlung ' + r[52],
+  }));
+}
 function parseUberCsv(text) {
   const rows = csvRows(text);
+  if (rows.length >= 2 && rows[0].length >= 50 && rows[0].length < 69 && /\u0639\u062f\u062f \u0627\u0644\u0637\u0644\u0628\u0627\u062a/.test(str(rows[0][3])) && isDay(str(rows[1] && rows[1][52]))) return parseUberPaymentsCsv(rows);
   if (rows.length < 2 || rows[0].length < 69) throw Object.assign(new Error('NOT_UBER_CSV'), { code: 'NOT_UBER_CSV' });
   const data = rows.filter(r => isDay(r[I.date]));
   if (!data.length) throw Object.assign(new Error('NO_ROWS'), { code: 'NO_ROWS' });
