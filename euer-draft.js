@@ -49,7 +49,8 @@ function build(data, year) {
   // عمولات المنصات من الكشوف المحفوظة (إذا ما في فواتير عمولة مرفوعة كفواتير)
   const stmts = (data.platformStatements || []).filter(s => s.periodTo && inY(s.periodTo));
   const stmtFees = stmts.reduce((s, x) => s + (x.commissionGrossCents || 0) + (x.otherFeesCents || 0), 0);
-  if (!platformFeeInvoices.length) exp.PLATFORM_FEES += stmtFees;
+  const stmtGoods = stmts.reduce((s, x) => s + (x.goodsCents || 0), 0); // بضاعة من فواتير المنصة (Lanch: مكوّنات وتغليف) ← مصروف بضاعة مو عمولة
+  if (!platformFeeInvoices.length) { exp.PLATFORM_FEES += stmtFees; exp.GOODS += stmtGoods; }
   exp.WAGES += (data.payrollPayments || []).filter(p => inY(str(p.date))).reduce((s, p) => s + Number(p.amountCents || 0), 0);
   // AfA: خطي شهري للأصول الفعّالة، بس الأشهر اللي جوّا السنة
   let afa = 0;

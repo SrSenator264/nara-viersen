@@ -1,5 +1,5 @@
 'use strict';
-// platform-statement.js — كشوف المنصات (Lieferando / Uber Eats / Sides-Loco): Claude بيقرا الكشف أو فاتورة العمولة،
+// platform-statement.js — كشوف المنصات (Lieferando / Uber Eats / Sides-Loco / Lanch): Claude بيقرا الكشف أو فاتورة العمولة،
 // وبعدين منقارنو مع طلبات المنصة المسجّلة بـ Flamo لنفس الفترة (عدد الطلبات والمبيعات).
 // القراءة = معاينة. الحفظ (data.platformStatements) بس بعد ضغطة عمر.
 // ملاحظة Kleinunternehmer: الضريبة على عمولة المنصة ما بترجع ← العمولة الإجمالية كلها مصروف.
@@ -10,16 +10,18 @@ const isDay = v => /^\d{4}-\d{2}-\d{2}$/.test(str(v));
 const c = v => (v == null || !Number.isFinite(Number(v)) ? null : Math.round(Number(v) * 100));
 
 const N = { type: ['number', 'null'] };
+const PLATFORMS = ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'SIDES', 'LANCH'];
 const SCHEMA = {
   type: 'object',
   properties: {
-    platform: { type: 'string', enum: ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'SIDES', 'OTHER'] },
+    platform: { type: 'string', enum: ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'SIDES', 'LANCH', 'OTHER'], description: 'LANCH = Dokumente der LANCH GmbH (Gutschrift/Rechnung, Nummer 67_…), auch wenn Lieferando darin erwähnt wird' },
     documentKind: { type: 'string', enum: ['SETTLEMENT', 'COMMISSION_INVOICE', 'OTHER'], description: 'Abrechnung/Auszahlungsbericht oder Provisionsrechnung' },
     invoiceNumber: { type: ['string', 'null'] }, documentDate: { type: ['string', 'null'] },
     periodFrom: { type: ['string', 'null'] }, periodTo: { type: ['string', 'null'] },
     ordersCount: N, grossSales: { type: ['number', 'null'], description: 'Bestellwert brutto inkl. Lieferkosten, vor Abzügen' },
     onlinePaid: { type: ['number', 'null'], description: 'online bezahlte Bestellungen' }, cashCollected: { type: ['number', 'null'], description: 'bar beim Kunden kassiert (Restaurant)' },
-    commissionNet: N, commissionVat: N, commissionGross: { type: ['number', 'null'], description: 'Provision/Servicegebühr inkl. USt' },
+    commissionNet: { type: ['number', 'null'], description: 'Summe ALLER Gebühren-Positionen netto (Provision, Servicegebühr, Marketinggebühr), ohne Waren' }, commissionVat: { type: ['number', 'null'], description: 'USt auf diese Gebühren' }, commissionGross: { type: ['number', 'null'], description: 'alle Gebühren-Positionen inkl. USt (netto + USt), ohne Waren' },
+    goods: { type: ['number', 'null'], description: 'Warenlieferungen (Zutaten, Verpackung laut Lieferschein) inkl. USt, getrennt von Gebühren' },
     otherFees: { type: ['number', 'null'], description: 'sonstige Gebühren (Online-Zahlung, Marketing, Tablet, Stornos…) inkl. USt' },
     refunds: { type: ['number', 'null'], description: 'Erstattungen/Rückbuchungen an Kunden' },
     payout: { type: ['number', 'null'], description: 'Auszahlung an das Restaurant (negativ = Restaurant muss zahlen)' },
@@ -27,18 +29,18 @@ const SCHEMA = {
   },
   required: ['platform', 'documentKind'],
 };
-const PROMPT = 'Das ist ein Dokument einer Lieferplattform an ein Restaurant (Abrechnung, Auszahlungsbericht oder Provisionsrechnung von Lieferando/Takeaway, Uber Eats, Wolt oder Sides). Lies nur sichtbare Werte, erfinde nichts, fehlende Werte null. Beträge in EUR als Zahl. Datum YYYY-MM-DD. Rufe save_platform_statement genau einmal auf.';
+const PROMPT = 'Das ist ein Dokument einer Lieferplattform an ein Restaurant (Abrechnung, Auszahlungsbericht oder Provisionsrechnung von Lieferando/Takeaway, Uber Eats, Wolt oder Sides). Dokumente der LANCH GmbH → platform LANCH. Bei Rechnungen: commission = alle Gebühren zusammen (z. B. Marketinggebühr + Servicegebühr), Zutaten/Verpackung NICHT als Gebühr sondern als goods. Lies nur sichtbare Werte, erfinde nichts, fehlende Werte null. Beträge in EUR als Zahl. Datum YYYY-MM-DD. Rufe save_platform_statement genau einmal auf.';
 
 function normalize(raw) {
   const r = raw || {};
   return {
-    platform: ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'SIDES'].includes(r.platform) ? r.platform : 'OTHER', documentKind: r.documentKind || 'OTHER',
+    platform: PLATFORMS.includes(r.platform) ? r.platform : 'OTHER', documentKind: r.documentKind || 'OTHER',
     invoiceNumber: r.invoiceNumber ? str(r.invoiceNumber).slice(0, 80) : null, documentDate: isDay(r.documentDate) ? r.documentDate : null,
     periodFrom: isDay(r.periodFrom) ? r.periodFrom : null, periodTo: isDay(r.periodTo) ? r.periodTo : null,
     ordersCount: Number.isFinite(Number(r.ordersCount)) && r.ordersCount != null ? Math.round(Number(r.ordersCount)) : null,
     grossCents: c(r.grossSales), onlinePaidCents: c(r.onlinePaid), cashCollectedCents: c(r.cashCollected),
     commissionNetCents: c(r.commissionNet), commissionVatCents: c(r.commissionVat), commissionGrossCents: c(r.commissionGross) ?? (c(r.commissionNet) != null ? c(r.commissionNet) + (c(r.commissionVat) || 0) : null),
-    otherFeesCents: c(r.otherFees), refundsCents: c(r.refunds), payoutCents: c(r.payout), notes: r.notes ? str(r.notes).slice(0, 300) : null,
+    otherFeesCents: c(r.otherFees), goodsCents: c(r.goods), refundsCents: c(r.refunds), payoutCents: c(r.payout), notes: r.notes ? str(r.notes).slice(0, 300) : null,
   };
 }
 
@@ -126,4 +128,4 @@ function parseUberCsv(text) {
   });
 }
 
-module.exports = { read, normalize, compare, parseUberCsv, SCHEMA };
+module.exports = { read, normalize, compare, parseUberCsv, SCHEMA, PLATFORMS };

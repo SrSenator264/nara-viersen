@@ -12,6 +12,7 @@ const eur = c => (Number(c || 0) / 100).toFixed(2).replace('.', ',');
 const iso = v => { const t = Date.parse(v || ''); return Number.isFinite(t) ? new Date(t).toISOString() : ''; };
 
 function platformOf(o) {
+  if (/LANCH/.test(up(o.source)) || /LANCH/.test(up(o.platform))) return 'LANCH'; // طلب Lanch ممكن يكون platform=NARA
   const p = up(o.platform || o.source);
   if (/LIEFERANDO/.test(p)) return 'LIEFERANDO';
   if (/UBER/.test(p)) return 'UBER_EATS';

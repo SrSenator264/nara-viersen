@@ -299,7 +299,7 @@ const LINK={closings:'kasse-settlement.html',tse:'sales.html',bank:'banking.html
 const AN_ICON={FIXED_COST_MISSING:'🏠',DUP_INVOICE:'👯',PRICE_JUMP:'📈',CASH_DIFF:'💵',LOW_SALES_DAY:'📉',OLD_UNMATCHED:'🏦',NO_DOCUMENT:'📎',VAT_ON_KLEIN:'🚨'};
 const AN_LINK={FIXED_COST_MISSING:'banking.html',DUP_INVOICE:'inventory-foundation.html',PRICE_JUMP:'inventory-foundation.html',CASH_DIFF:'kasse-settlement.html',LOW_SALES_DAY:'sales.html',OLD_UNMATCHED:'banking.html',NO_DOCUMENT:'inventory-foundation.html',VAT_ON_KLEIN:'accounting-home.html'};
 let AN=null,PL=[],PP=null,PPS=[],PMSG='';
-const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',SIDES:'Sides / Loco',OTHER:'?'};
+const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',SIDES:'Sides / Loco',LANCH:'Lanch',OTHER:'?'};
 function plLine(s,c){
   const fee=(s.commissionGrossCents||0)+(s.otherFeesCents||0);
   const cmp=!c||!c.possible?`<small>${esc(t('plCmpNo'))}</small>`:c.ok===null?`<small>${esc(t('plCmpNone'))}</small>`:c.ok?`<small class="okc">${esc(t('plCmpOk',{n:c.flamoCount}))}</small>`:`<small class="badc">${esc(t('plCmpBad',{n:(c.diffCount>0?'+':'')+(c.diffCount==null?'?':c.diffCount),a:(c.diffCents==null?'?':eur(c.diffCents))+(c.missingPct==null?'':' ('+c.missingPct+'%)')}))}</small>`;
@@ -308,7 +308,8 @@ function plLine(s,c){
 function drawPlat(){
   const el=$('c-plat');
   const prev=PPS.map((x,i)=>`<div class="check" style="background:var(--soft);border-radius:12px;padding:10px"><span class="e">🤖</span>${plLine(x.statement,x.comparison)}<button class="btn plSave" type="button" data-i="${i}">💾 ${esc(t('plSave'))}</button></div>`).join('');
-  const list=PL.slice(0,6).map(s=>`<div class="check"><span class="e">${s.comparison&&s.comparison.ok?'✅':'🛵'}</span>${plLine(s,s.comparison)}</div>`).join('');
+  const groups=[...new Set(PL.map(s=>s.platform))]; // all statements, grouped by platform
+  const list=groups.map(p=>{const L=PL.filter(s=>s.platform===p);return `<details class="plGrp"${groups.length===1?' open':''}><summary><b>${esc(PLN[p]||p)}</b> <small class="mute">(${L.length})</small></summary>${L.map(s=>`<div class="check"><span class="e">${s.comparison&&s.comparison.ok?'✅':'🛵'}</span>${plLine(s,s.comparison)}</div>`).join('')}</details>`}).join('');
   el.innerHTML=`<h2>🛵 ${esc(t('plTitle'))}</h2><p class="mute">${esc(t('plHint'))}</p><label class="up">📄 ${esc(t('plUp'))}<input type="file" id="plFile" accept=".pdf,.csv,application/pdf,text/csv,image/png,image/jpeg"></label><p class="mute" role="status">${esc(PMSG)}</p>${prev}${list||(!PPS.length?`<p class="mute">${esc(t('plNone'))}</p>`:'')}`;
   $('plFile').onchange=async()=>{const f=$('plFile').files[0];if(!f)return;PMSG=t('plReading');PPS=[];drawPlat();
     try{const data=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result));r.onerror=no;r.readAsDataURL(f)});
