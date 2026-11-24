@@ -76,4 +76,41 @@ async function read({ files = [], mimeTypes = [] }, { env = process.env, fetchIm
   finally { clearTimeout(timer); }
 }
 
-module.exports = { read, normalize, compare, SCHEMA };
+
+// CSV تبع Uber Eats (تقرير الطلبات، عناوين عربية بسطرين): قراءة محلية بدون ذكاء اصطناعي، كشف لكل تاريخ تحويل (أسبوع)
+function csvRows(text) {
+  const out = []; let row = [], cur = '', q = false; const t = str(text).replace(/^﻿/, '');
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (q) { if (ch === '"') { if (t[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === ',') { row.push(cur); cur = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && t[i + 1] === '\n') i++; row.push(cur); cur = ''; if (row.some(x => x !== '')) out.push(row); row = []; }
+    else cur += ch;
+  }
+  row.push(cur); if (row.some(x => x !== '')) out.push(row);
+  return out;
+}
+const I = { date: 6, vat: 18, refund: 23, ads: 64, fee: 58, payout: 66, transfer: 67, status: 68, fulfil: 9 };
+function parseUberCsv(text) {
+  const rows = csvRows(text);
+  if (rows.length < 2 || rows[0].length < 69) throw Object.assign(new Error('NOT_UBER_CSV'), { code: 'NOT_UBER_CSV' });
+  const data = rows.filter(r => isDay(r[I.date]));
+  if (!data.length) throw Object.assign(new Error('NO_ROWS'), { code: 'NO_ROWS' });
+  const n = v => { const x = Number(str(v).replace(',', '.')); return Number.isFinite(x) ? x : 0; };
+  const groups = new Map();
+  for (const r of data) { const k = isDay(r[I.transfer]) ? r[I.transfer] : ''; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); }
+  return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([transfer, g]) => {
+    const orders = g.filter(r => str(r[I.status]).trim() !== '' && !/ملغ|إلغ/.test(r[I.status]) && !/مسترد|مُستَرَد/.test(r[I.status]));
+    const dates = g.map(r => r[I.date]).sort();
+    const sum = (rs, i) => rs.reduce((a, r) => a + n(r[i]), 0);
+    return normalize({
+      platform: 'UBER_EATS', documentKind: 'SETTLEMENT', documentDate: transfer || null, periodFrom: dates[0], periodTo: dates[dates.length - 1],
+      ordersCount: orders.length, grossSales: sum(orders, I.vat), commissionGross: Math.abs(sum(g, I.fee)), otherFees: Math.abs(sum(g, I.ads)),
+      refunds: sum(g, I.refund), payout: sum(g, I.payout),
+      notes: 'CSV: ' + g.length + ' Zeilen, ' + (g.length - orders.length) + ' ohne abgeschlossene Bestellung (storniert/erstattet/Werbung)',
+    });
+  });
+}
+
+module.exports = { read, normalize, compare, parseUberCsv, SCHEMA };

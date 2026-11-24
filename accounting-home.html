@@ -196,6 +196,7 @@ FT.init({
   plUp:{de:'PDF oder Foto hochladen',ar:'ارفع PDF أو صورة',en:'Upload PDF or photo'},
   plReading:{de:'KI liest die Abrechnung…',ar:'عم يقرا الكشف…',en:'Reading the statement…'},
   plNoKey:{de:'Braucht ANTHROPIC_API_KEY in der .env auf dem Kassen-PC.',ar:'بدها ANTHROPIC_API_KEY بملف .env على كمبيوتر المحل.',en:'Needs ANTHROPIC_API_KEY in .env on the shop PC.'},
+  plCsvBad:{de:'Diese CSV ist kein Uber-Eats-Bestellbericht.',ar:'هالـ CSV مو تقرير طلبات Uber Eats.',en:'This CSV is not an Uber Eats orders report.'},
   plFail:{de:'Konnte nicht gelesen werden.',ar:'ما قدرت إقراه.',en:'Could not be read.'},
   plRow:{de:'{p} · {f} – {t}',ar:'{p} · {f} – {t}',en:'{p} · {f} – {t}'},
   plNums:{de:'Umsatz {g} · Provision+Gebühren {c} · Auszahlung {o}',ar:'المبيعات {g} · العمولة والرسوم {c} · الدفعة {o}',en:'Sales {g} · commission+fees {c} · payout {o}'},
@@ -297,7 +298,7 @@ let H=null,S=null,Y=null,M=null;
 const LINK={closings:'kasse-settlement.html',tse:'sales.html',bank:'banking.html',belege:'inventory-foundation.html',journal:'accounting.html',period:'accounting.html'};
 const AN_ICON={FIXED_COST_MISSING:'🏠',DUP_INVOICE:'👯',PRICE_JUMP:'📈',CASH_DIFF:'💵',LOW_SALES_DAY:'📉',OLD_UNMATCHED:'🏦',NO_DOCUMENT:'📎',VAT_ON_KLEIN:'🚨'};
 const AN_LINK={FIXED_COST_MISSING:'banking.html',DUP_INVOICE:'inventory-foundation.html',PRICE_JUMP:'inventory-foundation.html',CASH_DIFF:'kasse-settlement.html',LOW_SALES_DAY:'sales.html',OLD_UNMATCHED:'banking.html',NO_DOCUMENT:'inventory-foundation.html',VAT_ON_KLEIN:'accounting-home.html'};
-let AN=null,PL=[],PP=null,PMSG='';
+let AN=null,PL=[],PP=null,PPS=[],PMSG='';
 const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',SIDES:'Sides / Loco',OTHER:'?'};
 function plLine(s,c){
   const fee=(s.commissionGrossCents||0)+(s.otherFeesCents||0);
@@ -306,14 +307,14 @@ function plLine(s,c){
 }
 function drawPlat(){
   const el=$('c-plat');
-  const prev=PP?`<div class="check" style="background:var(--soft);border-radius:12px;padding:10px"><span class="e">🤖</span>${plLine(PP.statement,PP.comparison)}<button class="btn" type="button" id="plSave">💾 ${esc(t('plSave'))}</button></div>`:'';
+  const prev=PPS.map((x,i)=>`<div class="check" style="background:var(--soft);border-radius:12px;padding:10px"><span class="e">🤖</span>${plLine(x.statement,x.comparison)}<button class="btn plSave" type="button" data-i="${i}">💾 ${esc(t('plSave'))}</button></div>`).join('');
   const list=PL.slice(0,6).map(s=>`<div class="check"><span class="e">${s.comparison&&s.comparison.ok?'✅':'🛵'}</span>${plLine(s,s.comparison)}</div>`).join('');
-  el.innerHTML=`<h2>🛵 ${esc(t('plTitle'))}</h2><p class="mute">${esc(t('plHint'))}</p><label class="up">📄 ${esc(t('plUp'))}<input type="file" id="plFile" accept=".pdf,application/pdf,image/png,image/jpeg"></label><p class="mute" role="status">${esc(PMSG)}</p>${prev}${list||(!PP?`<p class="mute">${esc(t('plNone'))}</p>`:'')}`;
-  $('plFile').onchange=async()=>{const f=$('plFile').files[0];if(!f)return;PMSG=t('plReading');PP=null;drawPlat();
+  el.innerHTML=`<h2>🛵 ${esc(t('plTitle'))}</h2><p class="mute">${esc(t('plHint'))}</p><label class="up">📄 ${esc(t('plUp'))}<input type="file" id="plFile" accept=".pdf,.csv,application/pdf,text/csv,image/png,image/jpeg"></label><p class="mute" role="status">${esc(PMSG)}</p>${prev}${list||(!PPS.length?`<p class="mute">${esc(t('plNone'))}</p>`:'')}`;
+  $('plFile').onchange=async()=>{const f=$('plFile').files[0];if(!f)return;PMSG=t('plReading');PPS=[];drawPlat();
     try{const data=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result));r.onerror=no;r.readAsDataURL(f)});
       const r=await fetch('/api/accounting/platform-statement/read',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({filename:f.name,mime:f.type,data})});const j=await r.json().catch(()=>({}));
-      if(r.ok&&j.statement){PP=j;PMSG=''}else PMSG=t(j.code==='NO_AI_KEY'?'plNoKey':'plFail')+(j.code&&j.code!=='NO_AI_KEY'?' ['+j.code+(j.status?' '+j.status:'')+(j.detail?': '+j.detail:'')+']':'');}catch(e){PMSG=t('plFail')}drawPlat()};
-  const sv=$('plSave');if(sv)sv.onclick=async()=>{try{const r=await fetch('/api/accounting/platform-statement/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({documentId:PP.documentId,statement:PP.statement})});PMSG=t(r.ok?'plSaved':r.status===409?'plDup':'plFail');if(r.ok)PP=null;await loadPlat()}catch(e){PMSG=t('plFail');drawPlat()}};
+      if(r.ok&&(j.items||j.statement)){PPS=j.items||[j];PMSG=''}else PMSG=t(j.code==='NO_AI_KEY'?'plNoKey':(j.code==='NOT_UBER_CSV'||j.code==='NO_ROWS')?'plCsvBad':'plFail')+(j.code&&j.code!=='NO_AI_KEY'?' ['+j.code+(j.status?' '+j.status:'')+(j.detail?': '+j.detail:'')+']':'');}catch(e){PMSG=t('plFail')}drawPlat()};
+  document.querySelectorAll('.plSave').forEach(b=>b.onclick=async()=>{const x=PPS[Number(b.dataset.i)];if(!x)return;try{const r=await fetch('/api/accounting/platform-statement/save',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({documentId:x.documentId||null,statement:x.statement})});PMSG=t(r.ok?'plSaved':r.status===409?'plDup':'plFail');if(r.ok)PPS.splice(Number(b.dataset.i),1);await loadPlat()}catch(e){PMSG=t('plFail');drawPlat()}});
 }
 let PU=null,KB=null;
 const CAT_ICON={MEAT:'🥩',BREAD:'🍞',VEG:'🥬',CHEESE:'🧀',SAUCE:'🥫',FROZEN:'🍟',DRINKS:'🥤',OIL:'🫒',PACKAGING:'📦',CLEANING:'🧽',OTHER:'📎'};

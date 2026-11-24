@@ -145,3 +145,13 @@ test('Wareneinsatz pro Gericht: Rezept × letzter Preis, Marge, fehlende Preise 
   assert.equal(b.costCents, 230); assert.equal(b.marginCents, 760); assert.equal(b.costSharePct, 23.2); assert.equal(b.complete, false); assert.deepEqual(b.missing, ['Käse']);
   assert.equal(DC.build(d, { query: 'pizza' }).count, 0);
 });
+
+test('parseUberCsv reads Uber Eats CSV locally, rejects others', () => {
+  const fs = require('fs'), path = require('path');
+  const PS = require('../platform-statement.js');
+  const txt = fs.readFileSync(path.join(__dirname, 'fixtures', 'uber-orders-sample.csv'), 'utf8');
+  const out = PS.parseUberCsv(txt); assert.ok(out.length >= 1);
+  const st = out[0]; assert.equal(st.platform, 'UBER_EATS'); assert.match(st.periodFrom, /^2026-11-/); assert.ok(st.ordersCount >= 1); assert.ok(st.grossCents > 0); assert.equal(typeof st.payoutCents, 'number');
+  assert.throws(() => PS.parseUberCsv('a,b\n1,2\n'), { code: 'NOT_UBER_CSV' });
+  assert.throws(() => PS.parseUberCsv(''), { code: 'NOT_UBER_CSV' });
+});
