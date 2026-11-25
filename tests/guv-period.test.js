@@ -68,3 +68,29 @@ test('Manueller Jahresumsatz nur bei ganzem Jahr; Jahr = Summe der Monate', () =
   let sum = 0; for (let m = 1; m <= 12; m++) { const last = new Date(Date.UTC(2026, m, 0)).getUTCDate(), mm = String(m).padStart(2, '0'); sum += EU.buildPeriod(d, `2026-${mm}-01`, `2026-${mm}-${last}`).profitCents; }
   assert.equal(sum + 50000, y.profitCents);
 });
+
+test('Monatsbericht: ersetzt Wochen-Abrechnungen derselben Plattform an seinen Tagen, Woche über Monatsgrenze nur mit Vormonats-Tagen', () => {
+  const PS = require('../platform-statement.js');
+  const m = PS.normalize({ platform: 'UBER_EATS', documentKind: 'MONTHLY_SUMMARY', periodFrom: '2026-10-01', periodTo: '2026-10-31', grossSales: 5954.14, extraRevenue: 259.53, commissionGross: 760.22, otherFees: 1682.58, payout: 2699.89 });
+  assert.equal(m.documentKind, 'MONTHLY_SUMMARY'); assert.equal(m.extraRevenueCents, 25953);
+  const d = base({ platformStatements: [
+    { ...m },
+    { platform: 'UBER_EATS', documentKind: 'SETTLEMENT', periodFrom: '2026-09-28', periodTo: '2026-10-04', commissionGrossCents: 700 }, // 3 Tage Sept + 4 Tage Okt
+    { platform: 'UBER_EATS', documentKind: 'SETTLEMENT', periodFrom: '2026-10-05', periodTo: '2026-10-11', commissionGrossCents: 9999 },
+    { platform: 'LIEFERANDO', documentKind: 'COMMISSION_INVOICE', periodFrom: '2026-10-05', periodTo: '2026-10-11', commissionGrossCents: 500 },
+  ] });
+  const oct = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
+  assert.equal(oct.expenses.PLATFORM_FEES, 76022 + 168258 + 500);
+  const sep = EU.buildPeriod(d, '2026-09-01', '2026-09-30');
+  assert.equal(sep.expenses.PLATFORM_FEES, 300);
+  assert.equal(EU.overlapShare({ periodFrom: '2026-09-28', periodTo: '2026-10-04' }, '2026-09-01', '2026-10-31', new Set()), 1);
+});
+
+test('Monatsbericht deckt alle Tage ab → keine PLATFORM_STATEMENT_GAPS', () => {
+  const d = base({
+    orders: [{ id: 'u1', platform: 'UBER_EATS', placedAt: '2026-10-10T12:00:00Z', totalCents: 1000, status: 'DELIVERED' }],
+    platformStatements: [{ platform: 'UBER_EATS', documentKind: 'MONTHLY_SUMMARY', periodFrom: '2026-10-01', periodTo: '2026-10-31', commissionGrossCents: 100 }],
+  });
+  const r = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
+  assert.deepEqual(r.statementCoverage.UBER_EATS, { days: 31, of: 31 }); assert.ok(!r.warnings.includes('PLATFORM_STATEMENT_GAPS'));
+});

@@ -11,16 +11,18 @@ const c = v => (v == null || !Number.isFinite(Number(v)) ? null : Math.round(Num
 
 const N = { type: ['number', 'null'] };
 const PLATFORMS = ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'SIDES', 'LANCH'];
+const KINDS = ['SETTLEMENT', 'COMMISSION_INVOICE', 'MONTHLY_SUMMARY', 'OTHER'];
 const SCHEMA = {
   type: 'object',
   properties: {
     platform: { type: 'string', enum: ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'SIDES', 'LANCH', 'OTHER'], description: 'LANCH = Dokumente der LANCH GmbH (Gutschrift/Rechnung, Nummer 67_…), auch wenn Lieferando darin erwähnt wird' },
-    documentKind: { type: 'string', enum: ['SETTLEMENT', 'COMMISSION_INVOICE', 'OTHER'], description: 'Abrechnung/Auszahlungsbericht oder Provisionsrechnung' },
+    documentKind: { type: 'string', enum: ['SETTLEMENT', 'COMMISSION_INVOICE', 'MONTHLY_SUMMARY', 'OTHER'], description: 'Abrechnung/Auszahlungsbericht, Provisionsrechnung oder Monatsbericht (konsolidierte Zusammenfassung eines Kalendermonats)' },
     invoiceNumber: { type: ['string', 'null'] }, documentDate: { type: ['string', 'null'] },
     periodFrom: { type: ['string', 'null'] }, periodTo: { type: ['string', 'null'] },
     ordersCount: N, grossSales: { type: ['number', 'null'], description: 'Bestellwert brutto inkl. Lieferkosten, vor Abzügen' },
     onlinePaid: { type: ['number', 'null'], description: 'online bezahlte Bestellungen' }, cashCollected: { type: ['number', 'null'], description: 'bar beim Kunden kassiert (Restaurant)' },
     commissionNet: { type: ['number', 'null'], description: 'Summe ALLER Gebühren-Positionen netto (Provision, Servicegebühr, Marketinggebühr), ohne Waren' }, commissionVat: { type: ['number', 'null'], description: 'USt auf diese Gebühren' }, commissionGross: { type: ['number', 'null'], description: 'alle Gebühren-Positionen inkl. USt (netto + USt), ohne Waren' },
+    extraRevenue: { type: ['number', 'null'], description: 'zusätzliche Einnahmen außer Artikelumsatz: Trinkgelder + Sonstige Umsätze' },
     goods: { type: ['number', 'null'], description: 'Warenlieferungen (Zutaten, Verpackung laut Lieferschein) inkl. USt, getrennt von Gebühren' },
     otherFees: { type: ['number', 'null'], description: 'sonstige Gebühren (Online-Zahlung, Marketing, Tablet, Stornos…) inkl. USt' },
     refunds: { type: ['number', 'null'], description: 'Erstattungen/Rückbuchungen an Kunden' },
@@ -29,18 +31,18 @@ const SCHEMA = {
   },
   required: ['platform', 'documentKind'],
 };
-const PROMPT = 'Das ist ein Dokument einer Lieferplattform an ein Restaurant (Abrechnung, Auszahlungsbericht oder Provisionsrechnung von Lieferando/Takeaway, Uber Eats, Wolt oder Sides). Dokumente der LANCH GmbH → platform LANCH. Bei Rechnungen: commission = alle Gebühren zusammen (z. B. Marketinggebühr + Servicegebühr), Zutaten/Verpackung NICHT als Gebühr sondern als goods. Lies nur sichtbare Werte, erfinde nichts, fehlende Werte null. Beträge in EUR als Zahl. Datum YYYY-MM-DD. Rufe save_platform_statement genau einmal auf.';
+const PROMPT = 'Das ist ein Dokument einer Lieferplattform an ein Restaurant (Abrechnung, Auszahlungsbericht oder Provisionsrechnung von Lieferando/Takeaway, Uber Eats, Wolt oder Sides). Dokumente der LANCH GmbH → platform LANCH. Bei Rechnungen: commission = alle Gebühren zusammen (z. B. Marketinggebühr + Servicegebühr), Zutaten/Verpackung NICHT als Gebühr sondern als goods. Monatsbericht ("Monatliche Berichte" / "Konsolidierte monatliche Zusammenfassung") → documentKind MONTHLY_SUMMARY, NUR die konsolidierte Seite lesen, nicht die einzelnen Auszahlungen; periodFrom/periodTo = erster/letzter Tag des Monats; invoiceNumber = Berichtsnummer; grossSales = Umsatz (Artikel); extraRevenue = Trinkgelder + Sonstige Umsätze; commissionGross = Uber Servicegebühren; otherFees = Marketing gesamt; refunds = Netto-Rückbuchungsbetrag; cashCollected = Eingenommenes Bargeld; payout = Bankauszahlung; "Anpassungen" (Bargeld-Verrechnung) NICHT als Gebühr. Lies nur sichtbare Werte, erfinde nichts, fehlende Werte null. Beträge in EUR als Zahl. Datum YYYY-MM-DD. Rufe save_platform_statement genau einmal auf.';
 
 function normalize(raw) {
   const r = raw || {};
   return {
-    platform: PLATFORMS.includes(r.platform) ? r.platform : 'OTHER', documentKind: r.documentKind || 'OTHER',
+    platform: PLATFORMS.includes(r.platform) ? r.platform : 'OTHER', documentKind: KINDS.includes(r.documentKind) ? r.documentKind : 'OTHER',
     invoiceNumber: r.invoiceNumber ? str(r.invoiceNumber).slice(0, 80) : null, documentDate: isDay(r.documentDate) ? r.documentDate : null,
     periodFrom: isDay(r.periodFrom) ? r.periodFrom : null, periodTo: isDay(r.periodTo) ? r.periodTo : null,
     ordersCount: Number.isFinite(Number(r.ordersCount)) && r.ordersCount != null ? Math.round(Number(r.ordersCount)) : null,
     grossCents: c(r.grossSales), onlinePaidCents: c(r.onlinePaid), cashCollectedCents: c(r.cashCollected),
     commissionNetCents: c(r.commissionNet), commissionVatCents: c(r.commissionVat), commissionGrossCents: c(r.commissionGross) ?? (c(r.commissionNet) != null ? c(r.commissionNet) + (c(r.commissionVat) || 0) : null),
-    otherFeesCents: c(r.otherFees), goodsCents: c(r.goods), refundsCents: c(r.refunds), payoutCents: c(r.payout), notes: r.notes ? str(r.notes).slice(0, 300) : null,
+    otherFeesCents: c(r.otherFees), goodsCents: c(r.goods), extraRevenueCents: c(r.extraRevenue), refundsCents: c(r.refunds), payoutCents: c(r.payout), notes: r.notes ? str(r.notes).slice(0, 300) : null,
   };
 }
 
@@ -128,4 +130,4 @@ function parseUberCsv(text) {
   });
 }
 
-module.exports = { read, normalize, compare, parseUberCsv, SCHEMA, PLATFORMS };
+module.exports = { read, normalize, compare, parseUberCsv, SCHEMA, PLATFORMS, KINDS };

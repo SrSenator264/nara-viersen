@@ -199,6 +199,7 @@ FT.init({
   plCsvBad:{de:'Diese CSV ist kein Uber-Eats-Bestellbericht.',ar:'هالـ CSV مو تقرير طلبات Uber Eats.',en:'This CSV is not an Uber Eats orders report.'},
   plFail:{de:'Konnte nicht gelesen werden.',ar:'ما قدرت إقراه.',en:'Could not be read.'},
   plRow:{de:'{p} · {f} – {t}',ar:'{p} · {f} – {t}',en:'{p} · {f} – {t}'},
+  plMonthly:{de:'Monatsbericht',ar:'ملخّص شهري',en:'Monthly summary'},
   plNums:{de:'Umsatz {g} · Provision+Gebühren {c} · Auszahlung {o}',ar:'المبيعات {g} · العمولة والرسوم {c} · الدفعة {o}',en:'Sales {g} · commission+fees {c} · payout {o}'},
   plCmpOk:{de:'✅ Passt zu Flamo ({n} Bestellungen)',ar:'✅ مطابق لـ Flamo ({n} طلب)',en:'✅ Matches Flamo ({n} orders)'},
   plCmpBad:{de:'⚠️ Abweichung zu Flamo: {n} Bestellungen, {a}',ar:'⚠️ في فرق مع Flamo: {n} طلب، {a}',en:'⚠️ Differs from Flamo: {n} orders, {a}'},
@@ -303,7 +304,7 @@ const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',SIDES:'Side
 function plLine(s,c){
   const fee=(s.commissionGrossCents||0)+(s.otherFeesCents||0);
   const cmp=!c||!c.possible?`<small>${esc(t('plCmpNo'))}</small>`:c.ok===null?`<small>${esc(t('plCmpNone'))}</small>`:c.ok?`<small class="okc">${esc(t('plCmpOk',{n:c.flamoCount}))}</small>`:`<small class="badc">${esc(t('plCmpBad',{n:(c.diffCount>0?'+':'')+(c.diffCount==null?'?':c.diffCount),a:(c.diffCents==null?'?':eur(c.diffCents))+(c.missingPct==null?'':' ('+c.missingPct+'%)')}))}</small>`;
-  return `<span class="t"><b>${esc(t('plRow',{p:PLN[s.platform]||s.platform,f:s.periodFrom?fmtD(s.periodFrom):'?',t:s.periodTo?fmtD(s.periodTo):'?'}))}</b><small>${esc(t('plNums',{g:s.grossCents==null?'?':eur(s.grossCents),c:eur(fee),o:s.payoutCents==null?'?':eur(s.payoutCents)}))}${c&&c.feeSharePct!=null?' · '+esc(t('plFee',{p:c.feeSharePct})):''}</small>${cmp}</span>`;
+  return `<span class="t"><b>${esc(t('plRow',{p:PLN[s.platform]||s.platform,f:s.periodFrom?fmtD(s.periodFrom):'?',t:s.periodTo?fmtD(s.periodTo):'?'}))}${s.documentKind==='MONTHLY_SUMMARY'?' · 📅 '+esc(t('plMonthly')):''}</b><small>${esc(t('plNums',{g:s.grossCents==null?'?':eur(s.grossCents),c:eur(fee),o:s.payoutCents==null?'?':eur(s.payoutCents)}))}${c&&c.feeSharePct!=null?' · '+esc(t('plFee',{p:c.feeSharePct})):''}</small>${cmp}</span>`;
 }
 function drawPlat(){
   const el=$('c-plat');

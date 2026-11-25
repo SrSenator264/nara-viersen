@@ -33,12 +33,15 @@ const daysBetween = (a, b) => dnum(b) - dnum(a) + 1;
 const isDay = v => /^\d{4}-\d{2}-\d{2}$/.test(str(v));
 
 // حصة الكشف اللي بتقع جوّا الفترة (حسب الأيام). كشف بدون بداية = كلو بيوم النهاية.
-function overlapShare(st, from, to) {
+// skip = أيام (أرقام) مغطاية بملخّص شهري لنفس المنصة → ما بتنحسب من هالكشف.
+function overlapShare(st, from, to, skip) {
   const b = isDay(st.periodFrom) ? st.periodFrom : st.periodTo, e = st.periodTo;
   if (!isDay(e) || !isDay(b) || e < from || b > to) return 0;
-  const lo = b > from ? b : from, hi = e < to ? e : to;
-  return daysBetween(lo, hi) / daysBetween(b, e);
+  const lo = Math.max(dnum(b), dnum(from)), hi = Math.min(dnum(e), dnum(to));
+  let n = 0; for (let d = lo; d <= hi; d++) if (!skip || !skip.has(d)) n++;
+  return n / daysBetween(b, e);
 }
+const daySet = (st, from, to) => { const s = new Set(), b = isDay(st.periodFrom) ? st.periodFrom : st.periodTo; if (!isDay(b) || !isDay(st.periodTo)) return s; for (let n = Math.max(dnum(b), dnum(from)); n <= Math.min(dnum(st.periodTo), dnum(to)); n++) s.add(n); return s; };
 
 // الربح والخسارة لأي فترة (يوم أو شهر أو سنة). from/to = YYYY-MM-DD (يوم شغل).
 function buildPeriod(data, from, to) {
@@ -66,17 +69,17 @@ function buildPeriod(data, from, to) {
     if (cat === 'PLATFORM_FEES') platformFeeInvoices.push(i.id);
   }
   // عمولات المنصات من الكشوف المحفوظة (إذا ما في فواتير عمولة مرفوعة كفواتير)، بس حصة الأيام اللي جوّا الفترة
+  // الملخّص الشهري (MONTHLY_SUMMARY) هو المرجع للأيام اللي بيغطّيها؛ الكشوف الأسبوعية لنفس المنصة بتنحسب بس على الأيام الباقية
+  const all = data.platformStatements || [], monthly = {};
+  for (const x of all) if (x.documentKind === 'MONTHLY_SUMMARY') for (const n of daySet(x, from, to)) (monthly[x.platform] ??= new Set()).add(n);
   const stmts = [], covered = {};
   let stmtFees = 0, stmtGoods = 0;
-  for (const x of data.platformStatements || []) {
-    const sh = overlapShare(x, from, to); if (!sh) continue;
+  for (const x of all) {
+    const sh = overlapShare(x, from, to, x.documentKind === 'MONTHLY_SUMMARY' ? null : monthly[x.platform]); if (!sh) continue;
     stmts.push(x);
     stmtFees += Math.round(((x.commissionGrossCents || 0) + (x.otherFeesCents || 0)) * sh);
     stmtGoods += Math.round((x.goodsCents || 0) * sh); // بضاعة من فواتير المنصة (Lanch: مكوّنات وتغليف) ← مصروف بضاعة مو عمولة
-    if (x.documentKind === 'SETTLEMENT' || x.documentKind === 'COMMISSION_INVOICE') {
-      const b = isDay(x.periodFrom) ? x.periodFrom : x.periodTo, set = (covered[x.platform] ??= new Set());
-      for (let n = Math.max(dnum(b), dnum(from)); n <= Math.min(dnum(x.periodTo), dnum(to)); n++) set.add(n);
-    }
+    if (['SETTLEMENT', 'COMMISSION_INVOICE', 'MONTHLY_SUMMARY'].includes(x.documentKind)) { const set = (covered[x.platform] ??= new Set()); for (const n of daySet(x, from, to)) set.add(n); }
   }
   if (!platformFeeInvoices.length) { exp.PLATFORM_FEES += stmtFees; exp.GOODS += stmtGoods; }
   const pay = (data.payrollPayments || []).filter(p => inP(str(p.date)));
