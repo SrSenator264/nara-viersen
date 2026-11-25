@@ -114,3 +114,30 @@ test('Manuelle Ausgaben + Rechnungen im selben Monat → Summe und Hinweis auf D
   const r = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
   assert.equal(r.expenses.ENERGY, 11900); assert.ok(r.warnings.includes('MANUAL_EXPENSES_WITH_INVOICES'));
 });
+
+test('Plattform-Umsatz aus Abrechnungen je Tag: Woche über Monatsgrenze geteilt, Monatsbericht vor Woche, Flamo nur ohne Abrechnung', () => {
+  const ord = (pf, day, c) => ({ id: pf + day, platform: pf, placedAt: day + 'T12:00:00Z', totalCents: c, status: 'DELIVERED' });
+  const d = base({
+    orders: [ord('LIEFERANDO', '2026-10-02', 111), ord('WOLT', '2026-10-05', 777), ord('UBER_EATS', '2026-10-06', 50)],
+    platformStatements: [
+      { platform: 'LIEFERANDO', documentKind: 'COMMISSION_INVOICE', periodFrom: '2026-09-27', periodTo: '2026-10-03', grossCents: 7000 },
+      { platform: 'LIEFERANDO', documentKind: 'COMMISSION_INVOICE', periodFrom: '2026-10-04', periodTo: '2026-10-31', grossCents: 28000 },
+      { platform: 'UBER_EATS', documentKind: 'SETTLEMENT', periodFrom: '2026-10-05', periodTo: '2026-10-11', grossCents: 9999 },
+      { platform: 'UBER_EATS', documentKind: 'MONTHLY_SUMMARY', periodFrom: '2026-10-01', periodTo: '2026-10-31', grossCents: 50000 },
+    ] });
+  const oct = EU.buildPeriod(d, '2026-10-01', '2026-10-31'), sep = EU.buildPeriod(d, '2026-09-01', '2026-09-30');
+  assert.equal(oct.income.byPlatform.LIEFERANDO, 3000 + 28000); assert.equal(sep.income.byPlatform.LIEFERANDO, 4000); // 3/7 + 4/7 = ganze Woche
+  assert.equal(oct.income.byPlatform.UBER_EATS, 50000); // Monatsbericht schlägt Woche, Flamo-Bestellung nicht doppelt
+  assert.equal(oct.income.byPlatform.WOLT, 777); // keine Abrechnung → Flamo
+  assert.equal(oct.income.platformCents, 31000 + 50000 + 777); assert.equal(oct.income.incomeSource.LIEFERANDO.statementDays, 31);
+});
+
+test('Manueller Monatsumsatz je Plattform ersetzt Abrechnungen nur für seinen ganzen Monat', () => {
+  const d = base({ settings: { accounting: { manualIncome: { '2026-10': { LIEFERANDO: 2824197 } } } },
+    platformStatements: [{ platform: 'LIEFERANDO', documentKind: 'COMMISSION_INVOICE', periodFrom: '2026-10-25', periodTo: '2026-11-07', grossCents: 14000 }] });
+  const oct = EU.buildPeriod(d, '2026-10-01', '2026-10-31'), nov = EU.buildPeriod(d, '2026-11-01', '2026-11-30');
+  assert.equal(oct.income.byPlatform.LIEFERANDO, 2824197); assert.equal(oct.income.incomeSource.LIEFERANDO.manualCents, 2824197);
+  assert.equal(nov.income.byPlatform.LIEFERANDO, 7000); // nur die Nov-Tage der Abrechnung
+  assert.equal(EU.buildPeriod(d, '2026-10-15', '2026-10-31').income.byPlatform.LIEFERANDO, 7000); // halber Monat → kein manueller Wert
+  assert.equal(EU.build(d, 2026).income.byPlatform.LIEFERANDO, 2824197 + 7000);
+});

@@ -82,19 +82,32 @@ function buildPeriod(data, from, to) {
     if (['SETTLEMENT', 'COMMISSION_INVOICE', 'MONTHLY_SUMMARY'].includes(x.documentKind)) { const set = (covered[x.platform] ??= new Set()); for (const n of daySet(x, from, to)) set.add(n); }
   }
   if (!platformFeeInvoices.length) { exp.PLATFORM_FEES += stmtFees; exp.GOODS += stmtGoods; }
-  // Lanch / Just Virtual revenue comes from its Gutschrift (SETTLEMENT grossCents), prorated by days; Flamo orders count only on uncovered days
-  // (Flamo misses many Loco orders, and Lanch collects the money itself).
-  const STMT_INCOME = ['LANCH', 'JUST_VIRTUAL'];
-  let platformCentsAdj = platformCents;
-  for (const pf of STMT_INCOME) {
-    const sts = all.filter(x => x.platform === pf && x.documentKind === 'SETTLEMENT' && x.grossCents != null);
-    if (!sts.length) continue;
-    const days = new Set(); let gross = 0;
-    for (const x of sts) { const sh = overlapShare(x, from, to); if (!sh) continue; gross += Math.round(x.grossCents * sh); for (const n of daySet(x, from, to)) days.add(n); }
-    if (!days.size) continue;
-    const fromOrders = l.platform.rows.filter(r => r.platform === pf && !days.has(dnum(r.businessDay))).reduce((s, r) => s + r.grossCents, 0);
-    const v = gross + fromOrders;
-    platformCentsAdj += v - (byPlatform[pf] || 0); byPlatform[pf] = v;
+  // Platform revenue per day: manual monthly figure (settings.accounting.manualIncome['YYYY-MM'][PF], e.g. from Partner Hub) wins for
+  // its whole month; otherwise the best statement with grossCents covering that day (MONTHLY_SUMMARY > SETTLEMENT > COMMISSION_INVOICE),
+  // spread evenly over its days; days without any statement fall back to Flamo orders (Flamo misses orders when a bridge is down).
+  const RANK = { MONTHLY_SUMMARY: 3, SETTLEMENT: 2, COMMISSION_INVOICE: 1 };
+  const manualInc = monthlyIncome(acc.manualIncome, from, to);
+  const incSt = all.filter(x => RANK[x.documentKind] && x.grossCents != null && isDay(x.periodTo));
+  const pfs = new Set([...Object.keys(byPlatform), ...incSt.map(x => x.platform), ...Object.keys(manualInc.byPf)]);
+  const flamoDay = {};
+  for (const r of l.platform.rows) { const k = r.platform + '|' + dnum(r.businessDay); flamoDay[k] = (flamoDay[k] || 0) + r.grossCents; }
+  const incomeSource = {};
+  let platformCentsAdj = 0;
+  for (const pf of pfs) {
+    const sts = incSt.filter(x => x.platform === pf), used = new Map(), skip = manualInc.days[pf] || new Set();
+    let flamo = 0, stDays = 0;
+    for (let n = dnum(from); n <= dnum(to); n++) {
+      if (skip.has(n)) continue;
+      let best = null;
+      for (const x of sts) { const bb = isDay(x.periodFrom) ? x.periodFrom : x.periodTo; if (n < dnum(bb) || n > dnum(x.periodTo)) continue; if (!best || RANK[x.documentKind] > RANK[best.documentKind]) best = x; }
+      if (best) { used.set(best, (used.get(best) || 0) + 1); stDays++; } else flamo += flamoDay[pf + '|' + n] || 0;
+    }
+    let stCents = 0;
+    for (const [x, k] of used) stCents += Math.round(x.grossCents * k / daysBetween(isDay(x.periodFrom) ? x.periodFrom : x.periodTo, x.periodTo));
+    const man = manualInc.byPf[pf] || 0, v = man + stCents + flamo;
+    incomeSource[pf] = { manualCents: man, statementCents: stCents, statementDays: stDays, flamoCents: flamo, flamoOrdersCents: byPlatform[pf] || 0 };
+    if (v || byPlatform[pf] != null) byPlatform[pf] = v;
+    platformCentsAdj += v;
   }
   const pay = (data.payrollPayments || []).filter(p => inP(str(p.date)));
   exp.WAGES += pay.reduce((s, p) => s + Number(p.amountCents || 0), 0);
@@ -130,13 +143,26 @@ function buildPeriod(data, from, to) {
   if (!exp.RENT) warnings.push('NO_RENT');
   if (manualSkipped) warnings.push('MANUAL_REVENUE_YEARLY_ONLY');
   return {
-    from, to, regime, income: { ownCents, platformCents: platformCentsAdj, byPlatform, manualCents: manual, totalCents: incomeCents },
+    from, to, regime, income: { ownCents, platformCents: platformCentsAdj, byPlatform, incomeSource, manualCents: manual, totalCents: incomeCents },
     expenses: { ...exp, AFA: afa, totalCents: expenseCents }, manualExpenses: manualExp, profitCents: incomeCents - expenseCents,
     counts: { invoices: invoiceCount, platformStatements: stmts.length, ownSales: l.own.totals.count, platformOrders: l.platform.totals.count },
     statementCoverage: coverage, uncoveredPlatforms: uncovered, guessedCategories: guessed, warnings, reviewRequired: true,
   };
 }
 
+function monthEnd(m) { return m + '-' + String(new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 0)).getUTCDate()).padStart(2, '0'); }
+// Manual monthly platform revenue: only months fully inside the period; returns cents per platform and the covered day numbers
+function monthlyIncome(store, from, to) {
+  const byPf = {}, days = {};
+  for (const [m, pfs] of Object.entries(store || {})) {
+    if (!/^\d{4}-\d{2}$/.test(m) || !pfs || typeof pfs !== 'object' || m + '-01' < from || monthEnd(m) > to) continue;
+    for (const [pf, v] of Object.entries(pfs)) {
+      const c = Math.round(Number(v && typeof v === 'object' ? v.cents : v)); if (!Number.isFinite(c) || c < 0) continue;
+      byPf[pf] = (byPf[pf] || 0) + c; const set = (days[pf] ??= new Set()); for (let n = dnum(m + '-01'); n <= dnum(monthEnd(m)); n++) set.add(n);
+    }
+  }
+  return { byPf, days };
+}
 function monthlyManual(store, from, to) {
   const byCat = {}, months = []; let total = 0, vat = 0;
   for (const [m, cats] of Object.entries(store || {})) {
@@ -159,4 +185,4 @@ function build(data, year) {
   return { year, ...buildPeriod(data, year + '-01-01', year + '-12-31') };
 }
 
-module.exports = { build, buildPeriod, overlapShare, categorize, monthlyManual, CATS };
+module.exports = { build, buildPeriod, overlapShare, categorize, monthlyManual, monthlyIncome, CATS };
