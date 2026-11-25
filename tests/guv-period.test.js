@@ -94,3 +94,23 @@ test('Monatsbericht deckt alle Tage ab → keine PLATFORM_STATEMENT_GAPS', () =>
   const r = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
   assert.deepEqual(r.statementCoverage.UBER_EATS, { days: 31, of: 31 }); assert.ok(!r.warnings.includes('PLATFORM_STATEMENT_GAPS'));
 });
+
+test('Manuelle Monatsausgaben: zählen im Monat (netto+USt), nicht im Folgemonat, im Jahr genau einmal', () => {
+  const d = base({ settings: { accounting: { manualExpenses: {
+    '2026-10': { RENT: { netCents: 100000, vatCents: 0 }, GOODS: { netCents: 50000, vatCents: 3500 }, WAGES: { netCents: 20000, vatCents: 0 }, BAD: { netCents: 999 }, OTHER: { netCents: -5, vatCents: 0 } },
+    'x': { RENT: { netCents: 1 } },
+  } } } });
+  const oct = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
+  assert.equal(oct.expenses.RENT, 100000); assert.equal(oct.expenses.GOODS, 53500); assert.equal(oct.expenses.WAGES, 20000); assert.equal(oct.expenses.OTHER, 0);
+  assert.equal(oct.expenses.totalCents, 173500); assert.equal(oct.manualExpenses.vatCents, 3500); assert.deepEqual(oct.manualExpenses.months, ['2026-10']);
+  assert.ok(oct.warnings.includes('MANUAL_EXPENSES')); assert.ok(!oct.warnings.includes('NO_PURCHASE_INVOICES')); assert.ok(!oct.warnings.includes('NO_RENT')); assert.ok(!oct.warnings.includes('NO_PAYROLL'));
+  assert.equal(EU.buildPeriod(d, '2026-11-01', '2026-11-30').expenses.totalCents, 0);
+  assert.equal(EU.buildPeriod(d, '2026-10-15', '2026-10-31').expenses.totalCents, 0); // halber Monat → nicht anteilig, nicht doppelt
+  assert.equal(EU.build(d, 2026).expenses.totalCents, 173500);
+});
+
+test('Manuelle Ausgaben + Rechnungen im selben Monat → Summe und Hinweis auf Doppelerfassung', () => {
+  const d = month(); d.settings.accounting.manualExpenses = { '2026-10': { ENERGY: { netCents: 10000, vatCents: 1900 } } };
+  const r = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
+  assert.equal(r.expenses.ENERGY, 11900); assert.ok(r.warnings.includes('MANUAL_EXPENSES_WITH_INVOICES'));
+});

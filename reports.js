@@ -27,7 +27,14 @@ w_MANUAL_REVENUE_YEARLY_ONLY:{de:'Manueller Jahresumsatz zählt nur bei ganzem J
 covDays:{de:'{d} von {n} Tagen',ar:'{d} من {n} يوم',en:'{d} of {n} days'},
 review:{de:'Entwurf zur Prüfung, keine Steuererklärung.',ar:'مسودة للمراجعة، مو إقرار ضريبي.',en:'Draft for review, not a tax return.'},
 err:{de:'Bericht konnte nicht geladen werden',ar:'تعذر تحميل التقرير',en:'Could not load the report'},showFirst:{de:'Bitte zuerst den Bericht anzeigen.',ar:'اعرض التقرير أولاً.',en:'Show the report first.'},
-item:{de:'Posten',ar:'البند',en:'Item'},value:{de:'Wert',ar:'القيمة',en:'Value'}
+item:{de:'Posten',ar:'البند',en:'Item'},value:{de:'Wert',ar:'القيمة',en:'Value'},
+manualBtn:{de:'Manuelle Ausgaben',ar:'مصاريف يدوية',en:'Manual expenses'},manualH:{de:'Manuelle Ausgaben für den Monat',ar:'مصاريف يدوية للشهر',en:'Manual expenses for the month'},
+manualHint:{de:'Netto und USt je Kategorie in Euro. Leere Felder = 0. Speichern ersetzt die Werte des Monats.',ar:'الصافي والضريبة لكل فئة باليورو. الفاضي = 0. الحفظ بيستبدل قيم الشهر.',en:'Net and VAT per category in euro. Empty = 0. Saving replaces the month\'s values.'},
+netCol:{de:'Netto €',ar:'الصافي €',en:'Net €'},vatCol:{de:'USt €',ar:'الضريبة €',en:'VAT €'},noteCol:{de:'Notiz',ar:'ملاحظة',en:'Note'},
+save:{de:'Speichern',ar:'حفظ',en:'Save'},saved:{de:'Gespeichert',ar:'انحفظ',en:'Saved'},badAmount:{de:'Ungültiger Betrag',ar:'مبلغ مو صحيح',en:'Invalid amount'},pickMonth:{de:'Bitte zuerst einen Monat wählen.',ar:'اختار شهر أولاً.',en:'Pick a month first.'},
+manualLine:{de:'davon manuell',ar:'منها يدوي',en:'of which manual'},
+w_MANUAL_EXPENSES:{de:'Ausgaben manuell erfasst (ohne Einzelbelege).',ar:'المصاريف مدخلة يدوي (بدون فواتير مفصّلة).',en:'Expenses entered manually (no individual receipts).'},
+w_MANUAL_EXPENSES_WITH_INVOICES:{de:'Manuelle Ausgaben und Rechnungen im selben Zeitraum: auf Doppelerfassung prüfen.',ar:'في مصاريف يدوية وفواتير بنفس الفترة: تأكد ما في شي محسوب مرتين.',en:'Manual expenses and invoices in the same period: check for double counting.'}
 };
 const CATS=['GOODS','RENT','ENERGY','TELECOM','INSURANCE','PLATFORM_FEES','WAGES','VEHICLE','MARKETING','EQUIPMENT_SMALL','BANK_FEES','OTHER','AFA'];
 const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',JUST_VIRTUAL:'Just Smashed'};
@@ -39,7 +46,7 @@ function lines(){if(!report)return[];const r=report,inc=r.income||{},ex=r.expens
   L.push({h:t('incomeH')});if(inc.ownCents)L.push({k:t('own'),v:inc.ownCents});
   for(const [p,c] of Object.entries(inc.byPlatform||{}))if(c)L.push({k:PLN[p]||p,v:c,sub:cov[p]?t('covDays',{d:cov[p].days,n:cov[p].of}):''});
   if(inc.manualCents)L.push({k:t('manual'),v:inc.manualCents});L.push({k:t('incomeTotal'),v:inc.totalCents,b:1});
-  L.push({h:t('expenseH')});for(const c of CATS)if(ex[c])L.push({k:t(`c_${c}`),v:ex[c]});L.push({k:t('costs'),v:ex.totalCents,b:1});
+  L.push({h:t('expenseH')});const me=(r.manualExpenses&&r.manualExpenses.byCat)||{};for(const c of CATS)if(ex[c])L.push({k:t(`c_${c}`),v:ex[c],sub:me[c]?`${t('manualLine')} ${money(me[c])}`:''});L.push({k:t('costs'),v:ex.totalCents,b:1});
   L.push({k:t('result'),v:r.profitCents,b:1,res:1});return L;}
 const warnText=w=>t(`w_${w}`,{p:(report.uncoveredPlatforms||[]).map(p=>PLN[p]||p).join(', ')});
 function paint(){if(!report)return;const ex=report.expenses||{};$('sales').textContent=money(report.salesCents);$('purchases').textContent=money(ex.GOODS);$('labor').textContent=money(ex.WAGES);$('profit').textContent=money(report.profitCents);$('profit').style.color=report.profitCents>=0?'#18834b':'#c83b1d';
@@ -50,4 +57,13 @@ function paint(){if(!report)return;const ex=report.expenses||{};$('sales').textC
 async function loadReport(){const r=await fetch(`/api/reports/profit-loss?from=${$('from').value}&to=${$('to').value}`);const j=await r.json();if(!r.ok)throw Error(j.error||t('err'));report=j.report;paint();}
 function setMonth(){const m=$('month').value;if(!/^\d{4}-\d{2}$/.test(m))return;const [y,mo]=m.split('-').map(Number),last=new Date(Date.UTC(y,mo,0)).getUTCDate();$('from').value=m+'-01';$('to').value=m+'-'+String(last).padStart(2,'0');loadReport().catch(e=>$('details').textContent=e.message);}
 function exportReport(){if(!report){alert(t('showFirst'));return;}const rows=[[t('item'),t('value')],[t('period'),report.from+' - '+report.to],...lines().map(l=>l.h?[l.h,'']:[l.k,(l.v/100).toFixed(2).replace('.',',')]),...(report.warnings||[]).map(w=>[t('warnH'),warnText(w)])];const csv='﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(';')).join('\r\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`flamo-guv-${report.from}-${report.to}.csv`;a.click();}
-FT.init(T,{onChange:paint});{const d=today(),y=Number(d.slice(0,4)),m=Number(d.slice(5,7)),pm=m===1?(y-1)+'-12':y+'-'+String(m-1).padStart(2,'0');$('month').value=pm;$('month').onchange=setMonth;setMonth();}
+// Manual monthly expenses: net + VAT per category, stored per month on the server
+const MCATS=CATS.filter(c=>c!=='AFA'&&c!=='PLATFORM_FEES');let manual={};
+const toCents=v=>{const s=String(v||'').trim().replace(/\s/g,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.');if(!s)return 0;const n=Number(s);return Number.isFinite(n)&&n>=0?Math.round(n*100):NaN;};
+const eurIn=c=>c?(c/100).toFixed(2).replace('.',','):'';
+function drawManual(){$('manualRows').innerHTML=`<div class="mh"><span></span><span>${esc(t('netCol'))}</span><span>${esc(t('vatCol'))}</span><span>${esc(t('noteCol'))}</span></div>`+MCATS.map(c=>{const v=manual[c]||{};return `<div data-c="${c}"><span>${esc(t(`c_${c}`))}</span><input inputmode="decimal" class="n" value="${eurIn(v.netCents)}"><input inputmode="decimal" class="v" value="${eurIn(v.vatCents)}"><input class="note" maxlength="200" value="${esc(v.note||'')}"></div>`;}).join('');}
+async function toggleManual(){const p=$('manualPanel');if(!p.hidden){p.hidden=true;return;}const m=$('month').value;if(!/^\d{4}-\d{2}$/.test(m)){alert(t('pickMonth'));return;}const r=await fetch(`/api/accounting/manual-expenses?month=${m}`),j=await r.json();manual=j.entries||{};drawManual();$('manualStatus').textContent='';p.hidden=false;}
+async function saveManual(){const m=$('month').value,entries={};if(!/^\d{4}-\d{2}$/.test(m)){alert(t('pickMonth'));return;}
+  for(const row of document.querySelectorAll('#manualRows [data-c]')){const n=toCents(row.querySelector('.n').value),v=toCents(row.querySelector('.v').value);if(Number.isNaN(n)||Number.isNaN(v)){$('manualStatus').textContent=`${t('badAmount')}: ${t(`c_${row.dataset.c}`)}`;return;}if(n||v)entries[row.dataset.c]={netCents:n,vatCents:v,note:row.querySelector('.note').value};}
+  const r=await fetch('/api/accounting/manual-expenses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({month:m,entries})}),j=await r.json();if(!r.ok){$('manualStatus').textContent=j.error||t('err');return;}manual=j.entries;drawManual();$('manualStatus').textContent='✓ '+t('saved');setMonth();}
+FT.init(T,{onChange:()=>{paint();if(!$('manualPanel').hidden)drawManual();}});{const d=today(),y=Number(d.slice(0,4)),m=Number(d.slice(5,7)),pm=m===1?(y-1)+'-12':y+'-'+String(m-1).padStart(2,'0');$('month').value=pm;$('month').onchange=()=>{setMonth();if(!$('manualPanel').hidden){$('manualPanel').hidden=true;toggleManual();}};setMonth();}

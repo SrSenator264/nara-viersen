@@ -110,6 +110,9 @@ function buildPeriod(data, from, to) {
       if (key > tm) break; if (key >= fm) afa += m;
     }
   }
+  // Manual monthly expenses (settings.accounting.manualExpenses['YYYY-MM'][CAT] = {netCents, vatCents, note}); only months fully inside the period
+  const manualExp = monthlyManual(acc.manualExpenses, from, to);
+  for (const [c, v] of Object.entries(manualExp.byCat)) exp[c] += v;
   const incomeCents = ownCents + platformCentsAdj + manual;
   const expenseCents = Object.values(exp).reduce((a, b) => a + b, 0) + afa;
   // تغطية الكشوف: منصة إلها مبيعات بالفترة بس أيام ناقصة بالكشوف
@@ -118,19 +121,37 @@ function buildPeriod(data, from, to) {
   const uncovered = platformFeeInvoices.length ? [] : Object.keys(coverage).filter(pf => coverage[pf].days < days);
   const warnings = [];
   if (regime === 'REGEL') warnings.push('REGEL_NET_SPLIT_NEEDED');
-  if (!invoiceCount) warnings.push('NO_PURCHASE_INVOICES');
+  if (!invoiceCount && !manualExp.total) warnings.push('NO_PURCHASE_INVOICES');
+  if (manualExp.total) warnings.push(invoiceCount ? 'MANUAL_EXPENSES_WITH_INVOICES' : 'MANUAL_EXPENSES');
   if (!stmts.length && !platformFeeInvoices.length && platformCents) warnings.push('NO_PLATFORM_FEES');
   else if (uncovered.length) warnings.push('PLATFORM_STATEMENT_GAPS');
-  if (!pay.length) warnings.push('NO_PAYROLL');
+  if (!pay.length && !manualExp.byCat.WAGES) warnings.push('NO_PAYROLL');
   if (Object.keys(guessed).length) warnings.push('CATEGORIES_GUESSED');
   if (!exp.RENT) warnings.push('NO_RENT');
   if (manualSkipped) warnings.push('MANUAL_REVENUE_YEARLY_ONLY');
   return {
     from, to, regime, income: { ownCents, platformCents: platformCentsAdj, byPlatform, manualCents: manual, totalCents: incomeCents },
-    expenses: { ...exp, AFA: afa, totalCents: expenseCents }, profitCents: incomeCents - expenseCents,
+    expenses: { ...exp, AFA: afa, totalCents: expenseCents }, manualExpenses: manualExp, profitCents: incomeCents - expenseCents,
     counts: { invoices: invoiceCount, platformStatements: stmts.length, ownSales: l.own.totals.count, platformOrders: l.platform.totals.count },
     statementCoverage: coverage, uncoveredPlatforms: uncovered, guessedCategories: guessed, warnings, reviewRequired: true,
   };
+}
+
+function monthlyManual(store, from, to) {
+  const byCat = {}, months = []; let total = 0, vat = 0;
+  for (const [m, cats] of Object.entries(store || {})) {
+    if (!/^\d{4}-\d{2}$/.test(m) || !cats || typeof cats !== 'object') continue;
+    const last = new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 0)).getUTCDate();
+    if (m + '-01' < from || m + '-' + String(last).padStart(2, '0') > to) continue;
+    let used = false;
+    for (const [c, v] of Object.entries(cats)) {
+      if (!CATS.includes(c) || !v) continue;
+      const n = Math.max(0, Math.round(Number(v.netCents) || 0)), t = Math.max(0, Math.round(Number(v.vatCents) || 0)); if (!n && !t) continue;
+      byCat[c] = (byCat[c] || 0) + n + t; total += n + t; vat += t; used = true;
+    }
+    if (used) months.push(m);
+  }
+  return { byCat, total, vatCents: vat, months };
 }
 
 // EÜR لسنة كاملة = نفس الحساب على 01.01–31.12
@@ -138,4 +159,4 @@ function build(data, year) {
   return { year, ...buildPeriod(data, year + '-01-01', year + '-12-31') };
 }
 
-module.exports = { build, buildPeriod, overlapShare, categorize, CATS };
+module.exports = { build, buildPeriod, overlapShare, categorize, monthlyManual, CATS };
