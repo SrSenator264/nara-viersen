@@ -30,7 +30,7 @@ err:{de:'Bericht konnte nicht geladen werden',ar:'تعذر تحميل التقر
 item:{de:'Posten',ar:'البند',en:'Item'},value:{de:'Wert',ar:'القيمة',en:'Value'}
 };
 const CATS=['GOODS','RENT','ENERGY','TELECOM','INSURANCE','PLATFORM_FEES','WAGES','VEHICLE','MARKETING','EQUIPMENT_SMALL','BANK_FEES','OTHER','AFA'];
-const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch'};
+const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',JUST_VIRTUAL:'Just Smashed'};
 const $=id=>document.getElementById(id),t=(k,v)=>FT.t(k,v);let report=null;const today=()=>window.NARA_DAY?NARA_DAY.today():new Date().toISOString().slice(0,10);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function money(c){return `${(Number(c||0)/100).toFixed(2)} €`;}

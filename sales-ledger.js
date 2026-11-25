@@ -6,7 +6,7 @@
 // تنبيه: مو استشارة قانونية؛ المحاسب بيأكّد التفاصيل.
 
 const bizDay = require('./business-day.js');
-const PLATFORMS = new Set(['LIEFERANDO', 'UBER_EATS', 'WOLT', 'LANCH']);
+const PLATFORMS = new Set(['LIEFERANDO', 'UBER_EATS', 'WOLT', 'LANCH', 'JUST_VIRTUAL']);
 const up = v => String(v == null ? '' : v).toUpperCase();
 const eur = c => (Number(c || 0) / 100).toFixed(2).replace('.', ',');
 const iso = v => { const t = Date.parse(v || ''); return Number.isFinite(t) ? new Date(t).toISOString() : ''; };
@@ -16,7 +16,9 @@ const isLoco = o => /loco/i.test(String(o.brand || o.brandName || '')) || up(o.s
 // So every Loco order from an external platform counts as LANCH; Loco sold at the counter stays own sales.
 function platformOf(o) {
   const pf = basePlatformOf(o);
-  if (isLoco(o) && (pf || /SIDES/.test(up(o.platform || o.source || o.channel)))) return 'LANCH';
+  const ext = pf || /SIDES/.test(up(o.platform || o.source || o.channel));
+  if (isLoco(o) && ext) return 'LANCH';
+  if (/smash/i.test(String(o.brand || o.brandName || '')) && ext) return 'JUST_VIRTUAL'; // Just Smashed: Just Virtual collects and settles the same way
   return pf;
 }
 function basePlatformOf(o) {

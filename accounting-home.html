@@ -300,7 +300,7 @@ const LINK={closings:'kasse-settlement.html',tse:'sales.html',bank:'banking.html
 const AN_ICON={FIXED_COST_MISSING:'🏠',DUP_INVOICE:'👯',PRICE_JUMP:'📈',CASH_DIFF:'💵',LOW_SALES_DAY:'📉',OLD_UNMATCHED:'🏦',NO_DOCUMENT:'📎',VAT_ON_KLEIN:'🚨'};
 const AN_LINK={FIXED_COST_MISSING:'banking.html',DUP_INVOICE:'inventory-foundation.html',PRICE_JUMP:'inventory-foundation.html',CASH_DIFF:'kasse-settlement.html',LOW_SALES_DAY:'sales.html',OLD_UNMATCHED:'banking.html',NO_DOCUMENT:'inventory-foundation.html',VAT_ON_KLEIN:'accounting-home.html'};
 let AN=null,PL=[],PP=null,PPS=[],PMSG='';
-const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',SIDES:'Sides / Loco',LANCH:'Lanch',OTHER:'?'};
+const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',SIDES:'Sides / Loco',LANCH:'Lanch',JUST_VIRTUAL:'Just Smashed',OTHER:'?'};
 function plLine(s,c){
   const fee=(s.commissionGrossCents||0)+(s.otherFeesCents||0);
   const cmp=!c||!c.possible?`<small>${esc(t('plCmpNo'))}</small>`:c.ok===null?`<small>${esc(t('plCmpNone'))}</small>`:c.ok?`<small class="okc">${esc(t('plCmpOk',{n:c.flamoCount}))}</small>`:`<small class="badc">${esc(t('plCmpBad',{n:(c.diffCount>0?'+':'')+(c.diffCount==null?'?':c.diffCount),a:(c.diffCents==null?'?':eur(c.diffCents))+(c.missingPct==null?'':' ('+c.missingPct+'%)')}))}</small>`;

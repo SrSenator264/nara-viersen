@@ -71,3 +71,17 @@ test('GuV: Lanch-Umsatz aus Gutschrift (anteilig), Flamo-Bestellungen nur an ung
   const oct = EU.buildPeriod(d, '2026-10-01', '2026-10-31').income.byPlatform.LANCH, nov = EU.buildPeriod(d, '2026-11-01', '2026-11-30').income.byPlatform.LANCH;
   assert.equal(oct, 105000 + 1000 + 2000); assert.equal(nov, 45000);
 });
+
+test('Just Virtual (Just Smashed): Abrechnung KW46 → JUST_VIRTUAL, Umsatz aus Abrechnung, Gebühren voll, nicht bei Lieferando', () => {
+  const PS = require('../platform-statement.js'), EU = require('../euer-draft.js'), SL = require('../sales-ledger.js');
+  const st = PS.normalize({ platform: 'JUST_VIRTUAL', documentKind: 'SETTLEMENT', invoiceNumber: '750292170', periodFrom: '2026-11-08', periodTo: '2026-11-14',
+    grossSales: 166.65, cashCollected: 55.32, onlinePaid: 111.33, commissionNet: 72.08, commissionVat: 13.70, commissionGross: 85.79, payout: 25.54 });
+  assert.equal(st.platform, 'JUST_VIRTUAL'); assert.equal(st.grossCents, 16665); assert.equal(st.commissionGrossCents, 8579); assert.equal(st.cashCollectedCents, 5532); assert.equal(st.payoutCents, 2554);
+  assert.equal(SL.platformOf({ platform: 'LIEFERANDO', brand: 'Just Smashed' }), 'JUST_VIRTUAL');
+  const d = { settings: { accounting: {} }, payments: [], invoices: [], suppliers: [], payrollPayments: [], fixedAssets: [],
+    orders: [{ id: 'l', platform: 'LIEFERANDO', placedAt: '2026-11-10T12:00:00Z', totalCents: 500, status: 'DELIVERED' }], platformStatements: [st] };
+  const r = EU.buildPeriod(d, '2026-11-01', '2026-11-30');
+  assert.equal(r.income.byPlatform.JUST_VIRTUAL, 16665); assert.equal(r.income.byPlatform.LIEFERANDO, 500);
+  assert.equal(r.income.totalCents, 16665 + 500); assert.equal(r.expenses.PLATFORM_FEES, 8579);
+  assert.deepEqual(r.statementCoverage.JUST_VIRTUAL, { days: 7, of: 30 });
+});

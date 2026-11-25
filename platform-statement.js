@@ -10,12 +10,12 @@ const isDay = v => /^\d{4}-\d{2}-\d{2}$/.test(str(v));
 const c = v => (v == null || !Number.isFinite(Number(v)) ? null : Math.round(Number(v) * 100));
 
 const N = { type: ['number', 'null'] };
-const PLATFORMS = ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'SIDES', 'LANCH'];
+const PLATFORMS = ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'SIDES', 'LANCH', 'JUST_VIRTUAL'];
 const KINDS = ['SETTLEMENT', 'COMMISSION_INVOICE', 'MONTHLY_SUMMARY', 'OTHER'];
 const SCHEMA = {
   type: 'object',
   properties: {
-    platform: { type: 'string', enum: ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'SIDES', 'LANCH', 'OTHER'], description: 'LANCH = Dokumente der LANCH GmbH (Gutschrift/Rechnung, Nummer 67_…), auch wenn Lieferando darin erwähnt wird' },
+    platform: { type: 'string', enum: ['LIEFERANDO', 'UBER_EATS', 'WOLT', 'SIDES', 'LANCH', 'JUST_VIRTUAL', 'OTHER'], description: 'LANCH = Dokumente der LANCH GmbH (Gutschrift/Rechnung, Nummer 67_…); JUST_VIRTUAL = Dokumente von Just Virtual / Ghost Food Consulting GmbH (Marke Just Smashed) – jeweils auch wenn Lieferando darin erwähnt wird' },
     documentKind: { type: 'string', enum: ['SETTLEMENT', 'COMMISSION_INVOICE', 'MONTHLY_SUMMARY', 'OTHER'], description: 'Abrechnung/Auszahlungsbericht, Provisionsrechnung oder Monatsbericht (konsolidierte Zusammenfassung eines Kalendermonats)' },
     invoiceNumber: { type: ['string', 'null'] }, documentDate: { type: ['string', 'null'] },
     periodFrom: { type: ['string', 'null'] }, periodTo: { type: ['string', 'null'] },
@@ -31,7 +31,7 @@ const SCHEMA = {
   },
   required: ['platform', 'documentKind'],
 };
-const PROMPT = 'Das ist ein Dokument einer Lieferplattform an ein Restaurant (Abrechnung, Auszahlungsbericht oder Provisionsrechnung von Lieferando/Takeaway, Uber Eats, Wolt oder Sides). Dokumente der LANCH GmbH → platform LANCH. Bei Rechnungen: commission = alle Gebühren zusammen (z. B. Marketinggebühr + Servicegebühr), Zutaten/Verpackung NICHT als Gebühr sondern als goods. Monatsbericht ("Monatliche Berichte" / "Konsolidierte monatliche Zusammenfassung") → documentKind MONTHLY_SUMMARY, NUR die konsolidierte Seite lesen, nicht die einzelnen Auszahlungen; periodFrom/periodTo = erster/letzter Tag des Monats; invoiceNumber = Berichtsnummer; grossSales = Umsatz (Artikel); extraRevenue = Trinkgelder + Sonstige Umsätze; commissionGross = Uber Servicegebühren; otherFees = Marketing gesamt; refunds = Netto-Rückbuchungsbetrag; cashCollected = Eingenommenes Bargeld; payout = Bankauszahlung; "Anpassungen" (Bargeld-Verrechnung) NICHT als Gebühr. Lies nur sichtbare Werte, erfinde nichts, fehlende Werte null. Beträge in EUR als Zahl. Datum YYYY-MM-DD. Rufe save_platform_statement genau einmal auf.';
+const PROMPT = 'Das ist ein Dokument einer Lieferplattform an ein Restaurant (Abrechnung, Auszahlungsbericht oder Provisionsrechnung von Lieferando/Takeaway, Uber Eats, Wolt oder Sides). Dokumente der LANCH GmbH → platform LANCH. Dokumente von Just Virtual / Ghost Food Consulting GmbH (Just Smashed) → platform JUST_VIRTUAL, documentKind SETTLEMENT (Rechnung + Abrechnung in einem): grossSales = Brutto-Umsatz total, cashCollected = Bei Auslieferung bezahlt, onlinePaid = Online bezahlt, commission = Gesamtbetrag der Rechnung (alle Gebühren inkl. Marketing; netto/MwSt./brutto), payout = Überweisung auf Bankkonto. Bei Rechnungen: commission = alle Gebühren zusammen (z. B. Marketinggebühr + Servicegebühr), Zutaten/Verpackung NICHT als Gebühr sondern als goods. Monatsbericht ("Monatliche Berichte" / "Konsolidierte monatliche Zusammenfassung") → documentKind MONTHLY_SUMMARY, NUR die konsolidierte Seite lesen, nicht die einzelnen Auszahlungen; periodFrom/periodTo = erster/letzter Tag des Monats; invoiceNumber = Berichtsnummer; grossSales = Umsatz (Artikel); extraRevenue = Trinkgelder + Sonstige Umsätze; commissionGross = Uber Servicegebühren; otherFees = Marketing gesamt; refunds = Netto-Rückbuchungsbetrag; cashCollected = Eingenommenes Bargeld; payout = Bankauszahlung; "Anpassungen" (Bargeld-Verrechnung) NICHT als Gebühr. Lies nur sichtbare Werte, erfinde nichts, fehlende Werte null. Beträge in EUR als Zahl. Datum YYYY-MM-DD. Rufe save_platform_statement genau einmal auf.';
 
 function normalize(raw) {
   const r = raw || {};

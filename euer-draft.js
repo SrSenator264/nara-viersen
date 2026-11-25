@@ -82,9 +82,9 @@ function buildPeriod(data, from, to) {
     if (['SETTLEMENT', 'COMMISSION_INVOICE', 'MONTHLY_SUMMARY'].includes(x.documentKind)) { const set = (covered[x.platform] ??= new Set()); for (const n of daySet(x, from, to)) set.add(n); }
   }
   if (!platformFeeInvoices.length) { exp.PLATFORM_FEES += stmtFees; exp.GOODS += stmtGoods; }
-  // Lanch revenue comes from its Gutschrift (SETTLEMENT grossCents), prorated by days; Flamo orders count only on uncovered days
+  // Lanch / Just Virtual revenue comes from its Gutschrift (SETTLEMENT grossCents), prorated by days; Flamo orders count only on uncovered days
   // (Flamo misses many Loco orders, and Lanch collects the money itself).
-  const STMT_INCOME = ['LANCH'];
+  const STMT_INCOME = ['LANCH', 'JUST_VIRTUAL'];
   let platformCentsAdj = platformCents;
   for (const pf of STMT_INCOME) {
     const sts = all.filter(x => x.platform === pf && x.documentKind === 'SETTLEMENT' && x.grossCents != null);
