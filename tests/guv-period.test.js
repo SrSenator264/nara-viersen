@@ -1,0 +1,70 @@
+'use strict';
+// GuV pro Monat/Zeitraum = gleiche Logik wie die EÜR (euer-draft.buildPeriod).
+const test = require('node:test'), assert = require('node:assert/strict');
+const EU = require('../euer-draft.js');
+
+const base = (o = {}) => ({ settings: { accounting: { vatRegime: 'KLEIN' } }, orders: [], payments: [], invoices: [], suppliers: [], fiscalTransactions: [], receipts: [], platformStatements: [], payrollPayments: [], fixedAssets: [], ...o });
+
+const month = () => base({
+  orders: [{ id: 'o1' }, { id: 'l1', platform: 'LIEFERANDO', placedAt: '2026-10-10T12:00:00Z', totalCents: 10000, status: 'DELIVERED' }, { id: 'l2', platform: 'LIEFERANDO', placedAt: '2026-11-02T12:00:00Z', totalCents: 9999, status: 'DELIVERED' }],
+  payments: [{ id: 'p1', orderId: 'o1', createdAt: '2026-10-05T14:00:00Z', status: 'COMPLETED', amountCents: 2000 }],
+  suppliers: [{ id: 's1', name: 'Fleisch Müller' }, { id: 's2', name: 'Hausverwaltung Meier' }],
+  invoices: [
+    { supplierId: 's1', invoiceDate: '2026-10-03', totalCents: 3000, status: 'POSTED', lineItems: [{}] },
+    { supplierId: 's2', invoiceDate: '2026-10-01', totalCents: 80000, status: 'POSTED' },
+    { supplierId: 's1', invoiceDate: '2026-11-01', totalCents: 99999, status: 'POSTED' },
+  ],
+  // Woche 27.09–03.10: 3 von 7 Tagen im Oktober → 3/7 der Gebühren
+  platformStatements: [
+    { platform: 'LIEFERANDO', documentKind: 'COMMISSION_INVOICE', periodFrom: '2026-09-27', periodTo: '2026-10-03', commissionGrossCents: 700, otherFeesCents: 0 },
+    { platform: 'LIEFERANDO', documentKind: 'COMMISSION_INVOICE', periodFrom: '2026-10-04', periodTo: '2026-10-31', commissionGrossCents: 2800, goodsCents: 0 },
+  ],
+  payrollPayments: [{ date: '2026-10-02', amountCents: 5000 }, { date: '2026-11-02', amountCents: 7777 }],
+  fixedAssets: [{ status: 'ACTIVE', purchaseDate: '2026-09-15', usefulLifeMonths: 12, monthlyDepreciationCents: 1000 }],
+});
+
+test('GuV Oktober: Einnahmen Kasse + Plattform, Ausgaben je Kategorie, AfA 1 Monat, Ergebnis', () => {
+  const r = EU.buildPeriod(month(), '2026-10-01', '2026-10-31');
+  assert.equal(r.income.ownCents, 2000); assert.equal(r.income.platformCents, 10000);
+  assert.deepEqual(r.income.byPlatform, { LIEFERANDO: 10000 });
+  assert.equal(r.expenses.GOODS, 3000); assert.equal(r.expenses.RENT, 80000); assert.equal(r.expenses.WAGES, 5000);
+  assert.equal(r.expenses.PLATFORM_FEES, 300 + 2800); assert.equal(r.expenses.AFA, 1000);
+  assert.equal(r.expenses.totalCents, 3000 + 80000 + 5000 + 3100 + 1000);
+  assert.equal(r.profitCents, 12000 - r.expenses.totalCents);
+  assert.deepEqual(r.statementCoverage, { LIEFERANDO: { days: 31, of: 31 } });
+  assert.ok(!r.warnings.includes('PLATFORM_STATEMENT_GAPS')); assert.ok(!r.warnings.includes('NO_RENT'));
+});
+
+test('Abrechnung über Monatsgrenze: Anteil nach Tagen, beide Monate zusammen = ganzer Betrag', () => {
+  const st = { periodFrom: '2026-09-27', periodTo: '2026-10-03' };
+  assert.equal(EU.overlapShare(st, '2026-10-01', '2026-10-31'), 3 / 7);
+  assert.equal(EU.overlapShare(st, '2026-09-01', '2026-09-30'), 4 / 7);
+  assert.equal(EU.overlapShare(st, '2026-11-01', '2026-11-30'), 0);
+  assert.equal(EU.overlapShare({ periodTo: '2026-10-03' }, '2026-10-01', '2026-10-31'), 1);
+  const d = month();
+  const sep = EU.buildPeriod(d, '2026-09-01', '2026-09-30').expenses.PLATFORM_FEES, oct = EU.buildPeriod(d, '2026-10-01', '2026-10-31').expenses.PLATFORM_FEES;
+  assert.equal(sep + oct, 700 + 2800);
+});
+
+test('Lücke in den Abrechnungen → PLATFORM_STATEMENT_GAPS mit Plattform', () => {
+  const d = month(); d.platformStatements.pop();
+  const r = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
+  assert.ok(r.warnings.includes('PLATFORM_STATEMENT_GAPS')); assert.deepEqual(r.uncoveredPlatforms, ['LIEFERANDO']);
+  assert.deepEqual(r.statementCoverage.LIEFERANDO, { days: 3, of: 31 });
+});
+
+test('Leerer Monat: alles 0, Warnungen, kein Absturz', () => {
+  const r = EU.buildPeriod(base(), '2026-02-01', '2026-02-28');
+  assert.equal(r.income.totalCents, 0); assert.equal(r.expenses.totalCents, 0); assert.equal(r.profitCents, 0);
+  assert.ok(r.warnings.includes('NO_PURCHASE_INVOICES')); assert.ok(r.warnings.includes('NO_PAYROLL'));
+});
+
+test('Manueller Jahresumsatz nur bei ganzem Jahr; Jahr = Summe der Monate', () => {
+  const d = month(); d.settings.accounting.manualRevenueCents = { 2026: 50000 };
+  const oct = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
+  assert.equal(oct.income.manualCents, 0); assert.ok(oct.warnings.includes('MANUAL_REVENUE_YEARLY_ONLY'));
+  const y = EU.build(d, 2026);
+  assert.equal(y.year, 2026); assert.equal(y.income.manualCents, 50000);
+  let sum = 0; for (let m = 1; m <= 12; m++) { const last = new Date(Date.UTC(2026, m, 0)).getUTCDate(), mm = String(m).padStart(2, '0'); sum += EU.buildPeriod(d, `2026-${mm}-01`, `2026-${mm}-${last}`).profitCents; }
+  assert.equal(sum + 50000, y.profitCents);
+});
