@@ -82,6 +82,20 @@ function buildPeriod(data, from, to) {
     if (['SETTLEMENT', 'COMMISSION_INVOICE', 'MONTHLY_SUMMARY'].includes(x.documentKind)) { const set = (covered[x.platform] ??= new Set()); for (const n of daySet(x, from, to)) set.add(n); }
   }
   if (!platformFeeInvoices.length) { exp.PLATFORM_FEES += stmtFees; exp.GOODS += stmtGoods; }
+  // Lanch revenue comes from its Gutschrift (SETTLEMENT grossCents), prorated by days; Flamo orders count only on uncovered days
+  // (Flamo misses many Loco orders, and Lanch collects the money itself).
+  const STMT_INCOME = ['LANCH'];
+  let platformCentsAdj = platformCents;
+  for (const pf of STMT_INCOME) {
+    const sts = all.filter(x => x.platform === pf && x.documentKind === 'SETTLEMENT' && x.grossCents != null);
+    if (!sts.length) continue;
+    const days = new Set(); let gross = 0;
+    for (const x of sts) { const sh = overlapShare(x, from, to); if (!sh) continue; gross += Math.round(x.grossCents * sh); for (const n of daySet(x, from, to)) days.add(n); }
+    if (!days.size) continue;
+    const fromOrders = l.platform.rows.filter(r => r.platform === pf && !days.has(dnum(r.businessDay))).reduce((s, r) => s + r.grossCents, 0);
+    const v = gross + fromOrders;
+    platformCentsAdj += v - (byPlatform[pf] || 0); byPlatform[pf] = v;
+  }
   const pay = (data.payrollPayments || []).filter(p => inP(str(p.date)));
   exp.WAGES += pay.reduce((s, p) => s + Number(p.amountCents || 0), 0);
   // AfA: خطي شهري للأصول الفعّالة، كل شهر جوّا الفترة (الشهر الناقص بينحسب كامل)
@@ -96,7 +110,7 @@ function buildPeriod(data, from, to) {
       if (key > tm) break; if (key >= fm) afa += m;
     }
   }
-  const incomeCents = ownCents + platformCents + manual;
+  const incomeCents = ownCents + platformCentsAdj + manual;
   const expenseCents = Object.values(exp).reduce((a, b) => a + b, 0) + afa;
   // تغطية الكشوف: منصة إلها مبيعات بالفترة بس أيام ناقصة بالكشوف
   const days = daysBetween(from, to), coverage = {};
@@ -112,7 +126,7 @@ function buildPeriod(data, from, to) {
   if (!exp.RENT) warnings.push('NO_RENT');
   if (manualSkipped) warnings.push('MANUAL_REVENUE_YEARLY_ONLY');
   return {
-    from, to, regime, income: { ownCents, platformCents, byPlatform, manualCents: manual, totalCents: incomeCents },
+    from, to, regime, income: { ownCents, platformCents: platformCentsAdj, byPlatform, manualCents: manual, totalCents: incomeCents },
     expenses: { ...exp, AFA: afa, totalCents: expenseCents }, profitCents: incomeCents - expenseCents,
     counts: { invoices: invoiceCount, platformStatements: stmts.length, ownSales: l.own.totals.count, platformOrders: l.platform.totals.count },
     statementCoverage: coverage, uncoveredPlatforms: uncovered, guessedCategories: guessed, warnings, reviewRequired: true,

@@ -23,7 +23,7 @@ test('two separate ledgers: own sales with TSE, platform sales without', () => {
   assert.equal(l.own.rows.length, 1); assert.equal(l.own.rows[0].cashCents, 700); assert.equal(l.own.rows[0].cardCents, 1300); assert.equal(l.own.rows[0].tseTransaction, '77');
   assert.equal(l.own.totals.grossCents, 2000); assert.equal(l.own.totals.tseMissing, 0);
   assert.equal(l.platform.rows.length, 3); assert.equal(l.platform.totals.count, 2); assert.equal(l.platform.totals.cancelled, 1);
-  assert.equal(l.platform.totals.grossCents, 2873 + 1898); assert.equal(l.platform.totals.byBrand['Loco Chicken'], 1898); assert.equal(l.platform.totals.byPlatform.UBER_EATS, 1898);
+  assert.equal(l.platform.totals.grossCents, 2873 + 1898); assert.equal(l.platform.totals.byBrand['Loco Chicken'], 1898); assert.equal(l.platform.totals.byPlatform.LANCH, 1898); // Loco = Lanch-Marke, auch über Uber
   assert.ok(!l.own.rows.some(r => r.orderCode === 'W3CXY6')); // طلب منصة ما بيدخل بالسجل المحلي حتى لو إلو دفعة
 });
 test('csv uses ; and decimal comma', () => {

@@ -11,7 +11,15 @@ const up = v => String(v == null ? '' : v).toUpperCase();
 const eur = c => (Number(c || 0) / 100).toFixed(2).replace('.', ',');
 const iso = v => { const t = Date.parse(v || ''); return Number.isFinite(t) ? new Date(t).toISOString() : ''; };
 
+const isLoco = o => /loco/i.test(String(o.brand || o.brandName || '')) || up(o.station) === 'LOCO';
+// Loco Chicken is Lanch's brand: Lanch collects the money from Lieferando/Uber and settles via its Gutschrift.
+// So every Loco order from an external platform counts as LANCH; Loco sold at the counter stays own sales.
 function platformOf(o) {
+  const pf = basePlatformOf(o);
+  if (isLoco(o) && (pf || /SIDES/.test(up(o.platform || o.source || o.channel)))) return 'LANCH';
+  return pf;
+}
+function basePlatformOf(o) {
   if (/LANCH/.test(up(o.source)) || /LANCH/.test(up(o.platform))) return 'LANCH'; // طلب Lanch ممكن يكون platform=NARA
   const p = up(o.platform || o.source);
   if (/LIEFERANDO/.test(p)) return 'LIEFERANDO';
@@ -21,7 +29,7 @@ function platformOf(o) {
   const ch = up(o.channel); if (PLATFORMS.has(ch)) return ch; // طلبات Sides/Loco: القناة هي المنصة
   return null;
 }
-const brandOf = o => /loco/i.test(String(o.brand || o.brandName || '')) || up(o.station) === 'LOCO' ? 'Loco Chicken' : /smash/i.test(String(o.brand || o.brandName || '')) ? 'Just Smashed' : 'IU GENE';
+const brandOf = o => isLoco(o) ? 'Loco Chicken' : /smash/i.test(String(o.brand || o.brandName || '')) ? 'Just Smashed' : 'IU GENE';
 
 function build(data, from, to) {
   const orders = data.orders || [], byId = new Map(orders.map(o => [String(o.id), o]));

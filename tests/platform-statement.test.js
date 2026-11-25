@@ -42,3 +42,32 @@ test('EÜR: Waren aus Plattform-Rechnung → GOODS, Gebühren einmal → PLATFOR
   assert.equal(r.expenses.PLATFORM_FEES, 38896 + 3840 + 50739 + 72066);
   assert.equal(r.expenses.GOODS, 54772);
 });
+
+test('Loco Chicken über Lieferando/Uber/Sides zählt als LANCH, Loco an der Kasse nicht', () => {
+  const SL = require('../sales-ledger.js');
+  assert.equal(SL.platformOf({ platform: 'LIEFERANDO', brand: 'Loco Chicken' }), 'LANCH');
+  assert.equal(SL.platformOf({ platform: 'UBER_EATS', station: 'LOCO' }), 'LANCH');
+  assert.equal(SL.platformOf({ platform: 'SIDES', channel: 'LIEFERANDO', brandName: 'Loco Chicken' }), 'LANCH');
+  assert.equal(SL.platformOf({ platform: 'NARA', brand: 'Loco Chicken' }), null);
+  assert.equal(SL.platformOf({ platform: 'LIEFERANDO', brand: 'IU GENE' }), 'LIEFERANDO');
+});
+
+test('GuV: Lanch-Umsatz aus Gutschrift (anteilig), Flamo-Bestellungen nur an ungedeckten Tagen', () => {
+  const EU = require('../euer-draft.js');
+  const o = (id, day, c, extra) => ({ id, platform: 'LIEFERANDO', brand: 'Loco Chicken', placedAt: day + 'T12:00:00Z', totalCents: c, status: 'DELIVERED', ...extra });
+  const d = { settings: { accounting: {} }, payments: [], invoices: [], suppliers: [], payrollPayments: [], fixedAssets: [],
+    orders: [o('a', '2026-10-05', 1000), o('b', '2026-10-20', 2000), { id: 'l', platform: 'LIEFERANDO', placedAt: '2026-10-06T12:00:00Z', totalCents: 500, status: 'DELIVERED' }],
+    platformStatements: [
+      { platform: 'LANCH', documentKind: 'SETTLEMENT', periodFrom: '2026-10-01', periodTo: '2026-10-15', grossCents: 150000, commissionGrossCents: 100 },
+      { platform: 'LANCH', documentKind: 'COMMISSION_INVOICE', periodFrom: '2026-10-01', periodTo: '2026-10-15', commissionGrossCents: 200 },
+    ] };
+  const r = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
+  assert.equal(r.income.byPlatform.LANCH, 150000 + 2000); // Gutschrift + Bestellung am 20.10 (nicht gedeckt), 05.10 nicht doppelt
+  assert.equal(r.income.byPlatform.LIEFERANDO, 500);
+  assert.equal(r.income.platformCents, 152500); assert.equal(r.income.totalCents, 152500);
+  assert.deepEqual(r.statementCoverage.LANCH, { days: 15, of: 31 });
+  // Gutschrift über Monatsgrenze → anteilig
+  d.platformStatements[0] = { ...d.platformStatements[0], periodFrom: '2026-10-25', periodTo: '2026-11-03' };
+  const oct = EU.buildPeriod(d, '2026-10-01', '2026-10-31').income.byPlatform.LANCH, nov = EU.buildPeriod(d, '2026-11-01', '2026-11-30').income.byPlatform.LANCH;
+  assert.equal(oct, 105000 + 1000 + 2000); assert.equal(nov, 45000);
+});
