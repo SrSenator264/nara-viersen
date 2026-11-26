@@ -75,7 +75,7 @@ function render(){
   $('#invoices-list').innerHTML=visibleInvoices.map(x=>{
     const s=state.suppliers.find(y=>y.id===x.supplierId);
     const total=Number(x.totalAmount??(Number(x.totalCents||0)/100));
-    return `<tr><td>${x.invoiceNumber}</td><td>${s?.name|| (x.source==='MANAGER_DEMO'?'Flamo Manager · تجريبية':'')}</td><td>${x.invoiceDate||x.createdAt?.slice(0,10)||''}</td><td>${x.deliveryDate||''}</td><td>${total.toFixed(2)} €</td><td>${x.status==='POSTED'?'Gebucht':'Entwurf'}</td><td>${x.source==='MANAGER_DEMO'?'فاتورة مدير':(x.status==='POSTED'?'—':`<button data-post="${x.id}">Wareneingang buchen</button>`)}</td></tr>`
+    return `<tr><td>${x.invoiceNumber}</td><td>${s?.name|| (x.source==='MANAGER_DEMO'?'Flamo Manager · تجريبية':'')}</td><td>${x.invoiceDate||x.createdAt?.slice(0,10)||''}</td><td>${x.deliveryDate||''}</td><td>${total.toFixed(2)} €</td><td>${x.status==='POSTED'?'Gebucht':x.status==='APPROVED'?'✅ معتمدة للمحاسبة':'Entwurf'}</td><td>${x.source==='MANAGER_DEMO'?'فاتورة مدير':(x.status==='POSTED'?'—':`${x.status==='DRAFT'||!x.status?`<button data-approve="${x.id}">اعتمد للمحاسبة</button> `:''}<button data-post="${x.id}">Wareneingang buchen</button>`)}</td></tr>`
   }).join('')||'<tr><td colspan="7">لا توجد فواتير في العرض الحالي.</td></tr>';
   $('#movements-list').innerHTML=state.stockMovements.map(x=>`<tr><td>${x.createdAt||''}</td><td>${state.inventoryItems.find(y=>y.id===x.inventoryItemId)?.name||''}</td><td>${x.type}</td><td>${x.quantity||0} ${x.unit||''}</td><td>${x.referenceId||''}</td><td>${x.notes||''}</td></tr>`).join('');
   $('#summary').textContent=`${state.inventoryItems.length} Zutaten · ${state.suppliers.length} Lieferanten · ${state.invoices.length} Rechnungen · ${state.stockMovements.length} Bewegungen`
@@ -168,6 +168,15 @@ $('#invoice-form').onsubmit=async e=>{
   $('#invoice-lines').innerHTML=''
 };
 document.body.onclick=async e=>{
+  // Für die Buchhaltung freigeben (ohne Lagerbuchung) → zählt in GuV/EÜR
+  const ap=e.target.closest('[data-approve]');
+  if(ap){
+    const r=await fetch('/api/accounting/invoices/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invoiceId:ap.dataset.approve})});
+    const j=await r.json().catch(()=>({}));
+    const why={MISSING_FIELDS:'ناقص: '+(j.fields||[]).map(f=>({supplier:'المورّد',invoiceDate:'التاريخ',totalAmount:'المبلغ الإجمالي'}[f]||f)).join('، '),NET_VAT_MISMATCH:'الصافي + الضريبة ما بيساوي الإجمالي',ALREADY_APPROVED:'معتمدة من قبل',BAD_STATUS:'حالة الفاتورة ما بتسمح'};
+    $('#status').textContent=r.ok?'✅ انعتمدت الفاتورة للمحاسبة':'⚠️ ما انعتمدت: '+(why[j.error]||j.error||r.status);
+    return load()
+  }
   const p=e.target.closest('[data-post]');
   if(p&&confirm('Wareneingang wirklich buchen?')){
     const r=await fetch('/api/goods-receipt',{
