@@ -16,7 +16,9 @@ c_VEHICLE:{de:'Fahrzeug',ar:'سيارة',en:'Vehicle'},c_MARKETING:{de:'Werbung'
 c_BANK_FEES:{de:'Bank / Zahlung',ar:'بنك ودفع',en:'Bank / payment'},c_OTHER:{de:'Sonstiges',ar:'متفرقات',en:'Other'},c_AFA:{de:'Abschreibung (AfA)',ar:'إهلاك (AfA)',en:'Depreciation'},
 cogsInfo:{de:'Wareneinsatz laut Lager (nur Info)',ar:'تكلفة المواد حسب المخزون (معلومة بس)',en:'Cost of goods from stock (info only)'},
 warnH:{de:'Hinweise',ar:'تنبيهات',en:'Notes'},
-w_REGEL_NET_SPLIT_NEEDED:{de:'Regelbesteuerung: Netto/USt noch nicht getrennt, Beträge sind brutto.',ar:'ضريبة عادية: لسا ما في فصل صافي/ضريبة، المبالغ غروس.',en:'Standard VAT: net/VAT not split yet, amounts are gross.'},
+w_VAT_SALES_RATE_ASSUMED:{de:'Netto-Umsatz mit {r} % USt gerechnet (Speisen). Getränke mit 19 % sind nicht getrennt.',ar:'صافي المبيعات محسوب على ضريبة {r}% (أكل). المشروبات بـ 19% مو مفصولة.',en:'Net sales computed at {r}% VAT (food). 19% drinks are not split.'},
+w_MANUAL_VAT_ZERO:{de:'Manuelle Ausgaben ohne USt erfasst — Vorsteuer fehlt evtl.',ar:'المصاريف اليدوية مدخلة بضريبة 0 — ممكن يكون في Vorsteuer ضايع.',en:'Manual expenses entered with 0 VAT — input VAT may be missing.'},
+vatH:{de:'Umsatzsteuer (Regelbesteuerung)',ar:'ضريبة المبيعات (Regel)',en:'VAT (standard)'},vatOut:{de:'USt auf Umsätze',ar:'ضريبة المبيعات (USt)',en:'Output VAT'},vatIn:{de:'Vorsteuer',ar:'Vorsteuer (بترجعلك)',en:'Input VAT'},vatPay:{de:'Zahllast ans Finanzamt',ar:'المستحق للـ Finanzamt',en:'Payable to tax office'},netNote:{de:'Beträge netto',ar:'المبالغ صافي',en:'net amounts'},
 w_NO_PURCHASE_INVOICES:{de:'Keine Einkaufsrechnungen im Zeitraum: Ausgaben sind zu niedrig.',ar:'ما في فواتير شراء بهالفترة: المصاريف أقل من الحقيقة.',en:'No purchase invoices in this period: expenses are too low.'},
 w_NO_PLATFORM_FEES:{de:'Plattform-Umsatz ohne Plattform-Abrechnung: Gebühren fehlen.',ar:'في مبيعات منصات بدون كشوف: العمولات ناقصة.',en:'Platform sales without statements: fees are missing.'},
 w_PLATFORM_STATEMENT_GAPS:{de:'Plattform-Abrechnungen decken nicht alle Tage ab: {p}.',ar:'كشوف المنصات ما بتغطي كل الأيام: {p}.',en:'Platform statements do not cover every day: {p}.'},
@@ -43,13 +45,15 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 function money(c){return `${(Number(c||0)/100).toFixed(2)} €`;}
 // Zeilen der GuV: Einnahmen (Kasse, je Plattform, manuell) → Ausgaben je Kategorie → Ergebnis
 function lines(){if(!report)return[];const r=report,inc=r.income||{},ex=r.expenses||{},cov=r.statementCoverage||{},L=[];
-  L.push({h:t('incomeH')});if(inc.ownCents)L.push({k:t('own'),v:inc.ownCents});
+  const nn=r.vat?' · '+t('netNote'):'';L.push({h:t('incomeH')+nn});if(inc.ownCents)L.push({k:t('own'),v:inc.ownCents});
   for(const [p,c] of Object.entries(inc.byPlatform||{}))if(c){const src=(inc.incomeSource||{})[p]||{};L.push({k:PLN[p]||p,v:c,sub:src.manualCents?t('incManual'):cov[p]?t('covDays',{d:cov[p].days,n:cov[p].of}):''});}
   if(inc.manualCents)L.push({k:t('manual'),v:inc.manualCents});L.push({k:t('incomeTotal'),v:inc.totalCents,b:1});
-  L.push({h:t('expenseH')});const me=(r.manualExpenses&&r.manualExpenses.byCat)||{};const bk=(r.bank&&r.bank.byCat)||{};for(const c of CATS)if(ex[c]||bk[c])L.push({k:t(`c_${c}`),v:ex[c]||0,sub:[me[c]?`${t('manualLine')} ${money(me[c])}`:'',bk[c]?`${t('bankLine')} ${money(bk[c])}`:''].filter(Boolean).join(' · ')});L.push({k:t('costs'),v:ex.totalCents,b:1});
+  L.push({h:t('expenseH')+nn});const me=(r.manualExpenses&&r.manualExpenses.byCat)||{};const bk=(r.bank&&r.bank.byCat)||{};for(const c of CATS)if(ex[c]||bk[c])L.push({k:t(`c_${c}`),v:ex[c]||0,sub:[me[c]?`${t('manualLine')} ${money(me[c])}`:'',bk[c]?`${t('bankLine')} ${money(bk[c])}`:''].filter(Boolean).join(' · ')});L.push({k:t('costs'),v:ex.totalCents,b:1});
   if(r.bank&&r.bank.count){L.push({h:t('bankH')});for(const c of ['PRIVATE','TRANSFER'])if(bk[c])L.push({k:t(`bk_${c}`),v:bk[c]});if(bk.PLATFORM_PAYOUT)L.push({k:t('bk_PLATFORM_PAYOUT'),v:-bk.PLATFORM_PAYOUT});if(r.bank.uncategorized)L.push({k:t('bankUncat',{n:r.bank.uncategorized}),v:0});}
-  L.push({k:t('result'),v:r.profitCents,b:1,res:1});return L;}
-const warnText=w=>t(`w_${w}`,{p:(report.uncoveredPlatforms||[]).map(p=>PLN[p]||p).join(', ')});
+  L.push({k:t('result'),v:r.profitCents,b:1,res:1});
+  if(r.vat){L.push({h:t('vatH')});L.push({k:t('vatOut'),v:r.vat.outputCents});L.push({k:t('vatIn'),v:-r.vat.inputCents});L.push({k:t('vatPay'),v:r.vat.payableCents,b:1});}
+  return L;}
+const warnText=w=>t(`w_${w}`,{p:(report.uncoveredPlatforms||[]).map(p=>PLN[p]||p).join(', '),r:report.vat?report.vat.salesRate:''});
 function paint(){if(!report)return;const ex=report.expenses||{};$('sales').textContent=money(report.salesCents);$('purchases').textContent=money(ex.GOODS);$('labor').textContent=money(ex.WAGES);$('profit').textContent=money(report.profitCents);$('profit').style.color=report.profitCents>=0?'#18834b':'#c83b1d';
   const rows=lines().map(l=>l.h?`<div class="sec"><strong>${esc(l.h)}</strong></div>`:`<div${l.b?' class="tot"':''}><span>${esc(l.k)}${l.sub?` <small class="mute">· ${esc(l.sub)}</small>`:''}</span><strong${l.res?` style="color:${l.v>=0?'#18834b':'#c83b1d'}"`:''}>${money(l.v)}</strong></div>`).join('');
   $('details').innerHTML=`<div><span>${esc(t('period'))}</span><strong dir="ltr">${report.from} → ${report.to}</strong></div>${rows}${report.cogsCents?`<div class="info"><span>${esc(t('cogsInfo'))}</span><span>${money(report.cogsCents)}</span></div>`:''}`;

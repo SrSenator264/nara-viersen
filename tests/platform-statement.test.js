@@ -55,7 +55,7 @@ test('Loco Chicken über Lieferando/Uber/Sides zählt als LANCH, Loco an der Kas
 test('GuV: Lanch-Umsatz aus Gutschrift (anteilig), Flamo-Bestellungen nur an ungedeckten Tagen', () => {
   const EU = require('../euer-draft.js');
   const o = (id, day, c, extra) => ({ id, platform: 'LIEFERANDO', brand: 'Loco Chicken', placedAt: day + 'T12:00:00Z', totalCents: c, status: 'DELIVERED', ...extra });
-  const d = { settings: { accounting: {} }, payments: [], invoices: [], suppliers: [], payrollPayments: [], fixedAssets: [],
+  const d = { settings: { accounting: { vatRegime: 'KLEIN' } }, payments: [], invoices: [], suppliers: [], payrollPayments: [], fixedAssets: [],
     orders: [o('a', '2026-10-05', 1000), o('b', '2026-10-20', 2000), { id: 'l', platform: 'LIEFERANDO', placedAt: '2026-10-06T12:00:00Z', totalCents: 500, status: 'DELIVERED' }],
     platformStatements: [
       { platform: 'LANCH', documentKind: 'SETTLEMENT', periodFrom: '2026-10-01', periodTo: '2026-10-15', grossCents: 150000, commissionGrossCents: 100 },
@@ -78,7 +78,7 @@ test('Just Virtual (Just Smashed): Abrechnung KW46 → JUST_VIRTUAL, Umsatz aus 
     grossSales: 166.65, cashCollected: 55.32, onlinePaid: 111.33, commissionNet: 72.08, commissionVat: 13.70, commissionGross: 85.79, payout: 25.54 });
   assert.equal(st.platform, 'JUST_VIRTUAL'); assert.equal(st.grossCents, 16665); assert.equal(st.commissionGrossCents, 8579); assert.equal(st.cashCollectedCents, 5532); assert.equal(st.payoutCents, 2554);
   assert.equal(SL.platformOf({ platform: 'LIEFERANDO', brand: 'Just Smashed' }), 'JUST_VIRTUAL');
-  const d = { settings: { accounting: {} }, payments: [], invoices: [], suppliers: [], payrollPayments: [], fixedAssets: [],
+  const d = { settings: { accounting: { vatRegime: 'KLEIN' } }, payments: [], invoices: [], suppliers: [], payrollPayments: [], fixedAssets: [],
     orders: [{ id: 'l', platform: 'LIEFERANDO', placedAt: '2026-11-10T12:00:00Z', totalCents: 500, status: 'DELIVERED' }], platformStatements: [st] };
   const r = EU.buildPeriod(d, '2026-11-01', '2026-11-30');
   assert.equal(r.income.byPlatform.JUST_VIRTUAL, 16665); assert.equal(r.income.byPlatform.LIEFERANDO, 500);

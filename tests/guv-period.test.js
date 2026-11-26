@@ -96,7 +96,7 @@ test('Monatsbericht deckt alle Tage ab → keine PLATFORM_STATEMENT_GAPS', () =>
 });
 
 test('Manuelle Monatsausgaben: zählen im Monat (netto+USt), nicht im Folgemonat, im Jahr genau einmal', () => {
-  const d = base({ settings: { accounting: { manualExpenses: {
+  const d = base({ settings: { accounting: { vatRegime: 'KLEIN', manualExpenses: {
     '2026-10': { RENT: { netCents: 100000, vatCents: 0 }, GOODS: { netCents: 50000, vatCents: 3500 }, WAGES: { netCents: 20000, vatCents: 0 }, BAD: { netCents: 999 }, OTHER: { netCents: -5, vatCents: 0 } },
     'x': { RENT: { netCents: 1 } },
   } } } });
@@ -133,11 +133,40 @@ test('Plattform-Umsatz aus Abrechnungen je Tag: Woche über Monatsgrenze geteilt
 });
 
 test('Manueller Monatsumsatz je Plattform ersetzt Abrechnungen nur für seinen ganzen Monat', () => {
-  const d = base({ settings: { accounting: { manualIncome: { '2026-10': { LIEFERANDO: 2824197 } } } },
+  const d = base({ settings: { accounting: { vatRegime: 'KLEIN', manualIncome: { '2026-10': { LIEFERANDO: 2824197 } } } },
     platformStatements: [{ platform: 'LIEFERANDO', documentKind: 'COMMISSION_INVOICE', periodFrom: '2026-10-25', periodTo: '2026-11-07', grossCents: 14000 }] });
   const oct = EU.buildPeriod(d, '2026-10-01', '2026-10-31'), nov = EU.buildPeriod(d, '2026-11-01', '2026-11-30');
   assert.equal(oct.income.byPlatform.LIEFERANDO, 2824197); assert.equal(oct.income.incomeSource.LIEFERANDO.manualCents, 2824197);
   assert.equal(nov.income.byPlatform.LIEFERANDO, 7000); // nur die Nov-Tage der Abrechnung
   assert.equal(EU.buildPeriod(d, '2026-10-15', '2026-10-31').income.byPlatform.LIEFERANDO, 7000); // halber Monat → kein manueller Wert
   assert.equal(EU.build(d, 2026).income.byPlatform.LIEFERANDO, 2824197 + 7000);
+});
+
+test('Regelbesteuerung: Umsatz netto (7 %), Gebühren netto laut Abrechnung, manuelle USt als Vorsteuer, Zahllast', () => {
+  const d = base({ settings: { accounting: { vatRegime: 'REGEL', defaultSalesVatRate: 7, manualExpenses: { '2026-10': { RENT: { netCents: 100000, vatCents: 19000 }, WAGES: { netCents: 50000, vatCents: 0 } } } } },
+    platformStatements: [
+      { platform: 'LIEFERANDO', documentKind: 'COMMISSION_INVOICE', periodFrom: '2026-10-01', periodTo: '2026-10-31', grossCents: 107000, commissionNetCents: 10000, commissionVatCents: 1900, commissionGrossCents: 11900 },
+      { platform: 'UBER_EATS', documentKind: 'MONTHLY_SUMMARY', periodFrom: '2026-10-01', periodTo: '2026-10-31', grossCents: 21400, commissionGrossCents: 1190, otherFeesCents: 595 },
+      { platform: 'LANCH', documentKind: 'SETTLEMENT', periodFrom: '2026-10-01', periodTo: '2026-10-31', grossCents: 10700, commissionNetCents: 1000, commissionVatCents: 70, commissionGrossCents: 1070 },
+    ] });
+  const r = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
+  assert.equal(r.income.byPlatform.LIEFERANDO, 100000); assert.equal(r.income.byPlatform.UBER_EATS, 20000); assert.equal(r.income.byPlatform.LANCH, 10000);
+  assert.equal(r.income.totalCents, 130000);
+  assert.equal(r.expenses.PLATFORM_FEES, 10000 + 1000 + 500 + 1000); // Lanch 7 % laut Abrechnung, Uber ohne Netto → 19 %
+  assert.equal(r.expenses.RENT, 100000); assert.equal(r.expenses.WAGES, 50000);
+  assert.equal(r.vat.outputCents, 7000 + 1400 + 700); assert.equal(r.vat.inputCents, 1900 + 190 + 95 + 70 + 19000);
+  assert.equal(r.vat.payableCents, r.vat.outputCents - r.vat.inputCents);
+  assert.equal(r.profitCents, 130000 - 162500);
+  assert.ok(r.warnings.includes('VAT_SALES_RATE_ASSUMED')); assert.ok(!r.warnings.includes('MANUAL_VAT_ZERO'));
+});
+
+test('Kleinunternehmer: alles brutto, kein USt-Block', () => {
+  const d = base({ platformStatements: [{ platform: 'LIEFERANDO', documentKind: 'COMMISSION_INVOICE', periodFrom: '2026-10-01', periodTo: '2026-10-31', grossCents: 107000, commissionNetCents: 10000, commissionVatCents: 1900, commissionGrossCents: 11900 }] });
+  const r = EU.buildPeriod(d, '2026-10-01', '2026-10-31');
+  assert.equal(r.income.totalCents, 107000); assert.equal(r.expenses.PLATFORM_FEES, 11900); assert.equal(r.vat, null);
+});
+
+test('Regel: manuelle Ausgaben mit USt 0 → Warnung', () => {
+  const d = base({ settings: { accounting: { vatRegime: 'REGEL', manualExpenses: { '2026-10': { GOODS: { netCents: 5000, vatCents: 0 } } } } } });
+  assert.ok(EU.buildPeriod(d, '2026-10-01', '2026-10-31').warnings.includes('MANUAL_VAT_ZERO'));
 });

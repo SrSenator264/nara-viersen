@@ -1,7 +1,7 @@
 'use strict';
 // euer-draft.js — مسودة EÜR (Einnahmenüberschussrechnung) لسنة كاملة، ونفس الحساب لأي فترة (الربح والخسارة الشهري). قراءة بس، تحضير للمراجعة، مو إقرار.
 // Kleinunternehmer: الإيرادات = كل المبيعات الإجمالية (المحل + المنصات)، والضريبة المدفوعة على المصاريف ما بترجع ← المصاريف بالإجمالي (brutto).
-// Regelbesteuerung: نفس الشي حالياً، مع تنبيه إنو لازم فصل صافي/ضريبة (المرحلة B).
+// Regelbesteuerung: الإيرادات والمصاريف بالصافي، وقسم vat = ضريبة المبيعات − Vorsteuer = المستحق للـ Finanzamt.
 
 const SL = require('./sales-ledger.js');
 const str = v => (v == null ? '' : String(v));
@@ -59,12 +59,15 @@ function buildPeriod(data, from, to) {
   const sup = new Map((data.suppliers || []).map(s => [str(s.id), s.name]));
   const overrides = acc.supplierCategories || {};
   const exp = Object.fromEntries(CATS.map(c => [c, 0])), guessed = {}, platformFeeInvoices = [];
+  const inVat = {}; // Vorsteuer je Kategorie (nur Regelbesteuerung relevant)
   let invoiceCount = 0;
   for (const i of data.invoices || []) {
     if (['CANCELLED', 'DRAFT'].includes(str(i.status).toUpperCase())) continue;
     const d = str(i.invoiceDate || i.createdAt).slice(0, 10); if (!inP(d)) continue;
     const name = str(i.supplierName || sup.get(str(i.supplierId))), { cat, guessed: g } = categorize(name, i, overrides), c = invCents(i);
     exp[cat] += c; invoiceCount++;
+    const iv = Math.round(Number(i.vatAmountCents ?? (i.vatAmount != null ? Number(i.vatAmount) * 100 : 0)) || 0);
+    if (iv > 0 && iv < c) { inVat[cat] = (inVat[cat] || 0) + iv; }
     if (g) guessed[name || '?'] = cat;
     if (cat === 'PLATFORM_FEES') platformFeeInvoices.push(i.id);
   }
@@ -73,15 +76,20 @@ function buildPeriod(data, from, to) {
   const all = data.platformStatements || [], monthly = {};
   for (const x of all) if (x.documentKind === 'MONTHLY_SUMMARY') for (const n of daySet(x, from, to)) (monthly[x.platform] ??= new Set()).add(n);
   const stmts = [], covered = {};
-  let stmtFees = 0, stmtGoods = 0;
+  let stmtFees = 0, stmtGoods = 0, stmtFeesVat = 0;
+  const vatOf = (g, r) => Math.round(g - g / (1 + r)); // VAT share of a gross amount
   for (const x of all) {
     const sh = overlapShare(x, from, to, x.documentKind === 'MONTHLY_SUMMARY' ? null : monthly[x.platform]); if (!sh) continue;
     stmts.push(x);
     stmtFees += Math.round(((x.commissionGrossCents || 0) + (x.otherFeesCents || 0)) * sh);
+    // VAT on fees: as printed on the statement (Lanch charges 7% on part of it); otherwise assume 19%
+    const cg = Number(x.commissionGrossCents || 0), cn = x.commissionNetCents;
+    const cv = cn != null ? Number(x.commissionVatCents ?? (cg - cn)) : vatOf(cg, 0.19);
+    stmtFeesVat += Math.round((cv + vatOf(Number(x.otherFeesCents || 0), 0.19)) * sh);
     stmtGoods += Math.round((x.goodsCents || 0) * sh); // بضاعة من فواتير المنصة (Lanch: مكوّنات وتغليف) ← مصروف بضاعة مو عمولة
     if (['SETTLEMENT', 'COMMISSION_INVOICE', 'MONTHLY_SUMMARY'].includes(x.documentKind)) { const set = (covered[x.platform] ??= new Set()); for (const n of daySet(x, from, to)) set.add(n); }
   }
-  if (!platformFeeInvoices.length) { exp.PLATFORM_FEES += stmtFees; exp.GOODS += stmtGoods; }
+  if (!platformFeeInvoices.length) { exp.PLATFORM_FEES += stmtFees; exp.GOODS += stmtGoods; inVat.PLATFORM_FEES = (inVat.PLATFORM_FEES || 0) + stmtFeesVat; }
   // Platform revenue per day: manual monthly figure (settings.accounting.manualIncome['YYYY-MM'][PF], e.g. from Partner Hub) wins for
   // its whole month; otherwise the best statement with grossCents covering that day (MONTHLY_SUMMARY > SETTLEMENT > COMMISSION_INVOICE),
   // spread evenly over its days; days without any statement fall back to Flamo orders (Flamo misses orders when a bridge is down).
@@ -126,14 +134,30 @@ function buildPeriod(data, from, to) {
   // Manual monthly expenses (settings.accounting.manualExpenses['YYYY-MM'][CAT] = {netCents, vatCents, note}); only months fully inside the period
   const manualExp = monthlyManual(acc.manualExpenses, from, to);
   for (const [c, v] of Object.entries(manualExp.byCat)) exp[c] += v;
-  const incomeCents = ownCents + platformCentsAdj + manual;
+  for (const [c, v] of Object.entries(manualExp.vatByCat)) inVat[c] = (inVat[c] || 0) + v;
+  let incomeCents = ownCents + platformCentsAdj + manual;
+  // Regelbesteuerung: GuV in net amounts. Sales: gross / (1 + default rate, 7% food); expenses: minus their input VAT.
+  let vat = null, ownNet = ownCents, platNet = platformCentsAdj, manualNet = manual;
+  if (regime === 'REGEL') {
+    const rate = Number.isFinite(Number(acc.defaultSalesVatRate)) && acc.defaultSalesVatRate !== '' ? Number(acc.defaultSalesVatRate) / 100 : 0.07;
+    const net = g => Math.round(g / (1 + rate));
+    ownNet = net(ownCents); manualNet = net(manual); platNet = 0;
+    for (const pf of Object.keys(byPlatform)) { byPlatform[pf] = net(byPlatform[pf]); platNet += byPlatform[pf]; }
+    const grossIncome = incomeCents, grossExpense = Object.values(exp).reduce((a, b) => a + b, 0);
+    let input = 0;
+    for (const [c, v] of Object.entries(inVat)) { const t = Math.min(v, exp[c]); exp[c] -= t; input += t; }
+    incomeCents = ownNet + platNet + manualNet;
+    const output = grossIncome - incomeCents;
+    vat = { salesRate: Math.round(rate * 10000) / 100, outputCents: output, inputCents: input, payableCents: output - input, grossIncomeCents: grossIncome, grossExpenseCents: grossExpense };
+  }
   const expenseCents = Object.values(exp).reduce((a, b) => a + b, 0) + afa;
   // تغطية الكشوف: منصة إلها مبيعات بالفترة بس أيام ناقصة بالكشوف
   const days = daysBetween(from, to), coverage = {};
   for (const [pf, cents] of Object.entries(byPlatform)) if (cents > 0) coverage[pf] = { days: covered[pf] ? covered[pf].size : 0, of: days };
   const uncovered = platformFeeInvoices.length ? [] : Object.keys(coverage).filter(pf => coverage[pf].days < days);
   const warnings = [];
-  if (regime === 'REGEL') warnings.push('REGEL_NET_SPLIT_NEEDED');
+  if (vat) warnings.push('VAT_SALES_RATE_ASSUMED');
+  if (vat && manualExp.total && !manualExp.vatCents) warnings.push('MANUAL_VAT_ZERO');
   if (!invoiceCount && !manualExp.total) warnings.push('NO_PURCHASE_INVOICES');
   if (manualExp.total) warnings.push(invoiceCount ? 'MANUAL_EXPENSES_WITH_INVOICES' : 'MANUAL_EXPENSES');
   if (!stmts.length && !platformFeeInvoices.length && platformCents) warnings.push('NO_PLATFORM_FEES');
@@ -143,7 +167,7 @@ function buildPeriod(data, from, to) {
   if (!exp.RENT) warnings.push('NO_RENT');
   if (manualSkipped) warnings.push('MANUAL_REVENUE_YEARLY_ONLY');
   return {
-    from, to, regime, income: { ownCents, platformCents: platformCentsAdj, byPlatform, incomeSource, manualCents: manual, totalCents: incomeCents },
+    from, to, regime, income: { ownCents: ownNet, platformCents: platNet, byPlatform, incomeSource, manualCents: manualNet, totalCents: incomeCents }, vat,
     expenses: { ...exp, AFA: afa, totalCents: expenseCents }, manualExpenses: manualExp, bank: require('./bank-category.js').totals(data, from, to), profitCents: incomeCents - expenseCents,
     counts: { invoices: invoiceCount, platformStatements: stmts.length, ownSales: l.own.totals.count, platformOrders: l.platform.totals.count },
     statementCoverage: coverage, uncoveredPlatforms: uncovered, guessedCategories: guessed, warnings, reviewRequired: true,
@@ -164,7 +188,7 @@ function monthlyIncome(store, from, to) {
   return { byPf, days };
 }
 function monthlyManual(store, from, to) {
-  const byCat = {}, months = []; let total = 0, vat = 0;
+  const byCat = {}, vatByCat = {}, months = []; let total = 0, vat = 0;
   for (const [m, cats] of Object.entries(store || {})) {
     if (!/^\d{4}-\d{2}$/.test(m) || !cats || typeof cats !== 'object') continue;
     const last = new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7), 0)).getUTCDate();
@@ -174,10 +198,11 @@ function monthlyManual(store, from, to) {
       if (!CATS.includes(c) || !v) continue;
       const n = Math.max(0, Math.round(Number(v.netCents) || 0)), t = Math.max(0, Math.round(Number(v.vatCents) || 0)); if (!n && !t) continue;
       byCat[c] = (byCat[c] || 0) + n + t; total += n + t; vat += t; used = true;
+      if (t) vatByCat[c] = (vatByCat[c] || 0) + t;
     }
     if (used) months.push(m);
   }
-  return { byCat, total, vatCents: vat, months };
+  return { byCat, vatByCat, total, vatCents: vat, months };
 }
 
 // EÜR لسنة كاملة = نفس الحساب على 01.01–31.12
