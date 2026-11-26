@@ -2,6 +2,8 @@
 // telegram-accounting.js — المحاسبة من التلغرام:
 //   📸 صورة أو PDF فاتورة (من شات التنبيهات أو شات المالك) ← بتنحفظ كمستند بانتظار المراجعة بصفحة المشتريات.
 //   💬 سؤال نصي من شات المالك بس (TELEGRAM_OWNER_CHAT_ID) ← المحاسب الذكي بيجاوب. بشات الموظفين النص بيتجاهل.
+//   📎 طلب ملفات (المالك + الشريك) ← telegram-documents.js
+const TD = require('./telegram-documents.js');
 const MAX_BYTES = 20 * 1024 * 1024;
 const MIME = { 'application/pdf': '.pdf', 'image/jpeg': '.jpg', 'image/png': '.png' };
 
@@ -13,7 +15,8 @@ function pickFile(msg) {
   return null;
 }
 
-async function handleMessage(msg, { download, isOwner, who }, { saveDocument, askAgent, history }) {
+async function handleMessage(msg, { download, isOwner, who, role: roleIn, chatId }, { saveDocument, askAgent, history, documentRequest }) {
+  const role = roleIn || (isOwner ? 'OWNER' : 'STAFF'), uploadedBy = { chatId: String(chatId || (msg.chat && msg.chat.id) || ''), name: who || '', role };
   const f = pickFile(msg);
   if (f && f.unsupported) return '⚠️ بس PDF أو صورة (JPG/PNG) للفواتير.';
   if (f) {
@@ -21,11 +24,15 @@ async function handleMessage(msg, { download, isOwner, who }, { saveDocument, as
     const got = await download(f.fileId);
     if (!got || !got.buffer || !got.buffer.length) return '⚠️ ما قدرت نزّل الملف، جرّب كمان مرة.';
     if (got.buffer.length > MAX_BYTES) return '⚠️ الملف أكبر من 20 MB.';
-    const doc = saveDocument({ buffer: got.buffer, filename: f.name, mime: f.mime, ext: MIME[f.mime], caption: String(msg.caption || '').slice(0, 300), who });
+    const doc = saveDocument({ buffer: got.buffer, filename: f.name, mime: f.mime, ext: MIME[f.mime], caption: String(msg.caption || '').slice(0, 300), who, uploadedBy });
     return `🧾 وصلت الفاتورة (${doc.id.slice(-6)}). افتح «المشتريات والفواتير» بـ Flamo لتقراها وتراجعها.`;
   }
   const text = String(msg.text || '').trim();
-  if (!text || !isOwner) return null;
+  if (!text) return null;
+  // file request ("ابعتلي فواتير Lieferando شهر 11"): owner + partner; permissions are checked inside
+  if ((role === 'OWNER' || role === 'PARTNER') && documentRequest && TD.isRequest(text)) return documentRequest(text, { role, who, chatId: uploadedBy.chatId });
+  if (role === 'PARTNER') return 'فيك ترفع صورة أو PDF فاتورة، أو تطلب فواتير موردين (مثلاً: «ابعتلي فاتورة MELEDI شهر 11»).';
+  if (role !== 'OWNER') return null;
   const r = await askAgent(text, history ? history(String(msg.chat.id)) : []);
   return r;
 }

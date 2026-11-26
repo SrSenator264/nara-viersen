@@ -42,7 +42,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `web-prototype/datenschutz.html` — Datenschutzerklärung – Flamo Viersen
 - `web-prototype/impressum.html` — Impressum – Flamo Viersen
 
-## Code (Server & Frontend) (169)
+## Code (Server & Frontend) (170)
 
 - `accounting-agent.js` — المحاسب الذكي: وكيل مخصص للحسابات بس. · benutzt von: manager-agent.js, server.js
 - `accounting-anomalies.js` — "شي مو طبيعي" بالحسابات. قراءة بس، كل نتيجة = تنبيه مع سبب، والقرار عند عمر. · benutzt von: accounting-agent.js, accounting-weekly.js, server.js
@@ -206,6 +206,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `system-update.js` — "حدّث النظام" (للمالك): النسخة الحالية، هل في جديد على GitHub، وإطلاق مهمة Flamo-Update. · benutzt von: server.js
 - `telegram-accounting.js` — المحاسبة من التلغرام: · benutzt von: server.js
 - `telegram-actions.js` — بيستقبل ضغطات الأزرار من رسائل التلغرام (long polling: السيرفر هو اللي بيسأل تلغرام، ما بيحتاج رابط عام). · benutzt von: server.js
+- `telegram-documents.js` — طلب ملفات الفواتير والكشوف من التلغرام ("ابعتلي فواتير Lieferando شهر 11"، "فاتورة MELEDI"). · benutzt von: server.js, telegram-accounting.js
 - `tse-service.js` — الربط بين الكاشير والـ TSE (KassenSichV). واجهة وحدة، والـ "سائق" قابل للتبديل: · benutzt von: server.js
 - `tse-sim.js` — محاكي TSE (نفس واجهة tse-swissbit.js) لحتى نبني ونختبر الربط قبل ما توصل مكتبة Swissbit. · benutzt von: tse-service.js
 - `tse-swissbit.js` — الـ Swissbit USB-TSE الحقيقي (نفس واجهة tse-sim.js). مبني على WormAPI.dll من Swissbit SDK 6.0.1 عبر koffi. · benutzt von: tse-service.js
@@ -328,7 +329,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `README.md` — NARA – Restaurant Operations Platform
 - `web-prototype/README.md` — Website-Prototyp (Kunden-Seite)
 
-## Tests (116)
+## Tests (117)
 
 - `tests/accounting-agent.test.js`
 - `tests/accounting-books.test.js`
@@ -438,6 +439,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/system-update.test.js`
 - `tests/telegram-accounting.test.js`
 - `tests/telegram-actions.test.js`
+- `tests/telegram-documents.test.js`
 - `tests/tse-swissbit.test.js`
 - `tests/tse.test.js`
 - `tests/tunnel-config.test.js`

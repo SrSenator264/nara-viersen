@@ -104,3 +104,11 @@
 
 كل واجهة ورسالة وكيل يجب أن تدعم `ar`, `de`, `en` من المصدر نفسه، مع مصطلحات محاسبية محلية لا ترجمة حرفية. يجب حفظ لغة المستخدم واللغة الأصلية للمستند، مع عرض المصطلح الألماني عند الحاجة للمستشار.
 
+
+## سجل الشغل الموازي (Claude Code)
+
+- 2026-11-26 — ميزة الفواتير والكشوف عبر Telegram (3 خطوات):
+  - الخطوة 1 (خلصت 2026-11-26، `telegram-documents.js` + `tests/telegram-documents.test.js`): إرسال ملفات الفواتير/الكشوف من الأرشيف عبر Telegram `sendDocument`، مع صلاحيات: المالك (`TELEGRAM_OWNER_CHAT_ID`) كل شي، الشريك (`TELEGRAM_PARTNER_CHAT_ID`) رفع فواتير + طلب فواتير موردين بس، وكل طلب/رفع/رفض بالـ audit.
+  - الخطوة 2 (لسا): `POST /api/accounting/platform-statements/ingest` (service) + حفظ بـ `data/documents/platforms/` + مقارنة مع طلبات Flamo + ملخص Telegram بزر موافقة.
+  - الخطوة 3 (لسا): جامع كشوف مستقل بـ Playwright (منفصل عن جسور الطلبات)، بيوقف ويبعت تنبيه عند انتهاء الجلسة أو 2FA.
+  - الخطوة 1 — ملاحظات: الطلب بيتفهم بقواعد كلمات (مو AI)؛ حد 10 ملفات بالرد؛ الشريك بينضاف بـ `TELEGRAM_PARTNER_CHAT_ID` بملف `.env` (المالك بيعبّيه، رقم الشات من `/id`)؛ audit: `DOCUMENTS_SENT_TELEGRAM`, `TELEGRAM_REQUEST_DENIED`, و`DOCUMENT_FROM_TELEGRAM` مع `uploadedBy`. بيشتغل بعد restart للسيرفر.
