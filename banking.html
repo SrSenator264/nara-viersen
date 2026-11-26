@@ -47,6 +47,10 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
 .prev input{width:20px;height:20px}
 .okc{color:var(--ok);font-weight:800}.badc{color:var(--bad);font-weight:800}
 #status{min-height:1.4em;margin-top:8px}
+.cat{margin:8px 0 0 40px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cat select{min-height:38px;border-radius:10px;border:1px solid var(--line);padding:0 8px;background:#fff;font:inherit}
+.cat select.sug{border-color:var(--brand);border-style:dashed}
+.cat select.saved{border-color:var(--ok)}
 </style>
 <link rel="stylesheet" href="flamo-font.css?v=20261109a"></head>
 <body>
@@ -60,7 +64,8 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
   <section class="card" id="c-prev" hidden></section>
   <section class="card">
     <h2>🔗 <span data-t="txh"></span></h2>
-    <div class="chips"><button class="chip on" data-f="open" type="button" data-t="fOpen"></button><button class="chip" data-f="all" type="button" data-t="fAll"></button></div>
+    <div class="chips"><button class="chip on" data-f="open" type="button" data-t="fOpen"></button><button class="chip" data-f="uncat" type="button" data-t="fUncat"></button><button class="chip" data-f="all" type="button" data-t="fAll"></button></div>
+    <button class="btn small" id="catAll" type="button" hidden style="margin-bottom:8px"></button>
     <div id="transactions" class="mute" data-t="loading"></div>
   </section>
 </main>
@@ -102,6 +107,14 @@ FT.init({
   ok:{de:'Abgleich gespeichert ✅',ar:'انحفظت المطابقة ✅',en:'Match saved ✅'},
   noOk:{de:'Abgleich konnte nicht gespeichert werden',ar:'ما انحفظت المطابقة',en:'Could not save the match'},
   pick:{de:'Bitte zuerst eine Datei wählen',ar:'اختار ملف أول',en:'Choose a file first'},
+  fUncat:{de:'Ohne Kategorie',ar:'بدون فئة',en:'No category'},
+  catNone:{de:'— Kategorie —',ar:'— الفئة —',en:'— Category —'},
+  catSug:{de:'Vorschlag',ar:'اقتراح',en:'suggested'},
+  catAll:{de:'Alle Vorschläge übernehmen ({n})',ar:'اعتمد كل الاقتراحات ({n})',en:'Accept all suggestions ({n})'},
+  catOk:{de:'Kategorie gespeichert ✅',ar:'انحفظت الفئة ✅',en:'Category saved ✅'},
+  catFail:{de:'Kategorie nicht gespeichert',ar:'ما انحفظت الفئة',en:'Category not saved'},
+  c_GOODS:{de:'Waren',ar:'بضاعة',en:'Goods'},c_RENT:{de:'Miete',ar:'إيجار',en:'Rent'},c_ENERGY:{de:'Energie',ar:'كهربا وغاز ومي',en:'Energy'},c_TELECOM:{de:'Telefon / Internet',ar:'تلفون وإنترنت',en:'Phone / internet'},c_INSURANCE:{de:'Versicherung / Beiträge',ar:'تأمين واشتراكات',en:'Insurance / fees'},c_PLATFORM_FEES:{de:'Plattform-Gebühren',ar:'عمولات المنصات',en:'Platform fees'},c_WAGES:{de:'Löhne',ar:'رواتب',en:'Wages'},c_VEHICLE:{de:'Fahrzeug',ar:'سيارة',en:'Vehicle'},c_MARKETING:{de:'Werbung',ar:'تسويق',en:'Marketing'},c_EQUIPMENT_SMALL:{de:'Kleingeräte',ar:'معدات صغيرة',en:'Small equipment'},c_BANK_FEES:{de:'Bank / Zahlung',ar:'بنك ودفع',en:'Bank / payment'},c_OTHER:{de:'Sonstiges',ar:'متفرقات',en:'Other'},
+  c_PLATFORM_PAYOUT:{de:'Plattform-Auszahlung',ar:'دفعة منصة',en:'Platform payout'},c_PRIVATE:{de:'Privat',ar:'خاص / سحب شخصي',en:'Private'},c_TRANSFER:{de:'Geldtransit',ar:'تحويل داخلي',en:'Internal transfer'},
 },{onChange(){draw();drawPrev()}});
 
 const $=id=>document.getElementById(id);
@@ -110,31 +123,41 @@ const tk=(k,v)=>FT.t(k,v); // dynamic keys
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const eur=c=>new Intl.NumberFormat(FT.locale(),{style:'currency',currency:'EUR'}).format((Number(c)||0)/100);
 const fmtD=s=>{try{return new Intl.DateTimeFormat(FT.locale(),{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(String(s).slice(0,10)+'T00:00:00Z'))}catch(e){return s}};
-let TX=[],SUG=new Map(),filter='open',PREV=null;
+let TX=[],SUG=new Map(),filter='open',PREV=null,CATL=[];
 const say=k=>{$('status').textContent=k};
 
 async function load(){
   try{
     const [a,b]=await Promise.all([fetch('/api/accounting/bank-transactions?ts='+Date.now()),fetch('/api/accounting/bank-suggestions?ts='+Date.now())]);
-    TX=(a.ok?(await a.json()).transactions:[])||[];
+    const ja=a.ok?await a.json():{};TX=ja.transactions||[];CATL=ja.categories||[];
     SUG=new Map(((b.ok?(await b.json()).suggestions:[])||[]).map(s=>[s.transactionId,s.candidates]));
   }catch(e){TX=[];SUG=new Map()}
   draw();
 }
 function draw(){
-  const list=TX.filter(x=>filter==='all'||x.status==='UNMATCHED').sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const list=TX.filter(x=>filter==='all'||(filter==='uncat'?!x.category:x.status==='UNMATCHED')).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on',c.dataset.f===filter));
   $('transactions').innerHTML=list.map(x=>{
     const inn=x.amountCents>0,cands=SUG.get(x.id)||[];
     const sug=x.status==='UNMATCHED'?cands.map((c,i)=>`<div class="sug"><span class="l">💡 <b>${esc(t('sugg'))}:</b> ${esc(c.label)} · ${esc(eur(c.amountCents))} <span class="badge ${c.confidence}">${esc(tk(c.confidence))}</span></span><button class="btn small" type="button" data-ok="${esc(x.id)}" data-i="${i}">✅ ${esc(t('yes'))}</button></div>`).join(''):'';
     const st=x.status==='MATCHED'?`<small>🔗 ${esc(t('matchedTo',{r:x.matchedEntityId||''}))}</small>`:'';
-    return `<div class="tx"><div class="top"><span class="e">${x.status==='MATCHED'?'✅':inn?'⬇️':'⬆️'}</span><span class="d"><b>${esc(x.description||t('noDesc'))}</b><small>${esc(fmtD(x.date))}${x.reference?' · '+esc(x.reference):''}</small>${st}</span><span class="amt ${inn?'in':'out'}">${esc(eur(x.amountCents))}</span></div>${sug}${x.status==='UNMATCHED'?`<button class="btn ghost small" type="button" data-man="${esc(x.id)}" style="margin-top:8px">✍️ ${esc(t('manual'))}</button>`:''}</div>`;
+    const cv=x.category||x.suggestedCategory||'';
+    const cat=`<div class="cat"><select data-cat="${esc(x.id)}" class="${x.category?'saved':cv?'sug':''}"><option value="">${esc(t('catNone'))}</option>${CATL.map(c=>`<option value="${c}"${c===cv?' selected':''}>${esc(tk(`c_${c}`))}</option>`).join('')}</select>${!x.category&&cv?` <small class="mute">💡 ${esc(t('catSug'))}</small>`:''}</div>`;
+    return `<div class="tx"><div class="top"><span class="e">${x.status==='MATCHED'?'✅':inn?'⬇️':'⬆️'}</span><span class="d"><b>${esc(x.description||t('noDesc'))}</b><small>${esc(fmtD(x.date))}${x.reference?' · '+esc(x.reference):''}</small>${st}</span><span class="amt ${inn?'in':'out'}">${esc(eur(x.amountCents))}</span></div>${cat}${sug}${x.status==='UNMATCHED'?`<button class="btn ghost small" type="button" data-man="${esc(x.id)}" style="margin-top:8px">✍️ ${esc(t('manual'))}</button>`:''}</div>`;
   }).join('')||esc(t(filter==='open'&&TX.length?'noneOpen':'none'));
   document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{const c=(SUG.get(b.dataset.ok)||[])[Number(b.dataset.i)];if(c)match(b.dataset.ok,c.entityType,c.entityId)});
+  document.querySelectorAll('[data-cat]').forEach(s=>s.onchange=()=>saveCats([{transactionId:s.dataset.cat,category:s.value||null}]));
+  const pend=TX.filter(x=>!x.category&&x.suggestedCategory);$('catAll').hidden=!pend.length;$('catAll').textContent='✅ '+t('catAll',{n:pend.length});
+  $('catAll').onclick=()=>saveCats(pend.map(x=>({transactionId:x.id,category:x.suggestedCategory})));
   document.querySelectorAll('[data-man]').forEach(b=>b.onclick=()=>{const ref=prompt(t('ask'));if(ref)match(b.dataset.man,'MANUAL',ref)});
 }
 async function match(id,type,ref){
   try{const r=await fetch('/api/accounting/bank-transactions/match',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transactionId:id,status:'MATCHED',entityType:type,entityId:ref})});say(t(r.ok?'ok':'noOk'))}catch(e){say(t('noOk'))}
+  load();
+}
+async function saveCats(items){
+  if(!items.length)return;
+  try{const r=await fetch('/api/accounting/bank-transactions/category',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items})});say(t(r.ok?'catOk':'catFail'))}catch(e){say(t('catFail'))}
   load();
 }
 function drawPrev(){

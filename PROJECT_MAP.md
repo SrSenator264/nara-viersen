@@ -1,8 +1,8 @@
 # PROJECT_MAP — Flamo (automatisch erzeugt)
 
-Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand bearbeiten.
+Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand bearbeiten.
 
-## Seiten (HTML) (35)
+## Seiten (HTML) (37)
 
 - `accounting-agent.html` — Flamo · KI-Buchhalter
 - `accounting-home.html` — Flamo · Buchhaltung
@@ -38,9 +38,11 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `team.html` — Flamo · Team
 - `update.html` — Flamo · Update
 - `web-prototype/c-classic.html` — Halle in Farbe
-- `web-prototype/c.html` — Halle in Farbe
+- `web-prototype/c.html` — Flamo Viersen – Burger, Tacos &amp; mehr online bestellen
+- `web-prototype/datenschutz.html` — Datenschutzerklärung – Flamo Viersen
+- `web-prototype/impressum.html` — Impressum – Flamo Viersen
 
-## Code (Server & Frontend) (167)
+## Code (Server & Frontend) (169)
 
 - `accounting-agent.js` — المحاسب الذكي: وكيل مخصص للحسابات بس. · benutzt von: manager-agent.js, server.js
 - `accounting-anomalies.js` — "شي مو طبيعي" بالحسابات. قراءة بس، كل نتيجة = تنبيه مع سبب، والقرار عند عمر. · benutzt von: accounting-agent.js, accounting-weekly.js, server.js
@@ -63,6 +65,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `audit-options.mjs` — تدقيق الإضافات (قراءة فقط). ما بيعدّل ولا بيحذف أي شي.
 - `auth.js` — Rechte: PIN, Sitzungen, welche Rolle welche Seite/API darf, erlaubte Dateien · benutzt von: server-auth.js, server.js
 - `bank-ai.js` — Claude بيقرا كشف حساب البنك (PDF أو صورة) وبيطلع الحركات. معاينة بس، الاستيراد بعد موافقة عمر. · benutzt von: server.js
+- `bank-category.js` — Kategorie je Bankbuchung (nur Vorschlag; gespeichert wird erst nach Freigabe durch den Inhaber). · benutzt von: euer-draft.js, server.js
 - `bank-match.js` — اقتراحات مطابقة البنك (قراءة بس). عمر بيضغط ✅ والمطابقة بتنحفظ عن طريق /api/accounting/bank-transactions/match. · benutzt von: accounting-agent.js, server.js
 - `bank-pay.js` — Zahlung per Banküberweisung (Pay-first). Reine Logik, ohne I/O, daher testbar. · benutzt von: server.js
 - `body-reader.js` — JSON-Body sicher lesen (Server-Modul, auth.js SERVER_FILES). · benutzt von: server-auth.js, server.js
@@ -80,7 +83,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `data-guard.js` — Datei-Schutz für das Geschäfts-PC-Setup (Strom weg, Platte voll, halb geschriebene Datei): · benutzt von: server.js
 - `day-closing-print.js` — مؤقتاً: الورقة بتنطبع باسم المحل القانوني الحالي (IU GENE) لحد ما نغيّر الفورمة رسمياً. لتغييره: بدّل PRINT_NAME بس. · benutzt von: kasse-settlement.html, print-service.js
 - `day-closing-routes.js` — مسارات /api/day-closing/* (التقفيلة). السيرفر بيمرّر ctx؛ الصلاحيات بـ auth.js (GET = ACCT، POST = OWNER/MANAGER). · benutzt von: server.js, tests/day-closing-routes.test.js
-- `day-closing.js` — تقفيلة اليوم (Tagesabschluss). حساب نقي من بيانات الأدمن، بدون I/O (السيرفر بيحفظ). · benutzt von: daily-report.js, day-closing-routes.js, sales-invoice.js, server.js, tse-service.js
+- `day-closing.js` — تقفيلة اليوم (Tagesabschluss). حساب نقي من بيانات الأدمن، بدون I/O (السيرفر بيحفظ). · benutzt von: daily-report.js, day-closing-routes.js, sales-invoice.js, sales-posting.js, server.js
 - `deepseek-benchmark.js`
 - `delivery-quote.js` — اقتراح وقت التسليم لطلب جديد من المنصات (قبل ما نقبله ونطبعه). · benutzt von: server.js
 - `delivery-rules.js` — قواعد التوصيل: مناطق (PLZ)، رسوم الزبون، الحد الأدنى للطلب، وأجر السائق. · benutzt von: server.js
@@ -90,7 +93,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `dispatch-learning.js` — البرنامج بيتعلّم من التوصيلات الحقيقية. · benutzt von: dispatch-service.js, platform-trips.js
 - `dispatch-service.js` — بيجهّز معطيات عقل التوزيع من بيانات NARA: · benutzt von: customer-db.js, delivery-quote.js, platform-trips.js, server.js
 - `driver-tracker.js` · benutzt von: server.js
-- `euer-draft.js` — مسودة EÜR (Einnahmenüberschussrechnung) لسنة كاملة. قراءة بس، تحضير للمراجعة، مو إقرار. · benutzt von: accounting-agent.js, server.js
+- `euer-draft.js` — مسودة EÜR (Einnahmenüberschussrechnung) لسنة كاملة، ونفس الحساب لأي فترة (الربح والخسارة الشهري). قراءة بس، تحضير للمراجعة، مو إقرار. · benutzt von: accounting-agent.js, bank-category.js, server.js
 - `extra-category.js` — كاتيغوري "Extra / اكسترا" بالكاشير + خيار "دبل مكونات" للساندويشات والهوت دوغ. · benutzt von: server.js
 - `fcm.js` — Firebase Cloud Messaging (HTTP v1) fuer die Fahrer-APK, ohne Fremdbibliothek (nur node:crypto + fetch). · benutzt von: server.js
 - `flamo-ai.js` — Flamo, der KI-Verkäufer der Kundenseite. · benutzt von: server.js
@@ -173,12 +176,13 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `order-correction.js` — Storno nach Zahlung + Korrekturbestellung ("✏️ تصحيح"). Reine Logik ohne I/O (wie payment-logic.js). · benutzt von: server.js
 - `payment-logic.js` — الدفع بالكاشير: خصم للزبون (٪ أو €)، خصم موظف (بكود)، تقسيم الفاتورة، كاش + كرت. · benutzt von: server.js
 - `platform-accept.js` — استلام طلبات المنصات من تابلت واحد. · benutzt von: server.js
-- `platform-statement.js` — كشوف المنصات (Lieferando / Uber Eats / Sides-Loco): Claude بيقرا الكشف أو فاتورة العمولة، · benutzt von: accounting-agent.js, server.js
+- `platform-statement.js` — كشوف المنصات (Lieferando / Uber Eats / Sides-Loco / Lanch): Claude بيقرا الكشف أو فاتورة العمولة، · benutzt von: accounting-agent.js, server.js
 - `platform-status.js` — حالة جسور المنصات (Lieferando، لاحقاً Uber Eats…) بالذاكرة. · benutzt von: server.js
 - `platform-trips.js` — NARA بيتعلّم الخريطة من سواقينّا وهني عم يشتغلوا بتطبيق Lieferando. · benutzt von: server.js
 - `playwright.config.mjs` — اختبارات E2E لـ Flamo.  التشغيل: npm run test:e2e
 - `prep-learning.js` — البرنامج بيتعلّم قديش كل صنف بياخد بالمطبخ، وبيتوقع إيمتى الطلب بيخلص. · benutzt von: delivery-quote.js, dispatch-service.js, server.js
 - `print-service.js` — الطباعة من السيرفر مباشرة، بلا نافذة طباعة. · benutzt von: server.js, tests/day-closing-routes.test.js
+- `programming-log.js` — Programmierprotokoll (سجل تغييرات برمجة الكاسة) für das Finanzamt / Kassen-Nachschau. · benutzt von: server.js
 - `project-agent-tools.js` — Restricted tool gateway for the NARA project assistant. · benutzt von: server.js
 - `project-change-worker.js` — NARA change worker: approval gate only. It never executes arbitrary code.
 - `project-map.js` — خريطة المشروع: كل ملف شو بيعمل (من أول تعليق فيه)، شو API بيعرّف، ومين بيستعملو. · benutzt von: manager-agent.js
@@ -215,7 +219,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `web-prototype/builder/builder.js` — ───────────────────────── KERN (rein, testbar) ─────────────────────────
 - `web-prototype/builder/layers.json`
 
-## Skripte & Startdateien (57)
+## Skripte & Startdateien (59)
 
 - `Create-Desktop-Shortcut.cmd`
 - `Flamo-Autostart-Einrichten.cmd` — Startet NARA-Autostart-Komplett.ps1 mit Administrator-Rechten (Windows fragt einmal nach: "Ja" klicken).
@@ -238,6 +242,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `NARA-PIN-Reset.cmd` — PIN vom Inhaber neu setzen (nur auf diesem PC). Stoppt NARA, setzt den PIN, startet NARA wieder.
 - `NARA-Sides-Login.cmd` — Sides Auto-Login: Zugangsdaten einmal verschluesselt speichern (nur auf diesem PC).
 - `NARA-Sides.cmd` — NARA Sides-Bridge (Loco Chicken): liest die Sides-Bestellungen (nur lesen) und schickt sie an die Kasse.
+- `NARA-Simulate.cmd` — Realistische Test-Bestellungen (Kasse, Vor Ort, Website, Lieferando, Uber, Loco). "NARA-Simulate.cmd 60" = 60 Bestellungen. "NARA-Simulate.cmd clear" storniert sie wieder.
 - `NARA-Start.cmd`
 - `NARA-Stop.cmd`
 - `NARA-Tablet-Freigabe.cmd` — Einmalig: NARA fuer Tablets/Handys im Laden-WLAN freigeben (HOST=0.0.0.0) und Verbindungsseite mit QR-Codes oeffnen.
@@ -263,6 +268,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `scripts/reset-owner-pin.cjs` — reset-owner-pin.cjs — PIN vom Inhaber/Manager neu setzen, wenn er vergessen wurde.
 - `scripts/restore-owner.cjs` — restore-owner.cjs — حساب مدير بيرجع "صاحب المحل" (يشتغل محلياً على جهاز المحل والسيرفر مطفي).
 - `scripts/run-nightly.cmd` — Startet die naechtlichen Tests (wird vom Aufgabenplaner aufgerufen).
+- `scripts/simulate-orders.mjs` — محاكي طلبات واقعية لتجربة المطبخ / Live Orders / التوزيع / الشاشات.
 - `scripts/tse-check.mjs` — scripts/tse-check.mjs — فحص للقراءة فقط للـ Swissbit TSE (بدون setup وبدون معاملات وبدون أي تغيير على الـ USB).
 - `scripts/tse-setup.mjs` — scripts/tse-setup.mjs — التهيئة الأولى للـ Swissbit TSE (مرة وحدة بالعمر!).
 - `scripts/tse-test-tx.mjs` — Real-USB test: ONE test transaction (start + finish). Run: node scripts/tse-test-tx.mjs D:
@@ -275,13 +281,14 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `start-nara.cmd`
 - `Tunnel-Config-Aktualisieren.ps1` — Tunnel-Config-Aktualisieren.ps1
 
-## Dokumente & Pläne (42)
+## Dokumente & Pläne (44)
 
 - `ACCOUNTING_AGENT_SYSTEM.md` — NARA Accounting Agent System
 - `AI_AGENT_SYSTEM.md` — NARA · AI Orchestrator Behavior
 - `AI-MANAGER-PLAN.md` — خطة المدير الذكي + Flamo البائع الذكي (مؤجّلة)
 - `android-app/README.md` — Flamo Fahrer – Android-APK
 - `BETRIEB-FERNUEBERWACHUNG.md` — مراقبة المطعم عن بعد (Telegram + نسخ احتياطي)
+- `CLAUDE.md` — CLAUDE.md — قواعد الشغل بمشروع Flamo
 - `CUSTOMER-SMART-SELLER-PROMPT.md` — NARA Customer Smart Seller
 - `DELIVERY-OPERATIONS-PLAN.md` — NARA Delivery Operations Plan
 - `DELIVERY-WORKFORCE-MASTER-IMPLEMENTATION-PROMPT.md` — NARA — برومبت التنفيذ الشامل: التشغيل والتوصيل والموظفون
@@ -313,6 +320,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `plans/PLAN_UI_SKILLS.md` — PLAN: UI skills for Flamo pages (2026-10-27)
 - `plans/PLAN_VIRTUAL_OFFICE.md` — PLAN: Flamo Virtual Office (مكتب Flamo الافتراضي ثلاثي الأبعاد)
 - `plans/PLAN_WATCHDOG.md` — خطة: Watchdog للطلبات + تقرير يومي (Flamo)
+- `plans/PLAN_WHATSAPP_KAPSO.md` — خطة: واتساب عبر Kapso (فكرة، لسا ما تنفّذت)
 - `plans/PROMPT_NIGHT_2H.md` — برومبت شغل الليل (ساعتين، بدون تدخل)
 - `PRIORITY-DELIVERY-WORKFORCE-ROUTING.md` — أولوية عليا: توزيع الطلبات ومسار الموظفين التشغيلي
 - `PROJECT_CONTEXT.md` — NARA · Project Context
@@ -320,7 +328,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `README.md` — NARA – Restaurant Operations Platform
 - `web-prototype/README.md` — Website-Prototyp (Kunden-Seite)
 
-## Tests (109)
+## Tests (116)
 
 - `tests/accounting-agent.test.js`
 - `tests/accounting-books.test.js`
@@ -335,6 +343,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/auth-restore-owner.test.js`
 - `tests/auth-server.test.js`
 - `tests/auth.test.js`
+- `tests/bank-category.test.js`
 - `tests/bank-pay.test.js`
 - `tests/body-reader.test.js`
 - `tests/boot-and-shared.test.js`
@@ -374,6 +383,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/fcm.test.js`
 - `tests/fixtures/admin-menu-sample.json`
 - `tests/flamo-ai.test.js`
+- `tests/guv-period.test.js`
 - `tests/i18n-pages.test.js`
 - `tests/kasse-category-order.test.js`
 - `tests/kasse-extra-attach.test.js`
@@ -383,6 +393,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/kasse-window.test.js`
 - `tests/kitchen.test.js`
 - `tests/learning.test.js`
+- `tests/legal-pages.test.js`
 - `tests/live-orders-kasse-actions.test.js`
 - `tests/live-orders-trend.test.js`
 - `tests/manager-agent.test.js`
@@ -399,10 +410,13 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/payment.test.js`
 - `tests/platform-accept.test.js`
 - `tests/platform-print-switch.test.js`
+- `tests/platform-statement.test.js`
 - `tests/platform-status.test.js`
 - `tests/platform-trips.test.js`
 - `tests/print-service.test.js`
 - `tests/printer-panel-accept-switch.test.js`
+- `tests/programming-log-server.test.js`
+- `tests/programming-log.test.js`
 - `tests/push.test.js`
 - `tests/qonto-sync.test.js`
 - `tests/qr-print-hold.test.js`
@@ -420,6 +434,7 @@ Stand: 2026-11-21. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/sales-proof-photo.test.js`
 - `tests/settlement-ledger.test.js`
 - `tests/sides.test.js`
+- `tests/simulate-orders.test.js`
 - `tests/system-update.test.js`
 - `tests/telegram-accounting.test.js`
 - `tests/telegram-actions.test.js`

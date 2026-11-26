@@ -144,7 +144,7 @@ function buildPeriod(data, from, to) {
   if (manualSkipped) warnings.push('MANUAL_REVENUE_YEARLY_ONLY');
   return {
     from, to, regime, income: { ownCents, platformCents: platformCentsAdj, byPlatform, incomeSource, manualCents: manual, totalCents: incomeCents },
-    expenses: { ...exp, AFA: afa, totalCents: expenseCents }, manualExpenses: manualExp, profitCents: incomeCents - expenseCents,
+    expenses: { ...exp, AFA: afa, totalCents: expenseCents }, manualExpenses: manualExp, bank: require('./bank-category.js').totals(data, from, to), profitCents: incomeCents - expenseCents,
     counts: { invoices: invoiceCount, platformStatements: stmts.length, ownSales: l.own.totals.count, platformOrders: l.platform.totals.count },
     statementCoverage: coverage, uncoveredPlatforms: uncovered, guessedCategories: guessed, warnings, reviewRequired: true,
   };
