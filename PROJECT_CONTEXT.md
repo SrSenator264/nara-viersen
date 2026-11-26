@@ -112,3 +112,4 @@
   - الخطوة 2 (لسا): `POST /api/accounting/platform-statements/ingest` (service) + حفظ بـ `data/documents/platforms/` + مقارنة مع طلبات Flamo + ملخص Telegram بزر موافقة.
   - الخطوة 3 (لسا): جامع كشوف مستقل بـ Playwright (منفصل عن جسور الطلبات)، بيوقف ويبعت تنبيه عند انتهاء الجلسة أو 2FA.
   - الخطوة 1 — ملاحظات: الطلب بيتفهم بقواعد كلمات (مو AI)؛ حد 10 ملفات بالرد؛ الشريك بينضاف بـ `TELEGRAM_PARTNER_CHAT_ID` بملف `.env` (المالك بيعبّيه، رقم الشات من `/id`)؛ audit: `DOCUMENTS_SENT_TELEGRAM`, `TELEGRAM_REQUEST_DENIED`, و`DOCUMENT_FROM_TELEGRAM` مع `uploadedBy`. بيشتغل بعد restart للسيرفر.
+- 2026-11-26 — باك أب المستندات (خلص): `data/documents` بينسخ كل يوم تراكمياً لـ `backups-documents/` (بدون حذف أبداً، مع `manifest.json` sha256)، ولـ `NARA_BACKUP_MIRROR_DIR/documents` إذا معبّى بـ `.env`. الحالة بصفحة الصحة (status.html).

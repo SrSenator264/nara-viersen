@@ -3,6 +3,7 @@
 //  • readJsonRecovering: liest eine JSON-Datei; ist sie kaputt → automatisch aus .bak oder dem neuesten Tages-Backup,
 //    die kaputte Datei wandert in „*.corrupt-<Zeit>“ (nie löschen!).
 //  • dailyBackup: pro Tag einmal gzip-Kopie der Datendateien in backups/<Tag>/, die letzten N Tage bleiben.
+//  • mirrorFiles: Belege inkrementell nach backups-documents/ (+ Spiegel), nie löschen, mit manifest.json (sha256).
 //  • rotateLog: Logdatei wird kopiert + geleert, wenn sie zu groß wird (funktioniert auch, wenn cmd sie mit >> offen hält).
 const fs = require('node:fs'), path = require('node:path'), zlib = require('node:zlib');
 const { pipeline } = require('node:stream/promises');
@@ -94,6 +95,48 @@ async function dailyBackup(files, backupsDir, { keep = 14, now = Date.now(), mon
   return out;
 }
 
+// Belege (data/documents): inkrementelle Kopie in destDir — nur neue/geänderte Dateien, NIE löschen (GoBD: 10 Jahre aufbewahren).
+// Unterordner bleiben erhalten. manifest.json = Name, Größe, sha256 aller Dateien in destDir. Asynchron, damit der Server nicht hängt.
+async function mirrorFiles(srcDir, destDir, { manifest = true } = {}) {
+  const out = { copied: 0, total: 0, bytes: 0, errors: [] };
+  if (!fs.existsSync(srcDir)) return out;
+  const fsp = fs.promises, crypto = require('node:crypto');
+  async function walk(rel) {
+    const from = path.join(srcDir, rel), list = await fsp.readdir(from, { withFileTypes: true });
+    for (const e of list) {
+      const r = path.join(rel, e.name);
+      if (e.isDirectory()) { await walk(r); continue; }
+      if (!e.isFile()) continue;
+      try {
+        const src = path.join(srcDir, r), dst = path.join(destDir, r), s = await fsp.stat(src);
+        let d = null; try { d = await fsp.stat(dst); } catch (x) { /* neu */ }
+        if (!d || d.size !== s.size) {
+          await fsp.mkdir(path.dirname(dst), { recursive: true });
+          const tmp = dst + '.part'; await fsp.copyFile(src, tmp); await fsp.rename(tmp, dst); out.copied++;
+        }
+      } catch (x) { out.errors.push({ file: r, error: x.message }); }
+    }
+  }
+  try { await fsp.mkdir(destDir, { recursive: true }); await walk(''); } catch (x) { out.errors.push({ file: srcDir, error: x.message }); return out; }
+  if (manifest) {
+    const files = [];
+    async function list(rel) {
+      for (const e of await fsp.readdir(path.join(destDir, rel), { withFileTypes: true })) {
+        const r = path.join(rel, e.name);
+        if (e.isDirectory()) await list(r);
+        else if (e.isFile() && r !== 'manifest.json' && !r.endsWith('.part')) {
+          const buf = await fsp.readFile(path.join(destDir, r));
+          files.push({ file: r.split(path.sep).join('/'), size: buf.length, sha256: crypto.createHash('sha256').update(buf).digest('hex') });
+        }
+      }
+    }
+    try { await list(''); await fsp.writeFile(path.join(destDir, 'manifest.json'), JSON.stringify({ createdAt: new Date().toISOString(), files }, null, 1)); }
+    catch (x) { out.errors.push({ file: 'manifest.json', error: x.message }); }
+    out.total = files.length; out.bytes = files.reduce((s, f) => s + f.size, 0);
+  }
+  return out;
+}
+
 function backupInfo(backupsDir) {
   try {
     const days = fs.readdirSync(backupsDir).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d)).sort();
@@ -113,4 +156,4 @@ function rotateLog(file, { maxBytes = 20 * 1024 * 1024, keep = 3 } = {}) {
   } catch (e) { return false; }
 }
 
-module.exports = { readJsonRecovering, dailyBackup, backupInfo, rotateLog, atomicWrite, localDay };
+module.exports = { readJsonRecovering, dailyBackup, mirrorFiles, backupInfo, rotateLog, atomicWrite, localDay };

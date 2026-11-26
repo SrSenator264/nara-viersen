@@ -43,7 +43,7 @@ function evaluate(snap, st, t = Date.now(), limits = LIMITS) {
 
 function create({ alerts, platformStatus, dataFile, dataDir, backupsDir, guard, logFile, env = process.env, now = () => Date.now(), log = console.error, fetchFn = (...a) => fetch(...a), limits = LIMITS, backupFiles }) {
   const st = { bridgeBad: {} }, timers = [], runFile = path.join(dataDir, 'run-state.json');
-  let lastTs = now(), lagWin = [], backupError = null, lastBackup = null, tickN = 0, started = now(), stopped = false;
+  let lastTs = now(), lagWin = [], backupError = null, lastBackup = null, tickN = 0, started = now(), stopped = false, docsBackup = { day: null };
 
   function probeLag() { const t = now(); lagWin.push([t, Math.max(0, t - lastTs - 1000)]); lastTs = t; lagWin = lagWin.filter(x => t - x[0] < 60000); }
   const lagMax = () => lagWin.reduce((m, x) => Math.max(m, x[1]), 0);
@@ -56,7 +56,7 @@ function create({ alerts, platformStatus, dataFile, dataDir, backupsDir, guard, 
       at: new Date(now()).toISOString(), uptimeSec: Math.round((now() - started) / 1000), pid: process.pid,
       lagMs: lagMax(), rssMb: mem.rss / 1048576, heapMb: mem.heapUsed / 1048576, diskFreeMb, dataMb: mb(dataFile),
       bridges: platformStatus ? platformStatus.list(now()) : [],
-      backups: Object.assign(guard.backupInfo(backupsDir), { lastRunAt: lastBackup, error: backupError }),
+      backups: Object.assign(guard.backupInfo(backupsDir), { lastRunAt: lastBackup, error: backupError, documents: docsBackup.day ? docsBackup : null }),
       backupError, telegram: alerts.configured(), deadManSwitch: !!env.HEALTHCHECK_URL, alerts: alerts.recent().slice(0, 15), limits,
     };
   }
@@ -78,8 +78,19 @@ function create({ alerts, platformStatus, dataFile, dataDir, backupsDir, guard, 
     try {
       const r = await guard.dailyBackup((typeof backupFiles === 'function' ? backupFiles() : backupFiles) || [dataFile], backupsDir, { keep: 14, now: now(), monthlyDir: path.join(path.dirname(backupsDir), 'backups-monthly'), mirrorDir: String(env.NARA_BACKUP_MIRROR_DIR || '').trim() || null });
       lastBackup = new Date(now()).toISOString();
-      backupError = r.errors.length ? r.errors.map(e => `${e.file}: ${e.error}`).join('; ') : null;
+      const errs = r.errors.map(e => `${e.file}: ${e.error}`);
       if (r.created.length) log('[NARA][BACKUP]', r.day, r.created.join(', '));
+      // Belege: einmal pro Tag inkrementell nach backups-documents/ und (falls gesetzt) in den Spiegel
+      if (guard.mirrorFiles && docsBackup.day !== r.day) {
+        const src = path.join(dataDir, 'documents'), mirror = String(env.NARA_BACKUP_MIRROR_DIR || '').trim();
+        const local = await guard.mirrorFiles(src, path.join(path.dirname(backupsDir), 'backups-documents'));
+        const m = mirror ? await guard.mirrorFiles(src, path.join(mirror, 'documents')) : null;
+        docsBackup = { day: r.day, at: new Date(now()).toISOString(), files: local.total, mb: Math.round(local.bytes / 104857.6) / 10, copied: local.copied, mirror: m ? { files: m.total, copied: m.copied } : null };
+        for (const e of local.errors) errs.push(`documents/${e.file}: ${e.error}`);
+        if (m) for (const e of m.errors) errs.push(`Spiegel documents/${e.file}: ${e.error}`);
+        if (local.copied || (m && m.copied)) log('[NARA][BACKUP] Belege', local.copied, 'neu,', local.total, 'gesamt');
+      }
+      backupError = errs.length ? errs.slice(0, 5).join('; ') : null;
     } catch (e) { backupError = e.message; }
     return backupError;
   }

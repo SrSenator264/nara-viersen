@@ -329,7 +329,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `README.md` — NARA – Restaurant Operations Platform
 - `web-prototype/README.md` — Website-Prototyp (Kunden-Seite)
 
-## Tests (117)
+## Tests (118)
 
 - `tests/accounting-agent.test.js`
 - `tests/accounting-books.test.js`
@@ -367,6 +367,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/dispatch-manual.test.js`
 - `tests/dispatch-scenarios.test.js`
 - `tests/dispatch-service.test.js`
+- `tests/documents-archive-copy.test.js`
 - `tests/door-pay-server.test.js`
 - `tests/driver-claim-server.test.js`
 - `tests/driver-claim.test.js`
