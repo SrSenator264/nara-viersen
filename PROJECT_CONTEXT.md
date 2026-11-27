@@ -109,8 +109,26 @@
 
 - 2026-11-26 — ميزة الفواتير والكشوف عبر Telegram (3 خطوات):
   - الخطوة 1 (خلصت 2026-11-26، `telegram-documents.js` + `tests/telegram-documents.test.js`): إرسال ملفات الفواتير/الكشوف من الأرشيف عبر Telegram `sendDocument`، مع صلاحيات: المالك (`TELEGRAM_OWNER_CHAT_ID`) كل شي، الشريك (`TELEGRAM_PARTNER_CHAT_ID`) رفع فواتير + طلب فواتير موردين بس، وكل طلب/رفع/رفض بالـ audit.
-  - الخطوة 2 (لسا): `POST /api/accounting/platform-statements/ingest` (service) + حفظ بـ `data/documents/platforms/` + مقارنة مع طلبات Flamo + ملخص Telegram بزر موافقة.
-  - الخطوة 3 (لسا): جامع كشوف مستقل بـ Playwright (منفصل عن جسور الطلبات)، بيوقف ويبعت تنبيه عند انتهاء الجلسة أو 2FA.
+  - الخطوة 2 (لسا — محجوزة لـ Claude Code): `POST /api/accounting/platform-statements/ingest` (service) + حفظ بـ `data/documents/platforms/` + مقارنة مع طلبات Flamo + ملخص Telegram بزر موافقة.
+  - الخطوة 3 (لسا — محجوزة لـ Claude Code): جامع كشوف مستقل بـ Playwright (منفصل عن جسور الطلبات)، بيوقف ويبعت تنبيه عند انتهاء الجلسة أو 2FA.
   - الخطوة 1 — ملاحظات: الطلب بيتفهم بقواعد كلمات (مو AI)؛ حد 10 ملفات بالرد؛ الشريك بينضاف بـ `TELEGRAM_PARTNER_CHAT_ID` بملف `.env` (المالك بيعبّيه، رقم الشات من `/id`)؛ audit: `DOCUMENTS_SENT_TELEGRAM`, `TELEGRAM_REQUEST_DENIED`, و`DOCUMENT_FROM_TELEGRAM` مع `uploadedBy`. بيشتغل بعد restart للسيرفر.
 - 2026-11-26 — باك أب المستندات (خلص): `data/documents` بينسخ كل يوم تراكمياً لـ `backups-documents/` (بدون حذف أبداً، مع `manifest.json` sha256)، ولـ `NARA_BACKUP_MIRROR_DIR/documents` إذا معبّى بـ `.env`. الحالة بصفحة الصحة (status.html).
 - 2026-11-26 — فواتير DRAFT (خلص): `POST /api/accounting/invoices/approve` بيحوّل الفاتورة DRAFT → APPROVED بدون حركة مخزن (لازم مورّد + تاريخ + إجمالي > 0، والصافي+الضريبة = الإجمالي ±2 سنت إذا موجودين)، audit `INVOICE_APPROVED`. الـ GuV بيحسب APPROVED و POSTED. زر «اعتمد للمحاسبة» بصفحة المخزن والمشتريات. Wareneingang بيضل متل ما هو.
+
+## قواعد التنسيق الموازي (Claude Code + Antigravity)
+
+- قبل كل مهمة: نسحب أحدث نسخة (`git pull`) ونقرأ `PROJECT_CONTEXT.md`.
+- كل وكيل يشتغل على ملفات منفصلة لتجنّب تعارضات Git:
+  - **Claude Code** (جهاز المحل): ميزات Backend/Telegram/Collector (الخطوة 2 والخطوة 3، `server.js`, `platform-statement.js`, `telegram-*.js`, Playwright collector).
+  - **Antigravity** (اللابتوب): إصلاحات وتبسيط الواجهات (`kasse-settlement.*`, `accounting.*`, `accounting-agent.*`, `flamo-nav.*`, `kasse.*`, `kitchen.*`, `web-prototype/*`)، وبعدها مراجعة وتكامل الاختبارات.
+- لو احتاج Antigravity تعديلاً في `server.js`، يتنسّق هنا أولاً أو ينضاف بعد ما يخلص Claude Code دفعته الحالية.
+- عند نهاية كل مهمة: تحديث هذا القسم + `node --test` + `commit` و`push` على `main`.
+
+## سجل الشغل الموازي (Antigravity)
+
+- 2026-11-27 — تم الربط والمزامنة مع المستودع (`6741cab`).
+- **المهام الجاهزة للتنفيذ (المرحلة 1 — واجهات، بدون تعارض مع Claude):**
+  1. `kasse-settlement.html/.js/.css`: إزالة تغطية البطاقة اللاصقة لأزرار الفئات النقدية، إصلاح `<button>` المتداخل، وحل العرض الفارغ عند الفتح.
+  2. `accounting.html/.js/.css`: تحويل البطاقات المكدسة (14 بطاقة) إلى تبويبات منظمة، ترجمة أنواع الحسابات (`ASSET` إلخ)، تحسين رسالة خطأ DATEV 422، تفعيل تغذية راجعة لزر Debugging، وإصلاح مبدّل اللغة.
+  3. `accounting-agent.html/.js`: تعطيل الأزرار السريعة عند غياب مفتاح AI، واستبدال اسم المستخدم الثابت باسم المستخدم المسجّل.
+  4. الشريط العلوي (`flamo-nav.*`): منع تداخل زر `🌙` مع شريط البحث ومنع قص اسم المستخدم على الشاشات المتوسطة.
