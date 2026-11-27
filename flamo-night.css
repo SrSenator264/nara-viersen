@@ -1,6 +1,7 @@
 /* flamo-night.css — وضع ليلي عام للصفحات (قلب الألوان + إرجاع الصور والفيديو لوضعها الطبيعي). الزر: flamo-night.js */
 html.flamo-night{background:#fff;filter:invert(.92) hue-rotate(180deg)}
 html.flamo-night img,html.flamo-night video,html.flamo-night canvas,html.flamo-night iframe,html.flamo-night picture,html.flamo-night svg image,html.flamo-night [data-keep-colors]{filter:invert(1) hue-rotate(180deg)}
-#flamo-night-btn{position:fixed;top:2px;left:50%;transform:translateX(-50%);z-index:2147483000;width:auto;height:auto;border:0;border-radius:0;background:none;box-shadow:none;color:inherit;font-size:1.2rem;line-height:1;cursor:pointer;opacity:.6;padding:2px 6px;touch-action:manipulation}
+#flamo-night-btn{position:fixed;top:6px;inset-inline-end:10px;z-index:2147483000;width:auto;height:auto;border:0;border-radius:0;background:none;box-shadow:none;color:inherit;font-size:1.2rem;line-height:1;cursor:pointer;opacity:.7;padding:2px 6px;touch-action:manipulation}
+body.fn-on .fn-bar #flamo-night-btn{position:static;z-index:auto;padding:4px 8px;border-radius:9px;opacity:.85}
 #flamo-night-btn:hover,#flamo-night-btn:focus-visible{opacity:1}
 @media print{html.flamo-night{filter:none}#flamo-night-btn{display:none}}

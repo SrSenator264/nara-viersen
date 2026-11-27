@@ -191,6 +191,8 @@
       const b = bar.querySelector('.fn-back'); if (b) b.onclick = goBack;
       bar.querySelector('.fn-find').onclick = openPalette;
       const o2 = bar.querySelector('.fn-out2'); if (o2) o2.onclick = () => { try { NARA_AUTH.logout(); } catch (e) { /* ignore */ } };
+      const nb = document.getElementById('flamo-night-btn');
+      if (nb) { const who = bar.querySelector('.fn-who'); if (who) bar.insertBefore(nb, who); else bar.appendChild(nb); }
       paintStatus();
     }
 

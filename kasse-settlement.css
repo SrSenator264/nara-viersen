@@ -53,7 +53,8 @@ textarea.sd-in{min-height:70px;resize:vertical}
 .sd-sel{appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:none;border:1px solid #ccd3d8;border-radius:12px;background:#fff;color:#1d2327;padding:0 18px;min-height:46px;font-size:1rem;font-weight:700;cursor:pointer;text-align:center;text-align-last:center}
 .sd-sel.train{background:#f59e0b;color:#17202a;border-color:#f59e0b}
 
-.card.sum{position:sticky;top:0;z-index:5;box-shadow:0 8px 24px #17202a14}
+.card.sum{box-shadow:0 8px 24px #17202a14}
+.den-add{border:0;background:none;padding:0;margin:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;font:inherit;color:inherit;width:100%}
 .sum-main{display:flex;justify-content:space-between;align-items:baseline;gap:10px}.sum-main span{font-weight:700;color:#5a6670}.sum-main b{font-size:2rem;font-weight:900}
 .card.sum .diff{margin:10px 0}.card.sum .go{margin-top:2px}
 .card.empty{background:#f8fafc}.empty-day{margin:0;font-size:1.15rem;font-weight:700;color:#5a6670}

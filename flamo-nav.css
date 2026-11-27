@@ -11,7 +11,7 @@
 .fn-back{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:99px;background:var(--fn-paper)!important;border:1px solid var(--fn-line)!important;font-weight:700}
 .fn-back:hover{background:var(--fn-fire)!important;color:#fff;border-color:var(--fn-fire)!important}
 html[dir=rtl] .fn-arrow{display:inline-block;transform:scaleX(-1)}
-.fn-crumb{color:var(--fn-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fn-crumb em{font-style:normal;opacity:.6}.fn-crumb b{color:var(--fn-ink)}
+.fn-crumb{color:var(--fn-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.fn-crumb em{font-style:normal;opacity:.6}.fn-crumb b{color:var(--fn-ink)}
 .fn-sp{flex:1}
 .fn-find{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:99px;background:var(--fn-paper)!important;border:1px solid var(--fn-line)!important;color:var(--fn-mute)!important}
 .fn-find kbd{font:12px FlamoAr,Arial;background:#fff;border:1px solid var(--fn-line);border-radius:5px;padding:1px 6px}
@@ -68,10 +68,11 @@ body.fn-on #na-chip{display:none!important}
 
 .fn-menu{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:99px;background:var(--fn-fire);color:#fff;font-weight:800;text-decoration:none;white-space:nowrap}
 .fn-menu:hover{filter:brightness(.92)}
-.fn-who{display:inline-flex;align-items:center;gap:8px;padding-inline-start:10px;border-inline-start:1px solid var(--fn-line);white-space:nowrap}
-.fn-who b{max-width:140px;overflow:hidden;text-overflow:ellipsis;font-size:.9rem}
+.fn-who{display:inline-flex;align-items:center;gap:8px;padding-inline-start:10px;border-inline-start:1px solid var(--fn-line);white-space:nowrap;flex-shrink:0}
+.fn-who b{max-width:160px;overflow:hidden;text-overflow:ellipsis;font-size:.9rem}
 .fn-who button{height:32px;padding:0 12px;border-radius:99px;background:var(--fn-paper)!important;border:1px solid var(--fn-line)!important;font-weight:700}
 .fn-who button:hover{background:#20231f!important;color:#fff}
+@media(max-width:960px){.fn-find span,.fn-find kbd{display:none}.fn-crumb{max-width:160px}}
 @media(max-width:700px){.fn-menu span,.fn-who b{display:none}}
 /* Kasse: Navigationslinks stehen jetzt in der Seitenleiste – der Kassenkopf zeigt nur Werkzeuge (Status, Drucker, Kundensuche) */
 body.fn-on header .header-actions #nara-live-orders-link,body.fn-on header .header-actions #nara-dispatch-link,body.fn-on header .header-actions #nara-kitchen-link,body.fn-on header .header-actions #nara-custlog-link,body.fn-on header .header-actions #nara-connect-link{display:none!important}

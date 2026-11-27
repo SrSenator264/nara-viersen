@@ -157,7 +157,7 @@
    return card('', tr('cashCard'), b);
   }
   const isCoin = d => d <= 200, coinsUsed = DEN.some(d => isCoin(d) && S.counts[d]), showCoins = S.coins || coinsUsed;
-  const grid = DEN.filter(d => !isCoin(d) || showCoins).map(d => `<div class="den ${d >= 500 ? 'note' : 'coin'} d${d}" data-act="dp" data-c="${d}" role="button" tabindex="0"><div class="face"><span>${denLabel(d)}</span></div><b class="cnt" id="dn-${d}">${S.counts[d] || 0}</b><button type="button" class="minus" data-act="dm" data-c="${d}" aria-label="−">−</button></div>`).join('');
+  const grid = DEN.filter(d => !isCoin(d) || showCoins).map(d => `<div class="den ${d >= 500 ? 'note' : 'coin'} d${d}"><button type="button" class="den-add" data-act="dp" data-c="${d}"><span class="face"><span>${denLabel(d)}</span></span></button><b class="cnt" id="dn-${d}">${S.counts[d] || 0}</b><button type="button" class="minus" data-act="dm" data-c="${d}" aria-label="−">−</button></div>`).join('');
   let b = `<div class="den-grid">${grid}</div>${showCoins ? '' : `<button class="sd-btn ghost sm" type="button" data-act="coins">${tr('coins')}</button>`}<div class="fields"><label>${tr('opening')}<input class="sd-in" id="in-open" inputmode="decimal" value="${inEuro(openingNow())}"></label><label>${tr('total2')}<input class="sd-in" id="in-total" inputmode="decimal" value="${inEuro(countedNow())}"></label><label>${tr('leave')}<input class="sd-in" id="in-leave" inputmode="decimal" value="${inEuro(leaveNow())}"></label></div>`;
   b += row(tr('expected'), `<span id="c-exp">${euro(expectedNow())}</span>`, 'strong');
   b += `<div class="diff" id="c-diff"></div>` + row(tr('takeOut'), `<span id="c-take"></span>`);
@@ -330,7 +330,9 @@
   let night = false; try { night = localStorage.getItem('flamo-night') === '1'; } catch (e) {}
   applyNight(night);
   if (nightBtn) nightBtn.addEventListener('click', () => { night = !night; try { localStorage.setItem('flamo-night', night ? '1' : '0'); } catch (e) {} applyNight(night); });
-  api('GET', '/api/auth/me').then(r => { S.user = (r.json && r.json.user) || null; return load(true); });
+  render();
+  api('GET', '/api/auth/me').then(r => { S.user = (r.json && r.json.user) || null; if (S.report) render(); });
+  load(true);
   // وضع التدريب على هالجهاز: إذا انطفى وإحنا بالتدريب → فعلي. إذا اشتغل → خيار التدريب بيظهر.
   let last = trainingOn();
   setInterval(() => { const now = trainingOn(); if (now === last) return; last = now; S.mode = now ? 'ALL' : 'REAL'; load(true); }, 2000);

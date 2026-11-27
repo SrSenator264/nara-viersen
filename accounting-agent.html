@@ -30,6 +30,7 @@ header a,header button{border:0;background:#eef0ea;border-radius:12px;min-height
 .card.ask{box-shadow:inset 0 0 0 3px var(--brand);background:var(--soft)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .chip{border:0;background:#f7f5f2;border-radius:999px;padding:10px 14px;cursor:pointer;font-weight:600;text-align:start}
+.chip:disabled{opacity:.45;cursor:not-allowed}
 form{display:flex;gap:8px;padding:10px 14px 14px;max-width:820px;margin:0 auto;width:100%}
 textarea{flex:1;min-height:52px;max-height:160px;resize:none;border:2px solid var(--line);border-radius:16px;padding:12px 14px;background:#fff}
 #send{min-width:64px;border:0;border-radius:16px;background:var(--brand);color:#fff;font-weight:800;font-size:1.2rem;cursor:pointer}
@@ -50,7 +51,7 @@ FT.init({
   clear:{de:'Neu',ar:'جديد',en:'New'},
   ph:{de:'Frag nach Rechnung, Tagesabschluss, Umsatz…',ar:'اسأل عن فاتورة، تقفيلة، مبيعات…',en:'Ask about an invoice, closing, sales…'},
   send:{de:'Senden',ar:'ابعت',en:'Send'},
-  hello:{de:'Hallo Omar 👋 Ich bin nur für die Buchhaltung da und lese die echten Zahlen aus Flamo. Was möchtest du wissen?',ar:'أهلين عمر 👋 أنا للمحاسبة بس، وبقرا الأرقام الحقيقية من Flamo. شو بدك تعرف؟',en:'Hi Omar 👋 I only do accounting and read the real figures from Flamo. What would you like to know?'},
+  hello:{de:'Hallo{name} 👋 Ich bin nur für die Buchhaltung da und lese die echten Zahlen aus Flamo. Was möchtest du wissen?',ar:'أهلين{name} 👋 أنا للمحاسبة بس، وبقرا الأرقام الحقيقية من Flamo. شو بدك تعرف؟',en:'Hi{name} 👋 I only do accounting and read the real figures from Flamo. What would you like to know?'},
   s1:{de:'Wie war der Umsatz gestern?',ar:'كيف كانت المبيعات مبارح؟',en:'How were sales yesterday?'},
   s2:{de:'Zeig mir den letzten Tagesabschluss im Detail',ar:'فرجيني آخر تقفيلة بالتفصيل',en:'Show me the last daily closing in detail'},
   s3:{de:'Was fehlt noch für den Monatsabschluss?',ar:'شو ناقص لإقفال الشهر؟',en:'What is missing for the month close?'},
@@ -71,7 +72,7 @@ const $=id=>document.getElementById(id);
 const t=(k,v)=>FT.t(k,v);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const lang=()=>{const l=(FT.locale()||'de').slice(0,2);return ['de','ar','en'].includes(l)?l:'de'};
-let H=[],busy=false,status=null;
+let H=[],busy=false,status=null,userName='';
 try{H=JSON.parse(sessionStorage.getItem('flamo-acc-agent')||'[]')||[]}catch(e){H=[]}
 const keep=()=>{try{sessionStorage.setItem('flamo-acc-agent',JSON.stringify(H.slice(-30)))}catch(e){}};
 
@@ -87,9 +88,11 @@ function md(s){
 }
 function render(){
   const log=$('log');let html='';
-  if(status&&!status.configured)html+=`<div class="card ask"><b>🔑 ${esc(t('noKeyT'))}</b><p class="mute">${esc(t('noKey'))}</p></div>`;
-  html+=`<div class="msg ai"><p>${esc(t('hello'))}</p><p style="font-size:.85rem;color:var(--mute)">🔒 ${esc(t('readOnly'))}</p></div>`;
-  if(!H.length)html+=`<div class="chips">${['s1','s2','s3','s4','s5','s6'].map(k=>`<button class="chip" type="button" data-k="${k}">${esc(t(k))}</button>`).join('')}</div>`;
+  const noKey=!!(status&&!status.configured);
+  if(noKey)html+=`<div class="card ask"><b>🔑 ${esc(t('noKeyT'))}</b><p class="mute">${esc(t('noKey'))}</p></div>`;
+  const who=userName||((window.NARA_AUTH&&NARA_AUTH.user&&NARA_AUTH.user()&&NARA_AUTH.user().name)||'');
+  html+=`<div class="msg ai"><p>${esc(t('hello',{name:who?' '+who:''}))}</p><p style="font-size:.85rem;color:var(--mute)">🔒 ${esc(t('readOnly'))}</p></div>`;
+  if(!H.length)html+=`<div class="chips">${['s1','s2','s3','s4','s5','s6'].map(k=>`<button class="chip" type="button" data-k="${k}"${noKey?' disabled':''}>${esc(t(k))}</button>`).join('')}</div>`;
   for(const m of H){
     if(m.role==='user')html+=`<div class="msg me">${esc(m.text)}</div>`;
     else if(m.role==='assistant')html+=`<div class="msg ai">${md(m.text)}${m.tools&&m.tools.length?`<div class="tools">🔎 ${esc(t('looked',{t:m.tools.join(', ')}))}</div>`:''}</div>`;
@@ -97,11 +100,12 @@ function render(){
   }
   if(busy)html+=`<div class="typing">⏳ ${esc(t('thinking'))}</div>`;
   log.innerHTML=html;
-  log.querySelectorAll('.chip').forEach(b=>b.onclick=()=>ask(t(b.dataset.k)));
+  $('q').disabled=noKey;$('send').disabled=noKey||busy;
+  log.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{if(!noKey)ask(t(b.dataset.k))});
   log.scrollTop=log.scrollHeight;
   if(status&&status.configured){const u=status.usage||{};$('status').textContent=t('stat',{p:String(status.provider||'').split(':')[0],n:u.calls||0,c:(u.costEur||0).toFixed(2)})}
 }
-async function loadStatus(){try{const r=await fetch('/api/accounting/agent/status',{cache:'no-store'});if(r.ok)status=await r.json()}catch(e){}render()}
+async function loadStatus(){try{const[rs,rm]=await Promise.all([fetch('/api/accounting/agent/status',{cache:'no-store'}),fetch('/api/auth/me',{cache:'no-store'}).catch(()=>null)]);if(rs.ok)status=await rs.json();if(rm&&rm.ok){const m=await rm.json().catch(()=>null);if(m&&m.user&&m.user.name)userName=m.user.name}}catch(e){}render()}
 async function ask(text){
   text=String(text||'').trim();if(!text||busy)return;
   const history=H.filter(m=>m.role==='user'||m.role==='assistant').map(m=>({role:m.role,text:m.text}));

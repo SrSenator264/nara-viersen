@@ -11,7 +11,9 @@
     const b = document.createElement('button');
     b.id = 'flamo-night-btn'; b.type = 'button'; b.setAttribute('aria-label', 'Nachtmodus'); b.textContent = on ? '☀️' : '🌙';
     b.addEventListener('click', () => { on = !on; set(on); root.classList.toggle('flamo-night', on); b.textContent = on ? '☀️' : '🌙'; });
-    document.body.appendChild(b);
+    const bar = document.querySelector('.fn-bar');
+    if (bar) { const who = bar.querySelector('.fn-who'); if (who) bar.insertBefore(b, who); else bar.appendChild(b); }
+    else document.body.appendChild(b);
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', mount) : mount();
 })();
