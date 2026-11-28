@@ -36,7 +36,19 @@ netCol:{de:'Netto €',ar:'الصافي €',en:'Net €'},vatCol:{de:'USt €',
 save:{de:'Speichern',ar:'حفظ',en:'Save'},saved:{de:'Gespeichert',ar:'انحفظ',en:'Saved'},badAmount:{de:'Ungültiger Betrag',ar:'مبلغ مو صحيح',en:'Invalid amount'},pickMonth:{de:'Bitte zuerst einen Monat wählen.',ar:'اختار شهر أولاً.',en:'Pick a month first.'},
 incManual:{de:'manuell',ar:'يدوي',en:'manual'},bankLine:{de:'Bank',ar:'بالبنك',en:'bank'},bankH:{de:'Bank (nur Info, nicht in der GuV)',ar:'البنك (للمعلومات بس، مو داخل بالربح والخسارة)',en:'Bank (info only, not in P&L)'},bk_PRIVATE:{de:'Privatentnahmen',ar:'سحوبات شخصية',en:'Private withdrawals'},bk_TRANSFER:{de:'Geldtransit',ar:'تحويل داخلي',en:'Internal transfers'},bk_PLATFORM_PAYOUT:{de:'Plattform-Auszahlungen',ar:'دفعات المنصات',en:'Platform payouts'},bankUncat:{de:'{n} Buchungen ohne Kategorie',ar:'{n} حركة بدون فئة',en:'{n} transactions without category'},incH:{de:'Plattform-Umsatz (Monat)',ar:'مبيعات المنصات (الشهر)',en:'Platform sales (month)'},incCol:{de:'Umsatz €',ar:'المبيعات €',en:'Sales €'},incHint:{de:'Leer = aus Abrechnungen. Ein Wert ersetzt die Abrechnungen für den ganzen Monat (z. B. Partner Hub).',ar:'فاضي = من الكشوف. الرقم بيحلّ محل الكشوف للشهر كلو (مثلاً من Partner Hub).',en:'Empty = from statements. A value replaces the statements for the whole month (e.g. Partner Hub).'},manualLine:{de:'davon manuell',ar:'منها يدوي',en:'of which manual'},
 w_MANUAL_EXPENSES:{de:'Ausgaben manuell erfasst (ohne Einzelbelege).',ar:'المصاريف مدخلة يدوي (بدون فواتير مفصّلة).',en:'Expenses entered manually (no individual receipts).'},
-w_MANUAL_EXPENSES_WITH_INVOICES:{de:'Manuelle Ausgaben und Rechnungen im selben Zeitraum: auf Doppelerfassung prüfen.',ar:'في مصاريف يدوية وفواتير بنفس الفترة: تأكد ما في شي محسوب مرتين.',en:'Manual expenses and invoices in the same period: check for double counting.'}
+w_MANUAL_EXPENSES_WITH_INVOICES:{de:'Manuelle Ausgaben und Rechnungen im selben Zeitraum: auf Doppelerfassung prüfen.',ar:'في مصاريف يدوية وفواتير بنفس الفترة: تأكد ما في شي محسوب مرتين.',en:'Manual expenses and invoices in the same period: check for double counting.'},
+// einfache Ansicht: so entsteht der Gewinn (für Nicht-Buchhalter)
+simpleH:{de:'So entsteht der Gewinn',ar:'كيف طلع الربح',en:'How the profit comes about'},
+eqIncome:{de:'Einnahmen',ar:'المبيعات',en:'Income'},eqIncomeNet:{de:'Einnahmen (ohne MwSt)',ar:'المبيعات (بدون ضريبة)',en:'Income (excl. VAT)'},
+eqIncomeX:{de:'Alles, was Kasse, Website und Plattformen verkauft haben.',ar:'كل اللي بعناه بالكاشير والموقع والمنصات.',en:'Everything sold via till, website and platforms.'},
+eqIncomeVatX:{de:'Die MwSt gehört dem Finanzamt und ist hier schon herausgerechnet.',ar:'الضريبة إلها للمالية وهون مطلوعة من المبلغ.',en:'VAT belongs to the tax office and is already taken out here.'},
+eqGoods:{de:'Waren & Einkauf',ar:'البضاعة والمشتريات',en:'Goods & purchases'},eqGoodsX:{de:'Genehmigte Einkaufsrechnungen (Fleisch, Brot, Verpackung …).',ar:'فواتير المشتريات المعتمدة (لحمة، خبز، تغليف…).',en:'Approved purchase invoices (meat, bread, packaging …).'},
+eqStaff:{de:'Personal',ar:'الرواتب',en:'Staff'},eqStaffX:{de:'Löhne aus erfassten Lohnzahlungen und manuellen Einträgen.',ar:'الرواتب من الدفعات المسجّلة والإدخال اليدوي.',en:'Wages from recorded payments and manual entries.'},
+eqOther:{de:'Sonstige Kosten',ar:'مصاريف تانية',en:'Other costs'},eqOtherX:{de:'Miete, Strom, Plattform-Gebühren, Versicherung, Bank …',ar:'إيجار، كهربا، عمولات المنصات، تأمين، بنك…',en:'Rent, energy, platform fees, insurance, bank …'},
+eqAfa:{de:'Abschreibung',ar:'استهلاك الأجهزة',en:'Depreciation'},eqAfaX:{de:'Teure Geräte werden über ihre Nutzungsjahre verteilt.',ar:'الأجهزة الغالية بتنوزّع كلفتها على سنين استعمالها.',en:'Expensive equipment is spread over its useful life.'},
+eqProfit:{de:'Gewinn',ar:'الربح',en:'Profit'},eqLoss:{de:'Verlust',ar:'خسارة',en:'Loss'},eqProfitX:{de:'Was übrig bleibt — vor Einkommen- und Gewerbesteuer.',ar:'اللي بيضل — قبل ضريبة الدخل والضريبة التجارية.',en:'What is left — before income and trade tax.'},
+eqVat:{de:'MwSt ans Finanzamt (Zahllast)',ar:'الضريبة اللي لازم تندفع للمالية',en:'VAT to pay (net)'},eqVatX:{de:'Durchlaufend: von Kunden kassiert minus Vorsteuer aus Rechnungen. Weder Gewinn noch Verlust.',ar:'مصاري مارقة: انقبضت من الزباين ناقص الضريبة يلي دفعناها بالفواتير. مو ربح ولا خسارة.',en:'Pass-through: collected from customers minus input VAT on invoices. Neither profit nor loss.'},
+eqCheck:{de:'Rechnung geht auf ✓',ar:'الحساب مظبوط ✓',en:'The maths adds up ✓'},eqCheckBad:{de:'Rechnung geht nicht auf — bitte dem Team melden',ar:'الحساب مو راكب — خبّر الفريق',en:'The maths does not add up — please report it'}
 };
 const CATS=['GOODS','RENT','ENERGY','TELECOM','INSURANCE','PLATFORM_FEES','WAGES','VEHICLE','MARKETING','EQUIPMENT_SMALL','BANK_FEES','OTHER','AFA'];
 const PLN={LIEFERANDO:'Lieferando',UBER_EATS:'Uber Eats',WOLT:'Wolt',LANCH:'Lanch',JUST_VIRTUAL:'Just Smashed'};
@@ -53,12 +65,31 @@ function lines(){if(!report)return[];const r=report,inc=r.income||{},ex=r.expens
   L.push({k:t('result'),v:r.profitCents,b:1,res:1});
   if(r.vat){L.push({h:t('vatH')});L.push({k:t('vatOut'),v:r.vat.outputCents});L.push({k:t('vatIn'),v:-r.vat.inputCents});L.push({k:t('vatPay'),v:r.vat.payableCents,b:1});}
   return L;}
+// Einfache Gleichung: Einnahmen − Waren − Personal − Sonstiges − Abschreibung = Gewinn, mit Gegenprobe aus den Einzelposten
+function simpleModel(r){const inc=r.income||{},ex=r.expenses||{};
+  const channels=[['own',inc.ownCents],...Object.entries(inc.byPlatform||{}),['manual',inc.manualCents]].filter(([,c])=>Number(c));
+  const other=CATS.filter(c=>!['GOODS','WAGES','AFA'].includes(c)).reduce((s,c)=>s+(Number(ex[c])||0),0);
+  const goods=Number(ex.GOODS)||0,staff=Number(ex.WAGES)||0,afa=Number(ex.AFA)||0,income=Number(inc.totalCents)||0;
+  const sumChannels=channels.reduce((s,[,c])=>s+Number(c),0);
+  const ok=Math.abs(income-goods-staff-other-afa-(Number(r.profitCents)||0))<=1&&Math.abs(sumChannels-income)<=1&&Math.abs(goods+staff+other+afa-(Number(ex.totalCents)||0))<=1;
+  return {channels,income,goods,staff,other,afa,profit:Number(r.profitCents)||0,ok};}
+function simpleView(){const r=report;if(!r){$('simple').innerHTML='';return;}const m=simpleModel(r),vat=r.vat;
+  const by=m.channels.map(([k,c])=>`${esc(k==='own'?t('own'):k==='manual'?t('manual'):(PLN[k]||k))} ${money(c)}`).join(' · ');
+  const row=(op,label,expl,v,cls,extra)=>`<div class="eq-row ${cls||''}"><span class="op">${op}</span><div class="eq-t"><b>${esc(label)}</b><small>${esc(expl)}</small>${extra||''}</div><strong>${money(v)}</strong></div>`;
+  $('simple').innerHTML=`<h2>🧮 ${esc(t('simpleH'))}</h2><div class="eq">`
+    +row('+',vat?t('eqIncomeNet'):t('eqIncome'),t('eqIncomeX')+(vat?' '+t('eqIncomeVatX'):''),m.income,'plus',by?`<small class="by">${by}</small>`:'')
+    +row('−',t('eqGoods'),t('eqGoodsX'),m.goods,'minus')+row('−',t('eqStaff'),t('eqStaffX'),m.staff,'minus')
+    +row('−',t('eqOther'),t('eqOtherX'),m.other,'minus')+(m.afa?row('−',t('eqAfa'),t('eqAfaX'),m.afa,'minus'):'')
+    +row('=',m.profit>=0?t('eqProfit'):t('eqLoss'),t('eqProfitX'),m.profit,'total '+(m.profit>=0?'pos':'neg'))
+    +`<p class="eq-check ${m.ok?'ok':'bad'}">${esc(m.ok?t('eqCheck'):t('eqCheckBad'))}</p>`
+    +(vat?row('ⓘ',t('eqVat'),t('eqVatX'),vat.payableCents,'vat'):'')+`</div>`;}
 const warnText=w=>t(`w_${w}`,{p:(report.uncoveredPlatforms||[]).map(p=>PLN[p]||p).join(', '),r:report.vat?report.vat.salesRate:''});
 function paint(){if(!report)return;const ex=report.expenses||{};$('sales').textContent=money(report.salesCents);$('purchases').textContent=money(ex.GOODS);$('labor').textContent=money(ex.WAGES);$('profit').textContent=money(report.profitCents);$('profit').style.color=report.profitCents>=0?'#18834b':'#c83b1d';
   const rows=lines().map(l=>l.h?`<div class="sec"><strong>${esc(l.h)}</strong></div>`:`<div${l.b?' class="tot"':''}><span>${esc(l.k)}${l.sub?` <small class="mute">· ${esc(l.sub)}</small>`:''}</span><strong${l.res?` style="color:${l.v>=0?'#18834b':'#c83b1d'}"`:''}>${money(l.v)}</strong></div>`).join('');
   $('details').innerHTML=`<div><span>${esc(t('period'))}</span><strong dir="ltr">${report.from} → ${report.to}</strong></div>${rows}${report.cogsCents?`<div class="info"><span>${esc(t('cogsInfo'))}</span><span>${money(report.cogsCents)}</span></div>`:''}`;
   const warn=(report.warnings||[]).map(w=>`<li>${esc(warnText(w))}</li>`).join('');
-  $('warnings').innerHTML=(warn?`<h2>⚠️ ${esc(t('warnH'))}</h2><ul>${warn}</ul>`:'')+`<p class="mute">${esc(t('review'))}</p>`;}
+  $('warnings').innerHTML=(warn?`<h2>⚠️ ${esc(t('warnH'))}</h2><ul>${warn}</ul>`:'')+`<p class="mute">${esc(t('review'))}</p>`;
+  simpleView();}
 async function loadReport(){const r=await fetch(`/api/reports/profit-loss?from=${$('from').value}&to=${$('to').value}`);const j=await r.json();if(!r.ok)throw Error(j.error||t('err'));report=j.report;paint();}
 function setMonth(){const m=$('month').value;if(!/^\d{4}-\d{2}$/.test(m))return;const [y,mo]=m.split('-').map(Number),last=new Date(Date.UTC(y,mo,0)).getUTCDate();$('from').value=m+'-01';$('to').value=m+'-'+String(last).padStart(2,'0');loadReport().catch(e=>$('details').textContent=e.message);}
 function exportReport(){if(!report){alert(t('showFirst'));return;}const rows=[[t('item'),t('value')],[t('period'),report.from+' - '+report.to],...lines().map(l=>l.h?[l.h,'']:[l.k,(l.v/100).toFixed(2).replace('.',',')]),...(report.warnings||[]).map(w=>[t('warnH'),warnText(w)])];const csv='﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(';')).join('\r\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`flamo-guv-${report.from}-${report.to}.csv`;a.click();}

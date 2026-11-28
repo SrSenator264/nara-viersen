@@ -3,6 +3,9 @@
 import { defineConfig, devices } from 'playwright/test';
 import { E2E_BASE_URL, E2E_KEY } from './tests/e2e/e2e-env.mjs';
 
+// جهاز ما عليه متصفح Playwright المطابق: FLAMO_PW_CHANNEL=msedge (أو chrome) بيستعمل المتصفح المركّب بدل التنزيل
+const CHANNEL = process.env.FLAMO_PW_CHANNEL ? { channel: process.env.FLAMO_PW_CHANNEL } : {};
+
 export default defineConfig({
   testDir: 'tests/e2e',
   testMatch: '**/*.spec.mjs',
@@ -27,7 +30,7 @@ export default defineConfig({
     timeout: 90000,
   },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile', use: { ...devices['Pixel 7'] }, testMatch: '**/smoke.spec.mjs' },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], ...CHANNEL } },
+    { name: 'mobile', use: { ...devices['Pixel 7'], ...CHANNEL }, testMatch: ['**/smoke.spec.mjs', '**/pages-audit.spec.mjs'] },
   ],
 });

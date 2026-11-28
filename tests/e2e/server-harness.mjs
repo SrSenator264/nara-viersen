@@ -10,7 +10,8 @@ import { fileURLToPath } from 'node:url';
 import { E2E_PORT, E2E_KEY, E2E_BASE_URL, E2E_DRIVER_ID } from './e2e-env.mjs';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const SKIP_TOP = new Set(['node_modules', '.git', 'data', 'logs', 'dist', 'web-prototype', 'android-app', 'tests', 'tunnel',
+// dist (Produktbilder unter /assets) und web-prototype (Website c.html) werden mitkopiert, damit die Seitenprüfung echte 404 sieht
+const SKIP_TOP = new Set(['node_modules', '.git', 'data', 'logs', 'android-app', 'tests', 'tunnel',
   'pw-profile', 'test-results', 'playwright-report', '.env', '.nara-ocr-venv', '.nara-ocr-venv-fixed', 'local-ocr-output']);
 const SECRET_ENV = /KEY|TOKEN|SECRET|PASSWORD|GEMINI|GROQ|OPENAI|DEEPSEEK|FCM|WISE|QONTO|^NARA_|^AI_PROVIDER$/i;
 

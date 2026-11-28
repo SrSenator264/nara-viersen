@@ -19,11 +19,11 @@ const RULES = [
   ['VEHICLE', /tankstelle|aral|shell|esso|star |parken|kfz/i],
   ['BANK_FEES', /wise-karte|cashback|kontoführung|gebühr/i],
   ['EQUIPMENT_SMALL', /vevor|obi |refurbed|pc-sale|ebay|amazon|aliexpress/i],
-  ['GOODS', /meledi|jacob brot|handelshof|erciyes|metro|pool chefs|kaufland|aldi|netto|go asia|lidl|rewe|edeka|selgros/i],
+  ['GOODS', /meledi|jacob brot|handelshof|erciyes|metro|pool chefs|kaufland|aldi|netto|go asia|lidl|rewe|edeka|selgros|metzger|fleisch|b[äa]e?cker|backwaren|gro(ß|ss)handel|transgourmet|getr[äa]e?nke|gem[üu]e?se|lebensmittel|frischdienst/i],
   ['OTHER', /rundfunk|anthropic/i],
 ];
 
-const MATCHED = { PLATFORM_PAYOUT: 'PLATFORM_PAYOUT', PAYROLL: 'WAGES' };
+const MATCHED = { PLATFORM_PAYOUT: 'PLATFORM_PAYOUT', PLATFORM_STATEMENT: 'PLATFORM_PAYOUT', PAYROLL: 'WAGES' };
 
 // Vorschlag für eine Buchung: gespeicherte Kategorie > Abgleich > Regel > null
 function suggest(tx) {

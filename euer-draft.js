@@ -11,8 +11,10 @@ const invCents = i => { for (const k of ['totalAmountCents', 'totalCents', 'gros
 // تصنيف المصاريف: إعداد يدوي لكل مورّد أولاً، بعدين من اسم المورّد، وإلا بضاعة (إذا في بنود) أو متفرقات
 const CATS = ['GOODS', 'RENT', 'ENERGY', 'TELECOM', 'INSURANCE', 'PLATFORM_FEES', 'WAGES', 'VEHICLE', 'MARKETING', 'EQUIPMENT_SMALL', 'BANK_FEES', 'OTHER'];
 const GUESS = [
+  // Lebensmittel-/Getränke-Lieferanten zuerst (sonst landet z. B. «Gastro-Großhandel» bei Energie)
+  ['GOODS', /metzger|fleisch|b[äa]e?cker|backwaren|gro(ß|ss)handel|\bmetro\b|selgros|handelshof|transgourmet|chefs ?culinar|meledi|melkaa|getr[äa]e?nke|gem[üu]e?se|\bobst\b|lebensmittel|frischdienst|gefl[üu]e?gel|verpackung/],
   ['RENT', /miete|vermiet|hausverwalt|immobil/],
-  ['ENERGY', /strom|energie|ewe|logo ?energie|stadtwerke|gas|wasser/],
+  ['ENERGY', /strom|energie|\bewe\b|logo ?energie|stadtwerke|\bgas\b|erdgas|wasserwerk|wasserversorg/],
   ['TELECOM', /telekom|vodafone|o2|1&1|internet|mobilfunk/],
   ['INSURANCE', /bgn|berufsgenossenschaft|versicherung|allianz|axa|ergo|hdi|ihk|gez|rundfunk/],
   ['PLATFORM_FEES', /lieferando|takeaway|uber|wolt|sides/],

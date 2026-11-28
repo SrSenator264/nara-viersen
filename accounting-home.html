@@ -8,7 +8,7 @@
 <script src="flamo-t.js"></script>
 <link rel="stylesheet" href="flamo-night.css?v=20261031b"><script src="flamo-night.js?v=20261031b"></script>
 <style>
-:root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--bad:#d1342f;--soft:#fff4ea}
+:root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ef491d;--ok:#16884a;--bad:#d1342f;--soft:#fff4ea}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 FlamoAr,"Segoe UI",system-ui,Arial,sans-serif}
 button,input,select{font:inherit;color:inherit}
@@ -71,11 +71,37 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
 .fx{display:flex;gap:8px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}.fx span{flex:1}.fx button{border:0;background:#eef0ea;border-radius:10px;min-height:36px;padding:0 10px;cursor:pointer}
 .unk{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0;border-top:1px solid var(--line)}.unk span{flex:1;min-width:140px}.unk select{min-height:40px;border-radius:10px;border:2px solid var(--line);background:#fff}
 .note{font-size:.82rem;color:var(--mute);text-align:center;padding:4px 10px 20px}
+/* 3 Schritte */
+.steps{display:grid;gap:14px}
+.st-block h2{display:flex;align-items:center;gap:10px}
+.st-n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;font-size:1rem;font-weight:900;flex:none}
+.st-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.st-kpi{background:var(--soft);border-radius:14px;padding:12px 14px}
+.st-kpi small{display:block;color:var(--mute);font-weight:700}
+.st-kpi b{display:block;font-size:1.6rem;font-variant-numeric:tabular-nums;margin-top:2px}
+.st-kpi.neg b{color:var(--bad)}
+.st-note{margin:6px 0 0;font-size:.8rem}
+.st-todo{display:flex;align-items:center;gap:12px;padding:10px 12px;border:2px solid var(--line);border-radius:14px;margin-top:8px;color:inherit;text-decoration:none;min-height:52px}
+.st-todo:hover{border-color:var(--brand)}
+.st-todo .e{font-size:1.4rem;flex:none}.st-todo span{flex:1;font-weight:700}.st-todo i{font-style:normal;color:var(--brand);font-weight:900}
+.st-ok{display:flex;align-items:center;gap:14px;padding:8px 0}
+.st-ok img,.st-todo-head img{width:72px;height:72px;object-fit:contain;flex:none}
+.st-todo-head{display:flex;align-items:center;gap:12px;color:var(--mute);font-weight:700}
+.st-quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.st-quick a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:84px;padding:10px;border-radius:14px;background:#fff;border:2px solid var(--line);color:inherit;text-decoration:none;font-weight:800;text-align:center}
+.st-quick a:hover{border-color:var(--brand);background:var(--soft)}
+.st-quick a span{font-size:1.6rem}
 </style>
 <link rel="stylesheet" href="flamo-font.css?v=20261109a"></head>
 <body>
 <header><h1>📚 <span data-t="title"></span></h1><p data-t="sub"></p></header>
 <main>
+  <!-- 3 Schritte für Nicht-Buchhalter: Wie stehen wir? · Was fehlt? · Schnell erledigen. Nur Lesen, keine Buchung. -->
+  <section class="card steps" id="c-steps" aria-live="polite">
+    <div class="st-block"><h2><span class="st-n">1</span> <span data-s="s1"></span></h2><div class="st-kpis" id="st-kpis"></div><p class="mute st-note" data-s="draft"></p></div>
+    <div class="st-block"><h2><span class="st-n">2</span> <span data-s="s2"></span></h2><div id="st-todo"></div></div>
+    <div class="st-block"><h2><span class="st-n">3</span> <span data-s="s3"></span></h2><div class="st-quick" id="st-quick"></div></div>
+  </section>
   <section class="card alert" id="c-alert" hidden></section>
   <section class="card" id="c-klein"></section>
   <section class="card" id="c-month"></section>
@@ -449,6 +475,74 @@ loadPlat();loadEuer();
 $('fxAdd').onclick=()=>{const name=$('fx-name').value.trim(),match=($('fx-match').value.trim()||name);if(!name)return;const n=Number(String($('fx-amount').value).replace(',','.'));const l=((S&&S.fixedCosts)||[]).concat([{name:name.slice(0,60),match:match.slice(0,60),amountCents:Number.isFinite(n)&&n>0?Math.round(n*100):0,day:Math.min(28,Math.max(1,Number($('fx-day').value)||1))}]);$('fx-name').value='';$('fx-match').value='';$('fx-amount').value='';saveSettings({fixedCosts:l})};
 $('weekly').onclick=async()=>{try{const r=await fetch('/api/accounting/weekly/test',{method:'POST'});const j=await r.json();$('msg').textContent=t(j.sent?'weeklyOk':'weeklyNo')}catch(e){$('msg').textContent=t('err')}};
 load();
+</script>
+<script>
+/* 3 Schritte (Sprint 2026-11-28): liest nur vorhandene Daten (Gesundheit, EÜR-Entwurf, Tagesvorschau) — bucht nichts. */
+(function(){
+  const S={
+    de:{s1:'Wie stehen wir?',s2:'Was fehlt noch?',s3:'Schnell erledigen',today:'Heute an der Kasse (brutto)',month:'Einnahmen diesen Monat (ohne MwSt)',mprofit:'Gewinn diesen Monat',year:'dieses Jahr',draft:'Gewinn = Entwurf aus erfassten Zahlen (Einnahmen − Kosten, ohne MwSt), ersetzt nicht den Steuerberater.',
+      allOk:'Alles erledigt — nichts offen. 🎉',todoHead:'Das ist noch offen:',more:'weitere',
+      closings:'{n} Verkaufstag(e) ohne Tagesabschluss',bank:'{n} Bankbuchung(en) noch nicht zugeordnet',belege:'{n} Beleg(e) warten auf Prüfung',journal:'{n} Buchung(en) noch offen',
+      NO_PURCHASE_INVOICES:'Noch keine Einkaufsrechnungen erfasst',NO_RENT:'Miete / Fixkosten fehlen',NO_PAYROLL:'Löhne fehlen',NO_PLATFORM_FEES:'Plattform-Gebühren fehlen',PLATFORM_STATEMENT_GAPS:'Plattform-Abrechnungen fehlen für einige Monate',VAT_SALES_RATE_ASSUMED:'MwSt-Satz nur angenommen — einmal prüfen',CATEGORIES_GUESSED:'Einige Kategorien nur geschätzt — kurz prüfen',
+      deadline:'Nächste Frist',qBeleg:'Beleg hochladen',qBank:'Bank abgleichen',qClose:'Tagesabschluss',qPl:'Gewinn & Verlust',qAsk:'Buchhalter fragen',qPlat:'Plattform-Abrechnung'},
+    ar:{s1:'شو وضعنا؟',s2:'شو ناقصنا؟',s3:'خلّصها بسرعة',today:'اليوم بالكاشير (مع الضريبة)',month:'مبيعات هالشهر (بدون ضريبة)',mprofit:'ربح هالشهر',year:'هالسنة',draft:'الربح = مسودة من الأرقام المسجّلة (المبيعات − المصاريف، بدون ضريبة)، ما بتغني عن المستشار الضريبي.',
+      allOk:'كل شي خالص — ما في شي ناقص. 🎉',todoHead:'هدول لسا ناقصين:',more:'كمان',
+      closings:'{n} يوم بيع بلا تقفيلة',bank:'{n} حركة بنك لسا ما انربطت',belege:'{n} فاتورة/إيصال ناطرين مراجعة',journal:'{n} قيد لسا مفتوح',
+      NO_PURCHASE_INVOICES:'لسا ما في فواتير مشتريات',NO_RENT:'الإيجار / المصاريف الثابتة ناقصة',NO_PAYROLL:'الرواتب ناقصة',NO_PLATFORM_FEES:'عمولات المنصات ناقصة',PLATFORM_STATEMENT_GAPS:'كشوف المنصات ناقصة لكم شهر',VAT_SALES_RATE_ASSUMED:'نسبة الضريبة مفترضة — راجعها مرة',CATEGORIES_GUESSED:'كم تصنيف مقدّر — شيّك عليهم',
+      deadline:'أقرب موعد',qBeleg:'ارفع فاتورة',qBank:'طابق البنك',qClose:'تقفيلة اليوم',qPl:'الربح والخسارة',qAsk:'اسأل المحاسب',qPlat:'كشف منصة'},
+    en:{s1:'Where do we stand?',s2:'What is missing?',s3:'Do it quickly',today:'Today at the till (gross)',month:'Income this month (excl. VAT)',mprofit:'Profit this month',year:'this year',draft:'Profit = draft from the recorded numbers (income − costs, excl. VAT); it does not replace your tax advisor.',
+      allOk:'All done — nothing open. 🎉',todoHead:'Still open:',more:'more',
+      closings:'{n} sales day(s) without a daily closing',bank:'{n} bank transaction(s) not matched yet',belege:'{n} receipt(s) waiting for review',journal:'{n} booking(s) still open',
+      NO_PURCHASE_INVOICES:'No purchase invoices recorded yet',NO_RENT:'Rent / fixed costs missing',NO_PAYROLL:'Wages missing',NO_PLATFORM_FEES:'Platform fees missing',PLATFORM_STATEMENT_GAPS:'Platform statements missing for some months',VAT_SALES_RATE_ASSUMED:'VAT rate only assumed — check once',CATEGORIES_GUESSED:'Some categories only guessed — quick check',
+      deadline:'Next deadline',qBeleg:'Upload receipt',qBank:'Match bank',qClose:'Daily closing',qPl:'Profit & loss',qAsk:'Ask the accountant',qPlat:'Platform statement'}
+  };
+  const L=()=>{try{const l=window.NARA_LANG&&NARA_LANG.get();return S[l]?l:'de'}catch(e){return 'de'}};
+  const s=k=>(S[L()]||S.de)[k]||S.de[k]||k;
+  const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const eur=c=>(Number(c||0)/100).toLocaleString(L()==='en'?'en-IE':'de-DE',{style:'currency',currency:'EUR'});
+  const get=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
+  // was fehlt → Link (gleiche Seiten wie der Rest der Buchhaltung)
+  const LINK={closings:'kasse-settlement.html',bank:'banking.html',belege:'inventory-foundation.html',journal:'accounting.html',
+    NO_PURCHASE_INVOICES:'inventory-foundation.html',NO_RENT:'#fxList',NO_PAYROLL:'staff.html',NO_PLATFORM_FEES:'#c-plat',PLATFORM_STATEMENT_GAPS:'#c-plat',VAT_SALES_RATE_ASSUMED:'accounting.html',CATEGORIES_GUESSED:'banking.html'};
+  const ICON={closings:'📊',bank:'🏦',belege:'🧾',journal:'📒',NO_PURCHASE_INVOICES:'🧾',NO_RENT:'🏠',NO_PAYROLL:'👥',NO_PLATFORM_FEES:'🛵',PLATFORM_STATEMENT_GAPS:'🛵',VAT_SALES_RATE_ASSUMED:'％',CATEGORIES_GUESSED:'🏷️'};
+  let data={};
+  function render(){
+    document.querySelectorAll('#c-steps [data-s]').forEach(el=>{el.textContent=s(el.dataset.s)});
+    const h=data.health||{},m=h.month||{},eu=(data.euer&&data.euer.euer)||{},pl=(data.pl&&data.pl.report)||null,day=(data.day&&data.day.report)||null;
+    const kpi=(label,c,neg,sub)=>'<div class="st-kpi'+(neg?' neg':'')+'"><small>'+esc(label)+'</small><b>'+(c==null?'—':esc(eur(c)))+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</div>';
+    // Monat: gleiche Rechnung wie «Gewinn & Verlust» (Einnahmen inkl. Plattform-Abrechnungen − Kosten, ohne MwSt)
+    document.getElementById('st-kpis').innerHTML=kpi(s('today'),day&&day.net?day.net.grossCents:null)
+      +kpi(s('month'),pl&&pl.income?pl.income.totalCents:null)
+      +kpi(s('mprofit'),pl?pl.profitCents:null,pl&&Number(pl.profitCents)<0,eu.profitCents!=null?esc(s('year'))+': '+esc(eur(eu.profitCents)):'');
+    // Offene Punkte: Monats-Checkliste (ohne TSE — die bleibt unten in der Checkliste) + Hinweise aus dem Entwurf (Jahr)
+    const todo=[];
+    for(const it of (m.items||[]))if(it&&it.status!=='ok'&&it.status!=='wait'&&LINK[it.key]&&Number(it.count)>0)todo.push({k:it.key,txt:s(it.key).replace('{n}',it.count)});
+    for(const w of (eu.warnings||[]))if(LINK[w]&&S.de[w])todo.push({k:w,txt:s(w)});
+    const dl=(h.deadlines||[])[0];
+    const box=document.getElementById('st-todo');
+    const dlHtml=dl?'<p class="mute" style="margin:8px 0 0">⏰ '+esc(s('deadline'))+': <b>'+esc(new Date(dl.date+'T12:00:00').toLocaleDateString(L()==='en'?'en-GB':'de-DE'))+'</b></p>':'';
+    if(!todo.length){box.innerHTML='<div class="st-ok"><img src="/brand/flamo-happy.png" alt="" loading="lazy"><b>'+esc(s('allOk'))+'</b></div>'+dlHtml;return}
+    const shown=todo.slice(0,6);
+    box.innerHTML='<div class="st-todo-head"><img src="/brand/flamo-worried.png" alt="" loading="lazy"><span>'+esc(s('todoHead'))+'</span></div>'
+      +shown.map(x=>'<a class="st-todo" href="'+esc(LINK[x.k])+'"><span class="e">'+(ICON[x.k]||'•')+'</span><span>'+esc(x.txt)+'</span><i>›</i></a>').join('')
+      +(todo.length>shown.length?'<p class="mute">+'+(todo.length-shown.length)+' '+esc(s('more'))+'</p>':'')+dlHtml;
+  }
+  function quick(){
+    const Q=[['inventory-foundation.html','🧾','qBeleg'],['banking.html','🏦','qBank'],['kasse-settlement.html','📊','qClose'],['reports.html','📈','qPl'],['#c-plat','🛵','qPlat'],['accounting-agent.html','🤖','qAsk']];
+    document.getElementById('st-quick').innerHTML=Q.map(([h,e,k])=>'<a href="'+h+'"><span>'+e+'</span>'+esc(s(k))+'</a>').join('');
+  }
+  async function load(){
+    const health=await get('/api/accounting/health');
+    // Geschäftstag vom Server (nach Mitternacht zählt noch der Vortag) → Monat und Jahr daraus
+    const today=String((health&&health.today)||new Date().toISOString().slice(0,10)),y=today.slice(0,4),mo=today.slice(0,7);
+    const last=new Date(Date.UTC(Number(y),Number(today.slice(5,7)),0)).getUTCDate();
+    const [euer,pl,day]=await Promise.all([get('/api/accounting/euer?year='+y),get('/api/reports/profit-loss?from='+mo+'-01&to='+mo+'-'+String(last).padStart(2,'0')),get('/api/day-closing/preview')]);
+    data={health,euer,pl,day};render();
+  }
+  quick();render();load();
+  window.addEventListener('nara-lang',()=>{quick();render()});
+  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-lang]'))setTimeout(()=>{quick();render()},0)});
+})();
 </script>
 <script src="flamo-home.js?v=20261031a" defer></script></body>
 </html>

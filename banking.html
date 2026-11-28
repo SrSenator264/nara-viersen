@@ -8,7 +8,7 @@
 <script src="/flamo-t.js"></script>
 <link rel="stylesheet" href="flamo-night.css?v=20261031b"><script src="flamo-night.js?v=20261031b"></script>
 <style>
-:root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ff6d00;--ok:#16884a;--bad:#d1342f;--soft:#fff4ea}
+:root{--bg:#f4f2ef;--card:#fff;--ink:#1d2327;--mute:#6b7378;--line:#e7e3de;--brand:#ef491d;--ok:#16884a;--bad:#d1342f;--soft:#fff4ea}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 FlamoAr,"Segoe UI",system-ui,Arial,sans-serif}
 button,input{font:inherit;color:inherit}
@@ -21,6 +21,7 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
 .mute{color:var(--mute);font-size:.9rem}
 .drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px;border:2px dashed var(--line);border-radius:16px;cursor:pointer;text-align:center}
 .drop span{font-size:2rem}
+.drop.over{border-color:var(--brand);background:var(--soft,#fff4ea)}
 .drop input{display:none}
 .btn{min-height:50px;border:0;border-radius:14px;background:var(--brand);color:#fff;font-weight:800;cursor:pointer;padding:0 16px}
 .btn.ghost{background:#eef0ea;color:var(--ink)}
@@ -65,6 +66,7 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
   <section class="card">
     <h2>🔗 <span data-t="txh"></span></h2>
     <div class="chips"><button class="chip on" data-f="open" type="button" data-t="fOpen"></button><button class="chip" data-f="uncat" type="button" data-t="fUncat"></button><button class="chip" data-f="all" type="button" data-t="fAll"></button></div>
+    <button class="btn small" id="sureAll" type="button" hidden style="margin-bottom:8px"></button>
     <button class="btn small" id="catAll" type="button" hidden style="margin-bottom:8px"></button>
     <div id="transactions" class="mute" data-t="loading"></div>
   </section>
@@ -105,6 +107,9 @@ FT.init({
   manual:{de:'Selbst zuordnen',ar:'اربطها بإيدك',en:'Match manually'},
   ask:{de:'Rechnungs- oder Vorgangsnummer eingeben',ar:'اكتب رقم الفاتورة أو العملية',en:'Enter invoice or reference number'},
   ok:{de:'Abgleich gespeichert ✅',ar:'انحفظت المطابقة ✅',en:'Match saved ✅'},
+  sureAll:{de:'Alle sicheren Treffer bestätigen ({n})',ar:'ثبّت كل المطابقات الأكيدة ({n})',en:'Confirm all sure matches ({n})'},
+  sureAsk:{de:'{n} Buchungen mit dem sicheren Vorschlag verbinden?\n\n{list}',ar:'نربط {n} حركة بالاقتراح الأكيد؟\n\n{list}',en:'Link {n} transactions to their sure suggestion?\n\n{list}'},
+  sureDone:{de:'{n} Treffer gespeichert ✅',ar:'انحفظت {n} مطابقة ✅',en:'{n} matches saved ✅'},
   noOk:{de:'Abgleich konnte nicht gespeichert werden',ar:'ما انحفظت المطابقة',en:'Could not save the match'},
   pick:{de:'Bitte zuerst eine Datei wählen',ar:'اختار ملف أول',en:'Choose a file first'},
   fUncat:{de:'Ohne Kategorie',ar:'بدون فئة',en:'No category'},
@@ -147,6 +152,15 @@ function draw(){
   }).join('')||esc(t(filter==='open'&&TX.length?'noneOpen':'none'));
   document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{const c=(SUG.get(b.dataset.ok)||[])[Number(b.dataset.i)];if(c)match(b.dataset.ok,c.entityType,c.entityId)});
   document.querySelectorAll('[data-cat]').forEach(s=>s.onchange=()=>saveCats([{transactionId:s.dataset.cat,category:s.value||null}]));
+  // ضغطة وحدة: كل حركة إلها اقتراح «أكيد» (فائز واضح) بتنربط — بعد ما المالك يأكّد بالنافذة
+  const sure=TX.filter(x=>x.status==='UNMATCHED').map(x=>({x,c:(SUG.get(x.id)||[])[0]})).filter(({c})=>c&&c.confidence==='high');
+  $('sureAll').hidden=!sure.length;$('sureAll').textContent='✅ '+t('sureAll',{n:sure.length});
+  $('sureAll').onclick=async()=>{
+    const list=sure.slice(0,12).map(({x,c})=>'• '+fmtD(x.date)+' '+eur(x.amountCents)+' → '+c.label).join('\n')+(sure.length>12?'\n…':'');
+    if(!confirm(t('sureAsk',{n:sure.length,list})))return;
+    let n=0;for(const {x,c} of sure){try{const r=await fetch('/api/accounting/bank-transactions/match',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transactionId:x.id,status:'MATCHED',entityType:c.entityType,entityId:c.entityId})});if(r.ok)n++}catch(e){}}
+    say(t('sureDone',{n}));load();
+  };
   const pend=TX.filter(x=>!x.category&&x.suggestedCategory);$('catAll').hidden=!pend.length;$('catAll').textContent='✅ '+t('catAll',{n:pend.length});
   $('catAll').onclick=()=>saveCats(pend.map(x=>({transactionId:x.id,category:x.suggestedCategory})));
   document.querySelectorAll('[data-man]').forEach(b=>b.onclick=()=>{const ref=prompt(t('ask'));if(ref)match(b.dataset.man,'MANUAL',ref)});
@@ -193,6 +207,12 @@ $('file').onchange=async()=>{
   $('file').value='';
 };
 document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{filter=c.dataset.f;draw()});
+// الكشف بينسحب ويتفلت فوق المربع كمان (مش بس «اختار ملف»)
+{const drop=document.querySelector('.drop');if(drop){
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,()=>drop.classList.remove('over')));
+  drop.addEventListener('drop',e=>{e.preventDefault();const fl=e.dataTransfer&&e.dataTransfer.files;if(!fl||!fl.length)return;try{const dt=new DataTransfer();dt.items.add(fl[0]);$('file').files=dt.files;$('file').onchange()}catch(err){say(t('pick'))}});
+}}
 load();
 </script>
 <script src="flamo-home.js?v=20261031a" defer></script></body>
