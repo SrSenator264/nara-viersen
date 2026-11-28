@@ -1,7 +1,8 @@
 'use strict';
 // Bestell-Simulator: Verteilung/Preise offline (seed), und gegen einen echten temporären Server: alles isTest, nichts in TSE/Buchhaltung, clear storniert.
 const test = require('node:test'), assert = require('node:assert/strict');
-const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
+const { stopServer } = require('./helpers/stop-server.js');
+const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process'), { pathToFileURL } = require('node:url');
 const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-sim-'));
 const port = 5400 + Math.floor(Math.random() * 400), base = `http://127.0.0.1:${port}`;
@@ -16,9 +17,9 @@ test.before(async () => {
   fs.writeFileSync(path.join(tmp, '.env'), 'SECRET_KEY=x\n');
   proc = spawn(process.execPath, ['server.js'], { cwd: tmp, env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', NARA_SERVICE_KEY: '', NARA_MANAGER_KEY: 'simkey-123' }, stdio: 'ignore' });
   for (let i = 0; i < 60; i++) { try { await fetch(base + '/api/menu'); break; } catch { await new Promise(r => setTimeout(r, 150)); } }
-  sim = await import(path.join(root, 'scripts', 'simulate-orders.mjs'));
+  sim = await import(pathToFileURL(path.join(root, 'scripts', 'simulate-orders.mjs')).href); // Windows: import() braucht eine file://-URL
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+test.after(() => { return stopServer(proc, tmp); });
 
 test('rng: gleicher Seed = gleiche Folge', () => {
   const a = sim.rng(5), b = sim.rng(5), c = sim.rng(6);

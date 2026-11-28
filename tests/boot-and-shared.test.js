@@ -2,6 +2,7 @@
 // End-to-end: Start-Migrationen (Optionen-Bibliothek, Double/Triple-Cleanup, Übersetzungs-Entwürfe) + readAdminDataShared bleibt read-only.
 // Startet eine Kopie des Servers mit eingefrorenem Shared-Objekt (NARA_FREEZE_SHARED=1): verändert ein Handler es, wirft er → HTTP 500 → Test rot.
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-boot-'));
@@ -45,7 +46,7 @@ test.before(async () => {
   for (let i = 0; i < 60; i++) { try { await fetch(base + '/api/health'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start:\n' + out);
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+test.after(() => { return stopServer(proc, tmp); });
 const get = async u => { const r = await fetch(base + u, { headers: { 'x-nara-manager-key': KEY } }); return { status: r.status, json: await r.json().catch(() => null) }; };
 
 test('boot: option library is migrated, products linked, backup written', () => {

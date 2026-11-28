@@ -1,6 +1,7 @@
 'use strict';
 // الأرشفة الأسبوعية: بتنقل بس الطلبات القديمة والمسكّرة واللي يومها مقفّل، وما بتغيّر ولا رقم بالتقارير.
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
 const OA = require('../order-archive.js'), DC = require('../day-closing.js'), SL = require('../sales-ledger.js'), CDB = require('../customer-db.js'), bizDay = require('../business-day.js');
 const root = path.resolve(__dirname, '..');
@@ -108,7 +109,7 @@ test.before(async () => {
   for (let i = 0; i < 60; i++) { try { await fetch(base + '/api/auth/me'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start');
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(dir, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+test.after(() => { return stopServer(proc, dir); });
 async function call(method, url, body, cookie) {
   const r = await fetch(base + url, { method, headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, body: body ? JSON.stringify(body) : undefined });
   const text = await r.text(); let json = null; try { json = JSON.parse(text); } catch { /* */ }

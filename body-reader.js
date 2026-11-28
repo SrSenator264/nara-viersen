@@ -5,6 +5,7 @@
 //  • Handler-Fehler (Logik/Validierung) sind NICHT Sache dieses Moduls: die Handler antworten selbst (z. B. 422).
 // readBody(req, res, limit[, replyFn]) → Promise: das geparste JSON, oder undefined wenn schon geantwortet wurde (413/400) bzw. der Client weg ist.
 // replyFn(res, status, data) = server.js reply() (gleiche Header/CORS/Logging); Standard: schlanker JSON-Writer.
+const DRAIN_LIMIT = 1024 * 1024; // so viel Überlänge wird nach dem Limit noch verworfen, bevor wir antworten
 function defaultReply(res, status, data) {
   const body = JSON.stringify(data);
   if (res.headersSent) return;
@@ -19,10 +20,20 @@ function readBody(req, res, limit, replyFn = defaultReply) {
       if (done) return;
       done = true; // ab jetzt nichts mehr sammeln
       req.removeListener('data', onData);
-      try { replyFn(res, 413, { error: 'Payload too large.' }); } catch { /* Antwort schon raus */ }
-      // erst nach dem Senden der 413 die Verbindung kappen (sonst sieht der Client nur einen Reset); Sicherheits-Timer falls 'finish' nie kommt
-      const kill = () => { try { req.destroy(); } catch { /* weg */ } };
-      res.once('finish', kill); setTimeout(kill, 2000).unref();
+      // Rest des Uploads erst verwerfen (max. DRAIN_LIMIT / 1 s), dann die 413 schicken: wird gekappt, während der
+      // Client noch sendet, sieht er (v. a. unter Windows) nur ECONNRESET statt der 413.
+      let sent = false, extra = 0;
+      const send = () => {
+        if (sent) return; sent = true;
+        try { replyFn(res, 413, { error: 'Payload too large.' }); } catch { /* Antwort schon raus */ }
+        // nach dem Senden die Verbindung kappen; Sicherheits-Timer falls 'finish' nie kommt
+        const kill = () => { try { req.destroy(); } catch { /* weg */ } };
+        res.once('finish', kill); setTimeout(kill, 2000).unref();
+      };
+      req.on('data', chunk => { extra += chunk.length; if (extra > DRAIN_LIMIT) send(); });
+      req.once('end', send);
+      setTimeout(send, 1000).unref();
+      req.resume();
       resolve(undefined);
     };
     const onData = chunk => { body += chunk; if (body.length > limit) tooLarge(); };

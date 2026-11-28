@@ -1,6 +1,7 @@
 'use strict';
 // End-to-end Sicherheitstests: startet eine Kopie des Servers mit leerem data/-Ordner.
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-restore-owner-'));
@@ -18,7 +19,7 @@ test.before(async () => {
   for (let i = 0; i < 50; i++) { try { await fetch(base + '/api/auth/me'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start');
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+test.after(() => { return stopServer(proc, tmp); });
 
 async function call(method, url, body, cookie, headers = {}) {
   const r = await fetch(base + url, { method, redirect: 'manual', headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}), ...headers }, body: body ? JSON.stringify(body) : undefined });

@@ -2,6 +2,7 @@
 // Annahme-Tablet: Zustandsmaschine (PENDING → ACCEPTING → ACCEPTED/FAILED), Bridge-Befehle, Küche/Prognose-Ausblendung
 // und ein End-to-End-Lauf gegen eine echte Server-Kopie.
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
 const A = require('../platform-accept.js');
 const kitchen = require('../kitchen.js');
@@ -160,7 +161,7 @@ test.describe('End-to-End', () => {
     const b = await call('POST', '/api/auth/bootstrap', { name: 'Chef', pin: '739402' });
     assert.equal(b.status, 200); cookie = b.cookie;
   });
-  test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+  test.after(() => { return stopServer(proc, tmp); });
 
   test('ohne Anmeldung: Tablet-API gesperrt', async () => {
     assert.equal((await call('GET', '/api/platform-orders/pending')).status, 401);

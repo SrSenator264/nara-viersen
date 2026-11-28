@@ -2,6 +2,7 @@
 // Kasse-Host (Tunnel): Login-Liste zeigt nach bestandener Access-/Mail-Prüfung (kasseGate ok) alle aktiven Konten,
 // sonst über den Tunnel nur Fahrer. setupNeeded wird über den Tunnel nie verraten. End-to-end mit eigener Server-Kopie.
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), http = require('node:http'), { spawn } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-kasse-list-'));
@@ -18,7 +19,7 @@ test.before(async () => {
   for (let i = 0; i < 50; i++) { try { await req('GET', '/api/auth/me'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start');
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+test.after(() => { return stopServer(proc, tmp); });
 
 // node:http statt fetch, damit der Host-Header frei gesetzt werden kann.
 function req(method, url, body, headers = {}) {

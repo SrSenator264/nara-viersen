@@ -1,5 +1,6 @@
 'use strict';
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), http = require('node:http'), { spawn } = require('node:child_process');
 const F = require('../flamo-ai.js');
 
@@ -96,7 +97,7 @@ test.before(async () => {
   }); }).listen(fport);
   await startServer({ GEMINI_API_KEY: 'test-key', NARA_AI_BASE_URL: `http://127.0.0.1:${fport}`, NARA_AI_MONTHLY_CAP_EUR: '0.01', NARA_AI_PRICE_IN_EUR_PER_M: '1', NARA_AI_PRICE_OUT_EUR_PER_M: '5' });
 });
-test.after(() => { proc && proc.kill(); fakeSrv && fakeSrv.close(); fs.rmSync(tmp, { recursive: true, force: true }); });
+test.after(() => { fakeSrv && fakeSrv.close(); return stopServer(proc, tmp); });
 
 test('server: public chat uses Gemini with tools, key stays server-side, monthly cap pauses the AI', async () => {
   assert.equal((await fetch(base + '/api/flamo/status').then(r => r.json())).ai, true);

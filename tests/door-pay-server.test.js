@@ -1,6 +1,7 @@
 'use strict';
 // End-to-end: Türzahlung. Kopie des Servers mit leerem data/-Ordner und Test-IBAN.
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-door-'));
@@ -25,7 +26,7 @@ test.before(async () => {
   await start(false);
   const b = await call('POST', '/api/auth/bootstrap', { name: 'Chef', pin: '739402' }); assert.equal(b.status, 200);
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+test.after(() => { return stopServer(proc, tmp); });
 
 async function seed() {
   // Bestellung + Tour direkt in die Daten schreiben (Server liest bei jedem Aufruf neu)

@@ -1,6 +1,7 @@
 'use strict';
 // Rechnung für die Buchhaltung freigeben (DRAFT → APPROVED) ohne Lagerbuchung; zählt dann in der GuV, Wareneingang geht danach weiter.
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
 const EU = require('../euer-draft.js');
 
@@ -39,7 +40,7 @@ test('Route: freigeben, Fehlerfälle, Audit, Wareneingang danach', async t => {
     ],
   }));
   proc = spawn(process.execPath, ['server.js'], { cwd: tmp, env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', NARA_SERVICE_KEY: '', NARA_MANAGER_KEY: '', ANTHROPIC_API_KEY: '', GEMINI_API_KEY: '', NARA_NO_MONITOR: '1' }, stdio: 'ignore' });
-  t.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+  t.after(() => { return stopServer(proc, tmp); });
   for (let i = 0; i < 80; i++) { try { await fetch(base + '/api/auth/me'); break; } catch { await new Promise(r => setTimeout(r, 150)); } }
   const bs = await call('POST', '/api/auth/bootstrap', { name: 'Chef', pin: '739402' }); assert.equal(bs.status, 200, JSON.stringify(bs.json)); const owner = bs.cookie;
   const ap = (id, c = owner) => call('POST', '/api/accounting/invoices/approve', { invoiceId: id }, c);

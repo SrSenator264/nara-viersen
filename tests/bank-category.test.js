@@ -1,6 +1,7 @@
 'use strict';
 // Kategorie je Bankbuchung: Vorschlagsregeln, Summen und GuV-Vergleich (Bank vs. manuell); Route mit echtem Server.
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
 const BC = require('../bank-category.js'), EU = require('../euer-draft.js');
 
@@ -67,7 +68,7 @@ test('Route: Kategorie speichern, ungültige ablehnen, Audit', async t => {
   fs.mkdirSync(path.join(tmp, 'data'));
   fs.writeFileSync(path.join(tmp, '.env'), 'SECRET_KEY=topsecret\n');
   proc = spawn(process.execPath, ['server.js'], { cwd: tmp, env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', NARA_SERVICE_KEY: '', NARA_MANAGER_KEY: '', ANTHROPIC_API_KEY: '', GEMINI_API_KEY: '' }, stdio: 'ignore' });
-  t.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+  t.after(() => { return stopServer(proc, tmp); });
   for (let i = 0; i < 60; i++) { try { await fetch(base + '/api/auth/me'); break; } catch { await new Promise(r => setTimeout(r, 150)); } }
   owner = (await call('POST', '/api/auth/bootstrap', { name: 'Chef', pin: '739402' })).cookie;
 

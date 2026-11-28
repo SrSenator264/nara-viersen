@@ -2,6 +2,7 @@
 // End-to-end: POST /api/driver/claim gegen einen echten Server (Kopie mit leerem data/-Ordner).
 // Beweist, dass die Route wirklich erreichbar ist (nicht 404) und mit Fahrer-Login + QR-Text funktioniert.
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nara-claim-'));
@@ -21,7 +22,7 @@ test.before(async () => {
   proc = spawn(process.execPath, ['server.js'], { cwd: tmp, env: { ...process.env, PORT: String(port), HOST: '127.0.0.1', NARA_SERVICE_KEY: '', NARA_MANAGER_KEY: '', NARA_GEOCODE: 'off', QONTO_LOGIN: '', QONTO_SECRET: '' }, stdio: 'ignore' });
   for (let i = 0; i < 80; i++) { try { await fetch(base + '/api/auth/me'); break; } catch { await new Promise(r => setTimeout(r, 150)); } }
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+test.after(() => { return stopServer(proc, tmp); });
 
 test('claim over HTTP: login required, owner refused, driver adds order by our link / Scoober URL, route shows up in /api/driver/routes', async () => {
   // ohne Login: 401 (nicht 404)

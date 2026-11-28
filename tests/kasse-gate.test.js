@@ -1,6 +1,7 @@
 'use strict';
 // Kasse über Tunnel: nur mit Cloudflare-Access-Mail aus der Liste (Handy), sonst 403. Unit + End-to-end.
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), http = require('node:http'), { spawn } = require('node:child_process');
 const { kasseGate } = require('../kasse-gate.js');
 const ENV = { NARA_HUB_HOST: 'hub.flamo.co.de', NARA_KASSE_HOST: 'kasse.flamo.co.de', NARA_KASSE_EMAILS: 'Me@Example.com, other@example.com' };
@@ -40,7 +41,7 @@ test.before(async () => {
   for (let i = 0; i < 60; i++) { try { await get('app.flamo.co.de', '/api/auth/me'); return; } catch { await new Promise(r => setTimeout(r, 150)); } }
   throw new Error('server did not start');
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+test.after(() => { return stopServer(proc, tmp); });
 const get = (host, p, headers = {}) => new Promise((res, rej) => {
   const r = http.request({ host: '127.0.0.1', port, path: p, headers: { host, ...headers } }, x => { let b = ''; x.on('data', c => b += c); x.on('end', () => res({ status: x.statusCode, body: b })); });
   r.on('error', rej); r.end();

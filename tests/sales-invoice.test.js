@@ -1,5 +1,6 @@
 'use strict';
 const test = require('node:test'), assert = require('node:assert/strict');
+const { stopServer } = require('./helpers/stop-server.js');
 const fs = require('node:fs'), os = require('node:os'), path = require('node:path'), { spawn } = require('node:child_process');
 const SI = require('../sales-invoice.js');
 const root = path.resolve(__dirname, '..');
@@ -60,7 +61,7 @@ test.before(async () => {
   for (let i = 0; i < 60; i++) { try { await fetch(baseUrl + '/api/auth/me'); break; } catch { await new Promise(r => setTimeout(r, 150)); } }
   owner = (await call('POST', '/api/auth/bootstrap', { name: 'Chef', pin: '739402' })).cookie;
 });
-test.after(() => { proc && proc.kill(); fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); });
+test.after(() => { return stopServer(proc, tmp); });
 
 test('API: create from a cashier order, repeat returns the same one, html prints, cancel keeps the record', async () => {
   const mk = (id, extra) => ({ id, type: 'local', table: '2', status: 'OPEN', createdAt: new Date().toISOString(), cart: [{ id: 'x', name: 'Burger', unitCents: 899, quantity: 1, kind: 'ITEM' }], ...extra });
