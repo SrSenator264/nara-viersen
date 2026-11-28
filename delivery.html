@@ -119,6 +119,7 @@ function openDoor(){api('POST','/api/driver/door-pay',{orderId:O.id,action:'star
 })}
 function renderNotes(){var n=(O.driverNotes||[]).slice().reverse();$('notes').innerHTML=n.length?n.map(function(x){return'<div class="n"><div>'+esc(x.text)+'</div><div class="m">'+esc(x.by||'')+' · '+new Date(x.at).toLocaleString(LANG==='ar'?'ar':LANG)+'</div></div>'}).join(''):'<div class="m" style="color:var(--mut)">'+D.none+'</div>'}
 function load(){
+  if(!token&&!oid){$('load').hidden=true;$('err').hidden=false;$('err').textContent=D.bad;return}
   api('GET','/api/delivery/scan?'+KEY).then(function(j){
     if(!j.__ok){if(j.code==='AUTH_REQUIRED')return;throw Error(j.error||D.bad)}
     O=j.order;$('load').hidden=true;$('view').hidden=false;render()
