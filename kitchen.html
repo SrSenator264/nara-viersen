@@ -50,10 +50,16 @@ body.wide .list{grid-template-columns:1fr}
 .timer small{font-size:10px;color:var(--muted)}
 .card.late .timer b{color:var(--late)}.card.soon .timer b{color:#b45309}
 .cust{padding:0 10px;font-size:13px;color:#46505a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brief{padding:4px 10px 8px;font-size:16px;font-weight:800;line-height:1.35;direction:ltr;text-align:left}
-.brief span{white-space:nowrap}
+.brief{padding:4px 10px 8px;font-size:16px;line-height:1.3;direction:ltr;text-align:left}
+.brief .ln{padding:3px 0;border-top:1px dashed var(--line)}.brief .ln:first-child{border-top:0}
+.brief .ln>b{font-weight:800}.brief .q{display:inline-block;min-width:1.8em;color:var(--new)}
+.brief .op{font-size:14px;font-weight:600;color:#334;padding-left:1.8em}
+.brief .x{font-size:14px;font-weight:800;color:var(--late);padding-left:1.8em}
+.brief .x.alg,.note.alg{background:#fee2e2;border:2px solid #dc2626;color:#991b1b;border-radius:8px;padding:3px 8px;margin-top:3px;font-weight:900}
+.brief .x.alg{margin-left:1.8em;padding-left:8px}
+.note.dn{background:#eef2ff;border-color:#c7d2fe}
 .more{display:none;border-top:1px solid var(--line)}
-.card.open .more{display:block}.card.open .brief{display:none}
+.card.open .more{display:block}
 .info{padding:6px 10px;font-size:14px;line-height:1.5;color:#334;border-bottom:1px dashed var(--line)}
 .info a{color:var(--new);font-weight:800;text-decoration:none;direction:ltr;display:inline-block}
 .note{margin:6px 10px 0;padding:5px 8px;background:#fff7d6;border:1px solid #f3d36b;border-radius:8px;font-size:14px;font-weight:700}
@@ -89,7 +95,9 @@ button:disabled{opacity:.5}
 .card.prio{border-inline-start-color:#7c3aed;box-shadow:0 0 0 3px #7c3aed}
 .card.prio .row1{background:#f3efff}
 .ptag{font-size:13px;font-weight:900;color:#fff;background:#7c3aed;border-radius:6px;padding:2px 8px}
-@media (max-width:640px){header h1,#clock{display:none}.tab{font-size:14px;min-height:44px}.list{grid-template-columns:1fr}}
+@media (max-width:640px){header h1,#clock{display:none}.tab{font-size:14px;min-height:44px;padding:0 4px}.list{grid-template-columns:1fr}
+  /* على التلفون: التبويبات سطر كامل والأزرار تحتها (كانوا يركبوا فوق بعض) */
+  .tabs{flex:1 1 100%}.tools{display:flex;flex-wrap:wrap;gap:6px;width:100%;justify-content:flex-end}}
 @media print{header,#status,main{display:none!important}}
 </style>
 <link rel="stylesheet" href="flamo-font.css?v=20261109a"></head>
@@ -123,27 +131,28 @@ button:disabled{opacity:.5}
   const T={
     ar:{title:'المطبخ',colNew:'🆕 جديد',colPrep:'🔥 عم ينطبخ',colReady:'✅ جاهز',sum:'الملخص',sumTitle:'شو لازم نحضّر هلق',start:'🔥 بلّش',ready:'جاهز ✓',picked:'استلموه',back:'رجوع',print:'اطبع',
       delivery:'توصيل',pickup:'استلام',local:'بالمحل',table:'طاولة',min:'د',late:'متأخر',left:'باقي',empty:'ما في طلبات',updated:'آخر تحديث',orders:'طلبات',
-      offline:'ما في اتصال بالسيرفر — شوف إذا شغّال',login:'سجّل دخول أول',note:'ملاحظة',floor:'الطابق',drinks:'مشروبات',other:'أكل',
+      offline:'ما في اتصال بالسيرفر — شوف إذا شغّال',login:'سجّل دخول أول',note:'ملاحظة',allergy:'حساسية',floor:'الطابق',drinks:'مشروبات',other:'أكل',
       expect:'جاهز تقريباً',sumHint:'بس اللي لازم ينعمل هلق (الطلبات اللي عم تنطبخ واللي وقتها هلق). دوس على صنف لتشوف طلباته.',sumEmpty:'ما في شي للتحضير هلق',later:'لبعدين — لا تبلّش فيهن هلق',from:'من',prio:'أولوية',
       expandT:'افتح كل الطلبات',soundT:'الصوت',autoprintT:'طباعة تلقائية',langT:'اللغة'},
     de:{title:'Küche',colNew:'🆕 Neu',colPrep:'🔥 In Arbeit',colReady:'✅ Fertig',sum:'Übersicht',sumTitle:'Jetzt zubereiten',start:'🔥 Starten',ready:'Fertig ✓',picked:'Abgeholt',back:'Zurück',print:'Drucken',
       delivery:'Lieferung',pickup:'Abholung',local:'Vor Ort',table:'Tisch',min:'Min',late:'zu spät',left:'noch',empty:'Keine Bestellungen',updated:'Aktualisiert',orders:'Bestellungen',
-      offline:'Keine Verbindung zum Server — läuft er?',login:'Bitte zuerst anmelden',note:'Hinweis',floor:'Etage',drinks:'Getränke',other:'Speisen',
+      offline:'Keine Verbindung zum Server — läuft er?',login:'Bitte zuerst anmelden',note:'Hinweis',allergy:'Allergie',floor:'Etage',drinks:'Getränke',other:'Speisen',
       expect:'fertig ca.',sumHint:'Nur was jetzt dran ist (laufende Bestellungen und alle, deren Startzeit jetzt ist). Artikel antippen zeigt die Bestellungen.',sumEmpty:'Gerade nichts zuzubereiten',later:'Später — noch nicht anfangen',from:'ab',prio:'Vorrang',
       expandT:'Alle Bestellungen aufklappen',soundT:'Ton',autoprintT:'Automatisch drucken',langT:'Sprache'},
     en:{title:'Kitchen',colNew:'🆕 New',colPrep:'🔥 Cooking',colReady:'✅ Ready',sum:'Summary',sumTitle:'To prepare now',start:'🔥 Start',ready:'Ready ✓',picked:'Picked up',back:'Back',print:'Print',
       delivery:'Delivery',pickup:'Pickup',local:'Dine-in',table:'Table',min:'min',late:'late',left:'left',empty:'No orders',updated:'Updated',orders:'orders',
-      offline:'No connection to the server — is it running?',login:'Please log in first',note:'Note',floor:'Floor',drinks:'Drinks',other:'Food',
+      offline:'No connection to the server — is it running?',login:'Please log in first',note:'Note',allergy:'Allergy',floor:'Floor',drinks:'Drinks',other:'Food',
       expect:'ready ~',sumHint:'Only what is due now (cooking orders and those whose start time is now). Tap an item to see its orders.',sumEmpty:'Nothing to prepare right now',later:'Later — don\'t start yet',from:'from',prio:'Priority',
       expandT:'Expand all orders',soundT:'Sound',autoprintT:'Auto print',langT:'Language'}
   };
   const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
   // اللغة المشتركة (nara-lang). إذا لسا ما انحفظت، منستعمل مفتاح المطبخ القديم ومننقله.
   const LANGS=['de','ar','en'],NL=window.NARA_LANG;
-  // لغة المطبخ لحالها (غير الكاشير والسواق). الافتراضي عربي إذا لسا ما انختار.
+  // لغة المطبخ لحالها (غير الكاشير والسواق). إذا لسا ما انختارت: نفس لغة هالجهاز بباقي البرنامج، وإلا ألماني متل كل الشاشات.
   let lang=(function(){
     const old=store.get('nara-kitchen-lang',null);
-    const l=LANGS.includes(old)?old:'ar';
+    const shared=['nara-kasse-language','nara.language','nara-lang-app'].map(k=>store.get(k,null)).find(v=>LANGS.includes(v));
+    const l=LANGS.includes(old)?old:(shared||'de');
     if(NL)NL.set(l);
     return l;
   })();
@@ -156,6 +165,8 @@ button:disabled{opacity:.5}
   const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
   const NEXT={NEW:'PREPARING',PREPARING:'READY',READY:'PICKED_UP'},PREV={PREPARING:'NEW',READY:'PREPARING'},BTN={NEW:'start',PREPARING:'ready',READY:'picked'};
   const DRINK=/getr[äa]nk|drink|coffee|kaffee|tea\b|iced|frappuccino|cola|wasser|water|saft|juice|limo|sprite|fanta/i;
+  // كلمات الحساسية (de/en/ar) → الملاحظة بتطلع حمرا وواضحة
+  const ALLERGY=/allerg|unverträglich|intoleran|gluten|lakto|lacto|laktose|lactose|nüsse|nuss|\bnuts?\b|erdnuss|peanut|sesam|soja|\bsoy|zöliak|celiac|حساسي|حساسية|جلوتين|مكسرات|فستق|سمسم/i;
 
   function layout(){document.body.classList.toggle('wide',window.innerWidth>=1300)}
   function applyLang(){
@@ -192,13 +203,19 @@ button:disabled{opacity:.5}
     // "جاهز تقريباً" بيطلع بس إذا التقدير أبعد من الوقت المطلوب (يعني رح يتأخر) — بالأحمر
     const willBeLate=o.expectedReadyAt&&o.kitchenStatus!=='READY'&&Date.parse(o.expectedReadyAt)>Date.parse(o.readyBy)+60000;
     const exp=willBeLate?hhmm(new Date(o.expectedReadyAt)):'';
-    const hasNote=o.notes||o.items.some(i=>i.note);
+    // ⚠️ بالسطر الأول: بس لملاحظة للمطبخ (مش ملاحظة الباب للسواق)
+    const hasNote=(o.kitchenNotes!=null?(o.kitchenNotes||ALLERGY.test(o.deliveryNotes||'')):o.notes)||o.items.some(i=>i.note);
     const cust=[o.customerName,o.address].filter(Boolean).join(' · ');
-    const agg=new Map();for(const i of o.items){const k=itemKey(i);agg.set(k,{name:i.name,q:(agg.get(k)?.q||0)+i.quantity})}
-    const brief=[...agg.values()].map(i=>'<span>'+esc(i.q)+'× '+esc(P(i.name))+'</span>').join(' · ');
-    const items=o.items.map(i=>'<div class="it"><div class="n"><span class="q">'+esc(i.quantity)+'×</span>'+esc(P(i.name))+'</div>'
-      +(i.options||[]).map(x=>'<div class="o">'+(x.quantity>1?esc(x.quantity)+'× ':'')+esc(window.NARA_EMOJI?NARA_EMOJI.deco(P(x.name)):'+ '+P(x.name))+'</div>').join('')
-      +(i.note?'<div class="x">! '+esc(i.note)+'</div>':'')+'</div>').join('');
+    // كل اللي لازم المطبخ يعرفه بيطلع عالبطاقة مباشرة (بدون ما تنفتح): الإضافات، ملاحظة كل صنف، والحساسية بالأحمر
+    const lines=new Map();for(const i of o.items){const k=itemKey(i)+'|'+(i.options||[]).map(x=>x.quantity+'x'+x.name).join(',')+'|'+(i.note||'');const r=lines.get(k);if(r)r.q+=i.quantity;else lines.set(k,{i,q:i.quantity})}
+    const opt=x=>(x.quantity>1?esc(x.quantity)+'× ':'')+esc(window.NARA_EMOJI?NARA_EMOJI.deco(P(x.name)):'+ '+P(x.name));
+    const noteHtml=(cls,txt,label)=>{const a=ALLERGY.test(txt),said=/^\s*(allerg\w*|حساسي\S*)\s*:?/i.test(txt);return '<div class="'+cls+(a?' alg':'')+'">'+(a?'🚫 '+(said?'':esc(t('allergy'))+': '):(label?esc(label)+': ':'⚠ '))+'<bdi>'+esc(txt)+'</bdi></div>'};
+    const brief=[...lines.values()].map(({i,q})=>'<div class="ln"><b><span class="q">'+esc(q)+'×</span> '+esc(P(i.name))+'</b>'
+      +((i.options||[]).length?'<div class="op">'+i.options.map(opt).join(' · ')+'</div>':'')
+      +(i.note?noteHtml('x',i.note):'')+'</div>').join('');
+    const kNotes=o.kitchenNotes!=null?o.kitchenNotes:o.notes,dNotes=o.kitchenNotes!=null?o.deliveryNotes:'';
+    // ملاحظة التوصيل بتضل جوّا (للسواق) — إلا إذا فيها حساسية
+    const cardNotes=[kNotes,ALLERGY.test(dNotes||'')?dNotes:''].filter(Boolean).join(' · ');
     const info=[o.customerName?'<b><bdi>'+esc(o.customerName)+'</bdi></b>':'',o.phone?'<a href="tel:'+esc(o.phone.replace(/\s/g,''))+'">☎ '+esc(o.phone)+'</a>':'',
       o.address?'<bdi dir="ltr">'+esc(o.address)+(o.city?', '+esc(o.city):'')+'</bdi>':'',o.floor?t('floor')+': <bdi>'+esc(o.floor)+'</bdi>':''].filter(Boolean).join('<br>');
     const next=NEXT[o.kitchenStatus],prev=PREV[o.kitchenStatus];
@@ -210,7 +227,8 @@ button:disabled{opacity:.5}
       +(exp?'<div class="lwarn">⚠ '+t('expect')+' '+exp+'</div>':'')
       +(cust?'<div class="cust"><bdi>'+esc(cust)+'</bdi></div>':'')
       +'<div class="brief">'+brief+'</div>'
-      +'<div class="more">'+(info?'<div class="info">'+info+'</div>':'')+(o.notes?'<div class="note">'+esc(t('note'))+': <bdi>'+esc(o.notes)+'</bdi></div>':'')+custHintHtml(o)+'<div class="items">'+items+'</div></div>'
+      +(cardNotes?noteHtml('note',cardNotes,t('note')):'')
+      +'<div class="more">'+(info?'<div class="info">'+info+'</div>':'')+(dNotes&&!ALLERGY.test(dNotes)?'<div class="note dn">🛵 <bdi>'+esc(dNotes)+'</bdi></div>':'')+custHintHtml(o)+'</div>'
       +'<div class="acts">'+(prev?'<button class="sm" data-act="set" data-to="'+prev+'" title="'+t('back')+'">↩</button>':'')
       +'<button class="sm" data-act="print" title="'+t('print')+'">🖨️</button>'
       +(next?'<button class="go '+o.kitchenStatus+'" data-act="set" data-to="'+next+'">'+t(BTN[o.kitchenStatus])+'</button>':'')+'</div></article>';

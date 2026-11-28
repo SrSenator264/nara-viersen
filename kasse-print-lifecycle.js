@@ -4,9 +4,9 @@
   const state=()=>window.NARA_LEGACY_KASSE_STATE;
   const current=()=>state()?.getCurrent?.();
   const text={
-    de:{print:'🖨️ Drucken',kitchen:'🔥 An Küche',customer:'🧾 Kunde',driver:'🛵 Lieferung',reprint:'🔁 Erneut drucken',code:'Bestellcode',empty:'Bitte zuerst Artikel hinzufügen',tblAsk:'Zettel für den Tisch drucken?',tblYes:'🖨️ Drucken',sent:'Druck protokolliert, Auftrag bleibt offen ✅',psTitle:'Drucker-Einstellungen',psSetup:'🖨️ Drucker einrichten',psHelp:'Jedem Drucker eine Aufgabe zuweisen. Den echten Windows-Drucker wählst du im Druckdialog des Browsers.',psName:'Druckername',psAdd:'+ Drucker hinzufügen',psClose:'Schließen',rKitchen:'Küche',rCustomer:'Kunde',rDriver:'Lieferung',auto:'Automatisch nach Zahlung drucken',ip:'IP-Adresse (z. B. 192.168.1.50)',port:'Port',net:'Netzwerk TCP/IP',remove:'Entfernen',notReady:'Druckvorlage noch nicht geladen – Seite neu laden (F5)'},
-    ar:{print:'🖨️ اطبع',kitchen:'🔥 للمطبخ',customer:'🧾 نسخة الزبون',driver:'🛵 نسخة التوصيل',reprint:'🔁 اطبع مرة تانية',code:'رقم الطلب',empty:'زيد صنف قبل ما تطبع',tblAsk:'تطبع ورقة للطاولة؟',tblYes:'🖨️ اطبع',sent:'انطبع وتسجّل، والطلب لسّا مفتوح ✅',psTitle:'إعدادات الطابعة',psSetup:'🖨️ ضبط الطابعات',psHelp:'حدّد شو بتطبع كل طابعة. الطابعة الحقيقية بتنقّيها من نافذة الطباعة بالمتصفح.',psName:'اسم الطابعة',psAdd:'+ زيد طابعة',psClose:'سكّر',rKitchen:'المطبخ',rCustomer:'الزبون',rDriver:'التوصيل',auto:'اطبع لحالو بعد الدفع',ip:'عنوان IP (مثلاً 192.168.1.50)',port:'Port',net:'شبكة TCP/IP',remove:'شيل',notReady:'شكل الفاتورة لسا ما تحمّل – حدّث الصفحة (F5)'},
-    en:{print:'🖨️ Print',kitchen:'🔥 To kitchen',customer:'🧾 Customer copy',driver:'🛵 Driver copy',reprint:'🔁 Reprint',code:'Order code',empty:'Add an item before printing',tblAsk:'Print a slip for the table?',tblYes:'🖨️ Print',sent:'Print logged; order remains open ✅',psTitle:'Printer settings',psSetup:'🖨️ Printer setup',psHelp:'Assign a printer route. The browser print dialog selects the real Windows printer.',psName:'Printer name',psAdd:'+ Add printer',psClose:'Close',rKitchen:'Kitchen',rCustomer:'Customer',rDriver:'Delivery',auto:'Print automatically after payment',ip:'IP address (e.g. 192.168.1.50)',port:'Port',net:'Network TCP/IP',remove:'Remove',notReady:'Receipt template not loaded yet – reload the page (F5)'}};
+    de:{print:'🖨️ Drucken',kitchen:'🔥 An Küche',customer:'🧾 Kunde',driver:'🛵 Lieferung',reprint:'🔁 Erneut drucken',code:'Bestellcode',empty:'Bitte zuerst Artikel hinzufügen',tblAsk:'Zettel für den Tisch drucken?',tblYes:'🖨️ Drucken',sent:'Druck protokolliert, Auftrag bleibt offen ✅',psTitle:'Drucker-Einstellungen',psSetup:'🖨️ Drucker einrichten',psHelp:'Jedem Drucker eine Aufgabe zuweisen. Den echten Windows-Drucker wählst du im Druckdialog des Browsers.',psName:'Druckername',psAdd:'+ Drucker hinzufügen',psClose:'Schließen',rKitchen:'Küche',rCustomer:'Kunde',rDriver:'Lieferung',auto:'Automatisch nach Zahlung drucken',ip:'IP-Adresse (z. B. 192.168.1.50)',port:'Port',net:'Netzwerk TCP/IP',remove:'Entfernen',notReady:'Druckvorlage noch nicht geladen – Seite neu laden (F5)',inKitchen:'🔥 In der Küche ✅'},
+    ar:{print:'🖨️ اطبع',kitchen:'🔥 للمطبخ',customer:'🧾 نسخة الزبون',driver:'🛵 نسخة التوصيل',reprint:'🔁 اطبع مرة تانية',code:'رقم الطلب',empty:'زيد صنف قبل ما تطبع',tblAsk:'تطبع ورقة للطاولة؟',tblYes:'🖨️ اطبع',sent:'انطبع وتسجّل، والطلب لسّا مفتوح ✅',psTitle:'إعدادات الطابعة',psSetup:'🖨️ ضبط الطابعات',psHelp:'حدّد شو بتطبع كل طابعة. الطابعة الحقيقية بتنقّيها من نافذة الطباعة بالمتصفح.',psName:'اسم الطابعة',psAdd:'+ زيد طابعة',psClose:'سكّر',rKitchen:'المطبخ',rCustomer:'الزبون',rDriver:'التوصيل',auto:'اطبع لحالو بعد الدفع',ip:'عنوان IP (مثلاً 192.168.1.50)',port:'Port',net:'شبكة TCP/IP',remove:'شيل',notReady:'شكل الفاتورة لسا ما تحمّل – حدّث الصفحة (F5)',inKitchen:'🔥 وصل عالمطبخ ✅'},
+    en:{print:'🖨️ Print',kitchen:'🔥 To kitchen',customer:'🧾 Customer copy',driver:'🛵 Driver copy',reprint:'🔁 Reprint',code:'Order code',empty:'Add an item before printing',tblAsk:'Print a slip for the table?',tblYes:'🖨️ Print',sent:'Print logged; order remains open ✅',psTitle:'Printer settings',psSetup:'🖨️ Printer setup',psHelp:'Assign a printer route. The browser print dialog selects the real Windows printer.',psName:'Printer name',psAdd:'+ Add printer',psClose:'Close',rKitchen:'Kitchen',rCustomer:'Customer',rDriver:'Delivery',auto:'Print automatically after payment',ip:'IP address (e.g. 192.168.1.50)',port:'Port',net:'Network TCP/IP',remove:'Remove',notReady:'Receipt template not loaded yet – reload the page (F5)',inKitchen:'🔥 Sent to the kitchen ✅'}};
   function lang(){try{if(window.NARA_LANG)return window.NARA_LANG.get();const l=localStorage.getItem('nara-kasse-language');return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}}
   function t(k){return (text[lang()]||text.de)[k]||text.de[k]}
   // الورقة المطبوعة (فاتورة/تذكرة) بتضل ألماني أو إنجليزي، مو عربي
@@ -41,17 +41,29 @@
   }
   // للدفع بالمحل/استلام: kasse-payment.js بيرسل الطلب للمطبخ ويطبع ورقته لحاله (نفس زر "للمطبخ")
   window.NARA_PRINT_KITCHEN=()=>print('kitchen','KITCHEN_PRINT');
+  // كل طباعة بتنضاف للطباعات اللي لسا ماشية: الكاشير بيستناهن كلهن قبل ما يعيد تحميل الصفحة بعد الدفع (حد أقصى 10 ثواني)
+  function pending(job){const prev=window.NARA_PRINT_PENDING;window.NARA_PRINT_PENDING=Promise.race([Promise.all([prev,job.catch(()=>null)]),new Promise(r=>setTimeout(r,10000))])}
+  let kitchenBusy=false;
   async function print(kind,action){const o=current();if(!o||!(o.cart||[]).length){$('#message').textContent=t('empty');return}
-    // "المطبخ": الطلب لازم يكون محفوظ عالسيرفر قبل، وبعدها بيطلع عشاشة المطبخ
-    if(kind==='kitchen'){try{if(window.NARA_SYNC&&NARA_SYNC.pushOrders)await NARA_SYNC.pushOrders()}catch(e){}}
+    if(kind==='kitchen'){
+      // ضغطتين ورا بعض = طلب مكرر ونافذتين طباعة: منتجاهل الضغطة لحد ما يخلص التسليم
+      if(kitchenBusy)return;kitchenBusy=true;
+      // "المطبخ": الطلب لازم يكون محفوظ عالسيرفر قبل، وبعدها بيطلع عشاشة المطبخ
+      try{try{if(window.NARA_SYNC&&NARA_SYNC.pushOrders)await NARA_SYNC.pushOrders()}catch(e){}await log(o,action,kind)}finally{kitchenBusy=false}
+      $('#message').textContent=t('inKitchen');
+      if(!(window.NARA_RECEIPT&&window.NARA_RECEIPT.print))return showSheet(o,kind);
+      // ورقة المطبخ بتنطبع بالخلفية: لا الزر ولا الدفع بيستنوا نافذة الطباعة (window.print بيحجز التبويب لحد ما تتسكّر)
+      const job=new Promise(r=>setTimeout(r,0)).then(()=>window.NARA_RECEIPT.print(o,kind));
+      pending(job);
+      job.then(r=>{if(r&&r.error){$('#message').textContent='⚠ '+r.error;return}
+        // طلب بالمحل: ورقة للطاولة (نسخة الزبون بدون دفع) أول ما ينبعت للمطبخ
+        if((o.type==='local'||o.orderType==='DINE_IN')&&window.NARA_PRINT_TABLE_SLIP!==false)offerTableSlip(o)}).catch(()=>{});
+      return}
     await log(o,action,kind);
     if(window.NARA_RECEIPT&&window.NARA_RECEIPT.print){
-      // الكاشير بيستنى الطباعة قبل ما يعيد تحميل الصفحة بعد الدفع (حد أقصى 10 ثواني)
       const job=window.NARA_RECEIPT.print(o,kind);
-      window.NARA_PRINT_PENDING=Promise.race([job.catch(()=>null),new Promise(r=>setTimeout(r,10000))]);
+      pending(job);
       const r=await job;
-      // طلب بالمحل: ورقة للطاولة (نسخة الزبون بدون دفع) أول ما ينبعت للمطبخ
-      if(kind==='kitchen'&&(o.type==='local'||o.orderType==='DINE_IN')&&window.NARA_PRINT_TABLE_SLIP!==false&&!(r&&r.error))offerTableSlip(o);
       if(r&&r.error)$('#message').textContent='⚠ '+r.error;return}
     showSheet(o,kind)}
   function mount(){

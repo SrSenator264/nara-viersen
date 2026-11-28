@@ -83,6 +83,11 @@
   body .delivery-grid{grid-template-columns:1fr!important}
 }
 
+/* أدوات التلفون بس: على الشاشات الأعرض كانت تطلع بلا تنسيق («Neuer Auftrag» مكرر فوق، «0Warenkorb0,00 €» تحت، و«⌄» فوق السلة) */
+@media screen and (min-width:641px){
+  #phone-cart-bar,#phone-strip-toggle,.cart-panel>.pcb-close{display:none!important}
+}
+
 /* لما تطلع لوحة المفاتيح ما بدنا الصفحة تنزاح أفقياً (الكتابة تروح بعيد): قصّ أي عرض زايد + السلة/النماذج ما بتطلع برّا الشاشة */
 @media screen and (max-width:640px){
   html,body{max-width:100%;overflow-x:hidden}

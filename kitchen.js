@@ -22,11 +22,15 @@ function sourceOf(o) {
   return 'NARA';
 }
 
+// نوع الطلب — نفس القاعدة بالمطبخ وبالطلبات الحية (live-orders.html kindOf): النوع الصريح أول،
+// وإذا مش معروف: في عنوان توصيل = توصيل، ما في = استلام. (TAKEAWAY = استلام، مش توصيل)
 function typeOf(o) {
   const t = str(o.type || o.orderType).toLowerCase();
-  if (t === 'pickup') return 'pickup';
-  if (t === 'local' || t === 'dine_in' || t === 'dine-in') return 'local';
-  return 'delivery';
+  if (/^(deliv|lieferung)/.test(t)) return 'delivery';
+  if (/^(pickup|pick-up|takeaway|take-away|take_away|collection|abholung)/.test(t)) return 'pickup';
+  if (/^(local|dine[_-]?in|table|tisch)/.test(t)) return 'local';
+  const d = (o && o.delivery) || {};
+  return str(d.address || d.street) ? 'delivery' : 'pickup';
 }
 
 // اسم الخيار بدون الترجمة العربية الملحقة ("Einzel / بدون منيو" → "Einzel")
@@ -67,7 +71,8 @@ function kitchenView(o, now = Date.now(), catalog = null) {
   const notes = [str(d.notes), str(d.extra), str(o.remarks), str(o.note)].filter(Boolean);
   return {
     id: o.id,
-    displayCode: str(o.displayCode || o.externalOrderCode) || ('NARA-' + str(o.id).replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase()),
+    // نفس الرقم اللي بيطبعه الكاشير (kasse-print-lifecycle.js code()): FLAMO-xxxxxx
+    displayCode: str(o.displayCode || o.externalOrderCode) || ('FLAMO-' + str(o.id).replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase()),
     source: sourceOf(o),
     type: typeOf(o),
     table: str(o.table),
@@ -77,6 +82,9 @@ function kitchenView(o, now = Date.now(), catalog = null) {
     city: [str(d.postal || d.postalCode), str(d.city)].filter(Boolean).join(' '),
     floor: str(d.floor),
     notes: notes.join(' · '),
+    // للمطبخ: ملاحظة الطلب نفسه (بتنعرض عالبطاقة دايماً) — وملاحظة التوصيل/الباب لحالها (للسواق والتغليف)
+    kitchenNotes: [str(o.remarks), str(o.note)].filter(Boolean).join(' · '),
+    deliveryNotes: [str(d.notes), str(d.extra)].filter(Boolean).join(' · '),
     items: kitchenItems(o.cart, catalog),
     createdAt: new Date(created).toISOString(),
     readyBy: new Date(readyBy).toISOString(),

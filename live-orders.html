@@ -180,10 +180,12 @@ function stageOf(o){const st=S(o.status).toUpperCase();if(st==='CANCELLED')retur
 const cancelled=o=>S(o.status).toUpperCase()==='CANCELLED';
 const code=o=>S(o.displayCode)||S(o.externalOrderCode)||S(o.id).slice(-6);
 const D=o=>o.delivery||{};
-const isDel=o=>S(o.type||o.orderType).toLowerCase().startsWith('deliv');
+// نوع الطلب — نفس قاعدة المطبخ (kitchen.js typeOf): النوع الصريح أول، وإذا مش معروف: عنوان = توصيل، بلا عنوان = استلام
+function kindOf(o){const k=S(o.type||o.orderType).toLowerCase();if(/^(deliv|lieferung)/.test(k))return 'delivery';if(/^(pickup|pick-up|takeaway|take-away|take_away|collection|abholung)/.test(k))return 'pickup';if(/^(local|dine[_-]?in|table|tisch)/.test(k))return 'local';const d=D(o);return S(d.address||d.street)?'delivery':'pickup'}
+const isDel=o=>kindOf(o)==='delivery';
 function street(o){const d=D(o),st=S(d.street),h=S(d.house||d.houseNumber);return (st&&h&&!new RegExp('\\s'+h.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$').test(st)?st+' '+h:st)||S(d.address)}
 function place(o){const d=D(o);return [S(d.postal||d.postalCode),S(d.city)].filter(Boolean).join(' ')}
-function title(o){if(!isDel(o))return S(o.type)==='local'?t('local')+(o.table?' '+S(o.table):''):t('pickup');return [place(o),street(o)].filter(Boolean).join(', ')||t('delivery')}
+function title(o){if(!isDel(o))return kindOf(o)==='local'?t('local')+(o.table?' '+S(o.table):''):t('pickup');return [place(o),street(o)].filter(Boolean).join(', ')||t('delivery')}
 function custName(o){return S(D(o).name)||S(o.customerName)||t('customer')}
 function phone(o){return S(o.customerPhone)||S(D(o).phone)}
 // يوم الشغل: من 5 الصبح لـ 5 الصبح (طلب الساعة 00:30 تابع لليوم اللي قبل)
@@ -285,7 +287,7 @@ function renderDetail(o){
   const notes=[S(D(o).notes),S(o.remarks)].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i);
   const tel=phone(o);
   el.innerHTML=
-    '<div class="dh">'+ring(o,true)+'<div><h2>'+'<bdi>'+esc(title(o))+'</bdi>'+'</h2><div class="meta">#'+esc(code(o))+' · '+(isDel(o)?t('delTag'):S(o.type)==='local'?'🍽️ '+t('local'):t('pickTag'))+' '+badge(o)+(cancelled(o)?' <span class="badge b-x">'+t('cancelled')+'</span>':'')+'</div></div><span class="sp"></span></div>'+
+    '<div class="dh">'+ring(o,true)+'<div><h2>'+'<bdi>'+esc(title(o))+'</bdi>'+'</h2><div class="meta">#'+esc(code(o))+' · '+(isDel(o)?t('delTag'):kindOf(o)==='local'?'🍽️ '+t('local'):t('pickTag'))+' '+badge(o)+(cancelled(o)?' <span class="badge b-x">'+t('cancelled')+'</span>':'')+'</div></div><span class="sp"></span></div>'+
     '<div class="cust"><b>'+'<bdi>'+esc(custName(o))+'</bdi>'+'</b><div class="row">'+(tel?'<a href="tel:'+esc(tel.replace(/\s/g,''))+'">📞 <bdi dir="ltr">'+esc(tel)+'</bdi>'+'</a>':'')+(o.verificationCode?'<span><b>'+t('verify')+'</b> '+esc(o.verificationCode)+'</span>':'')+'</div>'+
       custLine(o)+hintLine(o)+
       (acc?'<div class="row muted">'+t('ordered')+' '+new Date(acc).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+(due(o)?' · '+t('dueBy')+' '+new Date(due(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}):'')+'</div>':'')+
@@ -359,7 +361,7 @@ function reportHtml(day){
     const good=L.filter(o=>!cancelled(o)),sum=good.reduce((s,o)=>s+totalOf(o),0),svc=good.reduce((s,o)=>s+svcOf(o),0);
     rows+='<div class="rg" style="--pc:'+PC[k]+'"><span>'+(k==='NARA'?t('naraKasse'):PL[k])+' · '+good.length+' '+t('orders')+'</span><span>'+eur(sum-svc)+'</span></div>'+(svc?'<div class="rsvc"><span>'+t('custPaid')+' '+eur(sum)+'</span><span>− '+t('platFee')+' '+eur(svc)+'</span></div>':'')+'<table class="rt">'+
       L.map(o=>{const amt=totalOf(o),pm=payOf(o);if(!cancelled(o)){const ps=paysOf(o);if(ps.length){for(const p of ps)for(const l of (p.paymentLines||[{method:p.method,amountCents:p.amountCents}])){const k=/CASH/i.test(l.method)?'Bar':/CARD/i.test(l.method)?'Karte':null;if(k)by[k]+=Number(l.amountCents)||0}}else if(by[pm]!=null)by[pm]+=amt}
-        return '<tr'+(cancelled(o)?' class="x"':'')+'><td>'+(isMgr?'<button class="tst" data-tst="'+esc(o.id)+'" title="'+esc(t('markTest'))+'">🧪</button> ':'')+new Date(dayOf(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+'</td><td>#'+esc(code(o))+'</td><td>'+(k==='LOCO'?esc(PL[o.channel]||o.portalName||''):'')+' '+(isDel(o)?t('delivery'):S(o.type)==='pickup'?t('pickup'):t('local'))+'</td><td>'+t(pm)+'</td><td class="n">'+eur(amt)+'</td></tr>'}).join('')+'</table>';
+        return '<tr'+(cancelled(o)?' class="x"':'')+'><td>'+(isMgr?'<button class="tst" data-tst="'+esc(o.id)+'" title="'+esc(t('markTest'))+'">🧪</button> ':'')+new Date(dayOf(o)).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+'</td><td>#'+esc(code(o))+'</td><td>'+(k==='LOCO'?esc(PL[o.channel]||o.portalName||''):'')+' '+t(kindOf(o))+'</td><td>'+t(pm)+'</td><td class="n">'+eur(amt)+'</td></tr>'}).join('')+'</table>';
   }
   const total=ok.reduce((s,o)=>s+totalOf(o),0),svcAll=ok.reduce((s,o)=>s+svcOf(o),0),canc=list.length-ok.length;
   return rows+'<div class="rsum"><div><span>'+t('orders')+'</span><span>'+ok.length+(canc?' (+'+canc+' '+t('plusCanc')+')':'')+'</span></div><div><span>'+t('Bar')+'</span><span>'+eur(by.Bar)+'</span></div><div><span>'+t('Karte')+'</span><span>'+eur(by.Karte)+'</span></div><div><span>'+t('onlinePlat')+'</span><span>'+eur(by.Online)+'</span></div>'+(svcAll?'<div><span>'+t('custPaid')+'</span><span>'+eur(total)+'</span></div><div><span>'+t('platFee')+'</span><span>− '+eur(svcAll)+'</span></div>':'')+'<div class="big"><span>'+t(svcAll?'forYou':'revenue')+'</span><span>'+eur(total-svcAll)+'</span></div></div>'||'<p>'+t('noOrders')+'</p>';
