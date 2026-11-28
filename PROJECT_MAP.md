@@ -1,6 +1,6 @@
 # PROJECT_MAP — Flamo (automatisch erzeugt)
 
-Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand bearbeiten.
+Stand: 2026-11-28. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand bearbeiten.
 
 ## Seiten (HTML) (37)
 
@@ -42,7 +42,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `web-prototype/datenschutz.html` — Datenschutzerklärung – Flamo Viersen
 - `web-prototype/impressum.html` — Impressum – Flamo Viersen
 
-## Code (Server & Frontend) (170)
+## Code (Server & Frontend) (172)
 
 - `accounting-agent.js` — المحاسب الذكي: وكيل مخصص للحسابات بس. · benutzt von: manager-agent.js, server.js
 - `accounting-anomalies.js` — "شي مو طبيعي" بالحسابات. قراءة بس، كل نتيجة = تنبيه مع سبب، والقرار عند عمر. · benutzt von: accounting-agent.js, accounting-weekly.js, server.js
@@ -54,8 +54,8 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `admin-history.js` — Änderungsverlauf für Menü-Daten (Produkte, Kategorien, Optionen) mit Rückgängig. Nur Server. · benutzt von: server.js
 - `admin-menu-translations.js` — Übersetzungen der Speisekarte prüfen & freigeben (EN · AR). Entwürfe stammen aus menu-translations.json; nur freigegebene Texte erscheinen an der Kasse und auf der Website. · benutzt von: admin-foundation.html
 - `ai-manager-cashier-agents.js` · benutzt von: ai-control.html
-- `ai-manager-command-center.js` · benutzt von: ai-control.html
-- `ai-manager-i18n-fix.js` · benutzt von: ai-control.html
+- `ai-manager-command-center.js` — مركز قيادة المدير الذكي (ai-control.html): ذاكرة المشروع، سجل القرارات، صحة الكود، مشاركة الشاشة، وتنفيذ تجريبي بموافقة. · benutzt von: ai-control.html
+- `ai-manager-i18n-fix.js` — العناوين حسب المحتوى مش حسب الترتيب (الترتيب تغيّر لما انضافت بطاقات جديدة) · benutzt von: ai-control.html
 - `ai-manager.js` · benutzt von: ai-control.html
 - `alerts.js` — Warnungen aufs Handy (Telegram). Zugangsdaten NUR in .env (nie im Code/Git): · benutzt von: server.js
 - `allergen-data.js`
@@ -121,7 +121,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `kasse-live-orders-link.js` · benutzt von: kasse.html
 - `kasse-monitor.js` · benutzt von: kasse.html
 - `kasse-open-orders.js` — الطلبات المفتوحة بالكاشير ككروت بلوحة جانبية بتنسحب من الحافة (ما بتغطي الكاشير). · benutzt von: kasse.html
-- `kasse-order-hub.js` · benutzt von: kasse.html
+- `kasse-order-hub.js` — الكود الداخلي 'NARA' بيضل متل ما هو (البيانات القديمة). TAKEAWAY = Lieferando القديم: ما منعرضه مرتين، بينحسب مع Lieferando. · benutzt von: kasse.html
 - `kasse-payment.js` — شاشة الدفع الجديدة بالكاشير. · benutzt von: kasse.html
 - `kasse-phone-lookup.js` — لما الكاشير يكتب رقم الهاتف بطلب توصيل، بتظهر اقتراحات من دفتر الزبائن (nara-customers)؛ بلمسة بتتعبّى البيانات. · benutzt von: kasse.html
 - `kasse-phone.js` — الكاشير على التلفون. · benutzt von: kasse.html
@@ -176,7 +176,9 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `order-correction.js` — Storno nach Zahlung + Korrekturbestellung ("✏️ تصحيح"). Reine Logik ohne I/O (wie payment-logic.js). · benutzt von: server.js
 - `payment-logic.js` — الدفع بالكاشير: خصم للزبون (٪ أو €)، خصم موظف (بكود)، تقسيم الفاتورة، كاش + كرت. · benutzt von: server.js
 - `platform-accept.js` — استلام طلبات المنصات من تابلت واحد. · benutzt von: server.js
-- `platform-statement.js` — كشوف المنصات (Lieferando / Uber Eats / Sides-Loco / Lanch): Claude بيقرا الكشف أو فاتورة العمولة، · benutzt von: accounting-agent.js, server.js
+- `platform-ingest.js` — Schritt 2: Plattform-Abrechnungen kommen automatisch an (Sammler oder Upload) und werden erst nach · benutzt von: server.js
+- `platform-statement.js` — كشوف المنصات (Lieferando / Uber Eats / Sides-Loco / Lanch): Claude بيقرا الكشف أو فاتورة العمولة، · benutzt von: accounting-agent.js, platform-ingest.js, server.js
+- `platform-statements-collector.mjs` — Schritt 3: Plattform-Abrechnungen selbst abholen. Getrennt von den Bestell-Brücken.
 - `platform-status.js` — حالة جسور المنصات (Lieferando، لاحقاً Uber Eats…) بالذاكرة. · benutzt von: server.js
 - `platform-trips.js` — NARA بيتعلّم الخريطة من سواقينّا وهني عم يشتغلوا بتطبيق Lieferando. · benutzt von: server.js
 - `playwright.config.mjs` — اختبارات E2E لـ Flamo.  التشغيل: npm run test:e2e
@@ -329,7 +331,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `README.md` — NARA – Restaurant Operations Platform
 - `web-prototype/README.md` — Website-Prototyp (Kunden-Seite)
 
-## Tests (119)
+## Tests (126)
 
 - `tests/accounting-agent.test.js`
 - `tests/accounting-books.test.js`
@@ -377,6 +379,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/e2e/helpers/flow.mjs`
 - `tests/e2e/kasse-ui.spec.mjs`
 - `tests/e2e/order-flow.spec.mjs`
+- `tests/e2e/pages-audit.spec.mjs`
 - `tests/e2e/README.md`
 - `tests/e2e/receipt-flow.spec.mjs`
 - `tests/e2e/server-harness.mjs`
@@ -386,6 +389,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/fixtures/admin-menu-sample.json`
 - `tests/flamo-ai.test.js`
 - `tests/guv-period.test.js`
+- `tests/helpers/stop-server.js`
 - `tests/i18n-pages.test.js`
 - `tests/invoice-approve.test.js`
 - `tests/kasse-category-order.test.js`
@@ -412,6 +416,8 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/order-correction.test.js`
 - `tests/payment.test.js`
 - `tests/platform-accept.test.js`
+- `tests/platform-collector.test.js`
+- `tests/platform-ingest.test.js`
 - `tests/platform-print-switch.test.js`
 - `tests/platform-statement.test.js`
 - `tests/platform-status.test.js`
@@ -438,6 +444,9 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/settlement-ledger.test.js`
 - `tests/sides.test.js`
 - `tests/simulate-orders.test.js`
+- `tests/sprint-accounting.test.js`
+- `tests/sprint-agents.test.js`
+- `tests/sprint-kitchen-kasse.test.js`
 - `tests/system-update.test.js`
 - `tests/telegram-accounting.test.js`
 - `tests/telegram-actions.test.js`
@@ -451,7 +460,7 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `tests/web-order-ratelimit.test.js`
 - `tests/web-order.test.js`
 
-## Daten/Konfiguration (8)
+## Daten/Konfiguration (9)
 
 - `allergen-ingredients.json`
 - `android-app/capacitor.config.json`
@@ -461,4 +470,5 @@ Stand: 2026-11-26. Neu erzeugen: `node scripts/project-map.mjs`. Nicht von Hand 
 - `local-preparser-dev-map.json`
 - `local-preparser-settings.json`
 - `package.json`
+- `platform-collector.config.example.json`
 
