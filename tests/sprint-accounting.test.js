@@ -63,5 +63,5 @@ test('Buchhaltung-Start: 3 Schritte sichtbar und nur lesend (keine POST-Aufrufe)
   const steps = h.slice(h.indexOf('/* 3 Schritte (Sprint'), h.indexOf('flamo-home.js'));
   assert.ok(steps.length > 500);
   assert.doesNotMatch(steps, /method:\s*'POST'/);
-  for (const k of ["s1:'Wie stehen wir?'", "s1:'شو وضعنا؟'", "s1:'Where do we stand?'"]) assert.ok(h.includes(k), k);
+  assert.ok(h.includes("s1:{de:'Wie stehen wir?',ar:'شو وضعنا؟',en:'Where do we stand?'}"), 'Wörterbuch im Hausformat key:{de,ar,en}');
 });

@@ -104,9 +104,12 @@ function md(s){
 }
 function render(){
   const log=$('log');let html='';
-  if(status&&!status.configured)html+=`<div class="card ask"><b>🔑 ${esc(t('noKeyT'))}</b><p class="mute">${esc(t('noKey'))}</p></div>`;
+  // Ohne KI-Schlüssel: Eingabe und Vorschläge gesperrt (wie beim KI-Buchhalter) — nichts wird gesendet, was nur einen Fehler bringt
+  const noKey=!!(status&&!status.configured);
+  if(noKey)html+=`<div class="card ask"><b>🔑 ${esc(t('noKeyT'))}</b><p class="mute">${esc(t('noKey'))}</p></div>`;
   html+=`<div class="msg ai"><p>${esc(t('hello'))}</p><p style="font-size:.85rem;color:var(--mute)">🔒 ${esc(t('readOnly'))}</p></div>`;
-  if(!H.length)html+=`<div class="chips">${['s1','s2','s3','s4','s5','s6'].map(k=>`<button class="chip" type="button" data-k="${k}">${esc(t(k))}</button>`).join('')}</div>`;
+  if(!H.length)html+=`<div class="chips">${['s1','s2','s3','s4','s5','s6'].map(k=>`<button class="chip" type="button" data-k="${k}"${noKey?' disabled':''}>${esc(t(k))}</button>`).join('')}</div>`;
+  $('q').disabled=noKey;$('send').disabled=noKey||busy;
   for(const m of H){
     if(m.role==='user')html+=`<div class="msg me">${esc(m.text)}</div>`;
     else if(m.role==='assistant')html+=`<div class="msg ai">${md(m.text)}${m.tools&&m.tools.length?`<div class="tools">🔎 ${esc(t('looked',{t:m.tools.join(', ')}))}</div>`:''}</div>`;
@@ -114,9 +117,9 @@ function render(){
   }
   if(busy)html+=`<div class="typing">⏳ ${esc(t('thinking'))}</div>`;
   log.innerHTML=html;
-  log.querySelectorAll('.chip').forEach(b=>b.onclick=()=>ask(t(b.dataset.k)));
+  log.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{if(!noKey)ask(t(b.dataset.k))});
   log.scrollTop=log.scrollHeight;
-  if(status&&status.configured){const u=status.usage||{};$('status').textContent=t('stat',{p:String(status.provider||'').split(':')[0],n:u.calls||0,c:(u.costEur||0).toFixed(2)})}
+  if(status&&status.configured){const u=status.usage||{};$('status').textContent=t('stat',{p:String(status.provider||'').split(':')[0],n:u.calls||0,c:(u.costEur||0).toFixed(2)})+(status.budgetEur?' / '+Number(status.budgetEur).toFixed(2)+' €':'')}
 }
 async function loadStatus(){try{const r=await fetch('/api/manager/status',{cache:'no-store'});if(r.ok)status=await r.json()}catch(e){}render()}
 async function ask(text){
@@ -131,7 +134,7 @@ async function ask(text){
     else if(j.code==='BUDGET')H.push({role:'error',text:t('budget',{c:(j.usage&&j.usage.costEur||0).toFixed(2),b:j.budgetEur})});
     else H.push({role:'error',text:t('err')});
   }catch(e){H.push({role:'error',text:t('err')})}
-  busy=false;$('send').disabled=false;keep();loadStatus();loadTasks();
+  busy=false;$('send').disabled=!!(status&&!status.configured);keep();loadStatus();loadTasks();
 }
 $('f').onsubmit=e=>{e.preventDefault();const v=$('q').value;$('q').value='';ask(v)};
 $('q').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('f').requestSubmit()}});

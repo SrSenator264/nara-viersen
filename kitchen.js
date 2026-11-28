@@ -175,6 +175,24 @@ function listKitchenOrders(orders, now = Date.now(), catalog = null) {
       || (Date.parse(a.readyBy) - Date.parse(b.readyBy)));
 }
 
+// ملخّص المطبخ هلق (للمدير الذكي — قراءة بس): كم طلب بكل حالة، كم متأخر، أطول انتظار، وشو لازم ينعمل هلق
+function kitchenSummary(orders, now = Date.now(), catalog = null) {
+  const list = listKitchenOrders(orders, now, catalog);
+  const counts = { NEW: 0, PREPARING: 0, READY: 0 }, byType = { delivery: 0, pickup: 0, local: 0 }, items = new Map();
+  let late = 0, oldest = 0;
+  for (const o of list) {
+    if (counts[o.kitchenStatus] == null) continue;
+    counts[o.kitchenStatus]++;
+    if (o.kitchenStatus === 'READY') continue;
+    byType[o.type] = (byType[o.type] || 0) + 1;
+    if (Date.parse(o.readyBy) < now) late++;
+    oldest = Math.max(oldest, Math.round((now - Date.parse(o.createdAt)) / 60000));
+    for (const i of o.items) items.set(i.name, (items.get(i.name) || 0) + i.quantity);
+  }
+  return { counts, open: counts.NEW + counts.PREPARING, late, oldestWaitingMin: oldest, byType,
+    toPrepare: [...items].sort((a, b) => b[1] - a[1]).slice(0, 12).map(([name, qty]) => ({ name, qty })) };
+}
+
 // تغيير حالة المطبخ + مزامنة مرحلة صفحة الطلبات الحية (PREPARE/HANDOVER)
 function applyKitchenStatus(order, next, user, now = new Date().toISOString()) {
   const to = str(next).toUpperCase();
@@ -194,4 +212,4 @@ function applyKitchenStatus(order, next, user, now = new Date().toISOString()) {
   return { from, to };
 }
 
-module.exports = { awaitingAccept, isDraft, kitchenStatusOf, isClosedForOps, STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, applyKitchenStatus };
+module.exports = { awaitingAccept, isDraft, kitchenStatusOf, isClosedForOps, STATES, MAX_AGE_H, isStale, orderTime, kitchenItems, kitchenView, isKitchenOrder, isOtherStation, catalogFrom, listKitchenOrders, kitchenSummary, applyKitchenStatus };

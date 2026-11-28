@@ -152,7 +152,7 @@ function draw(){
   }).join('')||esc(t(filter==='open'&&TX.length?'noneOpen':'none'));
   document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{const c=(SUG.get(b.dataset.ok)||[])[Number(b.dataset.i)];if(c)match(b.dataset.ok,c.entityType,c.entityId)});
   document.querySelectorAll('[data-cat]').forEach(s=>s.onchange=()=>saveCats([{transactionId:s.dataset.cat,category:s.value||null}]));
-  // ضغطة وحدة: كل حركة إلها اقتراح «أكيد» (فائز واضح) بتنربط — بعد ما المالك يأكّد بالنافذة
+  // Ein Klick: jede Buchung mit «sicherem» Vorschlag (klarer Gewinner) wird verbunden — erst nach Bestätigung im Dialog
   const sure=TX.filter(x=>x.status==='UNMATCHED').map(x=>({x,c:(SUG.get(x.id)||[])[0]})).filter(({c})=>c&&c.confidence==='high');
   $('sureAll').hidden=!sure.length;$('sureAll').textContent='✅ '+t('sureAll',{n:sure.length});
   $('sureAll').onclick=async()=>{
@@ -207,7 +207,7 @@ $('file').onchange=async()=>{
   $('file').value='';
 };
 document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{filter=c.dataset.f;draw()});
-// الكشف بينسحب ويتفلت فوق المربع كمان (مش بس «اختار ملف»)
+// Kontoauszug auch per Drag & Drop auf das Feld (nicht nur «Datei wählen»)
 {const drop=document.querySelector('.drop');if(drop){
   ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
   ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,()=>drop.classList.remove('over')));

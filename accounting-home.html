@@ -480,24 +480,38 @@ load();
 /* 3 Schritte (Sprint 2026-11-28): liest nur vorhandene Daten (Gesundheit, EÜR-Entwurf, Tagesvorschau) — bucht nichts. */
 (function(){
   const S={
-    de:{s1:'Wie stehen wir?',s2:'Was fehlt noch?',s3:'Schnell erledigen',today:'Heute an der Kasse (brutto)',month:'Einnahmen diesen Monat (ohne MwSt)',mprofit:'Gewinn diesen Monat',year:'dieses Jahr',draft:'Gewinn = Entwurf aus erfassten Zahlen (Einnahmen − Kosten, ohne MwSt), ersetzt nicht den Steuerberater.',
-      allOk:'Alles erledigt — nichts offen. 🎉',todoHead:'Das ist noch offen:',more:'weitere',
-      closings:'{n} Verkaufstag(e) ohne Tagesabschluss',bank:'{n} Bankbuchung(en) noch nicht zugeordnet',belege:'{n} Beleg(e) warten auf Prüfung',journal:'{n} Buchung(en) noch offen',
-      NO_PURCHASE_INVOICES:'Noch keine Einkaufsrechnungen erfasst',NO_RENT:'Miete / Fixkosten fehlen',NO_PAYROLL:'Löhne fehlen',NO_PLATFORM_FEES:'Plattform-Gebühren fehlen',PLATFORM_STATEMENT_GAPS:'Plattform-Abrechnungen fehlen für einige Monate',VAT_SALES_RATE_ASSUMED:'MwSt-Satz nur angenommen — einmal prüfen',CATEGORIES_GUESSED:'Einige Kategorien nur geschätzt — kurz prüfen',
-      deadline:'Nächste Frist',qBeleg:'Beleg hochladen',qBank:'Bank abgleichen',qClose:'Tagesabschluss',qPl:'Gewinn & Verlust',qAsk:'Buchhalter fragen',qPlat:'Plattform-Abrechnung'},
-    ar:{s1:'شو وضعنا؟',s2:'شو ناقصنا؟',s3:'خلّصها بسرعة',today:'اليوم بالكاشير (مع الضريبة)',month:'مبيعات هالشهر (بدون ضريبة)',mprofit:'ربح هالشهر',year:'هالسنة',draft:'الربح = مسودة من الأرقام المسجّلة (المبيعات − المصاريف، بدون ضريبة)، ما بتغني عن المستشار الضريبي.',
-      allOk:'كل شي خالص — ما في شي ناقص. 🎉',todoHead:'هدول لسا ناقصين:',more:'كمان',
-      closings:'{n} يوم بيع بلا تقفيلة',bank:'{n} حركة بنك لسا ما انربطت',belege:'{n} فاتورة/إيصال ناطرين مراجعة',journal:'{n} قيد لسا مفتوح',
-      NO_PURCHASE_INVOICES:'لسا ما في فواتير مشتريات',NO_RENT:'الإيجار / المصاريف الثابتة ناقصة',NO_PAYROLL:'الرواتب ناقصة',NO_PLATFORM_FEES:'عمولات المنصات ناقصة',PLATFORM_STATEMENT_GAPS:'كشوف المنصات ناقصة لكم شهر',VAT_SALES_RATE_ASSUMED:'نسبة الضريبة مفترضة — راجعها مرة',CATEGORIES_GUESSED:'كم تصنيف مقدّر — شيّك عليهم',
-      deadline:'أقرب موعد',qBeleg:'ارفع فاتورة',qBank:'طابق البنك',qClose:'تقفيلة اليوم',qPl:'الربح والخسارة',qAsk:'اسأل المحاسب',qPlat:'كشف منصة'},
-    en:{s1:'Where do we stand?',s2:'What is missing?',s3:'Do it quickly',today:'Today at the till (gross)',month:'Income this month (excl. VAT)',mprofit:'Profit this month',year:'this year',draft:'Profit = draft from the recorded numbers (income − costs, excl. VAT); it does not replace your tax advisor.',
-      allOk:'All done — nothing open. 🎉',todoHead:'Still open:',more:'more',
-      closings:'{n} sales day(s) without a daily closing',bank:'{n} bank transaction(s) not matched yet',belege:'{n} receipt(s) waiting for review',journal:'{n} booking(s) still open',
-      NO_PURCHASE_INVOICES:'No purchase invoices recorded yet',NO_RENT:'Rent / fixed costs missing',NO_PAYROLL:'Wages missing',NO_PLATFORM_FEES:'Platform fees missing',PLATFORM_STATEMENT_GAPS:'Platform statements missing for some months',VAT_SALES_RATE_ASSUMED:'VAT rate only assumed — check once',CATEGORIES_GUESSED:'Some categories only guessed — quick check',
-      deadline:'Next deadline',qBeleg:'Upload receipt',qBank:'Match bank',qClose:'Daily closing',qPl:'Profit & loss',qAsk:'Ask the accountant',qPlat:'Platform statement'}
+    s1:{de:'Wie stehen wir?',ar:'شو وضعنا؟',en:'Where do we stand?'},
+    s2:{de:'Was fehlt noch?',ar:'شو ناقصنا؟',en:'What is missing?'},
+    s3:{de:'Schnell erledigen',ar:'خلّصها بسرعة',en:'Do it quickly'},
+    today:{de:'Heute an der Kasse (brutto)',ar:'اليوم بالكاشير (مع الضريبة)',en:'Today at the till (gross)'},
+    month:{de:'Einnahmen diesen Monat (ohne MwSt)',ar:'مبيعات هالشهر (بدون ضريبة)',en:'Income this month (excl. VAT)'},
+    mprofit:{de:'Gewinn diesen Monat',ar:'ربح هالشهر',en:'Profit this month'},
+    year:{de:'dieses Jahr',ar:'هالسنة',en:'this year'},
+    draft:{de:'Gewinn = Entwurf aus erfassten Zahlen (Einnahmen − Kosten, ohne MwSt), ersetzt nicht den Steuerberater.',ar:'الربح = مسودة من الأرقام المسجّلة (المبيعات − المصاريف، بدون ضريبة)، ما بتغني عن المستشار الضريبي.',en:'Profit = draft from the recorded numbers (income − costs, excl. VAT); it does not replace your tax advisor.'},
+    allOk:{de:'Alles erledigt — nichts offen. 🎉',ar:'كل شي خالص — ما في شي ناقص. 🎉',en:'All done — nothing open. 🎉'},
+    todoHead:{de:'Das ist noch offen:',ar:'هدول لسا ناقصين:',en:'Still open:'},
+    more:{de:'weitere',ar:'كمان',en:'more'},
+    closings:{de:'{n} Verkaufstag(e) ohne Tagesabschluss',ar:'{n} يوم بيع بلا تقفيلة',en:'{n} sales day(s) without a daily closing'},
+    bank:{de:'{n} Bankbuchung(en) noch nicht zugeordnet',ar:'{n} حركة بنك لسا ما انربطت',en:'{n} bank transaction(s) not matched yet'},
+    belege:{de:'{n} Beleg(e) warten auf Prüfung',ar:'{n} فاتورة/إيصال ناطرين مراجعة',en:'{n} receipt(s) waiting for review'},
+    journal:{de:'{n} Buchung(en) noch offen',ar:'{n} قيد لسا مفتوح',en:'{n} booking(s) still open'},
+    NO_PURCHASE_INVOICES:{de:'Noch keine Einkaufsrechnungen erfasst',ar:'لسا ما في فواتير مشتريات',en:'No purchase invoices recorded yet'},
+    NO_RENT:{de:'Miete / Fixkosten fehlen',ar:'الإيجار / المصاريف الثابتة ناقصة',en:'Rent / fixed costs missing'},
+    NO_PAYROLL:{de:'Löhne fehlen',ar:'الرواتب ناقصة',en:'Wages missing'},
+    NO_PLATFORM_FEES:{de:'Plattform-Gebühren fehlen',ar:'عمولات المنصات ناقصة',en:'Platform fees missing'},
+    PLATFORM_STATEMENT_GAPS:{de:'Plattform-Abrechnungen fehlen für einige Monate',ar:'كشوف المنصات ناقصة لكم شهر',en:'Platform statements missing for some months'},
+    VAT_SALES_RATE_ASSUMED:{de:'MwSt-Satz nur angenommen — einmal prüfen',ar:'نسبة الضريبة مفترضة — راجعها مرة',en:'VAT rate only assumed — check once'},
+    CATEGORIES_GUESSED:{de:'Einige Kategorien nur geschätzt — kurz prüfen',ar:'كم تصنيف مقدّر — شيّك عليهم',en:'Some categories only guessed — quick check'},
+    deadline:{de:'Nächste Frist',ar:'أقرب موعد',en:'Next deadline'},
+    qBeleg:{de:'Beleg hochladen',ar:'ارفع فاتورة',en:'Upload receipt'},
+    qBank:{de:'Bank abgleichen',ar:'طابق البنك',en:'Match bank'},
+    qClose:{de:'Tagesabschluss',ar:'تقفيلة اليوم',en:'Daily closing'},
+    qPl:{de:'Gewinn & Verlust',ar:'الربح والخسارة',en:'Profit & loss'},
+    qAsk:{de:'Buchhalter fragen',ar:'اسأل المحاسب',en:'Ask the accountant'},
+    qPlat:{de:'Plattform-Abrechnung',ar:'كشف منصة',en:'Platform statement'}
   };
-  const L=()=>{try{const l=window.NARA_LANG&&NARA_LANG.get();return S[l]?l:'de'}catch(e){return 'de'}};
-  const s=k=>(S[L()]||S.de)[k]||S.de[k]||k;
+  const L=()=>{try{const l=window.NARA_LANG&&NARA_LANG.get();return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
+  const s=k=>{const e=S[k];return e?(e[L()]||e.de):k};
   const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const eur=c=>(Number(c||0)/100).toLocaleString(L()==='en'?'en-IE':'de-DE',{style:'currency',currency:'EUR'});
   const get=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
@@ -517,7 +531,7 @@ load();
     // Offene Punkte: Monats-Checkliste (ohne TSE — die bleibt unten in der Checkliste) + Hinweise aus dem Entwurf (Jahr)
     const todo=[];
     for(const it of (m.items||[]))if(it&&it.status!=='ok'&&it.status!=='wait'&&LINK[it.key]&&Number(it.count)>0)todo.push({k:it.key,txt:s(it.key).replace('{n}',it.count)});
-    for(const w of (eu.warnings||[]))if(LINK[w]&&S.de[w])todo.push({k:w,txt:s(w)});
+    for(const w of (eu.warnings||[]))if(LINK[w]&&S[w])todo.push({k:w,txt:s(w)});
     const dl=(h.deadlines||[])[0];
     const box=document.getElementById('st-todo');
     const dlHtml=dl?'<p class="mute" style="margin:8px 0 0">⏰ '+esc(s('deadline'))+': <b>'+esc(new Date(dl.date+'T12:00:00').toLocaleDateString(L()==='en'?'en-GB':'de-DE'))+'</b></p>':'';

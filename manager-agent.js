@@ -26,6 +26,8 @@ const TOOLS = [
     parameters: { type: 'object', properties: { limit: { type: 'integer' }, file: { type: 'string' } } } },
   { name: 'live_status', description: 'Aktueller Betriebszustand: Server-Laufzeit, Bestellungen heute pro Kanal, offene Küchen-Bestellungen, Plattform-Brücken (Lieferando/Uber/Sides), TSE-Modus, letzte Ereignisse.',
     parameters: { type: 'object', properties: {} } },
+  { name: 'kitchen_queue', description: 'Küche jetzt: Bestellungen je Status (neu / in Arbeit / fertig), wie viele zu spät sind, längste Wartezeit in Minuten, Liefern/Abholen/Tisch, und welche Gerichte gerade zubereitet werden müssen.',
+    parameters: { type: 'object', properties: {} } },
   { name: 'ask_accountant', description: 'Frage an den KI-Buchhalter weitergeben (Umsätze, Rechnungen, Tagesabschluss, Bank, Lager, Steuern). Liefert seine Antwort.',
     parameters: { type: 'object', properties: { question: { type: 'string' } }, required: ['question'] } },
   { name: 'create_task', description: 'Aufgabenkarte für eine Code-Änderung anlegen (wird NICHT ausgeführt; Omar gibt sie an Claude Code). Nur wenn Omar eine Änderung will.',
@@ -41,7 +43,7 @@ function safeRel(root, file) {
   return { rel, abs };
 }
 
-function makeTools({ root = __dirname, data = {}, status = () => ({}), askAccountant = async () => 'nicht verfügbar', tasks = { list: () => [], add: t => t }, git = null } = {}) {
+function makeTools({ root = __dirname, data = {}, status = () => ({}), kitchen = () => ({}), askAccountant = async () => 'nicht verfügbar', tasks = { list: () => [], add: t => t }, git = null } = {}) {
   let mapCache = null; const map = () => (mapCache ||= PM.build(root));
   const run = {
     project_map: a => {
@@ -83,6 +85,7 @@ function makeTools({ root = __dirname, data = {}, status = () => ({}), askAccoun
       return { commits };
     },
     live_status: () => { try { return status() || {}; } catch (e) { return { error: str(e && e.message) }; } },
+    kitchen_queue: () => { try { return kitchen() || {}; } catch (e) { return { error: str(e && e.message) }; } },
     ask_accountant: async a => ({ answer: await askAccountant(str(a.question).slice(0, 2000)) }),
     create_task: a => {
       const t = { title: str(a.title).slice(0, 160), why: str(a.why).slice(0, 1000), files: (Array.isArray(a.files) ? a.files : []).map(str).slice(0, 20), change: str(a.change).slice(0, 4000), dod: str(a.dod).slice(0, 3000), risk: ['low', 'medium', 'high'].includes(a.risk) ? a.risk : 'medium' };
@@ -105,7 +108,7 @@ function systemPrompt({ lang, today, context }) {
     'You are "Flamo Manager", the AI manager and brain of the Flamo restaurant system (repo nara-viersen: cashier/Kasse with TSE, kitchen, Live Orders, platform hub for Lieferando/Uber/Sides, drivers & dispatch, customer website with AI seller Flamo, accounting). The owner Omar talks only to you.',
     `Today: ${today}. Answer ONLY in ${L}. Short and practical: direct answer first, then details, then at most one next step.`,
     'Explain the code in simple words for a non-programmer owner: what a page/file does, why something happens, what changed recently. Always look things up with your tools (project_map, search_code, read_file, git_log, live_status) before answering; never guess file contents. Mention the file names you looked at in one short line at the end.',
-    'For accounting questions (sales, invoices, closings, bank, stock, taxes) call ask_accountant and pass on its answer.',
+    'For accounting questions (sales in euros, invoices, closings, bank, stock, purchases, platform statements, taxes, profit) ALWAYS call ask_accountant and pass on its numbers exactly as given. Never calculate, estimate or invent money amounts yourself; if the accountant cannot answer, say so plainly. For "what is going on right now" use live_status; for the kitchen (open, late, what to cook) use kitchen_queue.',
     'You cannot change code, data or settings. If Omar wants a change, first explain what would change and the risk, then create a task card with create_task (clear change + Definition of Done: what must work, tests, edge cases, what is not needed). Tell him to give the card to Claude Code. Never claim you changed anything.',
     'Never reveal secrets (.env, keys, tokens); you cannot read data/ or .env. Never touch the TSE or receipt logic in suggestions without marking risk high.',
     context ? '\nProject context (summary):\n' + context : '',
