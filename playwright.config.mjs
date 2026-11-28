@@ -31,6 +31,6 @@ export default defineConfig({
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'], ...CHANNEL } },
-    { name: 'mobile', use: { ...devices['Pixel 7'], ...CHANNEL }, testMatch: ['**/smoke.spec.mjs', '**/pages-audit.spec.mjs'] },
+    { name: 'mobile', use: { ...devices['Pixel 7'], ...CHANNEL }, testMatch: ['**/smoke.spec.mjs', '**/pages-audit.spec.mjs', '**/pages-audit-more.spec.mjs'] },
   ],
 });
