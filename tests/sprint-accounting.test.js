@@ -60,7 +60,7 @@ test('GuV-Gleichung: Einnahmen − Waren − Personal − Sonstiges − AfA = Ge
 test('Buchhaltung-Start: 3 Schritte sichtbar und nur lesend (keine POST-Aufrufe)', () => {
   const h = read('accounting-home.html');
   assert.match(h, /id="c-steps"/);
-  const steps = h.slice(h.indexOf('/* 3 Schritte (Sprint'), h.indexOf('flamo-home.js'));
+  const steps = h.slice(h.indexOf('/* 3 Schritte (Sprint'), h.indexOf('/* Plattform-Eingang'));
   assert.ok(steps.length > 500);
   assert.doesNotMatch(steps, /method:\s*'POST'/);
   assert.ok(h.includes("s1:{de:'Wie stehen wir?',ar:'شو وضعنا؟',en:'Where do we stand?'}"), 'Wörterbuch im Hausformat key:{de,ar,en}');

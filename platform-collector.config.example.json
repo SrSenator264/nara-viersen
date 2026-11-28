@@ -1,0 +1,30 @@
+{
+  "_hinweis": "Vorlage für platform-statements-collector.mjs. Als platform-collector.config.json kopieren. Keine Passwörter oder Schlüssel hier eintragen: der Sammler nutzt nur gespeicherte Sitzungen (storageState) und den Service-Schlüssel aus der Umgebung (NARA_SERVICE_KEY). URLs und Selektoren müssen einmal am echten Partnerportal geprüft werden; bis dahin enabled=false.",
+  "server": "http://127.0.0.1:4185",
+  "stateFile": "data/collector-state.json",
+  "maxPerRun": 5,
+  "platforms": [
+    {
+      "id": "LIEFERANDO",
+      "enabled": false,
+      "session": "D:/NARA-Playwright/sessions/lieferando-statements.json",
+      "statementsUrl": "https://PARTNERPORTAL-URL/rechnungen",
+      "loginUrlPattern": "login|signin|auth",
+      "loginSelector": "input[type=password]",
+      "twoFactorUrlPattern": "2fa|mfa|verify|otp",
+      "twoFactorSelector": "input[autocomplete=one-time-code]",
+      "linkSelector": "a[href$='.pdf'], a[href*='download']"
+    },
+    {
+      "id": "UBER_EATS",
+      "enabled": false,
+      "session": "D:/NARA-Playwright/sessions/uber-statements.json",
+      "statementsUrl": "https://MERCHANT-PORTAL-URL/payments",
+      "loginUrlPattern": "login|signin|auth",
+      "loginSelector": "input[type=password]",
+      "twoFactorUrlPattern": "2fa|mfa|verify|otp",
+      "twoFactorSelector": "input[autocomplete=one-time-code]",
+      "linkSelector": "a[href$='.csv'], a[href$='.pdf']"
+    }
+  ]
+}

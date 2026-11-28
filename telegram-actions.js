@@ -55,7 +55,8 @@ function create({ env = process.env, fetchFn = (...a) => fetch(...a), onAction, 
     const cq = update && update.callback_query;
     if (!cq || !cq.message || !ids().includes(String(cq.message.chat && cq.message.chat.id))) return false;
     let res = null;
-    try { res = await onAction(String(cq.data || ''), nameOf(cq.from)); } catch (e) { log('[NARA][TG-ACTION]', e && e.message); }
+    // Rolle des Chats mitgeben (z. B. darf nur der Inhaber eine Plattform-Abrechnung freigeben)
+    try { res = await onAction(String(cq.data || ''), nameOf(cq.from), { role: roleOf(String(cq.message.chat && cq.message.chat.id)) }); } catch (e) { log('[NARA][TG-ACTION]', e && e.message); }
     await api('answerCallbackQuery', { callback_query_id: cq.id, text: res ? res.answer : '⚠️' }).catch(() => {});
     if (res && res.edit) {
       const base = String(cq.message.text || '').split('\n✅ انطلب')[0].split('\n⏳ لسا')[0];

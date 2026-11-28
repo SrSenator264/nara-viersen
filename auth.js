@@ -85,6 +85,8 @@ const RULES = [
   ['POST', /^\/api\/nara-guide$/, 'public'],
   ['*', /^\/api\/auth\/(login|logout|me|employees|bootstrap|join|invite-check)$/, 'public'],
   ['POST', /^\/api\/platform-orders\/import$/, 'service'],
+  // Schritt 2: Plattform-Abrechnungen annehmen (Sammler mit Service-Schlüssel / loopback; Manager auch). Gebucht wird erst nach Freigabe.
+  ['POST', /^\/api\/accounting\/platform-statements\/(ingest|collector-alert)$/, 'service'],
   ['POST', /^\/api\/platform-orders\/(heartbeat|alert)$/, 'service'],
   ['GET', /^\/api\/platform-orders\/status$/, KITCH],
   ['POST', /^\/api\/platform-orders\/promise$/, CASH],

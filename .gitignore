@@ -47,3 +47,6 @@ playwright-report/
 
 # Swissbit-SDK (proprietär, darf NICHT auf GitHub)
 tse-sdk/
+
+# lokale Konfiguration des Abrechnungs-Sammlers (Vorlage: platform-collector.config.example.json)
+platform-collector.config.json

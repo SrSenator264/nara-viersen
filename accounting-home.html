@@ -102,6 +102,7 @@ main{max-width:760px;margin:0 auto;padding:14px;display:flex;flex-direction:colu
     <div class="st-block"><h2><span class="st-n">2</span> <span data-s="s2"></span></h2><div id="st-todo"></div></div>
     <div class="st-block"><h2><span class="st-n">3</span> <span data-s="s3"></span></h2><div class="st-quick" id="st-quick"></div></div>
   </section>
+  <section class="card" id="pst-inbox" hidden></section>
   <section class="card alert" id="c-alert" hidden></section>
   <section class="card" id="c-klein"></section>
   <section class="card" id="c-month"></section>
@@ -492,6 +493,7 @@ load();
     todoHead:{de:'Das ist noch offen:',ar:'هدول لسا ناقصين:',en:'Still open:'},
     more:{de:'weitere',ar:'كمان',en:'more'},
     closings:{de:'{n} Verkaufstag(e) ohne Tagesabschluss',ar:'{n} يوم بيع بلا تقفيلة',en:'{n} sales day(s) without a daily closing'},
+    inbox:{de:'{n} Plattform-Abrechnung(en) warten auf deine Freigabe',ar:'{n} كشف منصة ناطر موافقتك',en:'{n} platform statement(s) waiting for your approval'},
     bank:{de:'{n} Bankbuchung(en) noch nicht zugeordnet',ar:'{n} حركة بنك لسا ما انربطت',en:'{n} bank transaction(s) not matched yet'},
     belege:{de:'{n} Beleg(e) warten auf Prüfung',ar:'{n} فاتورة/إيصال ناطرين مراجعة',en:'{n} receipt(s) waiting for review'},
     journal:{de:'{n} Buchung(en) noch offen',ar:'{n} قيد لسا مفتوح',en:'{n} booking(s) still open'},
@@ -516,9 +518,9 @@ load();
   const eur=c=>(Number(c||0)/100).toLocaleString(L()==='en'?'en-IE':'de-DE',{style:'currency',currency:'EUR'});
   const get=u=>fetch(u,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
   // was fehlt → Link (gleiche Seiten wie der Rest der Buchhaltung)
-  const LINK={closings:'kasse-settlement.html',bank:'banking.html',belege:'inventory-foundation.html',journal:'accounting.html',
+  const LINK={inbox:'#pst-inbox',closings:'kasse-settlement.html',bank:'banking.html',belege:'inventory-foundation.html',journal:'accounting.html',
     NO_PURCHASE_INVOICES:'inventory-foundation.html',NO_RENT:'#fxList',NO_PAYROLL:'staff.html',NO_PLATFORM_FEES:'#c-plat',PLATFORM_STATEMENT_GAPS:'#c-plat',VAT_SALES_RATE_ASSUMED:'accounting.html',CATEGORIES_GUESSED:'banking.html'};
-  const ICON={closings:'📊',bank:'🏦',belege:'🧾',journal:'📒',NO_PURCHASE_INVOICES:'🧾',NO_RENT:'🏠',NO_PAYROLL:'👥',NO_PLATFORM_FEES:'🛵',PLATFORM_STATEMENT_GAPS:'🛵',VAT_SALES_RATE_ASSUMED:'％',CATEGORIES_GUESSED:'🏷️'};
+  const ICON={inbox:'📥',closings:'📊',bank:'🏦',belege:'🧾',journal:'📒',NO_PURCHASE_INVOICES:'🧾',NO_RENT:'🏠',NO_PAYROLL:'👥',NO_PLATFORM_FEES:'🛵',PLATFORM_STATEMENT_GAPS:'🛵',VAT_SALES_RATE_ASSUMED:'％',CATEGORIES_GUESSED:'🏷️'};
   let data={};
   function render(){
     document.querySelectorAll('#c-steps [data-s]').forEach(el=>{el.textContent=s(el.dataset.s)});
@@ -530,6 +532,7 @@ load();
       +kpi(s('mprofit'),pl?pl.profitCents:null,pl&&Number(pl.profitCents)<0,eu.profitCents!=null?esc(s('year'))+': '+esc(eur(eu.profitCents)):'');
     // Offene Punkte: Monats-Checkliste (ohne TSE — die bleibt unten in der Checkliste) + Hinweise aus dem Entwurf (Jahr)
     const todo=[];
+    if(data.inbox&&data.inbox.pending)todo.push({k:'inbox',txt:s('inbox').replace('{n}',data.inbox.pending)});
     for(const it of (m.items||[]))if(it&&it.status!=='ok'&&it.status!=='wait'&&LINK[it.key]&&Number(it.count)>0)todo.push({k:it.key,txt:s(it.key).replace('{n}',it.count)});
     for(const w of (eu.warnings||[]))if(LINK[w]&&S[w])todo.push({k:w,txt:s(w)});
     const dl=(h.deadlines||[])[0];
@@ -551,11 +554,45 @@ load();
     const today=String((health&&health.today)||new Date().toISOString().slice(0,10)),y=today.slice(0,4),mo=today.slice(0,7);
     const last=new Date(Date.UTC(Number(y),Number(today.slice(5,7)),0)).getUTCDate();
     const [euer,pl,day]=await Promise.all([get('/api/accounting/euer?year='+y),get('/api/reports/profit-loss?from='+mo+'-01&to='+mo+'-'+String(last).padStart(2,'0')),get('/api/day-closing/preview')]);
-    data={health,euer,pl,day};render();
+    const inbox=await get('/api/accounting/platform-statements/inbox');
+    data={health,euer,pl,day,inbox};render();
   }
   quick();render();load();
   window.addEventListener('nara-lang',()=>{quick();render()});
   document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-lang]'))setTimeout(()=>{quick();render()},0)});
+})();
+</script>
+<script>
+/* Plattform-Eingang (Schritt 2): automatisch angekommene Abrechnungen. Gebucht wird nur mit Klick des Inhabers (wie ✅ in Telegram). */
+(function(){
+  const P={
+    pTitle:{de:'Plattform-Abrechnungen zur Freigabe',ar:'كشوف منصات ناطرة موافقتك',en:'Platform statements to approve'},
+    pHint:{de:'Automatisch angekommen (Sammler oder Upload). Erst nach deinem Klick zählen sie in der Buchhaltung.',ar:'وصلت لحالها (الجامع أو رفع). ما بتنحسب بالمحاسبة إلا بعد ضغطتك.',en:'Arrived automatically (collector or upload). They only count in the books after your click.'},
+    pApprove:{de:'Buchen',ar:'احفظ بالحسابات',en:'Book it'},
+    pReject:{de:'Verwerfen',ar:'لا',en:'Discard'},
+    pAsk:{de:'Diese Abrechnung in die Buchhaltung übernehmen?',ar:'نحفظ هالكشف بالمحاسبة؟',en:'Add this statement to the books?'},
+    pOk:{de:'passt zu Flamo',ar:'مطابق لطلبات Flamo',en:'matches Flamo'},
+    pDiff:{de:'Abweichung zu Flamo',ar:'في فرق مع Flamo',en:'differs from Flamo'},
+    pDup:{de:'schon gebucht',ar:'محفوظ من قبل',en:'already booked'},
+    pGross:{de:'Umsatz',ar:'المبيعات',en:'Sales'},
+    pPayout:{de:'Auszahlung',ar:'الدفعة',en:'Payout'},
+    pDone:{de:'Gespeichert ✅',ar:'انحفظ ✅',en:'Saved ✅'}
+  };
+  const L=()=>{try{const l=window.NARA_LANG&&NARA_LANG.get();return ['de','ar','en'].includes(l)?l:'de'}catch(e){return 'de'}};
+  const p=k=>{const e=P[k];return e?(e[L()]||e.de):k};
+  const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const eur=c=>c==null?'—':(Number(c)/100).toLocaleString(L()==='en'?'en-IE':'de-DE',{style:'currency',currency:'EUR'});
+  const box=document.getElementById('pst-inbox');let items=[];
+  function draw(){
+    const pend=items.filter(x=>x.status==='PENDING_APPROVAL');box.hidden=!pend.length;if(!pend.length){box.innerHTML='';return}
+    box.innerHTML='<h2>📥 '+esc(p('pTitle'))+' ('+pend.length+')</h2><p class="mute">'+esc(p('pHint'))+'</p>'+pend.map(x=>'<div class="st-todo" style="flex-wrap:wrap"><span class="e">🧾</span><span>'
+      +(x.items||[]).map(i=>{const s=i.statement||{},c=i.comparison;return esc((s.platform||'?')+' · '+(s.periodFrom||'?')+' → '+(s.periodTo||'?'))+'<br><small class="mute">'+esc(p('pGross'))+' '+esc(eur(s.grossCents))+' · '+esc(p('pPayout'))+' '+esc(eur(s.payoutCents))+' · '+(i.duplicateOf?esc(p('pDup')):c?(c.ok?'✅ '+esc(p('pOk')):'⚠️ '+esc(p('pDiff'))):'')+'</small>'}).join('<br>')
+      +'</span><button class="btn small" type="button" data-pst="approve" data-id="'+esc(x.id)+'">✅ '+esc(p('pApprove'))+'</button> <button class="btn ghost small" type="button" data-pst="reject" data-id="'+esc(x.id)+'">✖ '+esc(p('pReject'))+'</button></div>').join('');
+    box.querySelectorAll('[data-pst]').forEach(b=>b.onclick=async()=>{if(b.dataset.pst==='approve'&&!confirm(p('pAsk')))return;b.disabled=true;
+      try{const r=await fetch('/api/accounting/platform-statements/inbox/decide',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:b.dataset.id,decision:b.dataset.pst})});if(r.ok&&b.dataset.pst==='approve')b.textContent=p('pDone')}catch(e){}load()});
+  }
+  async function load(){try{const r=await fetch('/api/accounting/platform-statements/inbox',{cache:'no-store'});if(r.ok){items=(await r.json()).items||[];draw()}}catch(e){}}
+  load();window.addEventListener('nara-lang',draw);document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-lang]'))setTimeout(draw,0)});
 })();
 </script>
 <script src="flamo-home.js?v=20261031a" defer></script></body>
